@@ -3,7 +3,7 @@ services:
   - type: web
     name: linkage-va-hub-api
     runtime: node
-    repo: https://github.com/YOUR_USERNAME/linkage-va-hub # Update with your repo
+    repo: https://github.com/customadesign/va-hum-mern
     buildCommand: cd backend && npm install
     startCommand: cd backend && node server.js
     envVars:
@@ -28,7 +28,7 @@ services:
   - type: web
     name: linkage-va-hub
     runtime: static
-    repo: https://github.com/YOUR_USERNAME/linkage-va-hub # Update with your repo
+    repo: https://github.com/customadesign/va-hum-mern
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/build
     routes:
