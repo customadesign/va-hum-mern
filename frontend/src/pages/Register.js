@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useAuth } from '../contexts/AuthContext';
+import PasswordStrength from '../components/PasswordStrength';
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -114,6 +115,7 @@ export default function Register() {
                 {formik.touched.password && formik.errors.password && (
                   <p className="mt-1 text-sm text-red-600">{formik.errors.password}</p>
                 )}
+                <PasswordStrength password={formik.values.password} />
               </div>
               
               <div>
