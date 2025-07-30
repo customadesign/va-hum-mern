@@ -1,0 +1,40 @@
+services:
+  # Backend API Service
+  - type: web
+    name: linkage-va-hub-api
+    runtime: node
+    repo: https://github.com/YOUR_USERNAME/linkage-va-hub # Update with your repo
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # Set in Render dashboard
+      - key: JWT_SECRET
+        generateValue: true # Render will generate a secure random value
+      - key: JWT_EXPIRE
+        value: 30d
+      - key: CLIENT_URL
+        value: https://linkage-va-hub.onrender.com # Update after frontend deploys
+      - key: PORT
+        value: 8000
+      - key: RATE_LIMIT_WINDOW
+        value: 15
+      - key: RATE_LIMIT_MAX
+        value: 100
+
+  # Frontend Static Site
+  - type: web
+    name: linkage-va-hub
+    runtime: static
+    repo: https://github.com/YOUR_USERNAME/linkage-va-hub # Update with your repo
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/build
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://linkage-va-hub-api.onrender.com/api # Update after backend deploys

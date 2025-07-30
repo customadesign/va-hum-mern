@@ -1,0 +1,21 @@
+{
+  "name": "linkage-va-hub-mern",
+  "version": "1.0.0",
+  "description": "Linkage VA Hub - MERN Stack Implementation",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm start",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "setup-mongodb": "node setup-mongodb.js",
+    "test-mongodb": "node test-mongodb-connection.js",
+    "get-mongodb-uri": "node get-mongodb-uri.js"
+  },
+  "keywords": ["virtual-assistant", "marketplace", "mern"],
+  "author": "Linkage Web Solutions",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
