@@ -26,16 +26,6 @@ const adminRoutes = require('./routes/admin');
 // Import middleware
 const errorHandler = require('./middleware/error');
 
-// Create Express app
-const app = express();
-const server = http.createServer(app);
-const io = socketio(server, {
-  cors: corsOptions
-});
-
-// Security middleware
-app.use(helmet());
-
 // CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
@@ -57,6 +47,15 @@ const corsOptions = {
   credentials: true
 };
 
+// Create Express app
+const app = express();
+const server = http.createServer(app);
+const io = socketio(server, {
+  cors: corsOptions
+});
+
+// Security middleware
+app.use(helmet());
 app.use(cors(corsOptions));
 app.use(compression());
 
