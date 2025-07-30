@@ -24,7 +24,7 @@ const roleTypeSchema = new mongoose.Schema({
 });
 
 // Index for VA lookup
-roleTypeSchema.index({ va: 1 });
+// Note: va already has unique index from schema definition
 
 // Virtual to get all selected types as array
 roleTypeSchema.virtual('selectedTypes').get(function() {

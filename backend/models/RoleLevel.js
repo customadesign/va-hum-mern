@@ -32,7 +32,7 @@ const roleLevelSchema = new mongoose.Schema({
 });
 
 // Index for VA lookup
-roleLevelSchema.index({ va: 1 });
+// Note: va already has unique index from schema definition
 
 // Virtual to get all selected levels as array
 roleLevelSchema.virtual('selectedLevels').get(function() {
