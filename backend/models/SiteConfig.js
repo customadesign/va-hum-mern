@@ -37,8 +37,8 @@ const siteConfigSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for key lookup
-siteConfigSchema.index({ key: 1 });
+// Index for lookup and filtering
+// Note: key already has unique index from schema definition
 siteConfigSchema.index({ category: 1 });
 siteConfigSchema.index({ isPublic: 1 });
 

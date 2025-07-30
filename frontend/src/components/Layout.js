@@ -27,7 +27,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-full">
-      <Disclosure as="nav" className="bg-white shadow">
+      <Disclosure as="nav" className="bg-gray-700 shadow">
         {({ open }) => (
           <>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,8 +49,8 @@ export default function Layout() {
                         to={item.href}
                         className={classNames(
                           item.current
-                            ? 'border-gray-500 text-gray-900'
-                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                            ? 'border-white text-white'
+                            : 'border-transparent text-gray-300 hover:border-gray-300 hover:text-white',
                           'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium'
                         )}
                       >
@@ -64,7 +64,7 @@ export default function Layout() {
                     <>
                       <button
                         type="button"
-                        className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                        className="bg-gray-800 p-1 rounded-full text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700 focus:ring-white"
                       >
                         <span className="sr-only">View notifications</span>
                         <BellIcon className="h-6 w-6" aria-hidden="true" />
@@ -73,10 +73,10 @@ export default function Layout() {
                       {/* Profile dropdown */}
                       <Menu as="div" className="ml-3 relative">
                         <div>
-                          <Menu.Button className="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                          <Menu.Button className="bg-gray-800 rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700 focus:ring-white">
                             <span className="sr-only">Open user menu</span>
-                            <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
-                              <span className="text-sm font-medium text-gray-700">
+                            <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center">
+                              <span className="text-sm font-medium text-gray-200">
                                 {user.email[0].toUpperCase()}
                               </span>
                             </div>
@@ -128,13 +128,13 @@ export default function Layout() {
                     <div className="flex items-center space-x-4">
                       <Link
                         to="/login"
-                        className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium"
+                        className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium"
                       >
                         Sign in
                       </Link>
                       <Link
                         to="/register"
-                        className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-md text-sm font-medium"
+                        className="bg-white hover:bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
                       >
                         Get started
                       </Link>
@@ -142,7 +142,7 @@ export default function Layout() {
                   )}
                 </div>
                 <div className="-mr-2 flex items-center sm:hidden">
-                  <Disclosure.Button className="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                  <Disclosure.Button className="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700 focus:ring-white">
                     <span className="sr-only">Open main menu</span>
                     {open ? (
                       <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
@@ -154,7 +154,7 @@ export default function Layout() {
               </div>
             </div>
 
-            <Disclosure.Panel className="sm:hidden">
+            <Disclosure.Panel className="sm:hidden bg-gray-700">
               <div className="pt-2 pb-3 space-y-1">
                 {navigation.map((item) => (
                   <Disclosure.Button
@@ -163,8 +163,8 @@ export default function Layout() {
                     to={item.href}
                     className={classNames(
                       item.current
-                        ? 'bg-gray-50 border-gray-500 text-gray-700'
-                        : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800',
+                        ? 'bg-gray-800 border-white text-white'
+                        : 'border-transparent text-gray-300 hover:bg-gray-600 hover:border-gray-300 hover:text-white',
                       'block pl-3 pr-4 py-2 border-l-4 text-base font-medium'
                     )}
                   >
@@ -173,17 +173,17 @@ export default function Layout() {
                 ))}
               </div>
               {user ? (
-                <div className="pt-4 pb-3 border-t border-gray-200">
+                <div className="pt-4 pb-3 border-t border-gray-600">
                   <div className="flex items-center px-4">
                     <div className="flex-shrink-0">
-                      <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-700">
+                      <div className="h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center">
+                        <span className="text-sm font-medium text-gray-200">
                           {user.email[0].toUpperCase()}
                         </span>
                       </div>
                     </div>
                     <div className="ml-3">
-                      <div className="text-base font-medium text-gray-800">{user.email}</div>
+                      <div className="text-base font-medium text-white">{user.email}</div>
                     </div>
                   </div>
                   <div className="mt-3 space-y-1">
@@ -192,7 +192,7 @@ export default function Layout() {
                         key={item.name}
                         as={Link}
                         to={item.href}
-                        className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                        className="block px-4 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-600"
                       >
                         {item.name}
                       </Disclosure.Button>
@@ -200,26 +200,26 @@ export default function Layout() {
                     <Disclosure.Button
                       as="button"
                       onClick={logout}
-                      className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-600"
                     >
                       Sign out
                     </Disclosure.Button>
                   </div>
                 </div>
               ) : (
-                <div className="pt-4 pb-3 border-t border-gray-200">
+                <div className="pt-4 pb-3 border-t border-gray-600">
                   <div className="space-y-1">
                     <Disclosure.Button
                       as={Link}
                       to="/login"
-                      className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                      className="block px-4 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-600"
                     >
                       Sign in
                     </Disclosure.Button>
                     <Disclosure.Button
                       as={Link}
                       to="/register"
-                      className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                      className="block px-4 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-600"
                     >
                       Get started
                     </Disclosure.Button>

@@ -150,8 +150,8 @@ const vaScreeningSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for VA lookup
-vaScreeningSchema.index({ va: 1 });
+// Index for lookup and filtering
+// Note: va already has unique index from schema definition
 vaScreeningSchema.index({ completedAt: 1 });
 vaScreeningSchema.index({ vaType: 1 });
 vaScreeningSchema.index({ experienceYears: 1 });

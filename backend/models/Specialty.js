@@ -37,8 +37,7 @@ const specialtySchema = new mongoose.Schema({
 });
 
 // Index for searching and sorting
-specialtySchema.index({ name: 1 });
-specialtySchema.index({ slug: 1 });
+// Note: name and slug already have unique indexes from schema definition
 specialtySchema.index({ category: 1 });
 specialtySchema.index({ vasCount: -1 });
 
