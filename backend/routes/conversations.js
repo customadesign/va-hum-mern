@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const Conversation = require('../models/Conversation');
 const User = require('../models/User');
-const auth = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 
 // Get all conversations for the current user (or all for admin)
-router.get('/', auth, async (req, res) => {
+router.get('/', protect, async (req, res) => {
   try {
     let query = {};
     
@@ -34,7 +34,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // Get a specific conversation
-router.get('/:id', auth, async (req, res) => {
+router.get('/:id', protect, async (req, res) => {
   try {
     const conversation = await Conversation.findById(req.params.id)
       .populate('va', 'email profile')
@@ -53,7 +53,7 @@ router.get('/:id', auth, async (req, res) => {
     if (!isParticipant && !req.user.admin) {
       return res.status(403).json({
         success: false,
-        error: 'Not authorized to view this conversation'
+        error: 'Not protectorized to view this conversation'
       });
     }
 
@@ -77,7 +77,7 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 // Start a new conversation with a VA
-router.post('/start/:vaId', auth, async (req, res) => {
+router.post('/start/:vaId', protect, async (req, res) => {
   try {
     const { message } = req.body;
     const vaId = req.params.vaId;
@@ -141,7 +141,7 @@ router.post('/start/:vaId', auth, async (req, res) => {
 });
 
 // Send a message in an existing conversation
-router.post('/:id/messages', auth, async (req, res) => {
+router.post('/:id/messages', protect, async (req, res) => {
   try {
     const { message } = req.body;
     
@@ -158,7 +158,7 @@ router.post('/:id/messages', auth, async (req, res) => {
     if (!conversation.participants.includes(req.user.id) && !req.user.admin) {
       return res.status(403).json({
         success: false,
-        error: 'Not authorized to send messages in this conversation'
+        error: 'Not protectorized to send messages in this conversation'
       });
     }
 
@@ -186,7 +186,7 @@ router.post('/:id/messages', auth, async (req, res) => {
 });
 
 // Get unread count for current user
-router.get('/unread/count', auth, async (req, res) => {
+router.get('/unread/count', protect, async (req, res) => {
   try {
     const conversations = await Conversation.find({
       participants: req.user.id
@@ -215,7 +215,7 @@ router.get('/unread/count', auth, async (req, res) => {
 });
 
 // Archive a conversation
-router.put('/:id/archive', auth, async (req, res) => {
+router.put('/:id/archive', protect, async (req, res) => {
   try {
     const conversation = await Conversation.findById(req.params.id);
     
@@ -230,7 +230,7 @@ router.put('/:id/archive', auth, async (req, res) => {
     if (!conversation.participants.includes(req.user.id) && !req.user.admin) {
       return res.status(403).json({
         success: false,
-        error: 'Not authorized to archive this conversation'
+        error: 'Not protectorized to archive this conversation'
       });
     }
 
