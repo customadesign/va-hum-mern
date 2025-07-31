@@ -5,8 +5,11 @@ import { useQuery } from 'react-query';
 import { Helmet } from 'react-helmet-async';
 import api from '../services/api';
 import VACard from '../components/VACard';
+import { useBranding } from '../contexts/BrandingContext';
 
 export default function Home() {
+  const { branding } = useBranding();
+  
   const { data: featuredVAs, isLoading } = useQuery(
     'featuredVAs',
     async () => {
@@ -18,8 +21,8 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>Linkage VA Hub - Connect with Talented Filipino Virtual Assistants</title>
-        <meta name="description" content="Find and hire skilled Filipino virtual assistants for your business needs" />
+        <title>{branding.isESystemsMode ? 'E-Systems Management - Find Skilled Team Members' : 'Linkage VA Hub - Connect with Talented Filipino Virtual Assistants'}</title>
+        <meta name="description" content={branding.isESystemsMode ? 'Access pre-screened, skilled professionals for your business needs' : 'Find and hire skilled Filipino virtual assistants for your business needs'} />
       </Helmet>
 
       <div className="bg-gray-50">
@@ -30,12 +33,30 @@ export default function Home() {
               <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28 lg:pr-0">
                 <div className="sm:text-center lg:text-left">
                   <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-                    <span className="block text-gray-600">Connect with talented</span>
-                    <span className="block text-gray-800">Filipino virtual assistants</span>
+                    {branding.isESystemsMode ? (
+                      <>
+                        <span className="block text-gray-600">Build your dream team</span>
+                        <span className="block text-gray-800">with skilled professionals</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="block text-gray-600">Connect with talented</span>
+                        <span className="block text-gray-800">Filipino virtual assistants</span>
+                      </>
+                    )}
                   </h1>
                   <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                    Linkage VA Hub connects businesses with skilled virtual assistants from the Philippines.
-                    <span className="md:block">Find your perfect VA match today.</span>
+                    {branding.isESystemsMode ? (
+                      <>
+                        E-Systems Management helps you find pre-screened, skilled professionals ready to join your team.
+                        <span className="md:block">Scale your business with confidence.</span>
+                      </>
+                    ) : (
+                      <>
+                        Linkage VA Hub connects businesses with skilled virtual assistants from the Philippines.
+                        <span className="md:block">Find your perfect VA match today.</span>
+                      </>
+                    )}
                   </p>
                   <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                     <div className="rounded-md shadow">
@@ -72,7 +93,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="pb-5 sm:flex sm:items-center sm:justify-between">
             <h2 className="text-lg leading-6 font-medium text-gray-900">
-              Featured Virtual Assistants
+              {branding.isESystemsMode ? 'Featured Team Members' : 'Featured Virtual Assistants'}
             </h2>
           </div>
 
@@ -107,7 +128,7 @@ export default function Home() {
                   to="/vas"
                   className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                 >
-                  View all VAs
+                  {branding.isESystemsMode ? 'View all team members' : 'View all VAs'}
                   <ArrowRightCircleIcon className="ml-3 -mr-1 h-5 w-5" aria-hidden="true" />
                 </Link>
               </div>

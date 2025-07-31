@@ -56,7 +56,7 @@ export default function Register() {
           <div>
             <img
               className="mx-auto h-24 w-auto object-contain"
-              src={branding.logo}
+              src={branding.logoUrl}
               alt={branding.name}
             />
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">

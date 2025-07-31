@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useAuth } from '../contexts/AuthContext';
+import { useBranding } from '../contexts/BrandingContext';
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -17,6 +18,7 @@ const validationSchema = Yup.object({
 export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { branding } = useBranding();
 
   const formik = useFormik({
     initialValues: {
@@ -39,7 +41,7 @@ export default function Login() {
   return (
     <>
       <Helmet>
-        <title>Sign In - Linkage VA Hub</title>
+        <title>Sign In - {branding.name}</title>
       </Helmet>
 
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -47,8 +49,8 @@ export default function Login() {
           <div>
             <img
               className="mx-auto h-24 w-auto object-contain"
-              src="https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/688ab56f0299a1fefc1986e5.png"
-              alt="Linkage VA Hub"
+              src={branding.logoUrl}
+              alt={branding.name}
             />
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
               Sign in to your account

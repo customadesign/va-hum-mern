@@ -2,14 +2,16 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { useBranding } from '../contexts/BrandingContext';
 
 export default function Dashboard() {
   const { user, isVA, isBusiness } = useAuth();
+  const { branding } = useBranding();
 
   return (
     <>
       <Helmet>
-        <title>Dashboard - Linkage VA Hub</title>
+        <title>Dashboard - {branding.name}</title>
       </Helmet>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -90,7 +92,7 @@ export default function Dashboard() {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      {isVA ? 'Profile Views' : 'VAs Contacted'}
+                      {isVA ? 'Profile Views' : (branding.isESystemsMode ? 'Team Members Contacted' : 'VAs Contacted')}
                     </dt>
                     <dd className="flex items-baseline">
                       <div className="text-2xl font-semibold text-gray-900">0</div>
@@ -129,7 +131,7 @@ export default function Dashboard() {
                     <Link to="/conversations" className="focus:outline-none">
                       <span className="absolute inset-0" aria-hidden="true" />
                       <p className="text-sm font-medium text-gray-900">Check Messages</p>
-                      <p className="text-sm text-gray-500">Respond to businesses</p>
+                      <p className="text-sm text-gray-500">{branding.isESystemsMode ? 'Respond to employers' : 'Respond to businesses'}</p>
                     </Link>
                   </div>
                 </div>
@@ -140,7 +142,7 @@ export default function Dashboard() {
                   <div className="flex-1 min-w-0">
                     <Link to="/vas" className="focus:outline-none">
                       <span className="absolute inset-0" aria-hidden="true" />
-                      <p className="text-sm font-medium text-gray-900">Browse VAs</p>
+                      <p className="text-sm font-medium text-gray-900">{branding.isESystemsMode ? 'Browse Team Members' : 'Browse VAs'}</p>
                       <p className="text-sm text-gray-500">Find your perfect match</p>
                     </Link>
                   </div>

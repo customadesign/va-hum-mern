@@ -5,8 +5,10 @@ import api from '../../services/api';
 import VACard from '../../components/VACard';
 import { FunnelIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { INDUSTRIES } from '../../constants/industries';
+import { useBranding } from '../../contexts/BrandingContext';
 
 export default function VAList() {
+  const { branding } = useBranding();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({
     specialties: [],
@@ -58,15 +60,15 @@ export default function VAList() {
   return (
     <>
       <Helmet>
-        <title>Virtual Assistants - Linkage VA Hub</title>
-        <meta name="description" content="Browse and connect with talented Filipino virtual assistants" />
+        <title>{branding.isESystemsMode ? 'Team Members - E-Systems Management' : 'Virtual Assistants - Linkage VA Hub'}</title>
+        <meta name="description" content={branding.isESystemsMode ? 'Browse and connect with pre-screened professionals for your team' : 'Browse and connect with talented Filipino virtual assistants'} />
       </Helmet>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="md:flex md:items-center md:justify-between">
           <div className="flex-1 min-w-0">
             <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-              Virtual Assistants
+              {branding.isESystemsMode ? 'Available Team Members' : 'Virtual Assistants'}
             </h2>
           </div>
         </div>
@@ -88,7 +90,7 @@ export default function VAList() {
                     name="search"
                     id="search"
                     className="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-                    placeholder="Search VAs..."
+                    placeholder={branding.isESystemsMode ? "Search team members..." : "Search VAs..."}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
@@ -263,7 +265,7 @@ export default function VAList() {
                   d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
                 />
               </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No VAs found</h3>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">{branding.isESystemsMode ? 'No team members found' : 'No VAs found'}</h3>
               <p className="mt-1 text-sm text-gray-500">Try adjusting your search or filters.</p>
             </div>
           ) : (
