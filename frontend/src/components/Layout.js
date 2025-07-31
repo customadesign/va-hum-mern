@@ -15,17 +15,11 @@ export default function Layout() {
   const { branding } = useBranding();
   const navigate = useNavigate();
 
-  const navigation = branding.isESystemsMode 
-    ? [
-        { name: 'Home', href: '/', current: false },
-        { name: 'Members', href: '/vas', current: false },
-        { name: 'About', href: '/about', current: false },
-      ]
-    : [
-        { name: 'Home', href: '/', current: false },
-        { name: 'Virtual Assistants', href: '/vas', current: false },
-        { name: 'About', href: '/about', current: false },
-      ];
+  const navigation = [
+    { name: 'Home', href: '/', current: false },
+    { name: 'Virtual Assistants', href: '/vas', current: false },
+    { name: 'About', href: '/about', current: false },
+  ];
 
   const userNavigation = [
     { name: 'Dashboard', href: '/dashboard' },
@@ -45,7 +39,7 @@ export default function Layout() {
                   <div className="flex-shrink-0 flex items-center">
                     <Link to="/" className="flex items-center">
                       <img
-                        className="h-10 w-auto bg-white rounded px-2"
+                        className="h-10 w-auto"
                         src={branding.logoUrl || branding.logo}
                         alt={branding.name}
                       />
