@@ -420,8 +420,15 @@ router.post('/:id/avatar', protect, authorize('va'), async (req, res) => {
       if (err) return; // Error already handled by middleware
       
       try {
+        console.log('Avatar update attempt:', {
+          vaId: req.params.id,
+          userId: req.user._id,
+          fileUrl: req.file.path
+        });
+
         const va = await VA.findById(req.params.id);
         if (!va) {
+          console.error('VA not found with ID:', req.params.id);
           return res.status(404).json({
             success: false,
             error: 'VA not found'
@@ -430,6 +437,11 @@ router.post('/:id/avatar', protect, authorize('va'), async (req, res) => {
 
         // Check ownership
         if (va.user.toString() !== req.user._id.toString() && !req.user.admin) {
+          console.error('Authorization failed:', {
+            vaOwner: va.user.toString(),
+            requestUser: req.user._id.toString(),
+            isAdmin: req.user.admin
+          });
           return res.status(403).json({
             success: false,
             error: 'Not authorized'
@@ -438,7 +450,10 @@ router.post('/:id/avatar', protect, authorize('va'), async (req, res) => {
 
         // Update avatar URL (req.file.path contains the Supabase URL)
         va.avatar = req.file.path;
+        console.log('Saving VA with new avatar:', va.avatar);
+        
         await va.save();
+        console.log('VA saved successfully');
 
         res.json({
           success: true,
@@ -447,10 +462,15 @@ router.post('/:id/avatar', protect, authorize('va'), async (req, res) => {
           }
         });
       } catch (error) {
-        console.error('Avatar update error:', error);
+        console.error('Avatar update error - Full details:', {
+          message: error.message,
+          stack: error.stack,
+          vaId: req.params.id,
+          userId: req.user?._id
+        });
         res.status(500).json({
           success: false,
-          error: 'Failed to update avatar'
+          error: 'Failed to update avatar: ' + error.message
         });
       }
     });
