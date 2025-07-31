@@ -6,6 +6,7 @@ import * as Yup from 'yup';
 import authService from '../services/auth';
 import { toast } from 'react-toastify';
 import PasswordStrength from '../components/PasswordStrength';
+import { useBranding } from '../contexts/BrandingContext';
 
 const validationSchema = Yup.object({
   password: Yup.string()
@@ -20,6 +21,7 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const { token } = useParams();
   const navigate = useNavigate();
+  const { branding } = useBranding();
 
   const formik = useFormik({
     initialValues: {
@@ -44,7 +46,7 @@ export default function ResetPassword() {
   return (
     <>
       <Helmet>
-        <title>Reset Password - Linkage VA Hub</title>
+        <title>Reset Password - {branding.name}</title>
       </Helmet>
 
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -52,8 +54,8 @@ export default function ResetPassword() {
           <div>
             <img
               className="mx-auto h-24 w-auto object-contain"
-              src="https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/6887516ca12d9403f02837dd.png"
-              alt="Linkage VA Hub"
+              src={branding.logoUrl || branding.logo}
+              alt={branding.name}
             />
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
               Reset your password

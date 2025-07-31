@@ -17,8 +17,8 @@ export const BrandingProvider = ({ children }) => {
   
   const [branding, setBranding] = useState({
     name: isESystemsEnv ? 'E-Systems Management' : 'Linkage VA Hub',
-    logo: isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/6887516ca12d9403f02837dd.png',
-    logoUrl: isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/6887516ca12d9403f02837dd.png',
+    logo: isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/688ab56f0299a1fefc1986e5.png',
+    logoUrl: isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/688ab56f0299a1fefc1986e5.png',
     primaryColor: '#1f2937',
     accentColor: '#3b82f6',
     allowVARegistration: !isESystemsEnv,
@@ -35,7 +35,7 @@ export const BrandingProvider = ({ children }) => {
         setBranding({
           ...response.data.data,
           // Ensure logoUrl is set
-          logoUrl: response.data.data.logoUrl || response.data.data.logo || 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/6887516ca12d9403f02837dd.png',
+          logoUrl: response.data.data.logoUrl || response.data.data.logo || 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/688ab56f0299a1fefc1986e5.png',
           // Override with environment variable if set
           isESystemsMode: isESystemsEnv || response.data.data.isESystemsMode
         });
