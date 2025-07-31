@@ -13,7 +13,7 @@ export default function AdminRoute() {
   }
 
   // Check if user is admin
-  if (!user || user.role !== 'admin') {
+  if (!user || !user.admin) {
     return <Navigate to="/login" replace />;
   }
 

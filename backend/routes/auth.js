@@ -347,4 +347,58 @@ router.put('/reset-password/:token', [
   }
 });
 
+// TEMPORARY: Create first admin - REMOVE AFTER USE
+// @route   POST /api/auth/create-first-admin
+// @desc    Create the first admin user
+// @access  Public (TEMPORARY - REMOVE AFTER USE)
+router.post('/create-first-admin', async (req, res) => {
+  try {
+    const { email, password, secretKey } = req.body;
+
+    // Simple secret key check - change this!
+    if (secretKey !== 'linkage-admin-2024') {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid secret key'
+      });
+    }
+
+    // Check if admin already exists
+    const adminExists = await User.findOne({ admin: true });
+    if (adminExists) {
+      return res.status(400).json({
+        success: false,
+        error: 'Admin user already exists'
+      });
+    }
+
+    // Check if user exists
+    let user = await User.findOne({ email });
+    
+    if (user) {
+      // Make existing user admin
+      user.admin = true;
+      await user.save();
+    } else {
+      // Create new admin user
+      user = await User.create({
+        email,
+        password,
+        admin: true
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Admin user created successfully for ${email}`
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
 module.exports = router;

@@ -31,7 +31,7 @@ export default function Layout() {
     { name: 'Dashboard', href: '/dashboard' },
     { name: 'Profile', href: isVA ? '/va/profile' : '/business/profile' },
     { name: 'Conversations', href: '/conversations' },
-    ...(user?.role === 'admin' ? [{ name: 'Admin Panel', href: '/admin' }] : []),
+    ...(user?.admin ? [{ name: 'Admin Panel', href: '/admin' }] : []),
   ];
 
   return (
