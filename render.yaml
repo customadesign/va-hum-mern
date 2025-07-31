@@ -17,6 +17,8 @@ services:
         value: 30d
       - key: CLIENT_URL
         value: https://linkage-va-hub.onrender.com # Update after frontend deploys
+      - key: SERVER_URL
+        value: https://linkage-va-hub-api.onrender.com
       - key: PORT
         value: 8000
       - key: RATE_LIMIT_WINDOW
