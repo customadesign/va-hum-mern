@@ -25,4 +25,21 @@ router.get('/branding', (req, res) => {
   }
 });
 
+// @route   GET /api/system/debug
+// @desc    Debug endpoint to check E-systems mode
+// @access  Public
+router.get('/debug', (req, res) => {
+  res.json({
+    ESYSTEMS_MODE: process.env.ESYSTEMS_MODE,
+    PORT: process.env.PORT,
+    isESystemsMode: isESystemsMode(),
+    branding: getESystemsBranding(),
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      ESYSTEMS_MODE: process.env.ESYSTEMS_MODE,
+      PORT: process.env.PORT
+    }
+  });
+});
+
 module.exports = router;
