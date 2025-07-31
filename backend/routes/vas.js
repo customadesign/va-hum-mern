@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body, query, validationResult } = require('express-validator');
+const multer = require('multer');
 const VA = require('../models/VA');
 const Location = require('../models/Location');
 const Specialty = require('../models/Specialty');
@@ -647,31 +648,58 @@ router.put('/me', protect, authorize('va'), async (req, res) => {
 // @route   POST /api/vas/me/upload
 // @desc    Upload image for VA profile (avatar or cover)
 // @access  Private (VA only)
-router.post('/me/upload', protect, authorize('va'), upload.single('image'), async (req, res) => {
-  try {
-    if (!req.file) {
+router.post('/me/upload', protect, authorize('va'), (req, res, next) => {
+  upload.single('image')(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading
+      console.error('Multer error:', err);
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+          success: false,
+          error: 'File size too large. Maximum size is 500MB'
+        });
+      }
       return res.status(400).json({
         success: false,
-        error: 'Please upload a file'
+        error: `Upload error: ${err.message}`
+      });
+    } else if (err) {
+      // An unknown error occurred when uploading
+      console.error('Upload error:', err);
+      return res.status(500).json({
+        success: false,
+        error: err.message || 'Failed to upload file'
       });
     }
 
-    // For now, we'll return the file path
-    // In production, you'd upload to cloudinary/S3 and return the URL
-    const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
-    const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
+    // Everything went fine
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: 'Please upload a file'
+        });
+      }
 
-    res.json({
-      success: true,
-      url: imageUrl
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      error: 'Server error'
-    });
-  }
+      // For now, we'll return the file path
+      // In production, you'd upload to cloudinary/S3 and return the URL
+      const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
+      const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
+
+      console.log('Image uploaded successfully:', imageUrl);
+
+      res.json({
+        success: true,
+        url: imageUrl
+      });
+    } catch (error) {
+      console.error('Processing error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to process uploaded file'
+      });
+    }
+  });
 });
 
 // @route   POST /api/vas/me/upload-video

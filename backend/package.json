@@ -4,6 +4,7 @@
   "description": "Backend API for Linkage VA Hub",
   "main": "server.js",
   "scripts": {
+    "prestart": "node scripts/ensure-uploads-dir.js",
     "start": "node server.js",
     "dev": "nodemon server.js",
     "esystems": "ESYSTEMS_MODE=true PORT=5001 node server.js",

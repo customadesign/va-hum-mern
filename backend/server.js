@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
 const http = require('http');
 const socketio = require('socket.io');
+const path = require('path');
 
 // Load env vars
 dotenv.config();
@@ -118,7 +119,7 @@ app.use('/api/shorturls', shortUrlRoutes);
 app.use('/s', shortUrlRoutes); // Public short URL redirects
 
 // Static files for uploads
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Error handler (must be last)
 app.use(errorHandler);
