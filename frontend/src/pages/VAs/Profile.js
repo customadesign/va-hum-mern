@@ -471,13 +471,13 @@ export default function VAProfile() {
                         <div className="relative">
                           {profile?.avatar || avatarPreview ? (
                             <img
-                              className="h-12 w-12 rounded-full"
+                              className="h-24 w-24 rounded-full object-cover"
                               src={avatarPreview || profile?.avatar}
                               alt="Avatar"
                             />
                           ) : (
-                            <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
-                              <span className="text-lg font-medium text-gray-700">
+                            <div className="h-24 w-24 rounded-full bg-gray-300 flex items-center justify-center">
+                              <span className="text-3xl font-medium text-gray-700">
                                 {formik.values.name?.[0]?.toUpperCase() || 'V'}
                               </span>
                             </div>

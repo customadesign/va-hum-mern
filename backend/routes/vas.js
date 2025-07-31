@@ -658,7 +658,8 @@ router.post('/me/upload', protect, authorize('va'), upload.single('image'), asyn
 
     // For now, we'll return the file path
     // In production, you'd upload to cloudinary/S3 and return the URL
-    const imageUrl = `/uploads/${req.file.filename}`;
+    const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
+    const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
     res.json({
       success: true,
