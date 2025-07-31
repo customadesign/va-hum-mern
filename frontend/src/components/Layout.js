@@ -18,7 +18,7 @@ export default function Layout() {
   const navigation = [
     { name: 'Home', href: '/', current: false },
     { name: 'Virtual Assistants', href: '/vas', current: false },
-    { name: 'Community', href: '/community', current: false },
+    ...(!branding.isESystemsMode ? [{ name: 'Community', href: '/community', current: false }] : []),
     { name: 'About', href: '/about', current: false },
   ];
 

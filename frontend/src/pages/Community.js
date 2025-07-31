@@ -1,6 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useBranding } from '../contexts/BrandingContext';
 import {
   AcademicCapIcon,
@@ -112,6 +112,11 @@ const resourceTypes = [
 
 export default function Community() {
   const { branding } = useBranding();
+
+  // Redirect to home if in E-systems mode
+  if (branding.isESystemsMode) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <>

@@ -1,110 +1,113 @@
 const mongoose = require('mongoose');
 
+const messageSchema = new mongoose.Schema({
+  sender: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  content: {
+    type: String,
+    required: true
+  },
+  read: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
 const conversationSchema = new mongoose.Schema({
+  participants: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }],
   va: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'VA',
+    ref: 'User',
     required: true
   },
   business: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Business',
+    ref: 'User',
     required: true
   },
-  vaBlockedAt: Date,
-  businessBlockedAt: Date,
-  inboundEmailToken: {
-    type: String,
-    unique: true,
-    sparse: true
-  },
-  userWithUnreadMessages: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+  messages: [messageSchema],
+  lastMessage: {
+    type: String
   },
   lastMessageAt: {
-    type: Date,
-    default: Date.now
+    type: Date
   },
-  messagesCount: {
-    type: Number,
-    default: 0
+  unreadCount: {
+    va: {
+      type: Number,
+      default: 0
+    },
+    business: {
+      type: Number,
+      default: 0
+    }
+  },
+  status: {
+    type: String,
+    enum: ['active', 'archived', 'blocked'],
+    default: 'active'
   }
 }, {
   timestamps: true
 });
 
-// Unique constraint for VA and Business combination
-conversationSchema.index({ va: 1, business: 1 }, { unique: true });
+// Update last message info when a new message is added
+conversationSchema.methods.updateLastMessage = function(message) {
+  this.lastMessage = message.content;
+  this.lastMessageAt = message.createdAt || new Date();
+};
 
-// Index for sorting and filtering
-conversationSchema.index({ lastMessageAt: -1 });
-conversationSchema.index({ vaBlockedAt: 1 });
-conversationSchema.index({ businessBlockedAt: 1 });
-conversationSchema.index({ userWithUnreadMessages: 1 });
-
-// Generate inbound email token before saving
-conversationSchema.pre('save', async function(next) {
-  if (!this.isNew || this.inboundEmailToken) return next();
+// Mark messages as read for a specific user
+conversationSchema.methods.markAsRead = async function(userId) {
+  let unreadCount = 0;
   
-  const generateToken = () => {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  this.messages.forEach(message => {
+    if (message.sender.toString() !== userId.toString() && !message.read) {
+      message.read = true;
+      unreadCount++;
+    }
+  });
+
+  // Update unread count
+  if (this.va.toString() === userId.toString()) {
+    this.unreadCount.va = 0;
+  } else if (this.business.toString() === userId.toString()) {
+    this.unreadCount.business = 0;
+  }
+
+  return unreadCount;
+};
+
+// Add a new message to the conversation
+conversationSchema.methods.addMessage = function(senderId, content) {
+  const message = {
+    sender: senderId,
+    content: content,
+    read: false
   };
-  
-  let token;
-  let exists = true;
-  
-  while (exists) {
-    token = generateToken();
-    exists = await mongoose.model('Conversation').findOne({ inboundEmailToken: token });
+
+  this.messages.push(message);
+  this.updateLastMessage(message);
+
+  // Update unread count for recipient
+  if (this.va.toString() === senderId.toString()) {
+    this.unreadCount.business++;
+  } else {
+    this.unreadCount.va++;
   }
-  
-  this.inboundEmailToken = token;
-  next();
-});
 
-// Virtual to check if conversation is blocked
-conversationSchema.virtual('isBlocked').get(function() {
-  return !!(this.vaBlockedAt || this.businessBlockedAt);
-});
-
-// Virtual to check if blocked by VA
-conversationSchema.virtual('blockedByVa').get(function() {
-  return !!this.vaBlockedAt;
-});
-
-// Virtual to check if blocked by Business
-conversationSchema.virtual('blockedByBusiness').get(function() {
-  return !!this.businessBlockedAt;
-});
-
-// Method to block conversation
-conversationSchema.methods.block = function(blockerType) {
-  if (blockerType === 'va') {
-    this.vaBlockedAt = new Date();
-  } else if (blockerType === 'business') {
-    this.businessBlockedAt = new Date();
-  }
-  return this.save();
-};
-
-// Method to unblock conversation
-conversationSchema.methods.unblock = function(unblockerType) {
-  if (unblockerType === 'va') {
-    this.vaBlockedAt = undefined;
-  } else if (unblockerType === 'business') {
-    this.businessBlockedAt = undefined;
-  }
-  return this.save();
-};
-
-// Method to mark as read
-conversationSchema.methods.markAsRead = function(userId) {
-  if (this.userWithUnreadMessages && this.userWithUnreadMessages.toString() === userId.toString()) {
-    this.userWithUnreadMessages = undefined;
-    return this.save();
-  }
-  return Promise.resolve(this);
+  return message;
 };
 
 module.exports = mongoose.model('Conversation', conversationSchema);
