@@ -80,12 +80,26 @@ export default function Home() {
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
             </div>
-          ) : (
+          ) : featuredVAs && featuredVAs.length > 0 ? (
             <>
-              <div className="shadow overflow-hidden sm:rounded-md divide-y divide-gray-200">
-                {featuredVAs?.map((va) => (
-                  <VACard key={va._id} va={va} />
-                ))}
+              <div className="relative overflow-hidden h-96 sm:rounded-md shadow bg-white">
+                {/* Gradient overlays for smooth fade effect */}
+                <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none"></div>
+                <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none"></div>
+                
+                {/* Scrolling container */}
+                <div className="animate-scroll-up">
+                  <div className="divide-y divide-gray-200">
+                    {/* Original list */}
+                    {featuredVAs?.map((va) => (
+                      <VACard key={`${va._id}-1`} va={va} />
+                    ))}
+                    {/* Duplicate list for seamless loop */}
+                    {featuredVAs?.map((va) => (
+                      <VACard key={`${va._id}-2`} va={va} />
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div className="mt-8 text-right">
@@ -98,6 +112,10 @@ export default function Home() {
                 </Link>
               </div>
             </>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              No featured virtual assistants available at the moment.
+            </div>
           )}
         </div>
       </div>
