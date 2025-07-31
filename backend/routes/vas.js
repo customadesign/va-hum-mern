@@ -8,9 +8,17 @@ const Specialty = require('../models/Specialty');
 const RoleLevel = require('../models/RoleLevel');
 const RoleType = require('../models/RoleType');
 const { protect, authorize, optionalAuth, checkESystemsVAAccess } = require('../middleware/auth');
-const upload = require('../utils/upload');
+// Use Supabase storage in production, local storage in development
+const isProduction = process.env.NODE_ENV === 'production';
+const useSupabase = isProduction && process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY;
+
+// Import both upload utilities
+const localUpload = require('../utils/upload');
 const { handleSupabaseUpload, uploadToSupabase, deleteFromSupabase } = require('../utils/supabaseStorage');
 const supabase = require('../config/supabase');
+
+// Use appropriate upload handler
+const upload = useSupabase ? require('../utils/supabaseStorage').uploadSupabase : localUpload;
 
 // @route   GET /api/vas
 // @desc    Get all VAs (with search and filters)
@@ -405,42 +413,100 @@ router.put('/:id', protect, authorize('va'), async (req, res) => {
 // @route   POST /api/vas/:id/avatar
 // @desc    Upload VA avatar
 // @access  Private (VA owner only)
-router.post('/:id/avatar', protect, authorize('va'), upload.single('avatar'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please upload a file'
-      });
-    }
+router.post('/:id/avatar', protect, authorize('va'), async (req, res) => {
+  // Handle upload based on environment
+  if (useSupabase) {
+    handleSupabaseUpload('avatar', 'avatars')(req, res, async (err) => {
+      if (err) return; // Error already handled by middleware
+      
+      try {
+        const va = await VA.findById(req.params.id);
+        if (!va) {
+          return res.status(404).json({
+            success: false,
+            error: 'VA not found'
+          });
+        }
 
-    const va = await VA.findById(req.params.id);
+        // Check ownership
+        if (va.user.toString() !== req.user._id.toString() && !req.user.admin) {
+          return res.status(403).json({
+            success: false,
+            error: 'Not authorized'
+          });
+        }
 
-    if (!va) {
-      return res.status(404).json({
-        success: false,
-        error: 'VA not found'
-      });
-    }
+        // Update avatar URL (req.file.path contains the Supabase URL)
+        va.avatar = req.file.path;
+        await va.save();
 
-    // Check ownership
-    if (va.user.toString() !== req.user._id.toString() && !req.user.admin) {
-      return res.status(403).json({
-        success: false,
-        error: 'Not authorized'
-      });
-    }
-
-    // Update avatar URL
-    va.avatar = `/uploads/${req.file.filename}`;
-    await va.save();
-
-    res.json({
-      success: true,
-      data: {
-        avatar: va.avatar
+        res.json({
+          success: true,
+          data: {
+            avatar: va.avatar
+          }
+        });
+      } catch (error) {
+        console.error('Avatar update error:', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to update avatar'
+        });
       }
     });
+  } else {
+    // Local upload
+    upload.single('avatar')(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({
+          success: false,
+          error: err.message
+        });
+      }
+
+      try {
+        if (!req.file) {
+          return res.status(400).json({
+            success: false,
+            error: 'Please upload a file'
+          });
+        }
+
+        const va = await VA.findById(req.params.id);
+        if (!va) {
+          return res.status(404).json({
+            success: false,
+            error: 'VA not found'
+          });
+        }
+
+        // Check ownership
+        if (va.user.toString() !== req.user._id.toString() && !req.user.admin) {
+          return res.status(403).json({
+            success: false,
+            error: 'Not authorized'
+          });
+        }
+
+        // Update avatar URL
+        va.avatar = `/uploads/${req.file.filename}`;
+        await va.save();
+
+        res.json({
+          success: true,
+          data: {
+            avatar: va.avatar
+          }
+        });
+      } catch (error) {
+        console.error('Avatar update error:', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to update avatar'
+        });
+      }
+    });
+  }
   } catch (err) {
     console.error(err);
     res.status(500).json({

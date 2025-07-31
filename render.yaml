@@ -25,6 +25,12 @@ services:
         value: 15
       - key: RATE_LIMIT_MAX
         value: 100
+      - key: SUPABASE_URL
+        sync: false # Set in Render dashboard
+      - key: SUPABASE_ANON_KEY
+        sync: false # Set in Render dashboard
+      - key: SUPABASE_BUCKET
+        value: linkage-va-hub # Or your bucket name
 
   # Frontend Static Site
   - type: web
