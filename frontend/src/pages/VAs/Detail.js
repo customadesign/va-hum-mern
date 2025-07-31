@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from 'react-query';
+import { toast } from 'react-toastify';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBranding } from '../../contexts/BrandingContext';
@@ -14,7 +15,8 @@ import {
   GlobeAltIcon,
   CalendarIcon,
   CheckCircleIcon,
-  ChatBubbleLeftIcon
+  ChatBubbleLeftIcon,
+  ShareIcon
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 
@@ -22,6 +24,9 @@ export default function VADetail() {
   const { id } = useParams();
   const { user, isBusiness } = useAuth();
   const { branding } = useBranding();
+  const [shareUrl, setShareUrl] = useState(null);
+  const [isCreatingShare, setIsCreatingShare] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const { data: va, isLoading, error } = useQuery(
     ['va', id],
@@ -34,6 +39,41 @@ export default function VADetail() {
   const handleStartConversation = async () => {
     // This would open a modal or redirect to start a conversation
     console.log('Start conversation with VA:', id);
+  };
+
+  const handleCreateShareUrl = async () => {
+    if (!user) {
+      toast.error('Please log in to create a shareable link');
+      return;
+    }
+
+    setIsCreatingShare(true);
+    try {
+      const response = await api.post(`/shorturls/vas/${id}`);
+      setShareUrl(response.data.data.fullShortUrl);
+      setShowShareModal(true);
+      toast.success('Shareable link created successfully!');
+    } catch (error) {
+      if (error.response?.status === 400 && error.response?.data?.shortUrl) {
+        // URL already exists
+        setShareUrl(error.response.data.shortUrl.fullShortUrl || 
+          `${window.location.origin}/s/${error.response.data.shortUrl.shortCode}`);
+        setShowShareModal(true);
+      } else {
+        toast.error(error.response?.data?.error || 'Failed to create shareable link');
+      }
+    } finally {
+      setIsCreatingShare(false);
+    }
+  };
+
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success('Link copied to clipboard!');
+    } catch (error) {
+      toast.error('Failed to copy link');
+    }
   };
 
   if (isLoading) {
@@ -106,7 +146,17 @@ export default function VADetail() {
                   </div>
                 </div>
               </div>
-              <div className="mt-4 flex md:mt-0 md:ml-4 pb-4">
+              <div className="mt-4 flex md:mt-0 md:ml-4 pb-4 space-x-3">
+                {user && va?.user === user.id && (
+                  <button
+                    onClick={handleCreateShareUrl}
+                    disabled={isCreatingShare}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
+                  >
+                    <ShareIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+                    {isCreatingShare ? 'Creating...' : 'Share Profile'}
+                  </button>
+                )}
                 {isBusiness && (
                   <button
                     onClick={handleStartConversation}
@@ -346,6 +396,62 @@ export default function VADetail() {
           </div>
         </div>
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && shareUrl && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-full">
+                <ShareIcon className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="mt-4 text-center">
+                <h3 className="text-lg font-medium text-gray-900">Share Your Profile</h3>
+                <div className="mt-4">
+                  <div className="flex items-center border border-gray-300 rounded-md p-3 bg-gray-50">
+                    <input
+                      type="text"
+                      value={shareUrl}
+                      readOnly
+                      className="flex-1 bg-transparent text-sm text-gray-600 focus:outline-none"
+                    />
+                    <button
+                      onClick={handleCopyToClipboard}
+                      className="ml-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-center space-x-3">
+                  <button
+                    onClick={() => setShowShareModal(false)}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-400"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({
+                          title: `${va.name} - ${branding.name}`,
+                          text: `Check out ${va.name}'s profile on ${branding.name}`,
+                          url: shareUrl
+                        });
+                      } else {
+                        handleCopyToClipboard();
+                      }
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+                  >
+                    {navigator.share ? 'Share' : 'Copy & Share'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
