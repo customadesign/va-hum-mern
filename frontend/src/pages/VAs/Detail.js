@@ -11,8 +11,11 @@ import {
   EnvelopeIcon,
   PhoneIcon,
   GlobeAltIcon,
-  CalendarIcon
+  CalendarIcon,
+  CheckCircleIcon,
+  ChatBubbleLeftIcon
 } from '@heroicons/react/24/outline';
+import { format } from 'date-fns';
 
 export default function VADetail() {
   const { id } = useParams();
@@ -138,16 +141,21 @@ export default function VADetail() {
                 </div>
               )}
 
-              {/* Experience */}
-              <div className="bg-white shadow rounded-lg p-6 mt-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Experience</h2>
-                <div className="space-y-4">
-                  {/* This would be populated from VA screening data */}
-                  <p className="text-sm text-gray-500">
-                    Experience details would go here...
-                  </p>
+              {/* Search Status */}
+              {va.searchStatus && (
+                <div className="bg-white shadow rounded-lg p-6 mt-6">
+                  <h2 className="text-lg font-medium text-gray-900 mb-4">Status</h2>
+                  <div className="flex items-center">
+                    <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2" />
+                    <span className="text-sm text-gray-900">
+                      {va.searchStatus === 'actively_looking' && 'Actively looking for opportunities'}
+                      {va.searchStatus === 'open' && 'Open to opportunities'}
+                      {va.searchStatus === 'not_interested' && 'Not currently looking'}
+                      {va.searchStatus === 'invisible' && 'Profile hidden'}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Sidebar */}
@@ -163,7 +171,7 @@ export default function VADetail() {
                         Location
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900">
-                        {va.location.city}, {va.location.country}
+                        {va.location.city}{va.location.state ? `, ${va.location.state}` : ''}, Philippines
                       </dd>
                     </div>
                   )}
@@ -191,7 +199,10 @@ export default function VADetail() {
                         Availability
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900">
-                        {va.roleType.selectedTypes?.join(', ')}
+                        {Object.entries(va.roleType || {})
+                          .filter(([key, value]) => value === true && key !== '_id')
+                          .map(([key]) => key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()))
+                          .join(', ') || 'Not specified'}
                       </dd>
                     </div>
                   )}
@@ -200,7 +211,10 @@ export default function VADetail() {
                     <div>
                       <dt className="text-sm font-medium text-gray-500">Experience Level</dt>
                       <dd className="mt-1 text-sm text-gray-900">
-                        {va.roleLevel.selectedLevels?.join(', ')}
+                        {Object.entries(va.roleLevel || {})
+                          .filter(([key, value]) => value === true && key !== '_id')
+                          .map(([key]) => key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()))
+                          .join(', ') || 'Not specified'}
                       </dd>
                     </div>
                   )}
@@ -224,9 +238,9 @@ export default function VADetail() {
                 </div>
               )}
 
-              {/* Contact */}
+              {/* Online Presence */}
               <div className="bg-white shadow rounded-lg p-6 mt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Contact</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Online Presence</h3>
                 <div className="space-y-3">
                   {va.website && (
                     <a
@@ -236,7 +250,40 @@ export default function VADetail() {
                       className="text-sm text-gray-600 hover:text-gray-500 flex items-center"
                     >
                       <GlobeAltIcon className="h-4 w-4 mr-2" />
-                      Website
+                      Portfolio Website
+                    </a>
+                  )}
+                  {va.linkedin && (
+                    <a
+                      href={va.linkedin.startsWith('http') ? va.linkedin : `https://linkedin.com/in/${va.linkedin}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-gray-600 hover:text-gray-500 flex items-center"
+                    >
+                      <GlobeAltIcon className="h-4 w-4 mr-2" />
+                      LinkedIn
+                    </a>
+                  )}
+                  {va.twitter && (
+                    <a
+                      href={va.twitter.startsWith('http') ? va.twitter : `https://twitter.com/${va.twitter}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-gray-600 hover:text-gray-500 flex items-center"
+                    >
+                      <GlobeAltIcon className="h-4 w-4 mr-2" />
+                      Twitter
+                    </a>
+                  )}
+                  {va.instagram && (
+                    <a
+                      href={va.instagram.startsWith('http') ? va.instagram : `https://instagram.com/${va.instagram}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-gray-600 hover:text-gray-500 flex items-center"
+                    >
+                      <GlobeAltIcon className="h-4 w-4 mr-2" />
+                      Instagram
                     </a>
                   )}
                   {va.email && user && (
@@ -261,6 +308,18 @@ export default function VADetail() {
                   )}
                 </div>
               </div>
+
+              {/* Member Since */}
+              {va.createdAt && (
+                <div className="bg-white shadow rounded-lg p-6 mt-6">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">Member since</p>
+                    <p className="text-lg font-medium text-gray-900">
+                      {format(new Date(va.createdAt), 'MMMM yyyy')}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
