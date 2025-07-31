@@ -4,6 +4,7 @@ import { useQuery } from 'react-query';
 import api from '../../services/api';
 import VACard from '../../components/VACard';
 import { FunnelIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { INDUSTRIES } from '../../constants/industries';
 
 export default function VAList() {
   const [search, setSearch] = useState('');
@@ -40,9 +41,9 @@ export default function VAList() {
     }
   );
 
-  // Fetch industries
-  const { data: industriesData } = useQuery(
-    'industries',
+  // Fetch industry counts
+  const { data: industryCounts } = useQuery(
+    'industryCounts',
     async () => {
       const response = await api.get('/vas/industries');
       return response.data;
@@ -130,36 +131,41 @@ export default function VAList() {
             {/* Expanded Filters */}
             {showFilters && (
               <div className="mt-6 border-t border-gray-200 pt-6">
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-6">
                   {/* Industry Filter */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Industry</label>
-                    <div className="mt-2 space-y-2">
-                      {industriesData?.data?.map((industry) => (
-                        <label key={industry.value} className="inline-flex items-center mr-4">
-                          <input
-                            type="checkbox"
-                            className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
-                            checked={filters.industry.includes(industry.value)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setFilters({ ...filters, industry: [...filters.industry, industry.value] });
-                              } else {
-                                setFilters({ ...filters, industry: filters.industry.filter(i => i !== industry.value) });
-                              }
-                              setPage(1);
-                            }}
-                          />
-                          <span className="ml-2 text-sm text-gray-700">
-                            {industry.label} ({industry.count})
-                          </span>
-                        </label>
-                      ))}
+                  <div className="col-span-full">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">Industry</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {INDUSTRIES.map((industry) => {
+                        const count = industryCounts?.data?.find(ic => ic.value === industry.value)?.count || 0;
+                        return (
+                          <label key={industry.value} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
+                              checked={filters.industry.includes(industry.value)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setFilters({ ...filters, industry: [...filters.industry, industry.value] });
+                                } else {
+                                  setFilters({ ...filters, industry: filters.industry.filter(i => i !== industry.value) });
+                                }
+                                setPage(1);
+                              }}
+                            />
+                            <span className="ml-2 text-sm text-gray-700">
+                              {industry.label} {count > 0 && `(${count})`}
+                            </span>
+                          </label>
+                        );
+                      })}
                     </div>
                   </div>
 
-                  {/* Years of Experience */}
-                  <div>
+                  {/* Other Filters */}
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {/* Years of Experience */}
+                    <div>
                     <label htmlFor="yearsOfExperience" className="block text-sm font-medium text-gray-700">
                       Minimum Years of Experience
                     </label>
@@ -199,6 +205,7 @@ export default function VAList() {
                       <option value="within_week">Within a week</option>
                       <option value="within_month">Within a month</option>
                     </select>
+                  </div>
                   </div>
                 </div>
 
