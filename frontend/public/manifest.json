@@ -1,0 +1,20 @@
+{
+  "short_name": "Linkage VA",
+  "name": "Linkage VA Hub",
+  "icons": [
+    {
+      "src": "atom-static.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1a365d",
+  "background_color": "#ffffff"
+}
