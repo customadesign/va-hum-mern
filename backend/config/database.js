@@ -2,11 +2,18 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
+    // Debug logging
+    console.log('MongoDB URI exists:', !!process.env.MONGODB_URI);
+    if (process.env.MONGODB_URI) {
+      console.log('MongoDB URI format check:', process.env.MONGODB_URI.startsWith('mongodb'));
+    }
+    
     // Try to connect to MongoDB
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('MongoDB connected successfully');
   } catch (error) {
     console.error('MongoDB connection error:', error.message);
+    console.error('Full error:', error);
     console.log('\n⚠️  MongoDB is not running!');
     console.log('Please install and start MongoDB:');
     console.log('  brew install mongodb-community');
