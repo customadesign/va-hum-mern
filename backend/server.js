@@ -11,6 +11,11 @@ const socketio = require('socket.io');
 // Load env vars
 dotenv.config();
 
+// Debug environment variables on startup
+console.log('Environment:', process.env.NODE_ENV || 'development');
+console.log('Port:', process.env.PORT || 5000);
+console.log('MongoDB URI exists:', !!process.env.MONGODB_URI);
+
 // Import routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
