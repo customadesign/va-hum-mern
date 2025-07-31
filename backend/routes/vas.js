@@ -9,6 +9,7 @@ const RoleLevel = require('../models/RoleLevel');
 const RoleType = require('../models/RoleType');
 const { protect, authorize, optionalAuth, checkESystemsVAAccess } = require('../middleware/auth');
 const upload = require('../utils/upload');
+const { upload: cloudinaryUpload, deleteFromCloudinary, getPublicIdFromUrl } = require('../utils/cloudinaryUpload');
 
 // @route   GET /api/vas
 // @desc    Get all VAs (with search and filters)
@@ -649,7 +650,12 @@ router.put('/me', protect, authorize('va'), async (req, res) => {
 // @desc    Upload image for VA profile (avatar or cover)
 // @access  Private (VA only)
 router.post('/me/upload', protect, authorize('va'), (req, res, next) => {
-  upload.single('image')(req, res, function (err) {
+  // Use Cloudinary in production, local storage in development
+  const uploadHandler = process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME
+    ? cloudinaryUpload.single('image')
+    : upload.single('image');
+    
+  uploadHandler(req, res, function (err) {
     if (err instanceof multer.MulterError) {
       // A Multer error occurred when uploading
       console.error('Multer error:', err);
@@ -681,10 +687,16 @@ router.post('/me/upload', protect, authorize('va'), (req, res, next) => {
         });
       }
 
-      // For now, we'll return the file path
-      // In production, you'd upload to cloudinary/S3 and return the URL
-      const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
-      const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
+      // Return the appropriate URL based on storage method
+      let imageUrl;
+      if (process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME) {
+        // Cloudinary URL is in req.file.path
+        imageUrl = req.file.path || req.file.secure_url;
+      } else {
+        // Local storage URL
+        const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
+        imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
+      }
 
       console.log('Image uploaded successfully:', imageUrl);
 
@@ -705,8 +717,22 @@ router.post('/me/upload', protect, authorize('va'), (req, res, next) => {
 // @route   POST /api/vas/me/upload-video
 // @desc    Upload video for VA profile
 // @access  Private (VA only)
-router.post('/me/upload-video', protect, authorize('va'), upload.single('video'), async (req, res) => {
-  try {
+router.post('/me/upload-video', protect, authorize('va'), (req, res, next) => {
+  // Use Cloudinary in production, local storage in development
+  const uploadHandler = process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME
+    ? cloudinaryUpload.single('video')
+    : upload.single('video');
+    
+  uploadHandler(req, res, async function (err) {
+    if (err) {
+      console.error('Video upload error:', err);
+      return res.status(400).json({
+        success: false,
+        error: err.message || 'Failed to upload video'
+      });
+    }
+    
+    try {
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -731,22 +757,29 @@ router.post('/me/upload-video', protect, authorize('va'), upload.single('video')
       });
     }
 
-    // For now, we'll return the file path
-    // In production, you'd upload to cloudinary/S3 and return the URL
-    const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
-    const videoUrl = `${baseUrl}/uploads/${req.file.filename}`;
+    // Return the appropriate URL based on storage method
+    let videoUrl;
+    if (process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME) {
+      // Cloudinary URL is in req.file.path
+      videoUrl = req.file.path || req.file.secure_url;
+    } else {
+      // Local storage URL
+      const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
+      videoUrl = `${baseUrl}/uploads/${req.file.filename}`;
+    }
 
     res.json({
       success: true,
       url: videoUrl
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      error: 'Server error'
-    });
-  }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        success: false,
+        error: 'Server error'
+      });
+    }
+  });
 });
 
 
