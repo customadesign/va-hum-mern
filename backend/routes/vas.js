@@ -22,6 +22,9 @@ router.get('/', optionalAuth, async (req, res) => {
       locations,
       minRate,
       maxRate,
+      industry,
+      yearsOfExperience,
+      availability,
       sort = '-searchScore',
       page = 1,
       limit = 20
@@ -58,6 +61,25 @@ router.get('/', optionalAuth, async (req, res) => {
           }
         }
       ];
+    }
+
+    // Industry filter
+    if (industry) {
+      const industries = Array.isArray(industry) ? industry : [industry];
+      query.industry = { $in: industries };
+    }
+
+    // Years of experience filter
+    if (yearsOfExperience) {
+      const years = parseInt(yearsOfExperience);
+      if (!isNaN(years)) {
+        query.yearsOfExperience = { $gte: years };
+      }
+    }
+
+    // Availability filter
+    if (availability) {
+      query.availability = availability;
     }
 
     // Execute query with pagination
@@ -110,6 +132,48 @@ router.get('/', optionalAuth, async (req, res) => {
         total,
         pages: Math.ceil(total / limit)
       }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   GET /api/vas/industries
+// @desc    Get all available industries with counts
+// @access  Public
+router.get('/industries', async (req, res) => {
+  try {
+    const industries = await VA.aggregate([
+      {
+        $match: {
+          searchStatus: { $in: ['actively_looking', 'open'] },
+          industry: { $exists: true, $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: '$industry',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+
+    const formattedIndustries = industries.map(ind => ({
+      value: ind._id,
+      label: ind._id.charAt(0).toUpperCase() + ind._id.slice(1).replace(/_/g, ' '),
+      count: ind.count
+    }));
+
+    res.json({
+      success: true,
+      data: formattedIndustries
     });
   } catch (err) {
     console.error(err);
@@ -337,6 +401,54 @@ router.post('/:id/avatar', protect, authorize('va'), upload.single('avatar'), as
       success: true,
       data: {
         avatar: va.avatar
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   POST /api/vas/:id/cover-image
+// @desc    Upload VA cover image
+// @access  Private (VA owner only)
+router.post('/:id/cover-image', protect, authorize('va'), upload.single('coverImage'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please upload a file'
+      });
+    }
+
+    const va = await VA.findById(req.params.id);
+
+    if (!va) {
+      return res.status(404).json({
+        success: false,
+        error: 'VA not found'
+      });
+    }
+
+    // Check ownership
+    if (va.user.toString() !== req.user._id.toString() && !req.user.admin) {
+      return res.status(403).json({
+        success: false,
+        error: 'Not authorized'
+      });
+    }
+
+    // Update cover image URL
+    va.coverImage = `/uploads/${req.file.filename}`;
+    await va.save();
+
+    res.json({
+      success: true,
+      data: {
+        coverImage: va.coverImage
       }
     });
   } catch (err) {

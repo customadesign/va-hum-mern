@@ -1,20 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPinIcon, BriefcaseIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
 
 export default function VACard({ va }) {
-  const formatRate = () => {
-    if (va.preferredMinHourlyRate && va.preferredMaxHourlyRate) {
-      return `$${va.preferredMinHourlyRate}-${va.preferredMaxHourlyRate}/hr`;
-    } else if (va.preferredMinHourlyRate) {
-      return `$${va.preferredMinHourlyRate}+/hr`;
-    } else if (va.preferredMinSalary && va.preferredMaxSalary) {
-      return `$${va.preferredMinSalary}-${va.preferredMaxSalary}/mo`;
-    } else if (va.preferredMinSalary) {
-      return `$${va.preferredMinSalary}+/mo`;
-    }
-    return 'Rate negotiable';
-  };
 
   const getStatusBadge = () => {
     switch (va.searchStatus) {
@@ -56,7 +44,14 @@ export default function VACard({ va }) {
               )}
             </div>
             <div className="ml-4">
-              <div className="text-sm font-medium text-gray-900">{va.name}</div>
+              <div className="text-sm font-medium text-gray-900">
+                {va.name}
+                {va.yearsOfExperience && (
+                  <span className="ml-2 text-xs text-gray-500">
+                    • {va.yearsOfExperience} years exp
+                  </span>
+                )}
+              </div>
               <div className="text-sm text-gray-500">{va.hero}</div>
               <div className="mt-2 flex items-center text-sm text-gray-500">
                 {va.location && (
@@ -72,15 +67,16 @@ export default function VACard({ va }) {
                     {va.specialties.length > 2 && ` +${va.specialties.length - 2}`}
                   </div>
                 )}
-                <div className="ml-6 flex items-center">
-                  <CurrencyDollarIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-                  {formatRate()}
-                </div>
               </div>
             </div>
           </div>
-          <div className="flex items-center">
+          <div className="flex flex-col items-end space-y-2">
             {getStatusBadge()}
+            {va.industry && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                {va.industry.charAt(0).toUpperCase() + va.industry.slice(1).replace(/_/g, ' ')}
+              </span>
+            )}
           </div>
         </div>
       </div>

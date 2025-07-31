@@ -52,13 +52,19 @@ router.post('/register', [
     await user.save();
 
     // Send confirmation email
-    const confirmUrl = `${process.env.CLIENT_URL}/confirm-email/${confirmToken}`;
-    await sendEmail({
-      email: user.email,
-      subject: 'Welcome to Linkage VA Hub - Please confirm your email',
-      template: 'welcome',
-      data: { confirmUrl }
-    });
+    // TODO: Configure email settings in production
+    try {
+      const confirmUrl = `${process.env.CLIENT_URL}/confirm-email/${confirmToken}`;
+      await sendEmail({
+        email: user.email,
+        subject: 'Welcome to Linkage VA Hub - Please confirm your email',
+        template: 'welcome',
+        data: { confirmUrl }
+      });
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // Continue with registration even if email fails
+    }
 
     // Create token
     const token = user.getSignedJwtToken();
@@ -253,17 +259,26 @@ router.post('/forgot-password', [
 
     // Send email
     const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
-    await sendEmail({
-      email: user.email,
-      subject: 'Password Reset Request',
-      template: 'reset-password',
-      data: { resetUrl }
-    });
-
-    res.json({
-      success: true,
-      message: 'Email sent'
-    });
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Password Reset Request',
+        template: 'reset-password',
+        data: { resetUrl }
+      });
+      
+      res.json({
+        success: true,
+        message: 'Email sent'
+      });
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      res.json({
+        success: true,
+        message: 'If the email exists, reset instructions will be sent',
+        resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
+      });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({

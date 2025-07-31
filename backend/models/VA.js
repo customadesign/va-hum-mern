@@ -161,7 +161,52 @@ const vaSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'processing', 'completed', 'failed'],
     default: 'pending'
-  }
+  },
+  // Additional fields for better categorization
+  industry: {
+    type: String,
+    enum: ['ecommerce', 'saas', 'healthcare', 'finance', 'education', 'realestate', 'marketing', 'technology', 'retail', 'other'],
+    default: 'other'
+  },
+  yearsOfExperience: {
+    type: Number,
+    min: 0,
+    max: 50
+  },
+  skills: [{
+    type: String,
+    trim: true
+  }],
+  certifications: [{
+    type: String,
+    trim: true
+  }],
+  languages: [{
+    language: {
+      type: String,
+      required: true
+    },
+    proficiency: {
+      type: String,
+      enum: ['native', 'fluent', 'conversational', 'basic'],
+      required: true
+    }
+  }],
+  availability: {
+    type: String,
+    enum: ['immediately', 'within_week', 'within_month', 'not_available'],
+    default: 'immediately'
+  },
+  workingHours: {
+    timezone: String,
+    preferredHours: String // e.g., "9AM-5PM EST"
+  },
+  portfolio: [{
+    title: String,
+    description: String,
+    url: String,
+    image: String
+  }]
 }, {
   timestamps: true
 });
@@ -181,6 +226,8 @@ vaSchema.index({ featuredAt: -1 });
 vaSchema.index({ profileUpdatedAt: -1 });
 vaSchema.index({ location: 1 });
 vaSchema.index({ specialties: 1 });
+vaSchema.index({ industry: 1 });
+vaSchema.index({ yearsOfExperience: 1 });
 
 // Generate public profile key before saving
 vaSchema.pre('save', async function(next) {

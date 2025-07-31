@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from 'react-query';
 import api from '../../services/api';
 import VACard from '../../components/VACard';
-import { FunnelIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export default function VAList() {
   const [search, setSearch] = useState('');
@@ -13,9 +13,13 @@ export default function VAList() {
     roleLevels: [],
     locations: [],
     minRate: '',
-    maxRate: ''
+    maxRate: '',
+    industry: [],
+    yearsOfExperience: '',
+    availability: ''
   });
   const [page, setPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
 
   const { data, isLoading, error } = useQuery(
     ['vas', { search, ...filters, page }],
@@ -24,6 +28,11 @@ export default function VAList() {
       if (search) params.append('search', search);
       if (filters.minRate) params.append('minRate', filters.minRate);
       if (filters.maxRate) params.append('maxRate', filters.maxRate);
+      if (filters.industry.length > 0) {
+        filters.industry.forEach(ind => params.append('industry', ind));
+      }
+      if (filters.yearsOfExperience) params.append('yearsOfExperience', filters.yearsOfExperience);
+      if (filters.availability) params.append('availability', filters.availability);
       params.append('page', page);
       params.append('limit', 20);
       
@@ -32,6 +41,15 @@ export default function VAList() {
     },
     {
       keepPreviousData: true
+    }
+  );
+
+  // Fetch industries
+  const { data: industriesData } = useQuery(
+    'industries',
+    async () => {
+      const response = await api.get('/vas/industries');
+      return response.data;
     }
   );
 
@@ -87,10 +105,16 @@ export default function VAList() {
               </button>
               <button
                 type="button"
+                onClick={() => setShowFilters(!showFilters)}
                 className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
               >
                 <FunnelIcon className="h-5 w-5 mr-2 -ml-1" aria-hidden="true" />
                 Filters
+                {(filters.industry.length > 0 || filters.yearsOfExperience || filters.availability) && (
+                  <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-800 text-white">
+                    {filters.industry.length + (filters.yearsOfExperience ? 1 : 0) + (filters.availability ? 1 : 0)}
+                  </span>
+                )}
               </button>
             </form>
 
@@ -106,6 +130,135 @@ export default function VAList() {
                 Full-time
               </span>
             </div>
+
+            {/* Expanded Filters */}
+            {showFilters && (
+              <div className="mt-6 border-t border-gray-200 pt-6">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {/* Industry Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Industry</label>
+                    <div className="mt-2 space-y-2">
+                      {industriesData?.data?.map((industry) => (
+                        <label key={industry.value} className="inline-flex items-center mr-4">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
+                            checked={filters.industry.includes(industry.value)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFilters({ ...filters, industry: [...filters.industry, industry.value] });
+                              } else {
+                                setFilters({ ...filters, industry: filters.industry.filter(i => i !== industry.value) });
+                              }
+                              setPage(1);
+                            }}
+                          />
+                          <span className="ml-2 text-sm text-gray-700">
+                            {industry.label} ({industry.count})
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Years of Experience */}
+                  <div>
+                    <label htmlFor="yearsOfExperience" className="block text-sm font-medium text-gray-700">
+                      Minimum Years of Experience
+                    </label>
+                    <select
+                      id="yearsOfExperience"
+                      value={filters.yearsOfExperience}
+                      onChange={(e) => {
+                        setFilters({ ...filters, yearsOfExperience: e.target.value });
+                        setPage(1);
+                      }}
+                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
+                    >
+                      <option value="">Any experience</option>
+                      <option value="1">1+ years</option>
+                      <option value="3">3+ years</option>
+                      <option value="5">5+ years</option>
+                      <option value="10">10+ years</option>
+                    </select>
+                  </div>
+
+                  {/* Availability */}
+                  <div>
+                    <label htmlFor="availability" className="block text-sm font-medium text-gray-700">
+                      Availability
+                    </label>
+                    <select
+                      id="availability"
+                      value={filters.availability}
+                      onChange={(e) => {
+                        setFilters({ ...filters, availability: e.target.value });
+                        setPage(1);
+                      }}
+                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
+                    >
+                      <option value="">Any availability</option>
+                      <option value="immediately">Immediately</option>
+                      <option value="within_week">Within a week</option>
+                      <option value="within_month">Within a month</option>
+                    </select>
+                  </div>
+
+                  {/* Hourly Rate Range */}
+                  <div className="sm:col-span-2 lg:col-span-1">
+                    <label className="block text-sm font-medium text-gray-700">Hourly Rate Range (USD)</label>
+                    <div className="mt-1 grid grid-cols-2 gap-3">
+                      <input
+                        type="number"
+                        placeholder="Min"
+                        value={filters.minRate}
+                        onChange={(e) => {
+                          setFilters({ ...filters, minRate: e.target.value });
+                          setPage(1);
+                        }}
+                        className="block w-full shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm border-gray-300 rounded-md"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Max"
+                        value={filters.maxRate}
+                        onChange={(e) => {
+                          setFilters({ ...filters, maxRate: e.target.value });
+                          setPage(1);
+                        }}
+                        className="block w-full shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm border-gray-300 rounded-md"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Clear Filters */}
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFilters({
+                        specialties: [],
+                        roleTypes: [],
+                        roleLevels: [],
+                        locations: [],
+                        minRate: '',
+                        maxRate: '',
+                        industry: [],
+                        yearsOfExperience: '',
+                        availability: ''
+                      });
+                      setPage(1);
+                    }}
+                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                  >
+                    <XMarkIcon className="h-4 w-4 mr-1" />
+                    Clear all filters
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
