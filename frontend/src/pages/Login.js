@@ -46,7 +46,7 @@ export default function Login() {
         <div className="max-w-md w-full space-y-8">
           <div>
             <img
-              className="mx-auto h-16 w-auto"
+              className="mx-auto h-20 w-auto object-contain"
               src="/logo.png"
               alt="Linkage VA Hub"
             />

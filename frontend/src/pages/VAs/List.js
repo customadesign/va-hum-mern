@@ -12,8 +12,6 @@ export default function VAList() {
     roleTypes: [],
     roleLevels: [],
     locations: [],
-    minRate: '',
-    maxRate: '',
     industry: [],
     yearsOfExperience: '',
     availability: ''
@@ -26,8 +24,6 @@ export default function VAList() {
     async () => {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
-      if (filters.minRate) params.append('minRate', filters.minRate);
-      if (filters.maxRate) params.append('maxRate', filters.maxRate);
       if (filters.industry.length > 0) {
         filters.industry.forEach(ind => params.append('industry', ind));
       }
@@ -204,33 +200,6 @@ export default function VAList() {
                       <option value="within_month">Within a month</option>
                     </select>
                   </div>
-
-                  {/* Hourly Rate Range */}
-                  <div className="sm:col-span-2 lg:col-span-1">
-                    <label className="block text-sm font-medium text-gray-700">Hourly Rate Range (USD)</label>
-                    <div className="mt-1 grid grid-cols-2 gap-3">
-                      <input
-                        type="number"
-                        placeholder="Min"
-                        value={filters.minRate}
-                        onChange={(e) => {
-                          setFilters({ ...filters, minRate: e.target.value });
-                          setPage(1);
-                        }}
-                        className="block w-full shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm border-gray-300 rounded-md"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Max"
-                        value={filters.maxRate}
-                        onChange={(e) => {
-                          setFilters({ ...filters, maxRate: e.target.value });
-                          setPage(1);
-                        }}
-                        className="block w-full shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm border-gray-300 rounded-md"
-                      />
-                    </div>
-                  </div>
                 </div>
 
                 {/* Clear Filters */}
@@ -243,8 +212,6 @@ export default function VAList() {
                         roleTypes: [],
                         roleLevels: [],
                         locations: [],
-                        minRate: '',
-                        maxRate: '',
                         industry: [],
                         yearsOfExperience: '',
                         availability: ''
