@@ -259,17 +259,19 @@ export default function VAProfile() {
             <h1 className="text-3xl font-bold leading-tight text-gray-900">
               Edit Your VA Profile
             </h1>
-            <div className="mt-4 sm:mt-0">
-              <Link
-                to={`/vas/${profile?._id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-              >
-                <EyeIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-                View Public Profile
-              </Link>
-            </div>
+            {profile?._id && (
+              <div className="mt-4 sm:mt-0">
+                <Link
+                  to={`/vas/${profile._id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                >
+                  <EyeIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+                  View Public Profile
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Profile Completion Progress */}
