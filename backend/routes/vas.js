@@ -507,13 +507,6 @@ router.post('/:id/avatar', protect, authorize('va'), async (req, res) => {
       }
     });
   }
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      error: 'Server error'
-    });
-  }
 });
 
 // @route   POST /api/vas/:id/cover-image
