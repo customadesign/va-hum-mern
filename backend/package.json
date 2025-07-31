@@ -10,7 +10,8 @@
     "esystems:dev": "ESYSTEMS_MODE=true PORT=5001 nodemon server.js",
     "test": "jest",
     "seed": "node seeds/index.js",
-    "seed:vas": "node seeds/seedVAs.js"
+    "seed:vas": "node seeds/seedVAs.js",
+    "seed:esystems": "node scripts/seedESystemsAccounts.js"
   },
   "dependencies": {
     "express": "^4.18.2",

@@ -30,7 +30,10 @@ export default function Layout() {
 
   return (
     <div className="min-h-full">
-      <Disclosure as="nav" className="bg-gray-700 shadow">
+      <Disclosure as="nav" className={classNames(
+        branding.isESystemsMode ? "bg-gray-700" : "bg-white border-b border-gray-200",
+        "shadow"
+      )}>
         {({ open }) => (
           <>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,8 +58,8 @@ export default function Layout() {
                         to={item.href}
                         className={classNames(
                           item.current
-                            ? 'border-white text-white'
-                            : 'border-transparent text-gray-300 hover:border-gray-300 hover:text-white',
+                            ? branding.isESystemsMode ? 'border-white text-white' : 'border-gray-900 text-gray-900'
+                            : branding.isESystemsMode ? 'border-transparent text-gray-300 hover:border-gray-300 hover:text-white' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
                           'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium'
                         )}
                       >
@@ -70,7 +73,12 @@ export default function Layout() {
                     <>
                       <button
                         type="button"
-                        className="bg-gray-800 p-1 rounded-full text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700 focus:ring-white"
+                        className={classNames(
+                          branding.isESystemsMode 
+                            ? "bg-gray-800 text-gray-300 hover:text-white focus:ring-offset-gray-700 focus:ring-white" 
+                            : "bg-gray-100 text-gray-400 hover:text-gray-500 focus:ring-offset-2 focus:ring-gray-500",
+                          "p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2"
+                        )}
                       >
                         <span className="sr-only">View notifications</span>
                         <BellIcon className="h-6 w-6" aria-hidden="true" />
@@ -79,10 +87,21 @@ export default function Layout() {
                       {/* Profile dropdown */}
                       <Menu as="div" className="ml-3 relative">
                         <div>
-                          <Menu.Button className="bg-gray-800 rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700 focus:ring-white">
+                          <Menu.Button className={classNames(
+                            branding.isESystemsMode 
+                              ? "bg-gray-800 focus:ring-offset-gray-700 focus:ring-white" 
+                              : "bg-gray-200 focus:ring-offset-2 focus:ring-gray-500",
+                            "rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
+                          )}>
                             <span className="sr-only">Open user menu</span>
-                            <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center">
-                              <span className="text-sm font-medium text-gray-200">
+                            <div className={classNames(
+                              branding.isESystemsMode ? "bg-gray-600" : "bg-gray-400",
+                              "h-8 w-8 rounded-full flex items-center justify-center"
+                            )}>
+                              <span className={classNames(
+                                branding.isESystemsMode ? "text-gray-200" : "text-white",
+                                "text-sm font-medium"
+                              )}>
                                 {user.email[0].toUpperCase()}
                               </span>
                             </div>
@@ -134,13 +153,23 @@ export default function Layout() {
                     <div className="flex items-center space-x-4">
                       <Link
                         to="/login"
-                        className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium"
+                        className={classNames(
+                          branding.isESystemsMode 
+                            ? "text-gray-300 hover:text-white" 
+                            : "text-gray-700 hover:text-gray-900",
+                          "px-3 py-2 text-sm font-medium"
+                        )}
                       >
                         Sign in
                       </Link>
                       <Link
                         to="/register"
-                        className="bg-white hover:bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                        className={classNames(
+                          branding.isESystemsMode 
+                            ? "bg-white hover:bg-gray-100 text-gray-700" 
+                            : "bg-gray-900 hover:bg-gray-700 text-white",
+                          "px-3 py-2 rounded-md text-sm font-medium"
+                        )}
                       >
                         Get started
                       </Link>
@@ -148,7 +177,12 @@ export default function Layout() {
                   )}
                 </div>
                 <div className="-mr-2 flex items-center sm:hidden">
-                  <Disclosure.Button className="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700 focus:ring-white">
+                  <Disclosure.Button className={classNames(
+                    branding.isESystemsMode 
+                      ? "bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-600 focus:ring-offset-gray-700 focus:ring-white" 
+                      : "bg-gray-100 text-gray-500 hover:text-gray-700 hover:bg-gray-200 focus:ring-offset-2 focus:ring-gray-500",
+                    "inline-flex items-center justify-center p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  )}>
                     <span className="sr-only">Open main menu</span>
                     {open ? (
                       <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
@@ -160,7 +194,10 @@ export default function Layout() {
               </div>
             </div>
 
-            <Disclosure.Panel className="sm:hidden bg-gray-700">
+            <Disclosure.Panel className={classNames(
+              "sm:hidden",
+              branding.isESystemsMode ? "bg-gray-700" : "bg-white border-b border-gray-200"
+            )}>
               <div className="pt-2 pb-3 space-y-1">
                 {navigation.map((item) => (
                   <Disclosure.Button
@@ -169,8 +206,8 @@ export default function Layout() {
                     to={item.href}
                     className={classNames(
                       item.current
-                        ? 'bg-gray-800 border-white text-white'
-                        : 'border-transparent text-gray-300 hover:bg-gray-600 hover:border-gray-300 hover:text-white',
+                        ? branding.isESystemsMode ? 'bg-gray-800 border-white text-white' : 'bg-gray-50 border-gray-900 text-gray-900'
+                        : branding.isESystemsMode ? 'border-transparent text-gray-300 hover:bg-gray-600 hover:border-gray-300 hover:text-white' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800',
                       'block pl-3 pr-4 py-2 border-l-4 text-base font-medium'
                     )}
                   >
@@ -179,17 +216,29 @@ export default function Layout() {
                 ))}
               </div>
               {user ? (
-                <div className="pt-4 pb-3 border-t border-gray-600">
+                <div className={classNames(
+                  "pt-4 pb-3 border-t",
+                  branding.isESystemsMode ? "border-gray-600" : "border-gray-200"
+                )}>
                   <div className="flex items-center px-4">
                     <div className="flex-shrink-0">
-                      <div className="h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-200">
+                      <div className={classNames(
+                        branding.isESystemsMode ? "bg-gray-600" : "bg-gray-400",
+                        "h-10 w-10 rounded-full flex items-center justify-center"
+                      )}>
+                        <span className={classNames(
+                          branding.isESystemsMode ? "text-gray-200" : "text-white",
+                          "text-sm font-medium"
+                        )}>
                           {user.email[0].toUpperCase()}
                         </span>
                       </div>
                     </div>
                     <div className="ml-3">
-                      <div className="text-base font-medium text-white">{user.email}</div>
+                      <div className={classNames(
+                        branding.isESystemsMode ? "text-white" : "text-gray-900",
+                        "text-base font-medium"
+                      )}>{user.email}</div>
                     </div>
                   </div>
                   <div className="mt-3 space-y-1">
@@ -198,7 +247,12 @@ export default function Layout() {
                         key={item.name}
                         as={Link}
                         to={item.href}
-                        className="block px-4 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-600"
+                        className={classNames(
+                          branding.isESystemsMode 
+                            ? "text-gray-300 hover:text-white hover:bg-gray-600" 
+                            : "text-gray-700 hover:text-gray-900 hover:bg-gray-100",
+                          "block px-4 py-2 text-base font-medium"
+                        )}
                       >
                         {item.name}
                       </Disclosure.Button>
@@ -206,14 +260,22 @@ export default function Layout() {
                     <Disclosure.Button
                       as="button"
                       onClick={logout}
-                      className="block w-full text-left px-4 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-600"
+                      className={classNames(
+                        branding.isESystemsMode 
+                          ? "text-gray-300 hover:text-white hover:bg-gray-600" 
+                          : "text-gray-700 hover:text-gray-900 hover:bg-gray-100",
+                        "block w-full text-left px-4 py-2 text-base font-medium"
+                      )}
                     >
                       Sign out
                     </Disclosure.Button>
                   </div>
                 </div>
               ) : (
-                <div className="pt-4 pb-3 border-t border-gray-600">
+                <div className={classNames(
+                  "pt-4 pb-3 border-t",
+                  branding.isESystemsMode ? "border-gray-600" : "border-gray-200"
+                )}>
                   <div className="space-y-1">
                     <Disclosure.Button
                       as={Link}
