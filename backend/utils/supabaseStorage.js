@@ -1,134 +1,148 @@
 const multer = require('multer');
-const supabase = require('../config/supabase');
-const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const supabase = require('../config/supabase');
 
-// Memory storage for processing files before uploading to Supabase
+// Multer memory storage for Supabase
 const storage = multer.memoryStorage();
 
 // File filter
 const fileFilter = (req, file, cb) => {
-  // Accept images
-  if (file.mimetype.startsWith('image/')) {
+  const allowedTypes = {
+    image: /jpeg|jpg|png|gif|webp/,
+    video: /mp4|avi|mov|wmv|flv|mkv|webm/,
+  };
+
+  const extname = path.extname(file.originalname).toLowerCase();
+  const isImage = allowedTypes.image.test(extname);
+  const isVideo = allowedTypes.video.test(extname);
+
+  if (isImage || isVideo) {
     cb(null, true);
-  } 
-  // Accept videos
-  else if (file.mimetype.startsWith('video/')) {
-    cb(null, true);
-  } 
-  else {
-    cb(new Error('Only image and video files are allowed'), false);
+  } else {
+    cb(new Error('Invalid file type'));
   }
 };
 
-// Create multer upload instance
-const upload = multer({
+// Create multer instance for Supabase
+const uploadSupabase = multer({
   storage: storage,
-  fileFilter: fileFilter,
   limits: {
     fileSize: 500 * 1024 * 1024 // 500MB limit
-  }
+  },
+  fileFilter: fileFilter
 });
 
-// Helper function to upload file to Supabase
-const uploadToSupabase = async (file, folder = 'uploads') => {
-  if (!supabase) {
-    throw new Error('Supabase is not configured');
-  }
+// Upload to Supabase Storage
+const uploadToSupabase = async (file, bucket, folder) => {
+  try {
+    if (!supabase) {
+      throw new Error('Supabase client not initialized');
+    }
 
-  // Generate unique filename
-  const fileExt = path.extname(file.originalname);
-  const fileName = `${uuidv4()}${fileExt}`;
-  const filePath = `${folder}/${fileName}`;
+    // Generate unique filename
+    const fileExt = path.extname(file.originalname);
+    const fileName = `${folder}/${uuidv4()}${fileExt}`;
 
-  // Upload file to Supabase Storage
-  const { data, error } = await supabase.storage
-    .from('linkage-va-hub') // Bucket name
-    .upload(filePath, file.buffer, {
-      contentType: file.mimetype,
-      upsert: false
-    });
+    // Upload file to Supabase
+    const { data, error } = await supabase
+      .storage
+      .from(bucket)
+      .upload(fileName, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false
+      });
 
-  if (error) {
-    console.error('Supabase upload error:', error);
-    throw new Error(`Failed to upload to Supabase: ${error.message}`);
-  }
+    if (error) {
+      console.error('Supabase upload error:', error);
+      throw error;
+    }
 
-  // Get public URL
-  const { data: { publicUrl } } = supabase.storage
-    .from('linkage-va-hub')
-    .getPublicUrl(filePath);
+    // Get public URL
+    const { data: { publicUrl } } = supabase
+      .storage
+      .from(bucket)
+      .getPublicUrl(fileName);
 
-  return {
-    url: publicUrl,
-    path: filePath,
-    size: file.size,
-    mimetype: file.mimetype
-  };
-};
-
-// Helper function to delete file from Supabase
-const deleteFromSupabase = async (filePath) => {
-  if (!supabase) {
-    throw new Error('Supabase is not configured');
-  }
-
-  const { error } = await supabase.storage
-    .from('linkage-va-hub')
-    .remove([filePath]);
-
-  if (error) {
-    console.error('Error deleting from Supabase:', error);
+    return publicUrl;
+  } catch (error) {
+    console.error('Upload to Supabase error:', error);
     throw error;
   }
-
-  return { success: true };
 };
 
-// Helper function to get file path from Supabase URL
-const getFilePathFromUrl = (url) => {
-  if (!url || !url.includes('supabase')) return null;
-  
-  // Extract the file path from the URL
-  const urlParts = url.split('/storage/v1/object/public/linkage-va-hub/');
-  if (urlParts.length > 1) {
-    return urlParts[1];
+// Delete from Supabase Storage
+const deleteFromSupabase = async (fileUrl, bucket) => {
+  try {
+    if (!supabase || !fileUrl) return;
+
+    // Extract file path from URL
+    const url = new URL(fileUrl);
+    const pathParts = url.pathname.split('/');
+    const bucketIndex = pathParts.indexOf(bucket);
+    
+    if (bucketIndex === -1) return;
+    
+    const filePath = pathParts.slice(bucketIndex + 1).join('/');
+
+    const { error } = await supabase
+      .storage
+      .from(bucket)
+      .remove([filePath]);
+
+    if (error) {
+      console.error('Supabase delete error:', error);
+    }
+  } catch (error) {
+    console.error('Delete from Supabase error:', error);
   }
-  
-  return null;
 };
 
 // Middleware to handle Supabase upload
 const handleSupabaseUpload = (fieldName, folder) => {
-  return async (req, res, next) => {
-    // First, use multer to parse the file
-    upload.single(fieldName)(req, res, async (err) => {
-      if (err) {
+  return (req, res, next) => {
+    uploadSupabase.single(fieldName)(req, res, async (err) => {
+      if (err instanceof multer.MulterError) {
+        console.error('Multer error:', err);
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({
+            success: false,
+            error: 'File size too large. Maximum size is 500MB'
+          });
+        }
         return res.status(400).json({
           success: false,
-          error: err.message
+          error: `Upload error: ${err.message}`
+        });
+      } else if (err) {
+        console.error('Upload error:', err);
+        return res.status(500).json({
+          success: false,
+          error: err.message || 'Failed to upload file'
         });
       }
 
-      // If no file or not using Supabase, continue
-      if (!req.file || !supabase) {
-        return next();
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: 'Please upload a file'
+        });
       }
 
+      // Upload to Supabase
       try {
-        // Upload to Supabase
-        const result = await uploadToSupabase(req.file, folder);
+        const bucket = 'linkage-va-hub'; // Your Supabase bucket name
+        const publicUrl = await uploadToSupabase(req.file, bucket, folder);
         
-        // Replace file info with Supabase result
-        req.file.supabase = result;
-        req.file.path = result.url;
-        req.file.filename = result.path;
+        // Add the URL to req.file for the route handler
+        req.file.path = publicUrl;
         
         next();
       } catch (error) {
+        console.error('Supabase upload failed:', error);
         return res.status(500).json({
           success: false,
-          error: error.message
+          error: 'Failed to upload to Supabase: ' + error.message
         });
       }
     });
@@ -136,9 +150,8 @@ const handleSupabaseUpload = (fieldName, folder) => {
 };
 
 module.exports = {
-  upload,
+  uploadSupabase,
   uploadToSupabase,
   deleteFromSupabase,
-  getFilePathFromUrl,
   handleSupabaseUpload
 };
