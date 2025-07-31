@@ -20,6 +20,11 @@ const vaSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide a bio']
   },
+  coverImage: {
+    type: String,
+    trim: true,
+    default: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&h=300&fit=crop'
+  },
   website: {
     type: String,
     trim: true
@@ -165,7 +170,33 @@ const vaSchema = new mongoose.Schema({
   // Additional fields for better categorization
   industry: {
     type: String,
-    enum: ['ecommerce', 'saas', 'healthcare', 'finance', 'education', 'realestate', 'marketing', 'technology', 'retail', 'other'],
+    enum: [
+      'ecommerce',
+      'real_estate',
+      'digital_marketing',
+      'social_media_management',
+      'customer_service',
+      'bookkeeping',
+      'content_creation',
+      'graphic_design',
+      'virtual_assistance',
+      'data_entry',
+      'lead_generation',
+      'email_marketing',
+      'amazon_fba',
+      'shopify',
+      'wordpress',
+      'video_editing',
+      'podcast_management',
+      'project_management',
+      'human_resources',
+      'online_tutoring',
+      'travel_planning',
+      'healthcare',
+      'finance',
+      'saas',
+      'other'
+    ],
     default: 'other'
   },
   yearsOfExperience: {

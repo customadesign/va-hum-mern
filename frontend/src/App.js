@@ -27,6 +27,8 @@ import Conversations from './pages/Conversations';
 import ConversationDetail from './pages/Conversations/Detail';
 import Dashboard from './pages/Dashboard';
 import ProfileSetup from './pages/ProfileSetup';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import NotFound from './pages/NotFound';
 
 // Create a client
@@ -56,6 +58,8 @@ function App() {
                   <Route path="reset-password/:token" element={<ResetPassword />} />
                   <Route path="vas" element={<VAList />} />
                   <Route path="vas/:id" element={<VADetail />} />
+                  <Route path="terms" element={<Terms />} />
+                  <Route path="privacy" element={<Privacy />} />
                   
                   {/* Protected Routes */}
                   <Route element={<PrivateRoute />}>

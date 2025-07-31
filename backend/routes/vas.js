@@ -167,7 +167,9 @@ router.get('/industries', async (req, res) => {
 
     const formattedIndustries = industries.map(ind => ({
       value: ind._id,
-      label: ind._id.charAt(0).toUpperCase() + ind._id.slice(1).replace(/_/g, ' '),
+      label: ind._id.split('_').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' '),
       count: ind.count
     }));
 
@@ -201,6 +203,39 @@ router.get('/featured', async (req, res) => {
     res.json({
       success: true,
       data: vas
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   GET /api/vas/profile
+// @desc    Get current user's VA profile
+// @access  Private (VA only)
+router.get('/profile', protect, authorize('va'), async (req, res) => {
+  try {
+    // Get VA profile with all populated fields
+    const va = await VA.findById(req.user.va)
+      .populate('user', 'email')
+      .populate('location')
+      .populate('specialties')
+      .populate('roleLevel')
+      .populate('roleType');
+
+    if (!va) {
+      return res.status(404).json({
+        success: false,
+        error: 'VA profile not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: va
     });
   } catch (err) {
     console.error(err);
@@ -520,5 +555,123 @@ router.put('/:id/specialties', protect, authorize('va'), [
     });
   }
 });
+
+// @route   GET /api/vas/me
+// @desc    Get current VA's profile
+// @access  Private (VA only)
+router.get('/me', protect, authorize('va'), async (req, res) => {
+  try {
+    const va = await VA.findOne({ user: req.user._id })
+      .populate('location')
+      .populate('specialties')
+      .populate('roleLevel')
+      .populate('roleType');
+
+    if (!va) {
+      return res.status(404).json({
+        success: false,
+        error: 'VA profile not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: va
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   PUT /api/vas/me
+// @desc    Update current VA's profile
+// @access  Private (VA only)
+router.put('/me', protect, authorize('va'), async (req, res) => {
+  try {
+    const allowedFields = [
+      'name',
+      'hero',
+      'bio',
+      'coverImage',
+      'avatar',
+      'website',
+      'github',
+      'linkedin',
+      'twitter',
+      'schedulingLink',
+      'preferredMinHourlyRate',
+      'preferredMaxHourlyRate',
+      'preferredMinSalary',
+      'preferredMaxSalary',
+      'searchStatus',
+      'videoIntroduction'
+    ];
+
+    const updateData = {};
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
+
+    const va = await VA.findOneAndUpdate(
+      { user: req.user._id },
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!va) {
+      return res.status(404).json({
+        success: false,
+        error: 'VA profile not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: va
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   POST /api/vas/me/upload
+// @desc    Upload image for VA profile (avatar or cover)
+// @access  Private (VA only)
+router.post('/me/upload', protect, authorize('va'), upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please upload a file'
+      });
+    }
+
+    // For now, we'll return the file path
+    // In production, you'd upload to cloudinary/S3 and return the URL
+    const imageUrl = `/uploads/${req.file.filename}`;
+
+    res.json({
+      success: true,
+      url: imageUrl
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
 
 module.exports = router;

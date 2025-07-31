@@ -62,34 +62,44 @@ export default function VADetail() {
       </Helmet>
 
       <div className="bg-white">
+        {/* Cover Image */}
+        <div className="relative h-48 sm:h-64 lg:h-80">
+          <img
+            className="w-full h-full object-cover"
+            src={va.coverImage || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&h=300&fit=crop'}
+            alt="Cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+        </div>
+
         {/* Header */}
-        <div className="bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="md:flex md:items-center md:justify-between">
+        <div className="relative -mt-16 sm:-mt-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="md:flex md:items-end md:justify-between">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center">
+                <div className="flex items-end">
                   {va.avatar ? (
                     <img
-                      className="h-16 w-16 rounded-full"
+                      className="h-24 w-24 sm:h-32 sm:w-32 rounded-full border-4 border-white"
                       src={va.avatar}
                       alt={va.name}
                     />
                   ) : (
-                    <div className="h-16 w-16 rounded-full bg-gray-300 flex items-center justify-center">
-                      <span className="text-xl font-medium text-gray-700">
+                    <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-full bg-gray-300 border-4 border-white flex items-center justify-center">
+                      <span className="text-3xl font-medium text-gray-700">
                         {va.name?.[0]?.toUpperCase() || 'V'}
                       </span>
                     </div>
                   )}
-                  <div className="ml-4">
+                  <div className="ml-4 pb-4">
                     <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
                       {va.name}
                     </h1>
-                    <p className="text-sm text-gray-500">{va.hero}</p>
+                    <p className="text-sm text-gray-600">{va.hero}</p>
                   </div>
                 </div>
               </div>
-              <div className="mt-4 flex md:mt-0 md:ml-4">
+              <div className="mt-4 flex md:mt-0 md:ml-4 pb-4">
                 {isBusiness && (
                   <button
                     onClick={handleStartConversation}

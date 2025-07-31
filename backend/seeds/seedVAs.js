@@ -72,10 +72,10 @@ const coverImageIds = [
   'photo-1523240795612-9a054b0db644' // team work
 ];
 
-// VA profiles data matching Rails seed
+// VA profiles data with Filipino names
 const vaProfiles = [
   {
-    name: "Maria Santos",
+    name: "Maria Clara Santos",
     email: "maria.santos@example.com",
     hero: "Expert E-commerce VA specializing in Shopify and Amazon FBA",
     bio: "I'm a dedicated virtual assistant with 5+ years of experience helping e-commerce businesses scale their operations. I specialize in Shopify store management, Amazon FBA operations, inventory tracking, and customer service. I've helped over 50+ businesses increase their sales by 30% through efficient store management and customer support.",
@@ -85,8 +85,8 @@ const vaProfiles = [
     responseRate: 95
   },
   {
-    name: "Sarah Johnson",
-    email: "sarah.johnson@example.com",
+    name: "Ana Marie Reyes",
+    email: "ana.reyes@example.com",
     hero: "Social Media Marketing Specialist & Content Creator",
     bio: "Creative social media manager with expertise in growing Instagram, Facebook, and TikTok accounts. I create engaging content, manage posting schedules, and develop social media strategies that drive engagement and conversions. My clients have seen 200% average follower growth in 6 months.",
     specialties: ["Social Media Management", "Content Writing", "Digital Marketing", "Graphic Design"],
@@ -95,8 +95,8 @@ const vaProfiles = [
     responseRate: 92
   },
   {
-    name: "David Chen",
-    email: "david.chen@example.com",
+    name: "Jose Miguel Cruz",
+    email: "jose.cruz@example.com",
     hero: "Financial & Bookkeeping Expert for Small Businesses",
     bio: "Certified QuickBooks ProAdvisor with 7+ years in accounting and bookkeeping. I help small businesses maintain accurate financial records, process invoices, reconcile accounts, and prepare financial reports. I'm experienced with QuickBooks, Xero, and Excel for financial analysis.",
     specialties: ["Bookkeeping", "Accounting", "Financial Analysis", "Data Entry"],
@@ -105,8 +105,8 @@ const vaProfiles = [
     responseRate: 98
   },
   {
-    name: "Jennifer Lopez",
-    email: "jennifer.lopez@example.com",
+    name: "Kristine Joy Dela Cruz",
+    email: "kristine.delacruz@example.com",
     hero: "Executive Assistant & Project Management Professional",
     bio: "Highly organized executive assistant with expertise in calendar management, travel planning, and project coordination. I support C-level executives and entrepreneurs by streamlining their operations and ensuring nothing falls through the cracks. Proficient in Asana, Trello, and Microsoft Office.",
     specialties: ["Executive Assistant", "Project Management", "Calendar Management", "Travel Planning"],
@@ -115,8 +115,8 @@ const vaProfiles = [
     responseRate: 96
   },
   {
-    name: "Michael Rodriguez",
-    email: "michael.rodriguez@example.com",
+    name: "Juan Paolo Garcia",
+    email: "juan.garcia@example.com",
     hero: "WordPress Developer & Website Maintenance Specialist",
     bio: "Full-stack WordPress developer specializing in custom themes, plugin development, and website optimization. I help businesses maintain their online presence with regular updates, security monitoring, and performance optimization. Expert in PHP, HTML, CSS, and JavaScript.",
     specialties: ["WordPress Management", "Web Design", "Website Maintenance", "Basic Web Development"],
@@ -125,8 +125,8 @@ const vaProfiles = [
     responseRate: 89
   },
   {
-    name: "Lisa Wang",
-    email: "lisa.wang@example.com",
+    name: "Carmela Rose Mendoza",
+    email: "carmela.mendoza@example.com",
     hero: "Content Writer & SEO Specialist",
     bio: "Professional content writer with expertise in SEO writing, blog posts, and copywriting. I've written over 1000+ articles for various niches including tech, health, finance, and e-commerce. My content consistently ranks on the first page of Google and drives organic traffic growth.",
     specialties: ["Content Writing", "SEO Writing", "Blog Writing", "Copywriting"],
@@ -135,8 +135,8 @@ const vaProfiles = [
     responseRate: 94
   },
   {
-    name: "Robert Anderson",
-    email: "robert.anderson@example.com",
+    name: "Rafael Antonio Ramos",
+    email: "rafael.ramos@example.com",
     hero: "Lead Generation & Sales Support Specialist",
     bio: "Results-driven lead generation expert with a proven track record of helping B2B companies build robust sales pipelines. I specialize in LinkedIn outreach, email marketing, and CRM management. My lead generation campaigns have helped clients achieve 40% increase in qualified leads.",
     specialties: ["Lead Generation", "Sales Support", "CRM Management", "Email Marketing"],
@@ -145,8 +145,8 @@ const vaProfiles = [
     responseRate: 91
   },
   {
-    name: "Emily Davis",
-    email: "emily.davis@example.com",
+    name: "Sophia Isabel Villanueva",
+    email: "sophia.villanueva@example.com",
     hero: "Graphic Designer & Brand Identity Expert",
     bio: "Creative graphic designer specializing in brand identity, logo design, and marketing materials. I help businesses establish strong visual identities that resonate with their target audience. Proficient in Adobe Creative Suite, Canva, and Figma.",
     specialties: ["Graphic Design", "Logo Design", "Branding", "Video Editing"],
@@ -155,8 +155,8 @@ const vaProfiles = [
     responseRate: 87
   },
   {
-    name: "James Wilson",
-    email: "james.wilson@example.com",
+    name: "Marco Luis Fernandez",
+    email: "marco.fernandez@example.com",
     hero: "Customer Support & Live Chat Specialist",
     bio: "Experienced customer support representative with expertise in live chat, email support, and help desk management. I provide exceptional customer service that builds loyalty and drives positive reviews. Skilled in Zendesk, Intercom, and various CRM platforms.",
     specialties: ["Customer Support", "Live Chat Support", "Help Desk", "Technical Support"],
@@ -165,8 +165,8 @@ const vaProfiles = [
     responseRate: 93
   },
   {
-    name: "Amanda Thompson",
-    email: "amanda.thompson@example.com",
+    name: "Patricia Anne Lim",
+    email: "patricia.lim@example.com",
     hero: "Data Analysis & Research Professional",
     bio: "Detail-oriented data analyst with expertise in market research, data entry, and business intelligence. I help companies make data-driven decisions by providing comprehensive analysis and actionable insights. Proficient in Excel, Google Sheets, and various research tools.",
     specialties: ["Data Analysis", "Market Research", "Data Entry", "Research"],
@@ -175,8 +175,8 @@ const vaProfiles = [
     responseRate: 90
   },
   {
-    name: "Carlos Mendoza",
-    email: "carlos.mendoza@example.com",
+    name: "Carlos Miguel Castillo",
+    email: "carlos.castillo@example.com",
     hero: "Real Estate VA & Transaction Coordinator",
     bio: "Specialized real estate virtual assistant with experience in transaction coordination, lead management, and property research. I help real estate agents and brokers streamline their operations and close more deals efficiently.",
     specialties: ["Real Estate Support", "Lead Generation", "Administrative Support", "CRM Management"],
@@ -185,8 +185,8 @@ const vaProfiles = [
     responseRate: 88
   },
   {
-    name: "Rachel Green",
-    email: "rachel.green@example.com",
+    name: "Rachel Ann Gonzales",
+    email: "rachel.gonzales@example.com",
     hero: "Human Resources & Recruitment Specialist",
     bio: "HR professional with expertise in recruitment, employee onboarding, and training coordination. I help growing companies build strong teams by streamlining their hiring processes and improving employee experience.",
     specialties: ["Human Resources", "Recruitment", "Training & Development", "Administrative Support"],
@@ -195,8 +195,8 @@ const vaProfiles = [
     responseRate: 95
   },
   {
-    name: "Antonio Silva",
-    email: "antonio.silva@example.com",
+    name: "Antonio Jose Bautista",
+    email: "antonio.bautista@example.com",
     hero: "Email Marketing & Automation Expert",
     bio: "Email marketing specialist with expertise in campaign creation, automation setup, and list management. I help businesses nurture leads and drive conversions through strategic email marketing campaigns. Expert in Mailchimp, ConvertKit, and ActiveCampaign.",
     specialties: ["Email Marketing", "Digital Marketing", "Lead Generation", "Content Writing"],
@@ -205,8 +205,8 @@ const vaProfiles = [
     responseRate: 92
   },
   {
-    name: "Sophie Turner",
-    email: "sophie.turner@example.com",
+    name: "Isabella Marie Torres",
+    email: "isabella.torres@example.com",
     hero: "Event Planning & Virtual Assistant",
     bio: "Creative event planner specializing in virtual and hybrid events. I coordinate all aspects of event management from planning to execution, ensuring seamless experiences for attendees. Experienced with Zoom, Teams, and various event platforms.",
     specialties: ["Event Planning", "Project Management", "Administrative Support", "Calendar Management"],
@@ -215,8 +215,8 @@ const vaProfiles = [
     responseRate: 89
   },
   {
-    name: "Thomas Kim",
-    email: "thomas.kim@example.com",
+    name: "Francis Paolo Aquino",
+    email: "francis.aquino@example.com",
     hero: "Technical Support & QA Specialist",
     bio: "Technical support professional with expertise in software testing, quality assurance, and customer technical support. I help SaaS companies maintain high-quality products and provide excellent technical support to their users.",
     specialties: ["Technical Support", "Quality Assurance", "App Testing", "Customer Support"],
@@ -225,8 +225,8 @@ const vaProfiles = [
     responseRate: 94
   },
   {
-    name: "Isabella Martinez",
-    email: "isabella.martinez@example.com",
+    name: "Gabriela Marie Pascual",
+    email: "gabriela.pascual@example.com",
     hero: "Translation & Content Localization Expert",
     bio: "Professional translator fluent in English, Spanish, and Filipino. I help businesses expand globally by providing accurate translation and content localization services. Specialized in marketing materials, websites, and business documents.",
     specialties: ["Translation Services", "Content Writing", "Transcription", "Content Moderation"],
@@ -235,8 +235,8 @@ const vaProfiles = [
     responseRate: 96
   },
   {
-    name: "Kevin Brown",
-    email: "kevin.brown@example.com",
+    name: "Kenneth Ryan Salvador",
+    email: "kenneth.salvador@example.com",
     hero: "Video Editing & Content Production Specialist",
     bio: "Creative video editor specializing in YouTube content, social media videos, and promotional materials. I help content creators and businesses produce engaging videos that drive views and conversions. Expert in Adobe Premiere Pro, After Effects, and DaVinci Resolve.",
     specialties: ["Video Editing", "Photo Editing", "Content Writing", "Social Media Management"],
@@ -245,8 +245,8 @@ const vaProfiles = [
     responseRate: 86
   },
   {
-    name: "Olivia Johnson",
-    email: "olivia.johnson@example.com",
+    name: "Angelica Rose Domingo",
+    email: "angelica.domingo@example.com",
     hero: "Legal Virtual Assistant & Document Management",
     bio: "Experienced legal assistant providing comprehensive support to law firms and legal departments. I handle document preparation, case management, legal research, and client communication. Proficient in legal terminology and various case management software.",
     specialties: ["Legal Support", "Document Management", "Research", "Administrative Support"],
@@ -255,8 +255,8 @@ const vaProfiles = [
     responseRate: 93
   },
   {
-    name: "Daniel Lee",
-    email: "daniel.lee@example.com",
+    name: "Daniel Mark Ocampo",
+    email: "daniel.ocampo@example.com",
     hero: "E-learning & Course Creation Specialist",
     bio: "E-learning specialist helping educators and businesses create engaging online courses. I manage LMS platforms, create course content, and provide technical support for online learning programs. Expert in Teachable, Thinkific, and Moodle.",
     specialties: ["E-learning Support", "Content Writing", "Video Editing", "Administrative Support"],
@@ -265,8 +265,8 @@ const vaProfiles = [
     responseRate: 88
   },
   {
-    name: "Grace Taylor",
-    email: "grace.taylor@example.com",
+    name: "Grace Catherine Mercado",
+    email: "grace.mercado@example.com",
     hero: "Healthcare VA & Medical Administrative Support",
     bio: "Healthcare virtual assistant with experience in medical billing, appointment scheduling, and patient communication. I help medical practices improve their administrative efficiency while maintaining HIPAA compliance. Knowledgeable in medical terminology and EHR systems.",
     specialties: ["Healthcare Administration", "Data Entry", "Customer Service", "Administrative Support"],
@@ -275,8 +275,8 @@ const vaProfiles = [
     responseRate: 91
   },
   {
-    name: "Alex Rivera",
-    email: "alex.rivera@example.com",
+    name: "Alexander Luis Rivera",
+    email: "alexander.rivera@example.com",
     hero: "Podcast Manager & Audio Content Specialist",
     bio: "Podcast production specialist managing all aspects of podcast creation from editing to distribution. I help podcasters grow their audience through strategic content planning and technical excellence. Proficient in Audacity, Adobe Audition, and podcast hosting platforms.",
     specialties: ["Podcast Management", "Audio Editing", "Content Writing", "Social Media Management"],
@@ -285,8 +285,8 @@ const vaProfiles = [
     responseRate: 87
   },
   {
-    name: "Natalie Foster",
-    email: "natalie.foster@example.com",
+    name: "Natalie Joy Flores",
+    email: "natalie.flores@example.com",
     hero: "Amazon FBA & E-commerce Operations Expert",
     bio: "Amazon FBA specialist helping sellers optimize their product listings, manage inventory, and increase sales. I handle product research, listing optimization, PPC campaigns, and customer communication. Experienced with Helium 10, Jungle Scout, and Seller Central.",
     specialties: ["Amazon FBA", "E-commerce Management", "Product Research", "Customer Service"],
@@ -295,8 +295,8 @@ const vaProfiles = [
     responseRate: 94
   },
   {
-    name: "Ryan Cooper",
-    email: "ryan.cooper@example.com",
+    name: "Ryan Christopher Dizon",
+    email: "ryan.dizon@example.com",
     hero: "Cryptocurrency & Blockchain Support Specialist",
     bio: "Crypto-savvy virtual assistant providing support for blockchain projects and cryptocurrency businesses. I manage community engagement, create educational content, and provide technical support for crypto platforms. Well-versed in DeFi, NFTs, and blockchain technology.",
     specialties: ["Cryptocurrency Support", "Community Management", "Content Writing", "Technical Support"],
@@ -305,8 +305,8 @@ const vaProfiles = [
     responseRate: 85
   },
   {
-    name: "Maya Patel",
-    email: "maya.patel@example.com",
+    name: "Michelle Andrea Panganiban",
+    email: "michelle.panganiban@example.com",
     hero: "Travel Planning & Hospitality VA",
     bio: "Travel specialist helping busy professionals and businesses manage their travel arrangements. I handle flight bookings, hotel reservations, itinerary planning, and expense tracking. Expert in travel booking platforms and expense management tools.",
     specialties: ["Travel Planning", "Administrative Support", "Calendar Management", "Research"],
@@ -315,8 +315,8 @@ const vaProfiles = [
     responseRate: 92
   },
   {
-    name: "Harper Wilson",
-    email: "harper.wilson@example.com",
+    name: "Hannah Mae Soriano",
+    email: "hannah.soriano@example.com",
     hero: "Pinterest Marketing & Visual Content Strategist",
     bio: "Pinterest marketing expert helping businesses drive traffic and sales through strategic pin creation and board management. I create eye-catching graphics, optimize pin descriptions, and develop Pinterest SEO strategies that increase visibility and engagement.",
     specialties: ["Pinterest Marketing", "Graphic Design", "Content Writing", "Social Media Management"],
