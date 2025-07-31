@@ -6,6 +6,7 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
 console.log('Supabase URL configured:', !!supabaseUrl);
 console.log('Supabase Key configured:', !!supabaseKey);
+if (supabaseUrl) console.log('Supabase URL:', supabaseUrl.substring(0, 30) + '...');
 
 if (!supabaseUrl || !supabaseKey) {
   console.warn('Supabase credentials not found. File uploads will use local storage.');

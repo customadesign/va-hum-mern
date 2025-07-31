@@ -647,6 +647,44 @@ router.put('/me', protect, authorize('va'), async (req, res) => {
   }
 });
 
+// @route   GET /api/vas/test-upload
+// @desc    Test upload configuration
+// @access  Public
+router.get('/test-upload', async (req, res) => {
+  try {
+    const supabaseStatus = {
+      configured: !!supabase,
+      bucketName: process.env.SUPABASE_BUCKET || 'linkage-va-hub',
+      environment: process.env.NODE_ENV,
+      urlConfigured: !!process.env.SUPABASE_URL,
+      keyConfigured: !!process.env.SUPABASE_ANON_KEY
+    };
+
+    if (supabase) {
+      try {
+        // Test bucket access
+        const { data, error } = await supabase.storage.from(supabaseStatus.bucketName).list('', { limit: 1 });
+        supabaseStatus.bucketAccessible = !error;
+        supabaseStatus.bucketError = error?.message;
+      } catch (e) {
+        supabaseStatus.bucketAccessible = false;
+        supabaseStatus.bucketError = e.message;
+      }
+    }
+
+    res.json({
+      success: true,
+      uploadConfig: supabaseStatus,
+      fallbackEnabled: true
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // @route   POST /api/vas/me/upload
 // @desc    Upload image for VA profile (avatar or cover)
 // @access  Private (VA only)
