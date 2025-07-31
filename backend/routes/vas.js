@@ -643,6 +643,8 @@ router.put('/:id/specialties', protect, authorize('va'), [
 // @access  Private (VA only)
 router.get('/me', protect, authorize('va'), async (req, res) => {
   try {
+    console.log('GET /api/vas/me - User ID:', req.user._id);
+    
     const va = await VA.findOne({ user: req.user._id })
       .populate('location')
       .populate('specialties')
@@ -650,21 +652,28 @@ router.get('/me', protect, authorize('va'), async (req, res) => {
       .populate('roleType');
 
     if (!va) {
+      console.log('VA profile not found for user:', req.user._id);
       return res.status(404).json({
         success: false,
         error: 'VA profile not found'
       });
     }
 
+    console.log('VA profile found:', va._id);
     res.json({
       success: true,
       data: va
     });
   } catch (err) {
-    console.error(err);
+    console.error('GET /api/vas/me error:', {
+      message: err.message,
+      stack: err.stack,
+      userId: req.user._id,
+      mongoDbConnected: require('mongoose').connection.readyState
+    });
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      error: 'Server error: ' + err.message
     });
   }
 });
