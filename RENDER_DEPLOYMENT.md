@@ -1,6 +1,6 @@
-# Deploying Linkage VA Hub on Render
+# Deploying Linkage VA Hub and E-Systems on Render
 
-This guide will walk you through deploying your MERN stack application on Render.
+This guide will walk you through deploying both the VA Hub and E-Systems Management Hub on Render.
 
 ## Prerequisites
 
@@ -180,9 +180,68 @@ REACT_APP_API_URL=https://your-backend.onrender.com/api
   - Custom domains
   - More resources
 
+## Deploying E-Systems Management Hub
+
+After your main VA Hub is deployed, you can deploy the E-Systems version:
+
+### E-Systems Backend Service
+
+1. Create a new Web Service in Render
+2. Connect to your GitHub repository: `customadesign/va-hum-mern`
+3. Configure:
+   - **Name**: `esystems-backend`
+   - **Root Directory**: `esystems-backend`
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+
+#### E-Systems Backend Environment Variables:
+```env
+NODE_ENV=production
+ESYSTEMS_MODE=true
+MONGODB_URI=mongodb+srv://your-connection-string
+JWT_SECRET=your-jwt-secret
+JWT_EXPIRE=30d
+CLIENT_URL=https://linkage-va-hub.onrender.com
+ESYSTEMS_CLIENT_URL=https://esystems-management.onrender.com
+EMAIL_FROM=noreply@yourdomain.com
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+```
+
+### E-Systems Frontend Service
+
+1. Create a new Static Site in Render
+2. Connect to your GitHub repository
+3. Configure:
+   - **Name**: `esystems-frontend`
+   - **Root Directory**: `esystems-frontend`
+   - **Build Command**: `npm install && npm run build`
+   - **Publish Directory**: `build`
+
+#### E-Systems Frontend Environment Variables:
+```env
+REACT_APP_API_URL=https://esystems-backend.onrender.com/api
+REACT_APP_SOCKET_URL=https://esystems-backend.onrender.com
+```
+
+### Update Existing VA Hub Backend
+
+Add this environment variable to your existing VA Hub backend:
+```env
+ESYSTEMS_CLIENT_URL=https://esystems-management.onrender.com
+```
+
+## Final URLs
+
+After deployment:
+- **VA Hub**: `https://linkage-va-hub.onrender.com`
+- **E-Systems**: `https://esystems-management.onrender.com`
+
+Both systems share the same database but provide different user experiences.
+
 ## Next Steps
 
-1. Set up a custom domain
+1. Set up custom domains for both systems
 2. Configure automatic deployments from GitHub
 3. Set up monitoring and alerts
 4. Implement CI/CD pipeline
