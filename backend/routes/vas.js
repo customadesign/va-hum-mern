@@ -6,7 +6,7 @@ const Location = require('../models/Location');
 const Specialty = require('../models/Specialty');
 const RoleLevel = require('../models/RoleLevel');
 const RoleType = require('../models/RoleType');
-const { protect, authorize, optionalAuth } = require('../middleware/auth');
+const { protect, authorize, optionalAuth, checkESystemsVAAccess } = require('../middleware/auth');
 const upload = require('../utils/upload');
 
 // @route   GET /api/vas
@@ -304,7 +304,7 @@ router.get('/:identifier', optionalAuth, async (req, res) => {
 // @route   POST /api/vas
 // @desc    Create VA profile
 // @access  Private (authenticated users only)
-router.post('/', protect, [
+router.post('/', protect, checkESystemsVAAccess, [
   body('name').notEmpty().trim(),
   body('bio').notEmpty().trim(),
   body('searchStatus').optional().isIn(['actively_looking', 'open', 'not_interested', 'invisible'])

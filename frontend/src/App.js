@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 // Context Providers
 import { AuthProvider } from './contexts/AuthContext';
+import { BrandingProvider } from './contexts/BrandingContext';
 
 // Layout Components
 import Layout from './components/Layout';
@@ -46,7 +47,8 @@ function App() {
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <Router>
-          <AuthProvider>
+          <BrandingProvider>
+            <AuthProvider>
             <div className="h-full flex flex-col">
               <Routes>
                 <Route path="/" element={<Layout />}>
@@ -87,6 +89,7 @@ function App() {
               />
             </div>
           </AuthProvider>
+        </BrandingProvider>
         </Router>
       </QueryClientProvider>
     </HelmetProvider>

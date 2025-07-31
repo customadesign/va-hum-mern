@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { isESystemsMode } = require('../utils/esystems');
 
 // Protect routes
 exports.protect = async (req, res, next) => {
@@ -100,5 +101,27 @@ exports.optionalAuth = async (req, res, next) => {
     // Continue without user
   }
 
+  next();
+};
+
+// Check E-systems access for VA routes
+exports.checkESystemsVAAccess = (req, res, next) => {
+  if (isESystemsMode()) {
+    return res.status(403).json({
+      success: false,
+      error: 'VA registration not available in E-systems mode'
+    });
+  }
+  next();
+};
+
+// Check E-systems access for business routes
+exports.checkESystemsBusinessAccess = (req, res, next) => {
+  if (isESystemsMode() && !req.user.business) {
+    return res.status(403).json({
+      success: false,
+      error: 'Business profile required in E-systems mode'
+    });
+  }
   next();
 };

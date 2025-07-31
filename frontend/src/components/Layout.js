@@ -4,6 +4,7 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useBranding } from '../contexts/BrandingContext';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -11,13 +12,20 @@ function classNames(...classes) {
 
 export default function Layout() {
   const { user, logout, isVA, isBusiness } = useAuth();
+  const { branding } = useBranding();
   const navigate = useNavigate();
 
-  const navigation = [
-    { name: 'Home', href: '/', current: false },
-    { name: 'Virtual Assistants', href: '/vas', current: false },
-    { name: 'About', href: '/about', current: false },
-  ];
+  const navigation = branding.isESystemsMode 
+    ? [
+        { name: 'Home', href: '/', current: false },
+        { name: 'Members', href: '/vas', current: false },
+        { name: 'About', href: '/about', current: false },
+      ]
+    : [
+        { name: 'Home', href: '/', current: false },
+        { name: 'Virtual Assistants', href: '/vas', current: false },
+        { name: 'About', href: '/about', current: false },
+      ];
 
   const userNavigation = [
     { name: 'Dashboard', href: '/dashboard' },
@@ -37,8 +45,8 @@ export default function Layout() {
                     <Link to="/" className="flex items-center">
                       <img
                         className="h-10 w-auto"
-                        src="/logo.png"
-                        alt="Linkage VA Hub"
+                        src={branding.logo}
+                        alt={branding.name}
                       />
                     </Link>
                   </div>
