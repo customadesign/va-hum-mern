@@ -5,6 +5,105 @@ const Business = require('../models/Business');
 const { protect, authorize } = require('../middleware/auth');
 const upload = require('../utils/upload');
 
+// @route   GET /api/businesses/me
+// @desc    Get current business profile
+// @access  Private/Business
+router.get('/me', protect, authorize('business'), async (req, res) => {
+  try {
+    const business = await Business.findOne({ user: req.user._id })
+      .populate('user', 'email');
+
+    if (!business) {
+      return res.status(404).json({
+        success: false,
+        error: 'Business profile not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: business
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   PUT /api/businesses/me
+// @desc    Update current business profile
+// @access  Private/Business
+router.put('/me', protect, authorize('business'), async (req, res) => {
+  try {
+    const business = await Business.findOne({ user: req.user._id });
+
+    if (!business) {
+      return res.status(404).json({
+        success: false,
+        error: 'Business profile not found'
+      });
+    }
+
+    // Update fields
+    const updateFields = [
+      'contactName', 'company', 'bio', 'website', 'contactRole',
+      'email', 'phone', 'streetAddress', 'city', 'state', 
+      'postalCode', 'country', 'vaNotifications', 'invisible',
+      'surveyRequestNotifications'
+    ];
+
+    updateFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        business[field] = req.body[field];
+      }
+    });
+
+    await business.save();
+
+    res.json({
+      success: true,
+      data: business
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   POST /api/businesses/me/upload
+// @desc    Upload business avatar
+// @access  Private/Business
+router.post('/me/upload', protect, authorize('business'), upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please upload a file'
+      });
+    }
+
+    const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
+    const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
+
+    res.json({
+      success: true,
+      url: imageUrl
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
 // @route   GET /api/businesses/:id
 // @desc    Get business by ID
 // @access  Private
