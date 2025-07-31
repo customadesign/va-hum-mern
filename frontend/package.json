@@ -30,6 +30,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "esystems": "REACT_APP_API_URL=http://localhost:5001 PORT=3001 react-scripts start",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

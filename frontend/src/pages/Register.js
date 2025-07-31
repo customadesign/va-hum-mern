@@ -48,7 +48,7 @@ export default function Register() {
   return (
     <>
       <Helmet>
-        <title>Create Account - Linkage VA Hub</title>
+        <title>Create Account - {branding.name}</title>
       </Helmet>
 
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -56,8 +56,8 @@ export default function Register() {
           <div>
             <img
               className="mx-auto h-24 w-auto object-contain"
-              src="https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/688ab56f0299a1fefc1986e5.png"
-              alt="Linkage VA Hub"
+              src={branding.logo}
+              alt={branding.name}
             />
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
               Create your account

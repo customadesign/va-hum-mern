@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../contexts/AuthContext';
+import { useBranding } from '../contexts/BrandingContext';
 import api from '../services/api';
 import { toast } from 'react-toastify';
 
@@ -9,6 +10,14 @@ export default function ProfileSetup() {
   const [profileType, setProfileType] = useState('');
   const navigate = useNavigate();
   const { updateUser } = useAuth();
+  const { branding } = useBranding();
+
+  // Auto-redirect to business profile in E-systems mode
+  React.useEffect(() => {
+    if (branding.isESystemsMode) {
+      handleProfileTypeSelect('business');
+    }
+  }, [branding.isESystemsMode]);
 
   const handleProfileTypeSelect = async (type) => {
     setProfileType(type);
