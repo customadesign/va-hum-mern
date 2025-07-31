@@ -163,7 +163,7 @@ const handleSupabaseUpload = (fieldName, folder) => {
 
       // Upload to Supabase
       try {
-        const bucket = 'linkage-va-hub'; // Your Supabase bucket name
+        const bucket = process.env.SUPABASE_BUCKET || 'linkage-va-hub'; // Your Supabase bucket name
         const publicUrl = await uploadToSupabase(req.file, bucket, folder);
         
         // Add the URL to req.file for the route handler

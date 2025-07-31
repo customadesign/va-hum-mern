@@ -11,12 +11,16 @@ This guide will help you set up Supabase Storage for file uploads in production.
 
 ### 1. Create a Storage Bucket
 
-1. Go to your Supabase Dashboard
-2. Navigate to Storage section
-3. Click "Create a new bucket"
-4. Name it: `linkage-va-hub`
-5. Set it as **Public** (important for serving files)
-6. Click "Create bucket"
+1. Go to your [Supabase Dashboard](https://app.supabase.com)
+2. Navigate to **Storage** section (in the left sidebar)
+3. Click **"New bucket"** button
+4. Configure the bucket:
+   - **Name**: Choose a name (e.g., `avatars`, `uploads`, or `linkage-va-hub`)
+   - **Public bucket**: Toggle ON ✅ (IMPORTANT: Must be public for images to display)
+   - **File size limit**: Set to 500MB (or your preferred limit)
+   - **Allowed MIME types**: Leave empty to allow all types
+5. Click **"Create bucket"**
+6. Note down your bucket name for the environment variable
 
 ### 2. Configure Bucket Policies
 
@@ -51,6 +55,14 @@ Add these to your production environment (e.g., Render):
 ```bash
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your-anon-key-here
+SUPABASE_BUCKET=your-bucket-name
+```
+
+**Example:**
+```bash
+SUPABASE_URL=https://abcdefgh.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_BUCKET=avatars
 ```
 
 **Important**: 
