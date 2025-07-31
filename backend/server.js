@@ -89,6 +89,18 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: process.env.ESYSTEMS_MODE === 'true' 
+      ? 'E-Systems Management Hub API is running' 
+      : 'Linkage VA Hub API is running',
+    mode: process.env.ESYSTEMS_MODE === 'true' ? 'esystems' : 'linkage',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
