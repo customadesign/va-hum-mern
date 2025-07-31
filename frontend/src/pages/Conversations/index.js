@@ -4,8 +4,10 @@ import { Link } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import api from '../../services/api';
 import { formatDistanceToNow } from 'date-fns';
+import { useBranding } from '../../contexts/BrandingContext';
 
 export default function Conversations() {
+  const { branding } = useBranding();
   const { data: conversations, isLoading } = useQuery('conversations', async () => {
     const response = await api.get('/conversations');
     return response.data.data;
@@ -22,7 +24,7 @@ export default function Conversations() {
   return (
     <>
       <Helmet>
-        <title>Conversations - Linkage VA Hub</title>
+        <title>Conversations - {branding.name}</title>
       </Helmet>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -53,7 +55,7 @@ export default function Conversations() {
               </svg>
               <h3 className="mt-2 text-sm font-medium text-gray-900">No conversations</h3>
               <p className="mt-1 text-sm text-gray-500">
-                Start a conversation with a VA or business to get started.
+                {branding.isESystemsMode ? 'Start a conversation with a professional to get started.' : 'Start a conversation with a VA or business to get started.'}
               </p>
             </div>
           ) : (

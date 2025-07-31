@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useQuery } from 'react-query';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useBranding } from '../../contexts/BrandingContext';
 import { 
   MapPinIcon, 
   BriefcaseIcon, 
@@ -20,6 +21,7 @@ import { format } from 'date-fns';
 export default function VADetail() {
   const { id } = useParams();
   const { user, isBusiness } = useAuth();
+  const { branding } = useBranding();
 
   const { data: va, isLoading, error } = useQuery(
     ['va', id],
@@ -46,10 +48,10 @@ export default function VADetail() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h3 className="text-lg font-medium text-gray-900">VA not found</h3>
+          <h3 className="text-lg font-medium text-gray-900">{branding.isESystemsMode ? 'Team member not found' : 'VA not found'}</h3>
           <div className="mt-2">
             <Link to="/vas" className="text-gray-600 hover:text-gray-500">
-              Back to VAs
+              {branding.isESystemsMode ? 'Back to team members' : 'Back to VAs'}
             </Link>
           </div>
         </div>
@@ -60,7 +62,7 @@ export default function VADetail() {
   return (
     <>
       <Helmet>
-        <title>{va.name} - Linkage VA Hub</title>
+        <title>{va.name} - {branding.name}</title>
         <meta name="description" content={va.bio?.substring(0, 160)} />
       </Helmet>
 
@@ -90,7 +92,7 @@ export default function VADetail() {
                   ) : (
                     <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-full bg-gray-300 border-4 border-white flex items-center justify-center">
                       <span className="text-3xl font-medium text-gray-700">
-                        {va.name?.[0]?.toUpperCase() || 'V'}
+                        {va.name?.[0]?.toUpperCase() || (branding.isESystemsMode ? 'P' : 'V')}
                       </span>
                     </div>
                   )}
@@ -109,7 +111,7 @@ export default function VADetail() {
                     className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                   >
                     <EnvelopeIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-                    Start Conversation
+                    {branding.isESystemsMode ? 'Contact Professional' : 'Start Conversation'}
                   </button>
                 )}
               </div>
@@ -148,9 +150,9 @@ export default function VADetail() {
                   <div className="flex items-center">
                     <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2" />
                     <span className="text-sm text-gray-900">
-                      {va.searchStatus === 'actively_looking' && 'Actively looking for opportunities'}
-                      {va.searchStatus === 'open' && 'Open to opportunities'}
-                      {va.searchStatus === 'not_interested' && 'Not currently looking'}
+                      {va.searchStatus === 'actively_looking' && (branding.isESystemsMode ? 'Available immediately' : 'Actively looking for opportunities')}
+                      {va.searchStatus === 'open' && (branding.isESystemsMode ? 'Open to new projects' : 'Open to opportunities')}
+                      {va.searchStatus === 'not_interested' && 'Not currently available'}
                       {va.searchStatus === 'invisible' && 'Profile hidden'}
                     </span>
                   </div>
