@@ -17,6 +17,8 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import VAList from './pages/VAs/List';
 import VADetail from './pages/VAs/Detail';
 import VAProfile from './pages/VAs/Profile';
@@ -50,6 +52,8 @@ function App() {
                   <Route path="about" element={<About />} />
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
+                  <Route path="forgot-password" element={<ForgotPassword />} />
+                  <Route path="reset-password/:token" element={<ResetPassword />} />
                   <Route path="vas" element={<VAList />} />
                   <Route path="vas/:id" element={<VADetail />} />
                   

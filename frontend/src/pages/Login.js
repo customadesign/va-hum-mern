@@ -137,6 +137,15 @@ export default function Login() {
                   Forgot your password?
                 </Link>
               </div>
+
+              <div className="text-sm">
+                <Link
+                  to="/forgot-password"
+                  className="font-medium text-gray-600 hover:text-gray-500"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
             </div>
 
             <div>
