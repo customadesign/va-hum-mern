@@ -1,20 +1,23 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { useBranding } from '../contexts/BrandingContext';
 
 export default function NotFound() {
+  const { branding } = useBranding();
+  
   return (
     <>
       <Helmet>
-        <title>Page Not Found - Linkage VA Hub</title>
+        <title>Page Not Found - {branding.name}</title>
       </Helmet>
 
       <div className="min-h-full pt-16 pb-12 flex flex-col bg-white">
         <main className="flex-grow flex flex-col justify-center max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex-shrink-0 flex justify-center">
             <Link to="/" className="inline-flex">
-              <span className="sr-only">Linkage VA Hub</span>
-              <h1 className="text-4xl font-bold text-gray-600">Linkage VA Hub</h1>
+              <span className="sr-only">{branding.name}</span>
+              <h1 className="text-4xl font-bold text-gray-600">{branding.name}</h1>
             </Link>
           </div>
           <div className="py-16">

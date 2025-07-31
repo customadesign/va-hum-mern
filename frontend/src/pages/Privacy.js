@@ -1,11 +1,14 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useBranding } from '../contexts/BrandingContext';
 
 export default function Privacy() {
+  const { branding } = useBranding();
+  
   return (
     <>
       <Helmet>
-        <title>Privacy Policy - Linkage VA Hub</title>
+        <title>Privacy Policy - {branding.name}</title>
       </Helmet>
 
       <div className="bg-white">
@@ -37,7 +40,7 @@ export default function Privacy() {
                 <p className="text-gray-600 mb-4">We use the information we collect to:</p>
                 <ul className="list-disc pl-6 text-gray-600 space-y-2">
                   <li>Provide and improve our services</li>
-                  <li>Connect businesses with virtual assistants</li>
+                  <li>{branding.isESystemsMode ? 'Connect businesses with skilled professionals' : 'Connect businesses with virtual assistants'}</li>
                   <li>Communicate with you about our services</li>
                   <li>Ensure platform security and prevent fraud</li>
                 </ul>

@@ -5,6 +5,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import authService from '../services/auth';
 import { toast } from 'react-toastify';
+import { useBranding } from '../contexts/BrandingContext';
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -15,6 +16,7 @@ const validationSchema = Yup.object({
 export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const { branding } = useBranding();
 
   const formik = useFormik({
     initialValues: {
@@ -39,7 +41,7 @@ export default function ForgotPassword() {
     return (
       <>
         <Helmet>
-          <title>Check Your Email - Linkage VA Hub</title>
+          <title>Check Your Email - {branding.name}</title>
         </Helmet>
 
         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -47,8 +49,8 @@ export default function ForgotPassword() {
             <div className="text-center">
               <img
                 className="mx-auto h-24 w-auto object-contain"
-                src="https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/6887516ca12d9403f02837dd.png"
-                alt="Linkage VA Hub"
+                src={branding.logoUrl}
+                alt={branding.name}
               />
               <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
                 Check your email
@@ -82,7 +84,7 @@ export default function ForgotPassword() {
   return (
     <>
       <Helmet>
-        <title>Forgot Password - Linkage VA Hub</title>
+        <title>Forgot Password - {branding.name}</title>
       </Helmet>
 
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -90,8 +92,8 @@ export default function ForgotPassword() {
           <div>
             <img
               className="mx-auto h-24 w-auto object-contain"
-              src="https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/6887516ca12d9403f02837dd.png"
-              alt="Linkage VA Hub"
+              src={branding.logoUrl}
+              alt={branding.name}
             />
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
               Forgot your password?

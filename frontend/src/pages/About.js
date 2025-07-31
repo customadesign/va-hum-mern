@@ -18,17 +18,19 @@ export default function About() {
             <p className="mt-1 text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
               {branding.name}
             </p>
-            <p className="max-w-xl mt-5 mx-auto text-xl text-gray-500">
-              Operated by Linkage Web Solutions
-            </p>
+            {!branding.isESystemsMode && (
+              <p className="max-w-xl mt-5 mx-auto text-xl text-gray-500">
+                Operated by Linkage Web Solutions
+              </p>
+            )}
           </div>
 
           <div className="mt-12 prose prose-lg text-gray-500 mx-auto">
             {branding.isESystemsMode ? (
               <>
                 <p>
-                  E-Systems Management is operated by Linkage Web Solutions, helping businesses build 
-                  exceptional remote teams with pre-screened professionals from the Philippines.
+                  E-Systems Management helps businesses build exceptional remote teams with pre-screened 
+                  professionals from the Philippines.
                 </p>
 
                 <h3>Our Mission</h3>
