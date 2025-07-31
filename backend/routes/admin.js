@@ -10,6 +10,55 @@ const { protect, authorize } = require('../middleware/auth');
 // All routes require admin authorization
 router.use(protect, authorize('admin'));
 
+// @route   GET /api/admin/stats
+// @desc    Get admin dashboard statistics
+// @access  Private/Admin
+router.get('/stats', async (req, res) => {
+  try {
+    const [
+      totalVAs,
+      activeVAs,
+      totalBusinesses,
+      pendingApprovals
+    ] = await Promise.all([
+      VA.countDocuments(),
+      VA.countDocuments({ searchStatus: { $in: ['actively_looking', 'open'] } }),
+      Business.countDocuments(),
+      VA.countDocuments({ status: 'pending' })
+    ]);
+
+    const recentActivity = await VA.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('name createdAt')
+      .lean()
+      .then(vas => vas.map(va => ({
+        title: `New VA registered: ${va.name}`,
+        description: `${va.name} joined the platform`,
+        createdAt: va.createdAt
+      })));
+
+    res.json({
+      success: true,
+      data: {
+        totalVAs,
+        activeVAs,
+        totalBusinesses,
+        pendingApprovals,
+        totalRevenue: 0, // Placeholder
+        activeContracts: 0, // Placeholder
+        recentActivity
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
 // @route   GET /api/admin/dashboard
 // @desc    Get admin dashboard stats
 // @access  Private/Admin

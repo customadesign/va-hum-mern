@@ -12,6 +12,7 @@ import { BrandingProvider } from './contexts/BrandingContext';
 // Layout Components
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute';
 
 // Pages
 import Home from './pages/Home';
@@ -31,6 +32,9 @@ import ProfileSetup from './pages/ProfileSetup';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import NotFound from './pages/NotFound';
+
+// Admin Pages
+import AdminDashboard from './pages/Admin/Dashboard';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -71,6 +75,11 @@ function App() {
                     <Route path="business/profile" element={<BusinessProfile />} />
                     <Route path="conversations" element={<Conversations />} />
                     <Route path="conversations/:id" element={<ConversationDetail />} />
+                  </Route>
+                  
+                  {/* Admin Routes */}
+                  <Route element={<AdminRoute />}>
+                    <Route path="admin" element={<AdminDashboard />} />
                   </Route>
                   
                   <Route path="*" element={<NotFound />} />
