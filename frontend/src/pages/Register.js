@@ -60,15 +60,15 @@ export default function Register() {
               alt={branding.name}
             />
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Create your account
+              {branding.isESystemsMode ? 'Create your employer account' : 'Create your account'}
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
-              Or{' '}
+              {branding.isESystemsMode ? 'Start hiring talented professionals' : 'Or'}{' '}
               <Link
                 to="/login"
                 className="font-medium text-gray-600 hover:text-gray-500"
               >
-                sign in to your existing account
+                {branding.isESystemsMode ? 'or sign in' : 'sign in to your existing account'}
               </Link>
             </p>
           </div>

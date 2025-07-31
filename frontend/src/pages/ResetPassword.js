@@ -52,7 +52,7 @@ export default function ResetPassword() {
           <div>
             <img
               className="mx-auto h-24 w-auto object-contain"
-              src="https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/688ab56f0299a1fefc1986e5.png"
+              src="https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/6887516ca12d9403f02837dd.png"
               alt="Linkage VA Hub"
             />
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
