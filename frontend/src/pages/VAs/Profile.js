@@ -245,9 +245,9 @@ export default function VAProfile() {
       return;
     }
 
-    // Validate file size (max 50MB)
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error('Video file size must be less than 50MB');
+    // Validate file size (max 500MB)
+    if (file.size > 500 * 1024 * 1024) {
+      toast.error('Video file size must be less than 500MB');
       return;
     }
 

@@ -694,12 +694,12 @@ router.post('/me/upload-video', protect, authorize('va'), upload.single('video')
       });
     }
 
-    // Check file size (max 50MB)
-    const maxSize = 50 * 1024 * 1024; // 50MB
+    // Check file size (max 500MB)
+    const maxSize = 500 * 1024 * 1024; // 500MB
     if (req.file.size > maxSize) {
       return res.status(400).json({
         success: false,
-        error: 'Video file size must be less than 50MB'
+        error: 'Video file size must be less than 500MB'
       });
     }
 
