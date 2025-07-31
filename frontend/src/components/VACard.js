@@ -1,21 +1,23 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPinIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
+import { useBranding } from '../contexts/BrandingContext';
 
 export default function VACard({ va }) {
+  const { branding } = useBranding();
 
   const getStatusBadge = () => {
     switch (va.searchStatus) {
       case 'actively_looking':
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            Actively looking
+            {branding.isESystemsMode ? 'Available now' : 'Actively looking'}
           </span>
         );
       case 'open':
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            Open to opportunities
+            {branding.isESystemsMode ? 'Open to offers' : 'Open to opportunities'}
           </span>
         );
       default:
