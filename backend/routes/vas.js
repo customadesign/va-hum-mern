@@ -653,9 +653,46 @@ router.put('/me', protect, authorize('va'), async (req, res) => {
 router.post('/me/upload', protect, authorize('va'), async (req, res, next) => {
   // Use Supabase in production if configured
   if (process.env.NODE_ENV === 'production' && supabase) {
+    console.log('Attempting Supabase upload...');
+    
+    // First try with Supabase
     handleSupabaseUpload('image', 'avatars')(req, res, async (err) => {
-      if (err || !req.file) {
-        return; // Error already handled by handleSupabaseUpload
+      if (err) {
+        console.error('Supabase upload failed, falling back to local storage:', err);
+        
+        // Fallback to local storage
+        upload.single('image')(req, res, function (uploadErr) {
+          if (uploadErr) {
+            console.error('Local upload also failed:', uploadErr);
+            return res.status(400).json({
+              success: false,
+              error: uploadErr.message || 'Failed to upload file'
+            });
+          }
+
+          if (!req.file) {
+            return res.status(400).json({
+              success: false,
+              error: 'Please upload a file'
+            });
+          }
+
+          const baseUrl = process.env.SERVER_URL || `https://${req.get('host')}`;
+          const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
+
+          console.log('Fallback: Image uploaded locally:', imageUrl);
+
+          res.json({
+            success: true,
+            url: imageUrl,
+            storage: 'local'
+          });
+        });
+        return;
+      }
+
+      if (!req.file) {
+        return; // Error already handled
       }
 
       try {
@@ -664,7 +701,8 @@ router.post('/me/upload', protect, authorize('va'), async (req, res, next) => {
 
         res.json({
           success: true,
-          url: imageUrl
+          url: imageUrl,
+          storage: 'supabase'
         });
       } catch (error) {
         console.error('Processing error:', error);
@@ -711,9 +749,45 @@ router.post('/me/upload', protect, authorize('va'), async (req, res, next) => {
 router.post('/me/upload-video', protect, authorize('va'), async (req, res, next) => {
   // Use Supabase in production if configured
   if (process.env.NODE_ENV === 'production' && supabase) {
+    console.log('Attempting Supabase video upload...');
+    
     handleSupabaseUpload('video', 'videos')(req, res, async (err) => {
-      if (err || !req.file) {
-        return; // Error already handled by handleSupabaseUpload
+      if (err) {
+        console.error('Supabase video upload failed, falling back to local storage:', err);
+        
+        // Fallback to local storage
+        upload.single('video')(req, res, function (uploadErr) {
+          if (uploadErr) {
+            console.error('Local video upload also failed:', uploadErr);
+            return res.status(400).json({
+              success: false,
+              error: uploadErr.message || 'Failed to upload video'
+            });
+          }
+
+          if (!req.file) {
+            return res.status(400).json({
+              success: false,
+              error: 'Please upload a video file'
+            });
+          }
+
+          const baseUrl = process.env.SERVER_URL || `https://${req.get('host')}`;
+          const videoUrl = `${baseUrl}/uploads/${req.file.filename}`;
+
+          console.log('Fallback: Video uploaded locally:', videoUrl);
+
+          res.json({
+            success: true,
+            url: videoUrl,
+            storage: 'local'
+          });
+        });
+        return;
+      }
+
+      if (!req.file) {
+        return; // Error already handled
       }
 
       try {
@@ -722,7 +796,8 @@ router.post('/me/upload-video', protect, authorize('va'), async (req, res, next)
 
         res.json({
           success: true,
-          url: videoUrl
+          url: videoUrl,
+          storage: 'supabase'
         });
       } catch (error) {
         console.error('Processing error:', error);

@@ -37,12 +37,34 @@ const uploadSupabase = multer({
 const uploadToSupabase = async (file, bucket, folder) => {
   try {
     if (!supabase) {
-      throw new Error('Supabase client not initialized');
+      throw new Error('Supabase client not initialized. Check your environment variables.');
     }
 
     // Generate unique filename
     const fileExt = path.extname(file.originalname);
     const fileName = `${folder}/${uuidv4()}${fileExt}`;
+
+    console.log('Attempting to upload to Supabase:', {
+      bucket,
+      fileName,
+      fileSize: file.size,
+      mimeType: file.mimetype
+    });
+
+    // Check if bucket exists
+    const { data: buckets, error: bucketsError } = await supabase
+      .storage
+      .listBuckets();
+    
+    if (bucketsError) {
+      console.error('Error listing buckets:', bucketsError);
+      throw new Error('Cannot access Supabase storage. Check your credentials.');
+    }
+
+    const bucketExists = buckets?.some(b => b.name === bucket);
+    if (!bucketExists) {
+      throw new Error(`Bucket '${bucket}' does not exist. Please create it in Supabase dashboard.`);
+    }
 
     // Upload file to Supabase
     const { data, error } = await supabase
@@ -54,7 +76,15 @@ const uploadToSupabase = async (file, bucket, folder) => {
       });
 
     if (error) {
-      console.error('Supabase upload error:', error);
+      console.error('Supabase upload error details:', {
+        message: error.message,
+        error: error
+      });
+      
+      if (error.message?.includes('row-level security')) {
+        throw new Error('Storage bucket RLS policies not configured. Please check Supabase setup guide.');
+      }
+      
       throw error;
     }
 
@@ -63,6 +93,8 @@ const uploadToSupabase = async (file, bucket, folder) => {
       .storage
       .from(bucket)
       .getPublicUrl(fileName);
+
+    console.log('Upload successful, public URL:', publicUrl);
 
     return publicUrl;
   } catch (error) {
