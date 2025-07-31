@@ -45,7 +45,7 @@ export default function Layout() {
                   <div className="flex-shrink-0 flex items-center">
                     <Link to="/" className="flex items-center">
                       <img
-                        className="h-10 w-auto brightness-0 invert"
+                        className="h-10 w-auto"
                         src={branding.logoUrl || branding.logo}
                         alt={branding.name}
                       />
