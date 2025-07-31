@@ -78,29 +78,31 @@ export default function VADetail() {
         </div>
 
         {/* Header */}
-        <div className="relative -mt-16 sm:-mt-20">
+        <div className="relative -mt-8 sm:-mt-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="md:flex md:items-end md:justify-between">
               <div className="flex-1 min-w-0">
                 <div className="flex items-end">
                   {va.avatar ? (
                     <img
-                      className="h-24 w-24 sm:h-32 sm:w-32 rounded-full border-4 border-white"
+                      className="h-24 w-24 sm:h-32 sm:w-32 rounded-full border-4 border-white shadow-lg"
                       src={va.avatar}
                       alt={va.name}
                     />
                   ) : (
-                    <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-full bg-gray-300 border-4 border-white flex items-center justify-center">
+                    <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-full bg-gray-300 border-4 border-white shadow-lg flex items-center justify-center">
                       <span className="text-3xl font-medium text-gray-700">
                         {va.name?.[0]?.toUpperCase() || (branding.isESystemsMode ? 'P' : 'V')}
                       </span>
                     </div>
                   )}
                   <div className="ml-4 pb-4">
-                    <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-                      {va.name}
-                    </h1>
-                    <p className="text-sm text-gray-600">{va.hero}</p>
+                    <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-sm">
+                      <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+                        {va.name}
+                      </h1>
+                      <p className="text-sm text-gray-600">{va.hero}</p>
+                    </div>
                   </div>
                 </div>
               </div>
