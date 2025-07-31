@@ -15,6 +15,7 @@ export const BrandingProvider = ({ children }) => {
   const [branding, setBranding] = useState({
     name: 'Linkage VA Hub',
     logo: '/logo.png',
+    logoUrl: 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/688ab56f0299a1fefc1986e5.png',
     primaryColor: '#1f2937',
     accentColor: '#3b82f6',
     allowVARegistration: true,
@@ -28,7 +29,11 @@ export const BrandingProvider = ({ children }) => {
     const fetchBranding = async () => {
       try {
         const response = await api.get('/system/branding');
-        setBranding(response.data.data);
+        setBranding({
+          ...response.data.data,
+          // Ensure logoUrl is set
+          logoUrl: response.data.data.logoUrl || response.data.data.logo || 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/688ab56f0299a1fefc1986e5.png'
+        });
       } catch (error) {
         console.error('Failed to fetch branding:', error);
         // Keep default branding on error
