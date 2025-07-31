@@ -49,7 +49,7 @@ export default function Layout() {
                           "h-10 w-auto",
                           branding.isESystemsMode && "brightness-0 invert"
                         )}
-                        src={branding.logo}
+                        src={branding.logoUrl || branding.logo}
                         alt={branding.name}
                       />
                     </Link>
