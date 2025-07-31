@@ -9,7 +9,8 @@ const RoleLevel = require('../models/RoleLevel');
 const RoleType = require('../models/RoleType');
 const { protect, authorize, optionalAuth, checkESystemsVAAccess } = require('../middleware/auth');
 const upload = require('../utils/upload');
-const { upload: cloudinaryUpload, deleteFromCloudinary, getPublicIdFromUrl } = require('../utils/cloudinaryUpload');
+const { handleSupabaseUpload, uploadToSupabase, deleteFromSupabase } = require('../utils/supabaseStorage');
+const supabase = require('../config/supabase');
 
 // @route   GET /api/vas
 // @desc    Get all VAs (with search and filters)
@@ -649,37 +650,41 @@ router.put('/me', protect, authorize('va'), async (req, res) => {
 // @route   POST /api/vas/me/upload
 // @desc    Upload image for VA profile (avatar or cover)
 // @access  Private (VA only)
-router.post('/me/upload', protect, authorize('va'), (req, res, next) => {
-  // Use Cloudinary in production, local storage in development
-  const uploadHandler = process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME
-    ? cloudinaryUpload.single('image')
-    : upload.single('image');
-    
-  uploadHandler(req, res, function (err) {
-    if (err instanceof multer.MulterError) {
-      // A Multer error occurred when uploading
-      console.error('Multer error:', err);
-      if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({
+router.post('/me/upload', protect, authorize('va'), async (req, res, next) => {
+  // Use Supabase in production if configured
+  if (process.env.NODE_ENV === 'production' && supabase) {
+    handleSupabaseUpload('image', 'avatars')(req, res, async (err) => {
+      if (err || !req.file) {
+        return; // Error already handled by handleSupabaseUpload
+      }
+
+      try {
+        const imageUrl = req.file.path; // Supabase URL is in req.file.path
+        console.log('Image uploaded to Supabase:', imageUrl);
+
+        res.json({
+          success: true,
+          url: imageUrl
+        });
+      } catch (error) {
+        console.error('Processing error:', error);
+        res.status(500).json({
           success: false,
-          error: 'File size too large. Maximum size is 500MB'
+          error: 'Failed to process uploaded file'
         });
       }
-      return res.status(400).json({
-        success: false,
-        error: `Upload error: ${err.message}`
-      });
-    } else if (err) {
-      // An unknown error occurred when uploading
-      console.error('Upload error:', err);
-      return res.status(500).json({
-        success: false,
-        error: err.message || 'Failed to upload file'
-      });
-    }
+    });
+  } else {
+    // Use local storage in development
+    upload.single('image')(req, res, function (err) {
+      if (err) {
+        console.error('Upload error:', err);
+        return res.status(400).json({
+          success: false,
+          error: err.message || 'Failed to upload file'
+        });
+      }
 
-    // Everything went fine
-    try {
       if (!req.file) {
         return res.status(400).json({
           success: false,
@@ -687,99 +692,83 @@ router.post('/me/upload', protect, authorize('va'), (req, res, next) => {
         });
       }
 
-      // Return the appropriate URL based on storage method
-      let imageUrl;
-      if (process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME) {
-        // Cloudinary URL is in req.file.path
-        imageUrl = req.file.path || req.file.secure_url;
-      } else {
-        // Local storage URL
-        const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
-        imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
-      }
+      const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
+      const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
-      console.log('Image uploaded successfully:', imageUrl);
+      console.log('Image uploaded locally:', imageUrl);
 
       res.json({
         success: true,
         url: imageUrl
       });
-    } catch (error) {
-      console.error('Processing error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to process uploaded file'
-      });
-    }
-  });
+    });
+  }
 });
 
 // @route   POST /api/vas/me/upload-video
 // @desc    Upload video for VA profile
 // @access  Private (VA only)
-router.post('/me/upload-video', protect, authorize('va'), (req, res, next) => {
-  // Use Cloudinary in production, local storage in development
-  const uploadHandler = process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME
-    ? cloudinaryUpload.single('video')
-    : upload.single('video');
-    
-  uploadHandler(req, res, async function (err) {
-    if (err) {
-      console.error('Video upload error:', err);
-      return res.status(400).json({
-        success: false,
-        error: err.message || 'Failed to upload video'
-      });
-    }
-    
-    try {
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please upload a video file'
-      });
-    }
+router.post('/me/upload-video', protect, authorize('va'), async (req, res, next) => {
+  // Use Supabase in production if configured
+  if (process.env.NODE_ENV === 'production' && supabase) {
+    handleSupabaseUpload('video', 'videos')(req, res, async (err) => {
+      if (err || !req.file) {
+        return; // Error already handled by handleSupabaseUpload
+      }
 
-    // Check file type
-    if (!req.file.mimetype.startsWith('video/')) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please upload a valid video file'
-      });
-    }
+      try {
+        const videoUrl = req.file.path; // Supabase URL is in req.file.path
+        console.log('Video uploaded to Supabase:', videoUrl);
 
-    // Check file size (max 500MB)
-    const maxSize = 500 * 1024 * 1024; // 500MB
-    if (req.file.size > maxSize) {
-      return res.status(400).json({
-        success: false,
-        error: 'Video file size must be less than 500MB'
-      });
-    }
-
-    // Return the appropriate URL based on storage method
-    let videoUrl;
-    if (process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME) {
-      // Cloudinary URL is in req.file.path
-      videoUrl = req.file.path || req.file.secure_url;
-    } else {
-      // Local storage URL
-      const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
-      videoUrl = `${baseUrl}/uploads/${req.file.filename}`;
-    }
-
-    res.json({
-      success: true,
-      url: videoUrl
+        res.json({
+          success: true,
+          url: videoUrl
+        });
+      } catch (error) {
+        console.error('Processing error:', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to process uploaded file'
+        });
+      }
     });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({
-        success: false,
-        error: 'Server error'
+  } else {
+    // Use local storage in development
+    upload.single('video')(req, res, function (err) {
+      if (err) {
+        console.error('Upload error:', err);
+        return res.status(400).json({
+          success: false,
+          error: err.message || 'Failed to upload file'
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: 'Please upload a video file'
+        });
+      }
+
+      // Check file type
+      if (!req.file.mimetype.startsWith('video/')) {
+        return res.status(400).json({
+          success: false,
+          error: 'Please upload a valid video file'
+        });
+      }
+
+      const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
+      const videoUrl = `${baseUrl}/uploads/${req.file.filename}`;
+
+      console.log('Video uploaded locally:', videoUrl);
+
+      res.json({
+        success: true,
+        url: videoUrl
       });
-    }
-  });
+    });
+  }
 });
 
 
