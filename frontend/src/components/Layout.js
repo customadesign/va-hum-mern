@@ -45,10 +45,7 @@ export default function Layout() {
                   <div className="flex-shrink-0 flex items-center">
                     <Link to="/" className="flex items-center">
                       <img
-                        className={classNames(
-                          "h-10 w-auto",
-                          branding.isESystemsMode && "brightness-0 invert"
-                        )}
+                        className="h-10 w-auto brightness-0 invert"
                         src={branding.logoUrl || branding.logo}
                         alt={branding.name}
                       />
@@ -268,7 +265,7 @@ export default function Layout() {
             </div>
             <div className="mt-8 md:mt-0 md:order-1">
               <p className="text-center text-base text-gray-400">
-                &copy; 2025 Linkage VA Hub. All rights reserved.
+                &copy; 2025 {branding.name}. All rights reserved.
               </p>
             </div>
           </div>
