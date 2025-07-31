@@ -51,20 +51,8 @@ const uploadToSupabase = async (file, bucket, folder) => {
       mimeType: file.mimetype
     });
 
-    // Check if bucket exists
-    const { data: buckets, error: bucketsError } = await supabase
-      .storage
-      .listBuckets();
-    
-    if (bucketsError) {
-      console.error('Error listing buckets:', bucketsError);
-      throw new Error('Cannot access Supabase storage. Check your credentials.');
-    }
-
-    const bucketExists = buckets?.some(b => b.name === bucket);
-    if (!bucketExists) {
-      throw new Error(`Bucket '${bucket}' does not exist. Please create it in Supabase dashboard.`);
-    }
+    // Skip bucket check - it might fail due to permissions
+    // Just try to upload directly
 
     // Upload file to Supabase
     const { data, error } = await supabase
