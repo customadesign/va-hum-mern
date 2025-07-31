@@ -674,5 +674,52 @@ router.post('/me/upload', protect, authorize('va'), upload.single('image'), asyn
   }
 });
 
+// @route   POST /api/vas/me/upload-video
+// @desc    Upload video for VA profile
+// @access  Private (VA only)
+router.post('/me/upload-video', protect, authorize('va'), upload.single('video'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please upload a video file'
+      });
+    }
+
+    // Check file type
+    if (!req.file.mimetype.startsWith('video/')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please upload a valid video file'
+      });
+    }
+
+    // Check file size (max 50MB)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (req.file.size > maxSize) {
+      return res.status(400).json({
+        success: false,
+        error: 'Video file size must be less than 50MB'
+      });
+    }
+
+    // For now, we'll return the file path
+    // In production, you'd upload to cloudinary/S3 and return the URL
+    const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
+    const videoUrl = `${baseUrl}/uploads/${req.file.filename}`;
+
+    res.json({
+      success: true,
+      url: videoUrl
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
 
 module.exports = router;

@@ -145,6 +145,18 @@ export default function VAProfile() {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image file size must be less than 5MB');
+      return;
+    }
+
     // Show preview
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -168,7 +180,8 @@ export default function VAProfile() {
       queryClient.invalidateQueries('vaProfile');
       toast.success('Cover image updated successfully');
     } catch (error) {
-      toast.error('Failed to upload cover image');
+      console.error('Cover upload error:', error);
+      toast.error(error.response?.data?.error || 'Failed to upload cover image');
       setCoverPreview(null);
     } finally {
       setUploadingCover(false);
@@ -178,6 +191,18 @@ export default function VAProfile() {
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image file size must be less than 5MB');
+      return;
+    }
 
     // Show preview
     const reader = new FileReader();
@@ -202,7 +227,8 @@ export default function VAProfile() {
       queryClient.invalidateQueries('vaProfile');
       toast.success('Profile picture updated successfully');
     } catch (error) {
-      toast.error('Failed to upload profile picture');
+      console.error('Avatar upload error:', error);
+      toast.error(error.response?.data?.error || 'Failed to upload profile picture');
       setAvatarPreview(null);
     } finally {
       setUploadingAvatar(false);
@@ -212,6 +238,18 @@ export default function VAProfile() {
   const handleVideoChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('video/')) {
+      toast.error('Please select a valid video file');
+      return;
+    }
+
+    // Validate file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('Video file size must be less than 50MB');
+      return;
+    }
 
     setUploadingVideo(true);
     setVideoProgress(0);
@@ -232,7 +270,8 @@ export default function VAProfile() {
       queryClient.invalidateQueries('vaProfile');
       toast.success('Video uploaded successfully');
     } catch (error) {
-      toast.error('Failed to upload video');
+      console.error('Video upload error:', error);
+      toast.error(error.response?.data?.error || 'Failed to upload video');
     } finally {
       setUploadingVideo(false);
       setVideoProgress(0);

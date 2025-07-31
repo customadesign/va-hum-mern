@@ -27,6 +27,9 @@ export default function VADetail() {
   const [shareUrl, setShareUrl] = useState(null);
   const [isCreatingShare, setIsCreatingShare] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   const { data: va, isLoading, error } = useQuery(
     ['va', id],
@@ -37,8 +40,36 @@ export default function VADetail() {
   );
 
   const handleStartConversation = async () => {
-    // This would open a modal or redirect to start a conversation
-    console.log('Start conversation with VA:', id);
+    if (!user) {
+      toast.error('Please log in to start a conversation');
+      return;
+    }
+    setShowChatModal(true);
+  };
+
+  const handleSendMessage = async () => {
+    if (!chatMessage.trim()) {
+      toast.error('Please enter a message');
+      return;
+    }
+
+    setIsSendingMessage(true);
+    try {
+      const response = await api.post(`/conversations/start/${va.user}`, {
+        message: chatMessage
+      });
+      
+      toast.success('Message sent successfully!');
+      setShowChatModal(false);
+      setChatMessage('');
+      
+      // Redirect to conversation
+      window.location.href = `/conversations/${response.data.data._id}`;
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to send message');
+    } finally {
+      setIsSendingMessage(false);
+    }
   };
 
   const handleCreateShareUrl = async () => {
@@ -447,6 +478,55 @@ export default function VADetail() {
                     className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
                   >
                     {navigator.share ? 'Share' : 'Copy & Share'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chat Modal */}
+      {showChatModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto bg-blue-100 rounded-full">
+                <ChatBubbleLeftIcon className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="mt-4 text-center">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Start a Conversation with {va.name}
+                </h3>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 text-left mb-2">
+                    Your Message
+                  </label>
+                  <textarea
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Hi, I'm interested in working with you..."
+                    value={chatMessage}
+                    onChange={(e) => setChatMessage(e.target.value)}
+                  />
+                </div>
+                <div className="mt-6 flex justify-center space-x-3">
+                  <button
+                    onClick={() => {
+                      setShowChatModal(false);
+                      setChatMessage('');
+                    }}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-400"
+                    disabled={isSendingMessage}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSendMessage}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                    disabled={isSendingMessage || !chatMessage.trim()}
+                  >
+                    {isSendingMessage ? 'Sending...' : 'Send Message'}
                   </button>
                 </div>
               </div>

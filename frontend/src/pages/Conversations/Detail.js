@@ -1,43 +1,84 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { toast } from 'react-toastify';
 import api from '../../services/api';
+import { format, isToday, isYesterday } from 'date-fns';
+import { useBranding } from '../../contexts/BrandingContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { formatDistanceToNow } from 'date-fns';
-import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import {
+  ArrowLeftIcon,
+  PaperAirplaneIcon,
+  UserCircleIcon,
+  EllipsisVerticalIcon,
+  ArchiveBoxIcon,
+  TrashIcon
+} from '@heroicons/react/24/outline';
+import { CheckBadgeIcon } from '@heroicons/react/24/solid';
+import { toast } from 'react-toastify';
 
 export default function ConversationDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { branding } = useBranding();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const messagesEndRef = useRef(null);
   const [message, setMessage] = useState('');
+  const [showOptions, setShowOptions] = useState(false);
 
-  const { data: conversationData, isLoading } = useQuery(
+  const { data: conversation, isLoading } = useQuery(
     ['conversation', id],
     async () => {
       const response = await api.get(`/conversations/${id}`);
       return response.data.data;
+    },
+    {
+      refetchInterval: 5000 // Poll for new messages every 5 seconds
     }
   );
 
   const sendMessageMutation = useMutation(
-    async (messageData) => {
-      const response = await api.post('/messages', messageData);
-      return response.data;
+    async (messageText) => {
+      const response = await api.post(`/conversations/${id}/messages`, {
+        message: messageText
+      });
+      return response.data.data;
     },
     {
       onSuccess: () => {
-        setMessage('');
         queryClient.invalidateQueries(['conversation', id]);
+        queryClient.invalidateQueries('conversations');
+        setMessage('');
       },
-      onError: () => {
-        toast.error('Failed to send message');
+      onError: (error) => {
+        toast.error(error.response?.data?.error || 'Failed to send message');
       }
     }
   );
+
+  const archiveConversationMutation = useMutation(
+    async () => {
+      const response = await api.put(`/conversations/${id}/archive`);
+      return response.data.data;
+    },
+    {
+      onSuccess: () => {
+        toast.success('Conversation archived');
+        navigate('/conversations');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.error || 'Failed to archive conversation');
+      }
+    }
+  );
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (message.trim()) {
+      sendMessageMutation.mutate(message);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,16 +86,37 @@ export default function ConversationDetail() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [conversationData?.messages]);
+  }, [conversation?.messages]);
 
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!message.trim()) return;
+  const getOtherParticipant = () => {
+    if (user.profile?.va) {
+      return conversation?.business;
+    } else {
+      return conversation?.va;
+    }
+  };
 
-    sendMessageMutation.mutate({
-      conversationId: id,
-      body: message
+  const formatMessageTime = (date) => {
+    const messageDate = new Date(date);
+    if (isToday(messageDate)) {
+      return format(messageDate, 'h:mm a');
+    } else if (isYesterday(messageDate)) {
+      return 'Yesterday ' + format(messageDate, 'h:mm a');
+    } else {
+      return format(messageDate, 'MMM d, h:mm a');
+    }
+  };
+
+  const groupMessagesByDate = (messages) => {
+    const groups = {};
+    messages?.forEach(msg => {
+      const date = format(new Date(msg.createdAt), 'yyyy-MM-dd');
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(msg);
     });
+    return groups;
   };
 
   if (isLoading) {
@@ -65,98 +127,179 @@ export default function ConversationDetail() {
     );
   }
 
-  const { conversation, messages } = conversationData || {};
-  const otherParty = user.va ? conversation?.business : conversation?.va;
+  const otherParticipant = getOtherParticipant();
+  const messageGroups = groupMessagesByDate(conversation?.messages || []);
 
   return (
     <>
       <Helmet>
-        <title>Conversation with {otherParty?.name || otherParty?.company} - Linkage VA Hub</title>
+        <title>
+          {otherParticipant?.profile?.name || otherParticipant?.profile?.company || 'Conversation'} - {branding.name}
+        </title>
       </Helmet>
 
-      <div className="flex h-screen bg-white">
-        <div className="flex-1 flex flex-col">
-          {/* Header */}
-          <div className="bg-white shadow-sm px-6 py-4 flex items-center">
-            <div className="flex items-center">
-              {otherParty?.avatar ? (
-                <img
-                  className="h-10 w-10 rounded-full"
-                  src={otherParty.avatar}
-                  alt=""
-                />
-              ) : (
-                <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                  <span className="text-sm font-medium text-gray-700">
-                    {(otherParty?.name || otherParty?.company)?.[0]?.toUpperCase()}
-                  </span>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b border-gray-200">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between px-4 py-4 sm:px-6">
+              <div className="flex items-center space-x-3">
+                <Link
+                  to="/conversations"
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <ArrowLeftIcon className="h-5 w-5" />
+                </Link>
+                
+                {otherParticipant?.profile?.avatar ? (
+                  <img
+                    className="h-10 w-10 rounded-full object-cover"
+                    src={otherParticipant.profile.avatar}
+                    alt=""
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                    <UserCircleIcon className="h-7 w-7 text-gray-500" />
+                  </div>
+                )}
+                
+                <div>
+                  <h1 className="text-lg font-medium text-gray-900 flex items-center">
+                    {otherParticipant?.profile?.name || otherParticipant?.profile?.company || 'Unknown User'}
+                    {otherParticipant?.admin && (
+                      <CheckBadgeIcon className="h-5 w-5 text-purple-600 ml-1" />
+                    )}
+                  </h1>
+                  <p className="text-sm text-gray-500">
+                    {otherParticipant?.profile?.hero || otherParticipant?.email}
+                  </p>
                 </div>
-              )}
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">
-                  {otherParty?.name || otherParty?.company}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {otherParty?.hero || otherParty?.bio?.substring(0, 50)}
-                </p>
+              </div>
+
+              <div className="relative">
+                <button
+                  onClick={() => setShowOptions(!showOptions)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <EllipsisVerticalIcon className="h-6 w-6" />
+                </button>
+                
+                {showOptions && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                    <div className="py-1">
+                      <button
+                        onClick={() => archiveConversationMutation.mutate()}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                      >
+                        <ArchiveBoxIcon className="h-4 w-4 mr-3" />
+                        Archive conversation
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-4">
-              {messages?.map((msg) => {
-                const isOwnMessage = 
-                  (user.va && msg.senderModel === 'VA') ||
-                  (user.business && msg.senderModel === 'Business');
-
-                return (
-                  <div
-                    key={msg._id}
-                    className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        isOwnMessage
-                          ? 'bg-gray-600 text-white'
-                          : 'bg-gray-100 text-gray-900'
-                      }`}
-                    >
-                      <p className="text-sm">{msg.body}</p>
-                      <p
-                        className={`text-xs mt-1 ${
-                          isOwnMessage ? 'text-gray-300' : 'text-gray-500'
-                        }`}
-                      >
-                        {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}
-                      </p>
-                    </div>
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+          <div className="max-w-3xl mx-auto space-y-6">
+            {Object.entries(messageGroups).map(([date, messages]) => (
+              <div key={date}>
+                <div className="flex items-center justify-center mb-4">
+                  <div className="bg-gray-200 rounded-full px-3 py-1">
+                    <p className="text-xs text-gray-600">
+                      {isToday(new Date(date)) 
+                        ? 'Today' 
+                        : isYesterday(new Date(date)) 
+                        ? 'Yesterday' 
+                        : format(new Date(date), 'MMMM d, yyyy')}
+                    </p>
                   </div>
-                );
-              })}
-              <div ref={messagesEndRef} />
-            </div>
+                </div>
+                
+                <div className="space-y-3">
+                  {messages.map((msg, idx) => {
+                    const isCurrentUser = msg.sender === user.id || msg.sender._id === user.id;
+                    const showAvatar = idx === 0 || messages[idx - 1].sender !== msg.sender;
+                    
+                    return (
+                      <div
+                        key={msg._id || idx}
+                        className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className={`flex items-end space-x-2 max-w-xs lg:max-w-md ${
+                          isCurrentUser ? 'flex-row-reverse space-x-reverse' : ''
+                        }`}>
+                          {showAvatar && !isCurrentUser && (
+                            otherParticipant?.profile?.avatar ? (
+                              <img
+                                className="h-8 w-8 rounded-full object-cover flex-shrink-0"
+                                src={otherParticipant.profile.avatar}
+                                alt=""
+                              />
+                            ) : (
+                              <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0">
+                                <UserCircleIcon className="h-5 w-5 text-gray-500" />
+                              </div>
+                            )
+                          )}
+                          
+                          {!showAvatar && !isCurrentUser && (
+                            <div className="w-8 h-8 flex-shrink-0" />
+                          )}
+                          
+                          <div className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}>
+                            <div className={`px-4 py-2 rounded-2xl ${
+                              isCurrentUser 
+                                ? 'bg-blue-600 text-white' 
+                                : 'bg-white text-gray-900 shadow-sm'
+                            }`}>
+                              <p className="text-sm">{msg.content}</p>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {formatMessageTime(msg.createdAt)}
+                              {isCurrentUser && msg.read && ' • Read'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
           </div>
+        </div>
 
-          {/* Message Input */}
-          <div className="bg-white border-t px-6 py-4">
-            <form onSubmit={handleSendMessage} className="flex space-x-4">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-1 rounded-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                disabled={sendMessageMutation.isLoading}
-              />
+        {/* Message Input */}
+        <div className="bg-white border-t border-gray-200">
+          <div className="max-w-3xl mx-auto px-4 py-4 sm:px-6">
+            <form onSubmit={handleSendMessage} className="flex items-end space-x-3">
+              <div className="flex-1">
+                <textarea
+                  rows={1}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage(e);
+                    }
+                  }}
+                  className="block w-full resize-none border-gray-300 rounded-lg px-4 py-3 text-sm placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Type a message..."
+                  disabled={sendMessageMutation.isLoading}
+                />
+              </div>
               <button
                 type="submit"
                 disabled={!message.trim() || sendMessageMutation.isLoading}
-                className="inline-flex items-center p-2 border border-transparent rounded-full shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center p-3 rounded-full text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <PaperAirplaneIcon className="h-5 w-5" aria-hidden="true" />
-                <span className="sr-only">Send message</span>
+                <PaperAirplaneIcon className="h-5 w-5" />
               </button>
             </form>
           </div>
