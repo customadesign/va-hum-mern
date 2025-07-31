@@ -4,9 +4,9 @@
   "description": "Backend API for E-Systems Management Hub",
   "main": "server.js",
   "scripts": {
-    "start": "ESYSTEMS_MODE=true node server.js",
-    "dev": "ESYSTEMS_MODE=true nodemon server.js",
-    "postinstall": "cd ../backend && npm install"
+    "start": "ESYSTEMS_MODE=true node ../backend/server.js",
+    "dev": "ESYSTEMS_MODE=true nodemon ../backend/server.js",
+    "install-deps": "cd ../backend && npm install"
   },
   "dependencies": {
     "express": "^4.18.2",

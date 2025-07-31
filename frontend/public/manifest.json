@@ -3,8 +3,13 @@
   "name": "Linkage VA Hub",
   "icons": [
     {
-      "src": "atom-static.svg",
+      "src": "favicon-atom.svg",
       "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "32x32",
       "type": "image/svg+xml"
     },
     {
@@ -15,6 +20,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#1a365d",
-  "background_color": "#ffffff"
+  "theme_color": "#4A90E2",
+  "background_color": "#f8fafc"
 }
