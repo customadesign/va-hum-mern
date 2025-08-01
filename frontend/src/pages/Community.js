@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, Navigate } from 'react-router-dom';
 import { useBranding } from '../contexts/BrandingContext';
+import { useAuth } from '../contexts/AuthContext';
 import {
   AcademicCapIcon,
   CodeBracketIcon,
@@ -14,8 +15,17 @@ import {
   BookOpenIcon,
   VideoCameraIcon,
   DocumentTextIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  PlayIcon,
+  ClockIcon,
+  CalendarDaysIcon,
+  FireIcon,
+  TrophyIcon,
+  StarIcon,
+  BoltIcon,
+  RocketLaunchIcon
 } from '@heroicons/react/24/outline';
+import { CheckCircleIcon as CheckCircleIconSolid, FireIcon as FireIconSolid } from '@heroicons/react/24/solid';
 
 const learningPaths = [
   {
@@ -110,12 +120,337 @@ const resourceTypes = [
   { icon: UserGroupIcon, label: 'Community Members', count: '10k+' }
 ];
 
+// Interactive Learning Center Data (for logged in users)
+const currentTutorials = [
+  {
+    id: 1,
+    title: 'Advanced Social Media Analytics with AI',
+    instructor: 'Sarah Martinez',
+    duration: '45 min',
+    difficulty: 'Intermediate',
+    category: 'Social Media',
+    thumbnail: null,
+    progress: 0,
+    isNew: true,
+    description: 'Learn how to use AI tools to analyze social media performance and create data-driven strategies.',
+    tags: ['Analytics', 'AI', 'Strategy']
+  },
+  {
+    id: 2,
+    title: 'Client Communication Mastery',
+    instructor: 'David Chen',
+    duration: '35 min',
+    difficulty: 'Beginner',
+    category: 'Client Relations',
+    thumbnail: null,
+    progress: 65,
+    isNew: false,
+    description: 'Master the art of professional communication with clients to build stronger relationships.',
+    tags: ['Communication', 'Clients', 'Professional']
+  },
+  {
+    id: 3,
+    title: 'WordPress Speed Optimization',
+    instructor: 'Emma Rodriguez',
+    duration: '60 min',
+    difficulty: 'Advanced',
+    category: 'Web Development',
+    thumbnail: null,
+    progress: 30,
+    isNew: false,
+    description: 'Technical deep-dive into optimizing WordPress sites for maximum performance.',
+    tags: ['WordPress', 'Performance', 'Technical']
+  }
+];
+
+const upcomingTrainings = [
+  {
+    id: 1,
+    title: 'Live Q&A: Building Your VA Business',
+    instructor: 'Maria Santos',
+    date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+    time: '2:00 PM EST',
+    attendees: 247,
+    description: 'Join our expert panel for a live discussion on scaling your virtual assistant business.'
+  },
+  {
+    id: 2,
+    title: 'Hands-on Workshop: Canva Design Mastery',
+    instructor: 'Alex Thompson',
+    date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+    time: '11:00 AM EST',
+    attendees: 189,
+    description: 'Interactive workshop covering advanced Canva techniques for professional designs.'
+  }
+];
+
+const achievements = [
+  { id: 1, title: 'First Tutorial Complete', icon: CheckCircleIconSolid, unlocked: true },
+  { id: 2, title: 'Week Streak', icon: FireIconSolid, unlocked: true },
+  { id: 3, title: 'Course Graduate', icon: TrophyIcon, unlocked: false },
+  { id: 4, title: 'Community Helper', icon: StarIcon, unlocked: false }
+];
+
 export default function Community() {
   const { branding } = useBranding();
+  const { user } = useAuth();
+  const [timeToNext, setTimeToNext] = useState('');
+
+  // Countdown timer for next live training
+  useEffect(() => {
+    if (!user || upcomingTrainings.length === 0) {
+      return;
+    }
+
+    const updateCountdown = () => {
+      const nextTraining = upcomingTrainings[0];
+      const now = new Date();
+      const trainindDate = new Date(nextTraining.date);
+      const difference = trainindDate.getTime() - now.getTime();
+
+      if (difference > 0) {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        
+        if (days > 0) {
+          setTimeToNext(`${days}d ${hours}h ${minutes}m`);
+        } else if (hours > 0) {
+          setTimeToNext(`${hours}h ${minutes}m`);
+        } else {
+          setTimeToNext(`${minutes}m`);
+        }
+      } else {
+        setTimeToNext('Live Now!');
+      }
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   // Redirect to home if in E-systems mode
   if (branding.isESystemsMode) {
     return <Navigate to="/" replace />;
+  }
+
+  // Show interactive learning center for logged in users
+  if (user) {
+    return (
+      <>
+        <Helmet>
+          <title>Learning Center - {branding.name}</title>
+        </Helmet>
+
+        <div className="bg-gray-50 min-h-screen">
+          {/* Header */}
+          <div className="bg-white shadow-sm">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user.profile?.name || 'VA'}!</h1>
+                  <p className="text-gray-600">Continue your learning journey</p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="text-right">
+                    <div className="text-sm text-gray-500">Learning Streak</div>
+                    <div className="flex items-center text-orange-600">
+                      <FireIconSolid className="h-5 w-5 mr-1" />
+                      <span className="font-bold">7 days</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Main Content */}
+              <div className="lg:col-span-2 space-y-8">
+                {/* Continue Learning */}
+                <div className="bg-white rounded-lg shadow-sm">
+                  <div className="p-6 border-b border-gray-200">
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <PlayIcon className="h-5 w-5 mr-2 text-blue-600" />
+                      Continue Learning
+                    </h2>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    {currentTutorials.map((tutorial) => (
+                      <div key={tutorial.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <h3 className="font-medium text-gray-900">{tutorial.title}</h3>
+                              {tutorial.isNew && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                  New
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">{tutorial.description}</p>
+                            <div className="flex items-center space-x-4 text-sm text-gray-500">
+                              <span>By {tutorial.instructor}</span>
+                              <span>{tutorial.duration}</span>
+                              <span className={`px-2 py-0.5 rounded text-xs ${
+                                tutorial.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
+                                tutorial.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {tutorial.difficulty}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {tutorial.tags.map((tag) => (
+                                <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end space-y-2 ml-4">
+                            <button className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                              {tutorial.progress > 0 ? 'Continue' : 'Start'}
+                              <PlayIcon className="ml-1 h-4 w-4" />
+                            </button>
+                            {tutorial.progress > 0 && (
+                              <div className="w-24">
+                                <div className="bg-gray-200 rounded-full h-2">
+                                  <div 
+                                    className="bg-blue-600 h-2 rounded-full" 
+                                    style={{ width: `${tutorial.progress}%` }}
+                                  ></div>
+                                </div>
+                                <span className="text-xs text-gray-500 mt-1">{tutorial.progress}% complete</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Quick Skills */}
+                <div className="bg-white rounded-lg shadow-sm">
+                  <div className="p-6 border-b border-gray-200">
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <BoltIcon className="h-5 w-5 mr-2 text-yellow-600" />
+                      Quick Skills (5-15 min)
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {[
+                        { title: 'Instagram Story Templates', time: '8 min', category: 'Design' },
+                        { title: 'Email Subject Line Tips', time: '5 min', category: 'Marketing' },
+                        { title: 'Client Onboarding Checklist', time: '12 min', category: 'Business' },
+                        { title: 'Keyword Research Basics', time: '15 min', category: 'SEO' }
+                      ].map((skill, index) => (
+                        <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-medium text-gray-900">{skill.title}</h4>
+                              <div className="flex items-center space-x-2 mt-1">
+                                <ClockIcon className="h-4 w-4 text-gray-400" />
+                                <span className="text-sm text-gray-500">{skill.time}</span>
+                                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">{skill.category}</span>
+                              </div>
+                            </div>
+                            <PlayIcon className="h-5 w-5 text-blue-600" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sidebar */}
+              <div className="space-y-8">
+                {/* Next Live Training Countdown */}
+                <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-lg shadow-sm text-white">
+                  <div className="p-6">
+                    <div className="flex items-center mb-4">
+                      <CalendarDaysIcon className="h-6 w-6 mr-2" />
+                      <h3 className="text-lg font-semibold">Next Live Training</h3>
+                    </div>
+                    {upcomingTrainings.length > 0 && (
+                      <div>
+                        <h4 className="font-medium mb-2">{upcomingTrainings[0].title}</h4>
+                        <p className="text-blue-100 text-sm mb-4">{upcomingTrainings[0].description}</p>
+                        <div className="bg-white bg-opacity-20 rounded-lg p-4 text-center">
+                          <div className="flex items-center justify-center mb-2">
+                            <ClockIcon className="h-5 w-5 mr-2" />
+                            <span className="font-semibold">Starts in</span>
+                          </div>
+                          <div className="text-2xl font-bold">{timeToNext}</div>
+                          <div className="text-sm text-blue-100 mt-1">
+                            {upcomingTrainings[0].date.toLocaleDateString()} at {upcomingTrainings[0].time}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between mt-4 text-sm">
+                          <span>{upcomingTrainings[0].attendees} registered</span>
+                          <button className="bg-white text-blue-600 px-4 py-2 rounded-md font-medium hover:bg-blue-50">
+                            Join Training
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Achievements */}
+                <div className="bg-white rounded-lg shadow-sm">
+                  <div className="p-6 border-b border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <TrophyIcon className="h-5 w-5 mr-2 text-yellow-600" />
+                      Achievements
+                    </h3>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    {achievements.map((achievement) => (
+                      <div key={achievement.id} className={`flex items-center space-x-3 ${
+                        achievement.unlocked ? 'text-gray-900' : 'text-gray-400'
+                      }`}>
+                        <achievement.icon className={`h-5 w-5 ${
+                          achievement.unlocked ? 'text-yellow-500' : 'text-gray-300'
+                        }`} />
+                        <span className={achievement.unlocked ? 'font-medium' : ''}>{achievement.title}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Learning Stats */}
+                <div className="bg-white rounded-lg shadow-sm">
+                  <div className="p-6 border-b border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900">Your Progress</h3>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Tutorials Completed</span>
+                      <span className="font-semibold">23</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Hours Learned</span>
+                      <span className="font-semibold">12.5</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Current Level</span>
+                      <span className="font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">Intermediate</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
   }
 
   return (
