@@ -209,6 +209,83 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+
+        {/* Profile Completion Encouragement Banner - Only show for VAs */}
+        {isVA && (
+          <div className="mt-8">
+            <div className="bg-gradient-to-r from-emerald-50 to-cyan-50 border border-emerald-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="px-6 py-5">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg">
+                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                          Get Placed Faster with a Complete Profile
+                        </h3>
+                        <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                          Complete your profile to appear higher in search results and increase your visibility to potential employers. 
+                          {branding.isESystemsMode ? 'Team members' : 'VAs'} with completed profiles get contacted 3x more often and secure placements faster.
+                        </p>
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center text-xs text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">
+                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            Higher search ranking
+                          </div>
+                          <div className="flex items-center text-xs text-cyan-700 bg-cyan-100 px-2 py-1 rounded-full">
+                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            Increased visibility
+                          </div>
+                          <div className="flex items-center text-xs text-indigo-700 bg-indigo-100 px-2 py-1 rounded-full">
+                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            Faster placement
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex-shrink-0 ml-4">
+                        <Link 
+                          to="/va/profile" 
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        >
+                          Complete Profile
+                          <svg className="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Progress indicator */}
+              <div className="bg-gradient-to-r from-emerald-100 to-cyan-100 px-6 py-3 border-t border-emerald-200">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 font-medium">Profile Completeness</span>
+                  <span className="text-emerald-700 font-semibold">75% Complete</span>
+                </div>
+                <div className="mt-2 bg-white rounded-full h-2 overflow-hidden shadow-inner">
+                  <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all duration-500 ease-out" style={{width: '75%'}}></div>
+                </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  Just a few more details needed to reach 100% and maximize your placement opportunities!
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
