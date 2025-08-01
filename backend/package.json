@@ -12,7 +12,10 @@
     "test": "jest",
     "seed": "node seeds/index.js",
     "seed:vas": "node seeds/seedVAs.js",
-    "seed:esystems": "node scripts/seedESystemsAccounts.js"
+    "seed:esystems": "node scripts/seedESystemsAccounts.js",
+    "seed:conversations": "node seeds/seedConversations.js",
+    "seed:messages": "node seeds/seedMessagesAdvanced.js",
+    "populate:api": "node scripts/populateConversations.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.53.0",
