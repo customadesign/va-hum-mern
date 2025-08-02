@@ -466,12 +466,10 @@ const vaSchema = new mongoose.Schema({
         url: String,
         image: String,
       },
-    ],
-  },
-  {
-    timestamps: true,
-  }
-);
+    ]
+}, {
+  timestamps: true
+});
 
 // Index for search functionality
 vaSchema.index({

@@ -29,6 +29,7 @@ const specialtyRoutes = require('./routes/specialties');
 const locationRoutes = require('./routes/locations');
 const adminRoutes = require('./routes/admin');
 const shortUrlRoutes = require('./routes/shortUrls');
+const courseRoutes = require('./routes/courses');
 
 // Import middleware
 const errorHandler = require('./middleware/error');
@@ -117,6 +118,7 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/shorturls', shortUrlRoutes);
 app.use('/s', shortUrlRoutes); // Public short URL redirects
+app.use('/api/courses', courseRoutes);
 
 // Static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

@@ -15,11 +15,12 @@
     "seed:esystems": "node scripts/seedESystemsAccounts.js",
     "seed:conversations": "node seeds/seedConversations.js",
     "seed:messages": "node seeds/seedMessagesAdvanced.js",
+    "seed:courses": "node seeds/seedCourses.js",
     "populate:api": "node scripts/populateConversations.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.53.0",
-    "axios": "^1.6.2",
+    "axios": "^1.11.0",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
