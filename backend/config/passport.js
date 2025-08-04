@@ -2,10 +2,27 @@ const passport = require('passport');
 const LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 const User = require('../models/User');
 const VA = require('../models/VA');
+const { isESystemsMode } = require('../utils/esystems');
+
+// Configure LinkedIn Strategy with dynamic credentials based on mode
+const getLinkedInCredentials = () => {
+  if (isESystemsMode()) {
+    return {
+      clientID: process.env.LINKEDIN_ESYSTEMS_CLIENT_ID,
+      clientSecret: process.env.LINKEDIN_ESYSTEMS_CLIENT_SECRET
+    };
+  }
+  return {
+    clientID: process.env.LINKEDIN_CLIENT_ID,
+    clientSecret: process.env.LINKEDIN_CLIENT_SECRET
+  };
+};
+
+const credentials = getLinkedInCredentials();
 
 passport.use(new LinkedInStrategy({
-  clientID: process.env.LINKEDIN_CLIENT_ID,
-  clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
+  clientID: credentials.clientID,
+  clientSecret: credentials.clientSecret,
   callbackURL: process.env.NODE_ENV === 'production' 
     ? "https://linkage-va-hub-api.onrender.com/api/auth/linkedin/callback"
     : "/api/auth/linkedin/callback",
