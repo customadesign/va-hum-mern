@@ -317,13 +317,16 @@ export default function BusinessProfile() {
           </div>
 
           <form onSubmit={formik.handleSubmit} className="space-y-8">
-            {/* Company Information */}
+            {/* 1. Company Header - Like LinkedIn's Intro/Header card */}
             <section className="bg-white shadow px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h2 className="text-lg font-medium leading-6 text-gray-900">Company Information</h2>
+                  <h2 className="text-lg font-medium leading-6 text-gray-900 flex items-center">
+                    <BuildingOfficeIcon className="h-5 w-5 mr-2 text-blue-500" />
+                    Company Header
+                  </h2>
                   <p className="mt-2 text-sm text-gray-500">
-                    Basic information about your company.
+                    Your company's primary information that VAs will see first.
                   </p>
                 </div>
 
@@ -331,18 +334,18 @@ export default function BusinessProfile() {
                   <div className="space-y-6">
                     {/* Company Logo */}
                     <div>
-                      <span className="block text-sm font-medium text-gray-700">Company Logo</span>
+                      <span className="block text-sm font-medium text-gray-700">Company Logo *</span>
                       <div className="mt-1 flex items-center">
                         <div className="relative">
                           {profile?.avatar || avatarPreview ? (
                             <img
-                              className="h-24 w-24 rounded-lg object-cover"
+                              className="h-24 w-24 rounded-lg object-cover border-2 border-gray-200"
                               src={avatarPreview || profile?.avatar}
                               alt="Company Logo"
                             />
                           ) : (
-                            <div className="h-24 w-24 rounded-lg bg-gray-300 flex items-center justify-center">
-                              <span className="text-2xl font-medium text-gray-700">
+                            <div className="h-24 w-24 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center border-2 border-gray-200">
+                              <span className="text-2xl font-bold text-white">
                                 {formik.values.company?.[0]?.toUpperCase() || 'C'}
                               </span>
                             </div>
@@ -353,13 +356,17 @@ export default function BusinessProfile() {
                             </div>
                           )}
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => avatarInputRef.current?.click()}
-                          className="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                        >
-                          Change
-                        </button>
+                        <div className="ml-5">
+                          <button
+                            type="button"
+                            onClick={() => avatarInputRef.current?.click()}
+                            className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          >
+                            <CameraIcon className="h-4 w-4 inline mr-2" />
+                            Upload Logo
+                          </button>
+                          <p className="mt-2 text-xs text-gray-500">Recommended: 400x400px minimum</p>
+                        </div>
                         <input
                           ref={avatarInputRef}
                           type="file"
@@ -370,84 +377,184 @@ export default function BusinessProfile() {
                       </div>
                     </div>
 
-                    {/* Company Name */}
-                    <div>
-                      <label htmlFor="company" className="block text-sm font-medium text-gray-700">
-                        Company Name *
-                      </label>
-                      <div className="mt-1">
-                        <input
-                          type="text"
-                          name="company"
-                          id="company"
-                          value={formik.values.company}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                          className={`block w-full rounded-md shadow-sm sm:text-sm ${
-                            formik.touched.company && formik.errors.company
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
-                          }`}
-                        />
+                    {/* Company Name & Industry Row */}
+                    <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                      <div>
+                        <label htmlFor="company" className="block text-sm font-medium text-gray-700">
+                          Company Name *
+                        </label>
+                        <div className="mt-1">
+                          <input
+                            type="text"
+                            name="company"
+                            id="company"
+                            value={formik.values.company}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            placeholder="e.g., Microsoft Corporation"
+                            className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                              formik.touched.company && formik.errors.company
+                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                            }`}
+                          />
+                        </div>
+                        {formik.touched.company && formik.errors.company && (
+                          <p className="mt-1 text-sm text-red-600">{formik.errors.company}</p>
+                        )}
                       </div>
-                      {formik.touched.company && formik.errors.company && (
-                        <p className="mt-1 text-sm text-red-600">{formik.errors.company}</p>
-                      )}
+
+                      <div>
+                        <label htmlFor="industry" className="block text-sm font-medium text-gray-700">
+                          Industry *
+                        </label>
+                        <div className="mt-1">
+                          <select
+                            name="industry"
+                            id="industry"
+                            value={formik.values.industry}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                              formik.touched.industry && formik.errors.industry
+                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                            }`}
+                          >
+                            <option value="">Select Industry</option>
+                            {INDUSTRIES.map(industry => (
+                              <option key={industry} value={industry}>{industry}</option>
+                            ))}
+                          </select>
+                        </div>
+                        {formik.touched.industry && formik.errors.industry && (
+                          <p className="mt-1 text-sm text-red-600">{formik.errors.industry}</p>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Website */}
-                    <div>
-                      <label htmlFor="website" className="block text-sm font-medium text-gray-700">
-                        Company Website
-                      </label>
-                      <div className="mt-1">
-                        <input
-                          type="url"
-                          name="website"
-                          id="website"
-                          value={formik.values.website}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                          placeholder="https://example.com"
-                          className={`block w-full rounded-md shadow-sm sm:text-sm ${
-                            formik.touched.website && formik.errors.website
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
-                          }`}
-                        />
+                    {/* Company Size & Founded Year Row */}
+                    <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-3">
+                      <div>
+                        <label htmlFor="companySize" className="block text-sm font-medium text-gray-700">
+                          Company Size *
+                        </label>
+                        <div className="mt-1">
+                          <select
+                            name="companySize"
+                            id="companySize"
+                            value={formik.values.companySize}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                              formik.touched.companySize && formik.errors.companySize
+                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                            }`}
+                          >
+                            <option value="">Select Size</option>
+                            {COMPANY_SIZES.map(size => (
+                              <option key={size} value={size}>{size} employees</option>
+                            ))}
+                          </select>
+                        </div>
+                        {formik.touched.companySize && formik.errors.companySize && (
+                          <p className="mt-1 text-sm text-red-600">{formik.errors.companySize}</p>
+                        )}
                       </div>
-                      {formik.touched.website && formik.errors.website && (
-                        <p className="mt-1 text-sm text-red-600">{formik.errors.website}</p>
-                      )}
+
+                      <div>
+                        <label htmlFor="foundedYear" className="block text-sm font-medium text-gray-700">
+                          Founded Year
+                        </label>
+                        <div className="mt-1">
+                          <input
+                            type="number"
+                            name="foundedYear"
+                            id="foundedYear"
+                            min="1800"
+                            max={new Date().getFullYear()}
+                            value={formik.values.foundedYear}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            placeholder="2020"
+                            className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                              formik.touched.foundedYear && formik.errors.foundedYear
+                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                            }`}
+                          />
+                        </div>
+                        {formik.touched.foundedYear && formik.errors.foundedYear && (
+                          <p className="mt-1 text-sm text-red-600">{formik.errors.foundedYear}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label htmlFor="workEnvironment" className="block text-sm font-medium text-gray-700">
+                          Work Environment
+                        </label>
+                        <div className="mt-1">
+                          <select
+                            name="workEnvironment"
+                            id="workEnvironment"
+                            value={formik.values.workEnvironment}
+                            onChange={formik.handleChange}
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                          >
+                            <option value="">Select Environment</option>
+                            {WORK_ENVIRONMENTS.map(env => (
+                              <option key={env.value} value={env.value}>{env.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Company Bio */}
-                    <div>
-                      <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
-                        About Your Company *
-                      </label>
-                      <div className="mt-1">
-                        <textarea
-                          id="bio"
-                          name="bio"
-                          rows={4}
-                          value={formik.values.bio}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                          placeholder="Tell VAs about your company, culture, and what you're looking for..."
-                          className={`block w-full rounded-md shadow-sm sm:text-sm ${
-                            formik.touched.bio && formik.errors.bio
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
-                          }`}
-                        />
+                    {/* Website & Headquarters */}
+                    <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                      <div>
+                        <label htmlFor="website" className="block text-sm font-medium text-gray-700">
+                          <GlobeAltIcon className="h-4 w-4 inline mr-1" />
+                          Company Website
+                        </label>
+                        <div className="mt-1">
+                          <input
+                            type="url"
+                            name="website"
+                            id="website"
+                            value={formik.values.website}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            placeholder="https://www.yourcompany.com"
+                            className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                              formik.touched.website && formik.errors.website
+                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                            }`}
+                          />
+                        </div>
+                        {formik.touched.website && formik.errors.website && (
+                          <p className="mt-1 text-sm text-red-600">{formik.errors.website}</p>
+                        )}
                       </div>
-                      <p className="mt-2 text-sm text-gray-500">
-                        {formik.values.bio.length} characters (minimum 50)
-                      </p>
-                      {formik.touched.bio && formik.errors.bio && (
-                        <p className="mt-1 text-sm text-red-600">{formik.errors.bio}</p>
-                      )}
+
+                      <div>
+                        <label htmlFor="headquartersLocation" className="block text-sm font-medium text-gray-700">
+                          Headquarters Location
+                        </label>
+                        <div className="mt-1">
+                          <input
+                            type="text"
+                            name="headquartersLocation"
+                            id="headquartersLocation"
+                            value={formik.values.headquartersLocation}
+                            onChange={formik.handleChange}
+                            placeholder="e.g., New York, NY, USA"
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
