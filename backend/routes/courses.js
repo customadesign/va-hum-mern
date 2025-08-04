@@ -24,28 +24,14 @@ const {
   submitAssignment
 } = require('../controllers/lessonController');
 const {
-  createRoom,
-  getToken,
-  startRecording,
-  stopRecording,
-  getRecordings,
-  startLiveStream,
-  stopLiveStream,
-  handleWebhook,
-  uploadVideo,
-  validateRoom,
-  getParticipants
-} = require('../controllers/videoSDKController');
+  createMeeting,
+  getMeeting, 
+  generateToken,
+  listMeetings,
+  validateApiKey
+} = require('../controllers/videosdkController');
 
-// Multer for video uploads
-const multer = require('multer');
-const storage = multer.memoryStorage();
-const upload = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 500 * 1024 * 1024 // 500MB limit
-  }
-});
+
 
 // Public course routes
 router.get('/', optionalAuth, getCourses);
@@ -80,18 +66,11 @@ router.post('/lessons/:id/quiz', protect, submitQuiz);
 router.post('/lessons/:id/assignment', protect, submitAssignment);
 
 // VideoSDK routes
-router.post('/videosdk/rooms', protect, authorize('va'), createRoom);
-router.post('/videosdk/token', protect, getToken);
-router.post('/videosdk/recording/start', protect, authorize('va'), startRecording);
-router.post('/videosdk/recording/stop', protect, authorize('va'), stopRecording);
-router.get('/videosdk/recordings/:sessionId', protect, getRecordings);
-router.post('/videosdk/livestream/start', protect, authorize('va'), startLiveStream);
-router.post('/videosdk/livestream/stop', protect, authorize('va'), stopLiveStream);
-router.post('/videosdk/upload', protect, authorize('va'), upload.single('video'), uploadVideo);
-router.get('/videosdk/rooms/:roomId/validate', protect, validateRoom);
-router.get('/videosdk/sessions/:sessionId/participants', protect, authorize('va'), getParticipants);
+router.post('/videosdk/meeting', protect, authorize('va'), createMeeting);
+router.get('/videosdk/meeting/:roomId', protect, getMeeting);
+router.post('/videosdk/token', protect, generateToken);
+router.get('/videosdk/meetings', protect, listMeetings);
+router.get('/videosdk/validate', protect, validateApiKey);
 
-// VideoSDK webhook (public but verified)
-router.post('/webhooks/videosdk', handleWebhook);
 
 module.exports = router;
