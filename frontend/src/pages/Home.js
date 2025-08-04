@@ -31,8 +31,8 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>{branding.isESystemsMode ? 'E-Systems Management - Find Skilled Team Members' : 'Linkage VA Hub - Connect with Talented Filipino Virtual Assistants'}</title>
-        <meta name="description" content={branding.isESystemsMode ? 'Access pre-screened, skilled professionals for your business needs' : 'Find and hire skilled Filipino virtual assistants for your business needs'} />
+        <title>{branding.isESystemsMode ? 'E-Systems Management - Find Skilled Team Members' : 'Linkage VA Hub - Register as a Virtual Assistant and Start Earning'}</title>
+        <meta name="description" content={branding.isESystemsMode ? 'Access pre-screened, skilled professionals for your business needs' : 'Join Linkage VA Hub and access high-paying virtual assistant jobs starting at $4 per hour. Register today and build your VA career.'} />
       </Helmet>
 
       <div className="bg-gray-50">
@@ -50,8 +50,8 @@ export default function Home() {
                       </>
                     ) : (
                       <>
-                        <span className="block text-gray-600">Connect with talented</span>
-                        <span className="block text-gray-800">Filipino virtual assistants</span>
+                        <span className="block text-gray-600">Register for a Linkage VA</span>
+                        <span className="block text-gray-800">account and start earning</span>
                       </>
                     )}
                   </h1>
@@ -63,8 +63,8 @@ export default function Home() {
                       </>
                     ) : (
                       <>
-                        Linkage VA Hub connects businesses with skilled virtual assistants from the Philippines.
-                        <span className="md:block">Find your perfect VA match today.</span>
+                        Join Linkage VA Hub and access high-paying virtual assistant opportunities.
+                        <span className="md:block">Get VA jobs starting at $4 per hour and build your career.</span>
                       </>
                     )}
                   </p>
@@ -74,7 +74,7 @@ export default function Home() {
                         to="/register"
                         className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 md:py-4 md:text-lg md:px-10"
                       >
-                        Get started
+                        Register as VA
                       </Link>
                     </div>
                     <div className="mt-3 sm:mt-0 sm:ml-3">
@@ -82,7 +82,7 @@ export default function Home() {
                         to="/about"
                         className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-gray-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10"
                       >
-                        Learn more
+                        View Opportunities
                       </Link>
                     </div>
                   </div>
