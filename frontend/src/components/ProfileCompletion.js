@@ -129,7 +129,7 @@ const ProfileCompletion = ({ className = '', showInFooter = false }) => {
     <div className={`rounded-lg p-4 border shadow-lg ${
       profileCompletion.percentage >= 80 ? 'bg-green-50 border-green-200' :
       profileCompletion.percentage >= 60 ? 'bg-yellow-50 border-yellow-200' :
-      'bg-red-50 border-red-200'
+      'bg-blue-50 border-blue-200'
     } ${className}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center">
@@ -144,14 +144,14 @@ const ProfileCompletion = ({ className = '', showInFooter = false }) => {
             <h3 className={`text-sm font-medium ${
               profileCompletion.percentage >= 80 ? 'text-green-800' :
               profileCompletion.percentage >= 60 ? 'text-yellow-800' :
-              'text-red-800'
+              'text-blue-800'
             }`}>
               Profile {profileCompletion.percentage}% Complete
             </h3>
             <p className={`text-sm ${
               profileCompletion.percentage >= 80 ? 'text-green-700' :
               profileCompletion.percentage >= 60 ? 'text-yellow-700' :
-              'text-red-700'
+              'text-blue-700'
             }`}>
               {profileCompletion.percentage >= 80 
                 ? 'Almost there! Complete your profile to maximize visibility.'
@@ -166,7 +166,7 @@ const ProfileCompletion = ({ className = '', showInFooter = false }) => {
           <div className={`text-lg font-bold ${
             profileCompletion.percentage >= 80 ? 'text-green-600' :
             profileCompletion.percentage >= 60 ? 'text-yellow-600' :
-            'text-red-600'
+            'text-blue-600'
           }`}>
             {profileCompletion.percentage}%
           </div>
@@ -180,7 +180,7 @@ const ProfileCompletion = ({ className = '', showInFooter = false }) => {
             className={`h-2 rounded-full transition-all duration-500 ${
               profileCompletion.percentage >= 80 ? 'bg-green-500' :
               profileCompletion.percentage >= 60 ? 'bg-yellow-500' :
-              'bg-red-500'
+              'bg-blue-600'
             }`}
             style={{ width: `${profileCompletion.percentage}%` }}
           ></div>
@@ -193,7 +193,7 @@ const ProfileCompletion = ({ className = '', showInFooter = false }) => {
           <p className={`text-xs ${
             profileCompletion.percentage >= 80 ? 'text-green-600' :
             profileCompletion.percentage >= 60 ? 'text-yellow-600' :
-            'text-red-600'
+            'text-blue-600'
           }`}>
             <strong>Still needed:</strong> {
               profileCompletion.missingFields.slice(0, 3).map((field, index) => (

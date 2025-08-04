@@ -1628,7 +1628,7 @@ export default function VAProfile() {
                             ? "text-green-500"
                             : profileCompletion.percentage >= 60
                             ? "text-yellow-500"
-                            : "text-red-500"
+                            : "text-blue-600"
                         }
                       />
                     </svg>
