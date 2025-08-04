@@ -8,7 +8,7 @@ import {
   EyeIcon, 
   ChatBubbleLeftRightIcon,
   UserGroupIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   ClockIcon 
 } from '@heroicons/react/24/outline';
 
@@ -109,7 +109,7 @@ export default function Analytics() {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 {isVA ? (
-                  <TrendingUpIcon className="h-8 w-8 text-purple-600" />
+                  <ArrowTrendingUpIcon className="h-8 w-8 text-purple-600" />
                 ) : (
                   <UserGroupIcon className="h-8 w-8 text-purple-600" />
                 )}
@@ -172,7 +172,7 @@ export default function Analytics() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <TrendingUpIcon className="h-8 w-8 text-red-600" />
+                <ArrowTrendingUpIcon className="h-8 w-8 text-red-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">
