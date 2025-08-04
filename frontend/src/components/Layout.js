@@ -1,10 +1,12 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useBranding } from '../contexts/BrandingContext';
+import { useNotifications } from '../hooks/useNotifications';
+import NotificationBadge from './NotificationBadge';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -14,6 +16,8 @@ export default function Layout() {
   const { user, logout, isVA, isBusiness } = useAuth();
   const { branding } = useBranding();
   const navigate = useNavigate();
+  const { unreadCount } = useNotifications();
+  const [isHoveringBell, setIsHoveringBell] = useState(false);
 
   const navigation = [
     { name: 'Home', href: '/', current: false },
@@ -74,15 +78,26 @@ export default function Layout() {
                     <>
                       <button
                         type="button"
+                        onClick={() => navigate('/notifications')}
+                        onMouseEnter={() => setIsHoveringBell(true)}
+                        onMouseLeave={() => setIsHoveringBell(false)}
                         className={classNames(
                           branding.isESystemsMode 
                             ? "bg-gray-800 text-gray-300 hover:text-white focus:ring-offset-gray-700 focus:ring-white" 
                             : "bg-gray-100 text-gray-400 hover:text-gray-500 focus:ring-offset-2 focus:ring-gray-500",
-                          "p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2"
+                          "p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 relative transition-all duration-200",
+                          isHoveringBell ? "transform scale-110" : "transform scale-100"
                         )}
                       >
-                        <span className="sr-only">View notifications</span>
-                        <BellIcon className="h-6 w-6" aria-hidden="true" />
+                        <span className="sr-only">View notifications {unreadCount > 0 ? `(${unreadCount} unread)` : ''}</span>
+                        <BellIcon 
+                          className={classNames(
+                            "h-6 w-6 transition-all duration-200",
+                            unreadCount > 0 && "animate-wiggle"
+                          )} 
+                          aria-hidden="true" 
+                        />
+                        <NotificationBadge count={unreadCount} />
                       </button>
 
                       {/* Profile dropdown */}
@@ -235,12 +250,25 @@ export default function Layout() {
                         </span>
                       </div>
                     </div>
-                    <div className="ml-3">
+                    <div className="ml-3 flex-1">
                       <div className={classNames(
                         branding.isESystemsMode ? "text-white" : "text-gray-900",
                         "text-base font-medium"
                       )}>{user.email}</div>
                     </div>
+                    <button
+                      onClick={() => navigate('/notifications')}
+                      className={classNames(
+                        branding.isESystemsMode 
+                          ? "bg-gray-800 text-gray-300 hover:text-white" 
+                          : "bg-gray-100 text-gray-400 hover:text-gray-500",
+                        "p-2 rounded-full relative mr-2"
+                      )}
+                    >
+                      <span className="sr-only">View notifications {unreadCount > 0 ? `(${unreadCount} unread)` : ''}</span>
+                      <BellIcon className="h-6 w-6" aria-hidden="true" />
+                      <NotificationBadge count={unreadCount} />
+                    </button>
                   </div>
                   <div className="mt-3 space-y-1">
                     {userNavigation.map((item) => (

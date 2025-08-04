@@ -308,7 +308,7 @@ router.delete('/:id', protect, async (req, res) => {
       });
     }
 
-    await business.remove();
+    await business.deleteOne();
 
     // Update user
     const user = await User.findById(business.user);

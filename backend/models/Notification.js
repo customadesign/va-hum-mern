@@ -53,7 +53,9 @@ const notificationSchema = new mongoose.Schema({
     ref: 'User'
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 // Index for recipient lookup and sorting
@@ -82,6 +84,31 @@ notificationSchema.virtual('title').get(function() {
     'hiring_invoice': 'Hiring Invoice Request'
   };
   return titles[this.type] || 'Notification';
+});
+
+// Virtual to get formatted message
+notificationSchema.virtual('message').get(function() {
+  // If params.message exists, use it
+  if (this.params && this.params.message) {
+    return this.params.message;
+  }
+  
+  // Otherwise generate a default message based on type
+  const messages = {
+    'new_message': `You have a new message${this.params?.senderName ? ' from ' + this.params.senderName : ''}`,
+    'new_conversation': `A new conversation has been started${this.params?.initiatorName ? ' by ' + this.params.initiatorName : ''}`,
+    'profile_view': `${this.params?.viewerName || 'Someone'} viewed your profile`,
+    'profile_reminder': 'Please complete your profile to get better visibility',
+    'va_added': `${this.params?.vaName || 'A new VA'} has joined the platform`,
+    'business_added': `${this.params?.businessName || 'A new business'} has joined the platform`,
+    'admin_notification': this.params?.content || 'You have a notification from the admin',
+    'system_announcement': this.params?.content || 'Important system announcement',
+    'referral_joined': `${this.params?.referralName || 'Your referral'} has joined the platform`,
+    'celebration_package': `${this.params?.businessName || 'A business'} requested a celebration package`,
+    'hiring_invoice': `${this.params?.businessName || 'A business'} requested a hiring invoice`
+  };
+  
+  return messages[this.type] || 'You have a new notification';
 });
 
 // Method to mark as read
