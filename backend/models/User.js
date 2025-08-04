@@ -3,6 +3,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Please provide a name'],
+    trim: true
+  },
   email: {
     type: String,
     required: [true, 'Please provide an email'],
@@ -10,11 +15,28 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email']
   },
+  role: {
+    type: String,
+    enum: ['va', 'business'],
+    required: [true, 'Please specify user role']
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
   password: {
     type: String,
-    required: [true, 'Please provide a password'],
+    required: function() {
+      // Password not required for OAuth users
+      return !this.provider || this.provider === 'local';
+    },
     minlength: 6,
     select: false
+  },
+  provider: {
+    type: String,
+    enum: ['local', 'linkedin'],
+    default: 'local'
   },
   confirmationToken: String,
   confirmationTokenExpire: Date,
