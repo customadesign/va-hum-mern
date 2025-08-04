@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useQuery } from 'react-query';
 import api from '../../services/api';
 import VACard from '../../components/VACard';
-import { FunnelIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon, MagnifyingGlassIcon, XMarkIcon, SparklesIcon, LightBulbIcon } from '@heroicons/react/24/outline';
 import { INDUSTRIES } from '../../constants/industries';
 import { useBranding } from '../../contexts/BrandingContext';
 
@@ -21,6 +21,7 @@ export default function VAList() {
   });
   const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  const [showSearchTips, setShowSearchTips] = useState(false);
 
   const { data, isLoading, error } = useQuery(
     ['vas', { search, ...filters, page }],
@@ -73,9 +74,47 @@ export default function VAList() {
           </div>
         </div>
 
-        {/* Search and Filters */}
+                    {/* Search and Filters */}
         <div className="mt-6 bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
+            <div className="mb-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <SparklesIcon className="h-5 w-5 text-purple-500" />
+                <h3 className="text-sm font-medium text-gray-900">AI-Powered Search</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowSearchTips(!showSearchTips)}
+                  className="text-xs text-gray-500 hover:text-gray-700"
+                >
+                  <LightBulbIcon className="h-4 w-4 inline mr-1" />
+                  Tips
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">
+                Use natural language like "experienced React developer" or "Spanish speaking customer service expert"
+              </p>
+              
+              {showSearchTips && (
+                <div className="mt-3 p-3 bg-purple-50 rounded-md">
+                  <p className="text-xs font-medium text-purple-800 mb-2">Try these search examples:</p>
+                  <div className="space-y-1 text-xs text-purple-700">
+                    <div className="cursor-pointer hover:underline" onClick={() => setSearch('bilingual customer service representative with e-commerce experience')}>
+                      "bilingual customer service representative with e-commerce experience"
+                    </div>
+                    <div className="cursor-pointer hover:underline" onClick={() => setSearch('senior developer proficient in React and Node.js')}>
+                      "senior developer proficient in React and Node.js"
+                    </div>
+                    <div className="cursor-pointer hover:underline" onClick={() => setSearch('creative content writer for social media marketing')}>
+                      "creative content writer for social media marketing"
+                    </div>
+                    <div className="cursor-pointer hover:underline" onClick={() => setSearch('detail-oriented bookkeeper with QuickBooks experience')}>
+                      "detail-oriented bookkeeper with QuickBooks experience"
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
             <form onSubmit={handleSearch} className="sm:flex sm:items-center">
               <div className="w-full sm:max-w-xs">
                 <label htmlFor="search" className="sr-only">
@@ -90,7 +129,7 @@ export default function VAList() {
                     name="search"
                     id="search"
                     className="shadow-sm focus:ring-gray-500 focus:border-gray-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-                    placeholder={branding.isESystemsMode ? "Search team members..." : "Search VAs..."}
+                    placeholder={branding.isESystemsMode ? "e.g., project manager with Scrum experience..." : "e.g., social media expert with graphic design skills..."}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
@@ -240,9 +279,28 @@ export default function VAList() {
 
         {/* Results */}
         <div className="mt-6">
+          {/* Search Results Summary */}
+          {search && data?.data && (
+            <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-md">
+              <div className="flex items-center space-x-2">
+                <SparklesIcon className="h-4 w-4 text-purple-500" />
+                <span className="text-sm font-medium text-purple-800">
+                  AI Search Results for "{search}"
+                </span>
+              </div>
+              <p className="text-xs text-purple-600 mt-1">
+                Found {data.pagination?.total || data.data.length} {data.pagination?.total === 1 ? 'professional' : 'professionals'} 
+                {data.data.some(va => va.aiScore) && ' ranked by AI relevance'}
+              </p>
+            </div>
+          )}
+          
           {isLoading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+              <p className="mt-2 text-sm text-gray-500 text-center">
+                {search ? 'AI is analyzing your search...' : 'Loading VAs...'}
+              </p>
             </div>
           ) : error ? (
             <div className="text-center py-12">

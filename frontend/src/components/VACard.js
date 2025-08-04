@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPinIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, BriefcaseIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { useBranding } from '../contexts/BrandingContext';
 
 export default function VACard({ va }) {
@@ -74,6 +74,14 @@ export default function VACard({ va }) {
           </div>
           <div className="flex flex-col items-end space-y-2">
             {getStatusBadge()}
+            {va.aiScore && va.aiScore > 0 && (
+              <div className="flex items-center space-x-1">
+                <SparklesIcon className="h-3 w-3 text-purple-500" />
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  {Math.round(va.aiScore)}% match
+                </span>
+              </div>
+            )}
             {va.industry && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
                 {va.industry.charAt(0).toUpperCase() + va.industry.slice(1).replace(/_/g, ' ')}

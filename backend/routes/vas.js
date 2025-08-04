@@ -16,6 +16,7 @@ const useSupabase = isProduction && process.env.SUPABASE_URL && process.env.SUPA
 const localUpload = require('../utils/upload');
 const { handleSupabaseUpload, uploadToSupabase, deleteFromSupabase } = require('../utils/supabaseStorage');
 const supabase = require('../config/supabase');
+const { analyzeSearchQuery, fallbackSearch } = require('../utils/aiSearch');
 
 // Use appropriate upload handler
 const upload = useSupabase ? require('../utils/supabaseStorage').uploadSupabase : localUpload;
@@ -96,15 +97,19 @@ router.get('/', optionalAuth, async (req, res) => {
     // Execute query with pagination
     const skip = (page - 1) * limit;
     
+    // For AI search, get more results initially then let AI scoring handle ranking
+    const searchLimit = search ? Math.max(parseInt(limit) * 3, 60) : parseInt(limit);
+    const searchSkip = search ? 0 : skip; // When using AI search, don't skip initially
+    
     const [vas, total] = await Promise.all([
       VA.find(query)
         .populate('location')
         .populate('specialties')
         .populate('roleLevel')
         .populate('roleType')
-        .sort(sort)
-        .skip(skip)
-        .limit(parseInt(limit)),
+        .sort(search ? '-searchScore' : sort) // Use default sort for AI search initially
+        .skip(searchSkip)
+        .limit(searchLimit),
       VA.countDocuments(query)
     ]);
 
@@ -134,8 +139,27 @@ router.get('/', optionalAuth, async (req, res) => {
       );
     }
 
+    // Apply AI-powered search if search query exists
+    let processedVAs = filteredVAs;
+    
+    if (search && search.trim()) {
+      try {
+        // Use AI to analyze search query and score VAs
+        processedVAs = await analyzeSearchQuery(search, filteredVAs);
+        console.log(`AI search processed ${processedVAs.length} VAs for query: "${search}"`);
+      } catch (aiError) {
+        console.error('AI search failed, falling back to basic search:', aiError);
+        // Fallback to enhanced text search
+        processedVAs = fallbackSearch(search, filteredVAs);
+      }
+      
+      // Apply pagination after AI scoring
+      const startIndex = (page - 1) * limit;
+      processedVAs = processedVAs.slice(startIndex, startIndex + parseInt(limit));
+    }
+
     // Transform the data structure to match frontend expectations
-    const transformedVAs = filteredVAs.map(va => ({
+    const transformedVAs = processedVAs.map(va => ({
       ...va.toObject(),
       roleType: va.roleType ? {
         part_time_contract: va.roleType.partTimeContract || false,
