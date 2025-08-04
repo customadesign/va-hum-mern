@@ -176,5 +176,3 @@ export const useVideoSDK = () => {
   };
 };
 
-// Keep backward compatibility alias
-export const useZoom = useVideoSDK;
