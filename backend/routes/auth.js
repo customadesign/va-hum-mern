@@ -13,8 +13,14 @@ router.post('/register', [
   body('password').isLength({ min: 6 }),
   body('referralCode').optional().trim()
 ], async (req, res) => {
+  console.log('Registration request received:', {
+    body: req.body,
+    headers: req.headers
+  });
+  
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log('Validation errors:', errors.array());
     return res.status(400).json({ errors: errors.array() });
   }
 

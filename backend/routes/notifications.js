@@ -128,7 +128,7 @@ router.delete('/:id', protect, async (req, res) => {
       });
     }
 
-    await notification.deleteOne();
+    await notification.remove();
 
     res.json({
       success: true,

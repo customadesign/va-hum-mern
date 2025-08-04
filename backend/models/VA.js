@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const vaSchema = new mongoose.Schema({
   user: {
@@ -42,6 +42,14 @@ const vaSchema = new mongoose.Schema({
     trim: true
   },
   twitter: {
+    type: String,
+    trim: true
+  },
+  meta: {
+    type: String,
+    trim: true
+  },
+  instagram: {
     type: String,
     trim: true
   },
@@ -212,179 +220,83 @@ const vaSchema = new mongoose.Schema({
     type: String,
     trim: true
   }],
-    specialties: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Specialty",
-      },
-    ],
-    location: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Location",
-    },
-    roleLevel: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "RoleLevel",
-    },
-    roleType: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "RoleType",
-    },
-    avatar: {
-      type: String, // URL to avatar image
-    },
-    coverImage: {
-      type: String, // URL to cover image
-    },
-    videoIntroduction: {
-      type: String, // URL to video
-    },
-    videoTranscription: {
-      type: String, // Transcribed text from video
-    },
-    videoTranscriptionId: {
-      type: String, // External transcription service ID
-    },
-    videoTranscriptionStatus: {
+  languages: [{
+    language: {
       type: String,
-      enum: ["pending", "processing", "completed", "failed"],
-      default: "pending",
+      required: true
     },
-    // Additional fields for better categorization
-    industry: {
+    proficiency: {
       type: String,
-      enum: [
-        "ecommerce",
-        "real_estate",
-        "digital_marketing",
-        "social_media_management",
-        "customer_service",
-        "bookkeeping",
-        "content_creation",
-        "graphic_design",
-        "virtual_assistance",
-        "data_entry",
-        "lead_generation",
-        "email_marketing",
-        "amazon_fba",
-        "shopify",
-        "wordpress",
-        "video_editing",
-        "podcast_management",
-        "project_management",
-        "human_resources",
-        "online_tutoring",
-        "travel_planning",
-        "healthcare",
-        "finance",
-        "saas",
-        "other",
-      ],
-      default: "other",
+      enum: ['native', 'fluent', 'conversational', 'basic'],
+      required: true
+    }
+  }],
+  availability: {
+    type: String,
+    enum: ['immediately', 'within_week', 'within_month', 'not_available'],
+    default: 'immediately'
+  },
+  workingHours: {
+    timezone: String,
+    preferredHours: String // e.g., "9AM-5PM EST"
+  },
+  portfolio: [{
+    title: String,
+    description: String,
+    url: String,
+    image: String
+  }],
+  
+  // DISC Personality Assessment
+  discAssessment: {
+    isCompleted: {
+      type: Boolean,
+      default: false
     },
-    yearsOfExperience: {
-      type: Number,
-      min: 0,
-      max: 50,
+    primaryType: {
+      type: String,
+      enum: ['D', 'I', 'S', 'C'],
+      default: null
     },
-    skills: [
-      {
-        type: String,
-        trim: true,
+    scores: {
+      dominance: {
+        type: Number,
+        min: 0,
+        max: 100
       },
-    ],
-    certifications: [
-      {
-        type: String,
-        trim: true,
+      influence: {
+        type: Number,
+        min: 0,
+        max: 100
       },
-    ],
-    // DISC Personality Assessment
-    discAssessment: {
-      isCompleted: {
-        type: Boolean,
-        default: false
+      steadiness: {
+        type: Number,
+        min: 0,
+        max: 100
       },
-      primaryType: {
-        type: String,
-        enum: ['D', 'I', 'S', 'C', null],
-        default: null
-      },
-      scores: {
-        dominance: {
-          type: Number,
-          min: 0,
-          max: 100,
-          default: null
-        },
-        influence: {
-          type: Number,
-          min: 0,
-          max: 100,
-          default: null
-        },
-        steadiness: {
-          type: Number,
-          min: 0,
-          max: 100,
-          default: null
-        },
-        conscientiousness: {
-          type: Number,
-          min: 0,
-          max: 100,
-          default: null
-        }
-      },
-      completedAt: {
-        type: Date,
-        default: null
-      },
-      testUrl: {
-        type: String,
-        default: 'https://openpsychometrics.org/tests/ODAT/'
+      conscientiousness: {
+        type: Number,
+        min: 0,
+        max: 100
       }
     },
-    languages: [
-      {
-        language: {
-          type: String,
-          required: true,
-        },
-        proficiency: {
-          type: String,
-          enum: ["native", "fluent", "conversational", "basic"],
-          required: true,
-        },
-      },
-    ],
-    availability: {
-      type: String,
-      enum: ["immediately", "within_week", "within_month", "not_available"],
-      default: "immediately",
+    completedAt: {
+      type: Date
     },
-    workingHours: {
-      timezone: String,
-      preferredHours: String, // e.g., "9AM-5PM EST"
-    },
-    portfolio: [
-      {
-        title: String,
-        description: String,
-        url: String,
-        image: String,
-      },
-    ],
+    assessmentData: {
+      type: mongoose.Schema.Types.Mixed // Store raw assessment responses
+    }
+  }
 }, {
   timestamps: true
 });
 
 // Index for search functionality
-vaSchema.index({
-  name: "text",
-  bio: "text",
-  hero: "text",
-  videoTranscription: "text",
+vaSchema.index({ 
+  name: 'text', 
+  bio: 'text', 
+  hero: 'text',
+  videoTranscription: 'text' 
 });
 
 // Index for filtering
@@ -398,30 +310,27 @@ vaSchema.index({ industry: 1 });
 vaSchema.index({ yearsOfExperience: 1 });
 
 // Generate public profile key before saving
-vaSchema.pre("save", async function (next) {
+vaSchema.pre('save', async function(next) {
   if (!this.isNew) return next();
-
+  
   const generateKey = () => {
-    return (
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15)
-    );
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   };
-
+  
   let key;
   let exists = true;
-
+  
   while (exists) {
     key = generateKey();
-    exists = await mongoose.model("VA").findOne({ publicProfileKey: key });
+    exists = await mongoose.model('VA').findOne({ publicProfileKey: key });
   }
-
+  
   this.publicProfileKey = key;
   next();
 });
 
 // Update profile updated at
-vaSchema.pre("save", function (next) {
+vaSchema.pre('save', function(next) {
   if (this.isModified() && !this.isNew) {
     this.profileUpdatedAt = new Date();
   }
@@ -429,37 +338,21 @@ vaSchema.pre("save", function (next) {
 });
 
 // Virtual for completion percentage
-vaSchema.virtual("completionPercentage").get(function () {
+vaSchema.virtual('completionPercentage').get(function() {
   let score = 0;
   const fields = [
-    "name",
-    "bio",
-    "hero",
-    "location",
-    "avatar",
-    "roleLevel",
-    "roleType",
-    "website",
-    "github",
-    "linkedin",
-    "email",
-    "phone",
-    "specialties",
-    "preferredMinHourlyRate",
-    "preferredMaxHourlyRate",
-    "videoIntroduction",
+    'name', 'bio', 'hero', 'location', 'avatar', 'roleLevel', 'roleType',
+    'website', 'github', 'linkedin', 'email', 'phone', 'specialties',
+    'preferredMinHourlyRate', 'preferredMaxHourlyRate', 'videoIntroduction'
   ];
-
-  fields.forEach((field) => {
-    if (
-      this[field] &&
-      (Array.isArray(this[field]) ? this[field].length > 0 : true)
-    ) {
+  
+  fields.forEach(field => {
+    if (this[field] && (Array.isArray(this[field]) ? this[field].length > 0 : true)) {
       score += 100 / fields.length;
     }
   });
-
+  
   return Math.round(score);
 });
 
-module.exports = mongoose.model("VA", vaSchema);
+module.exports = mongoose.model('VA', vaSchema);

@@ -105,4 +105,42 @@ router.post('/geocode', async (req, res) => {
   }
 });
 
+// @route   POST /api/locations
+// @desc    Create a new location
+// @access  Public (for testing)
+router.post('/', async (req, res) => {
+  try {
+    const { city, state, country, countryCode, timeZone, utcOffset, latitude, longitude } = req.body;
+
+    if (!city || !country || !countryCode || !timeZone || utcOffset === undefined) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide city, country, countryCode, timeZone, and utcOffset'
+      });
+    }
+
+    const location = await Location.create({
+      city,
+      state,
+      country,
+      countryCode,
+      timeZone,
+      utcOffset,
+      latitude,
+      longitude
+    });
+
+    res.status(201).json({
+      success: true,
+      data: location
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
 module.exports = router;

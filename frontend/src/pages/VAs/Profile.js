@@ -1,94 +1,1206 @@
-import React, { useState, useRef, useMemo } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { toast } from 'react-toastify';
-import api from '../../services/api';
-import { InformationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
-import { VideoCameraIcon, ArrowUpTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
-import ProfileCompletion from '../../components/ProfileCompletion';
-
+import React, { useState, useRef, useMemo } from "react";
+import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "react-query";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { toast } from "react-toastify";
+import api from "../../services/api";
+import {
+  InformationCircleIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/24/solid";
+import {
+  VideoCameraIcon,
+  ArrowUpTrayIcon,
+  EyeIcon,
+} from "@heroicons/react/24/outline";
+import ProfileCompletion from "../../components/ProfileCompletion";
 
 const validationSchema = Yup.object({
-  name: Yup.string().required('Name is required'),
-  hero: Yup.string().required('Hero statement is required'),
-  bio: Yup.string().required('Bio is required').min(100, 'Bio must be at least 100 characters'),
+  name: Yup.string().required("Name is required"),
+  hero: Yup.string().required("Hero statement is required"),
+  bio: Yup.string()
+    .required("Bio is required")
+    .min(100, "Bio must be at least 100 characters"),
   location: Yup.object({
-    province: Yup.string().required('Province is required'),
-    city: Yup.string().required('City is required'),
-    barangay: Yup.string().required('Barangay is required'),
+    province: Yup.string().required("Province is required"),
+    city: Yup.string().required("City is required"),
+    barangay: Yup.string().required("Barangay is required"),
   }),
-  email: Yup.string().email('Invalid email').required('Email is required'),
+  email: Yup.string().email("Invalid email").required("Email is required"),
   phone: Yup.string(),
-  website: Yup.string().url('Must be a valid URL'),
+  website: Yup.string().url("Must be a valid URL"),
   meta: Yup.string(),
   instagram: Yup.string(),
   linkedin: Yup.string(),
   whatsapp: Yup.string(),
   twitter: Yup.string(),
   viber: Yup.string(),
+  // DISC Assessment fields
+  discPrimaryType: Yup.string().oneOf(['D', 'I', 'S', 'C', ''], 'Invalid DISC type'),
+  discDominance: Yup.number().transform((value) => (isNaN(value) ? undefined : value)).min(0).max(100),
+  discInfluence: Yup.number().transform((value) => (isNaN(value) ? undefined : value)).min(0).max(100),
+  discSteadiness: Yup.number().transform((value) => (isNaN(value) ? undefined : value)).min(0).max(100),
+  discConscientiousness: Yup.number().transform((value) => (isNaN(value) ? undefined : value)).min(0).max(100),
 });
 
 // Philippine location data with provinces, cities, and barangays
 const philippineLocations = {
   "Metro Manila": {
-    "Manila": ["Binondo", "Ermita", "Intramuros", "Malate", "Paco", "Pandacan", "Port Area", "Quiapo", "Sampaloc", "San Andres", "San Miguel", "San Nicolas", "Santa Ana", "Santa Cruz", "Santa Mesa", "Tondo"],
-    "Quezon City": ["Alicia", "Bagong Pag-asa", "Bahay Toro", "Balingasa", "Bungad", "Central", "Commonwealth", "Culiat", "Diliman", "Holy Spirit", "Kamuning", "Kristong Hari", "Libis", "Malaking Bahay", "Mariana", "New Era", "North Fairview", "Novaliches Proper", "Old Balara", "Pasong Putik Proper", "Project 6", "Sacred Heart", "San Bartolome", "Tandang Sora", "White Plains"],
-    "Makati": ["Bangkal", "Bel-Air", "Cembo", "Comembo", "Dasmariñas", "East Rembo", "Forbes Park", "Guadalupe Nuevo", "Guadalupe Viejo", "Kasilawan", "La Paz", "Magallanes", "Olympia", "Palanan", "Pembo", "Pinagkaisahan", "Pio del Pilar", "Poblacion", "Post Proper Northside", "Post Proper Southside", "Rizal", "San Antonio", "San Isidro", "San Lorenzo", "Santa Cruz", "Singkamas", "South Cembo", "Tejeros", "Urdaneta", "Valenzuela", "West Rembo"],
-    "Taguig": ["Bagumbayan", "Bambang", "Calzada", "Central Bicutan", "Central Signal Village", "Fort Bonifacio", "Hagonoy", "Ibayo-Tipas", "Katuparan", "Ligid-Tipas", "Lower Bicutan", "Maharlika Village", "Napindan", "New Lower Bicutan", "North Daang Hari", "North Signal Village", "Palingon", "Pinagsama", "San Miguel", "Santa Ana", "South Daang Hari", "South Signal Village", "Tanyag", "Tuktukan", "Upper Bicutan", "Ususan", "Wawa", "Western Bicutan"],
-    "Pasig": ["Bagong Ilog", "Bagong Katipunan", "Bambang", "Buting", "Caniogan", "Dela Paz", "Kalawaan", "Kapasigan", "Kapitolyo", "Malinao", "Manggahan", "Maybunga", "Oranbo", "Palatiw", "Pinagbuhatan", "Rosario", "Sagad", "San Antonio", "San Joaquin", "San Jose", "San Miguel", "San Nicolas", "Santa Cruz", "Santa Lucia", "Santa Rosa", "Santo Tomas", "Sumilang", "Ugong"]
+    Manila: [
+      "Binondo",
+      "Ermita",
+      "Intramuros",
+      "Malate",
+      "Paco",
+      "Pandacan",
+      "Port Area",
+      "Quiapo",
+      "Sampaloc",
+      "San Andres",
+      "San Miguel",
+      "San Nicolas",
+      "Santa Ana",
+      "Santa Cruz",
+      "Santa Mesa",
+      "Tondo",
+    ],
+    "Quezon City": [
+      "Alicia",
+      "Bagong Pag-asa",
+      "Bahay Toro",
+      "Balingasa",
+      "Bungad",
+      "Central",
+      "Commonwealth",
+      "Culiat",
+      "Diliman",
+      "Holy Spirit",
+      "Kamuning",
+      "Kristong Hari",
+      "Libis",
+      "Malaking Bahay",
+      "Mariana",
+      "New Era",
+      "North Fairview",
+      "Novaliches Proper",
+      "Old Balara",
+      "Pasong Putik Proper",
+      "Project 6",
+      "Sacred Heart",
+      "San Bartolome",
+      "Tandang Sora",
+      "White Plains",
+    ],
+    Makati: [
+      "Bangkal",
+      "Bel-Air",
+      "Cembo",
+      "Comembo",
+      "Dasmariñas",
+      "East Rembo",
+      "Forbes Park",
+      "Guadalupe Nuevo",
+      "Guadalupe Viejo",
+      "Kasilawan",
+      "La Paz",
+      "Magallanes",
+      "Olympia",
+      "Palanan",
+      "Pembo",
+      "Pinagkaisahan",
+      "Pio del Pilar",
+      "Poblacion",
+      "Post Proper Northside",
+      "Post Proper Southside",
+      "Rizal",
+      "San Antonio",
+      "San Isidro",
+      "San Lorenzo",
+      "Santa Cruz",
+      "Singkamas",
+      "South Cembo",
+      "Tejeros",
+      "Urdaneta",
+      "Valenzuela",
+      "West Rembo",
+    ],
+    Taguig: [
+      "Bagumbayan",
+      "Bambang",
+      "Calzada",
+      "Central Bicutan",
+      "Central Signal Village",
+      "Fort Bonifacio",
+      "Hagonoy",
+      "Ibayo-Tipas",
+      "Katuparan",
+      "Ligid-Tipas",
+      "Lower Bicutan",
+      "Maharlika Village",
+      "Napindan",
+      "New Lower Bicutan",
+      "North Daang Hari",
+      "North Signal Village",
+      "Palingon",
+      "Pinagsama",
+      "San Miguel",
+      "Santa Ana",
+      "South Daang Hari",
+      "South Signal Village",
+      "Tanyag",
+      "Tuktukan",
+      "Upper Bicutan",
+      "Ususan",
+      "Wawa",
+      "Western Bicutan",
+    ],
+    Pasig: [
+      "Bagong Ilog",
+      "Bagong Katipunan",
+      "Bambang",
+      "Buting",
+      "Caniogan",
+      "Dela Paz",
+      "Kalawaan",
+      "Kapasigan",
+      "Kapitolyo",
+      "Malinao",
+      "Manggahan",
+      "Maybunga",
+      "Oranbo",
+      "Palatiw",
+      "Pinagbuhatan",
+      "Rosario",
+      "Sagad",
+      "San Antonio",
+      "San Joaquin",
+      "San Jose",
+      "San Miguel",
+      "San Nicolas",
+      "Santa Cruz",
+      "Santa Lucia",
+      "Santa Rosa",
+      "Santo Tomas",
+      "Sumilang",
+      "Ugong",
+    ],
   },
-  "Cebu": {
-    "Cebu City": ["Adlaon", "Agsungot", "Apas", "Bacayan", "Banilad", "Basak Pardo", "Basak San Nicolas", "Binaliw", "Bonbon", "Budla-an", "Buhisan", "Capitol Site", "Carreta", "Central", "Cogon Pardo", "Cogon Ramos", "Day-as", "Duljo Fatima", "Ermita", "Guadalupe", "Guba", "Hipodromo", "Inayawan", "Kalubihan", "Kamagayan", "Kamputhaw", "Kasambagan", "Kinasang-an Pardo", "Labangon", "Lahug", "Lorega San Miguel", "Luz", "Mabini", "Mabolo", "Malubog", "Mambaling", "Pahina Central", "Pahina San Nicolas", "Pardo", "Pari-an", "Paril", "Pasil", "Poblacion Pardo", "Pulangbato", "Pung-ol Sibugay", "Punta Princesa", "Quiot", "Sambag I", "Sambag II", "San Antonio", "San Jose", "San Nicolas Central", "San Roque", "Santa Cruz", "Santo Niño", "Sapangdaku", "Sawang Calero", "Sinsin", "Sirao", "Suba", "Sudlon I", "Sudlon II", "T. Padilla", "Tabunan", "Tagba-o", "Talamban", "Taptap", "Tejero", "Tinago", "Tisa", "To-ong", "Zapatera"],
-    "Mandaue City": ["Alang-alang", "Bakilid", "Banilad", "Basak", "Cabancalan", "Cambaro", "Canduman", "Casili", "Casuntingan", "Centro", "Cubacub", "Guizo", "Ibabao-Estancia", "Jagobiao", "Labogon", "Looc", "Maguikay", "Mantuyong", "Opao", "Pakna-an", "Pagsabungan", "Subangdaku", "Tabok", "Tawason", "Tingub", "Tipolo", "Umapad"],
-    "Lapu-Lapu City": ["Agus", "Babag", "Bankal", "Baring", "Basak", "Buaya", "Calawisan", "Canjulao", "Caw-oy", "Caubian", "Gun-ob", "Ibo", "Looc", "Mactan", "Maribago", "Marigondon", "Pajac", "Poblacion", "Pajo", "Punta Engaño", "Pusok", "Sabang", "Santa Rosa", "Subabasbas", "Talima", "Tingo", "Tungasan"],
-    "Talisay": ["Biasong", "Bulacao", "Cadulawan", "Camp Lapu-Lapu", "Candulawan", "Cansojong", "Dumlog", "Jaclupan", "Lagtang", "Lawaan I", "Lawaan II", "Lawaan III", "Linao", "Maghaway", "Manipis", "Mohon", "Poblacion", "Pooc", "San Isidro", "San Roque", "Tabunok", "Tangke", "Tapul"]
+  Cebu: {
+    "Cebu City": [
+      "Adlaon",
+      "Agsungot",
+      "Apas",
+      "Bacayan",
+      "Banilad",
+      "Basak Pardo",
+      "Basak San Nicolas",
+      "Binaliw",
+      "Bonbon",
+      "Budla-an",
+      "Buhisan",
+      "Capitol Site",
+      "Carreta",
+      "Central",
+      "Cogon Pardo",
+      "Cogon Ramos",
+      "Day-as",
+      "Duljo Fatima",
+      "Ermita",
+      "Guadalupe",
+      "Guba",
+      "Hipodromo",
+      "Inayawan",
+      "Kalubihan",
+      "Kamagayan",
+      "Kamputhaw",
+      "Kasambagan",
+      "Kinasang-an Pardo",
+      "Labangon",
+      "Lahug",
+      "Lorega San Miguel",
+      "Luz",
+      "Mabini",
+      "Mabolo",
+      "Malubog",
+      "Mambaling",
+      "Pahina Central",
+      "Pahina San Nicolas",
+      "Pardo",
+      "Pari-an",
+      "Paril",
+      "Pasil",
+      "Poblacion Pardo",
+      "Pulangbato",
+      "Pung-ol Sibugay",
+      "Punta Princesa",
+      "Quiot",
+      "Sambag I",
+      "Sambag II",
+      "San Antonio",
+      "San Jose",
+      "San Nicolas Central",
+      "San Roque",
+      "Santa Cruz",
+      "Santo Niño",
+      "Sapangdaku",
+      "Sawang Calero",
+      "Sinsin",
+      "Sirao",
+      "Suba",
+      "Sudlon I",
+      "Sudlon II",
+      "T. Padilla",
+      "Tabunan",
+      "Tagba-o",
+      "Talamban",
+      "Taptap",
+      "Tejero",
+      "Tinago",
+      "Tisa",
+      "To-ong",
+      "Zapatera",
+    ],
+    "Mandaue City": [
+      "Alang-alang",
+      "Bakilid",
+      "Banilad",
+      "Basak",
+      "Cabancalan",
+      "Cambaro",
+      "Canduman",
+      "Casili",
+      "Casuntingan",
+      "Centro",
+      "Cubacub",
+      "Guizo",
+      "Ibabao-Estancia",
+      "Jagobiao",
+      "Labogon",
+      "Looc",
+      "Maguikay",
+      "Mantuyong",
+      "Opao",
+      "Pakna-an",
+      "Pagsabungan",
+      "Subangdaku",
+      "Tabok",
+      "Tawason",
+      "Tingub",
+      "Tipolo",
+      "Umapad",
+    ],
+    "Lapu-Lapu City": [
+      "Agus",
+      "Babag",
+      "Bankal",
+      "Baring",
+      "Basak",
+      "Buaya",
+      "Calawisan",
+      "Canjulao",
+      "Caw-oy",
+      "Caubian",
+      "Gun-ob",
+      "Ibo",
+      "Looc",
+      "Mactan",
+      "Maribago",
+      "Marigondon",
+      "Pajac",
+      "Poblacion",
+      "Pajo",
+      "Punta Engaño",
+      "Pusok",
+      "Sabang",
+      "Santa Rosa",
+      "Subabasbas",
+      "Talima",
+      "Tingo",
+      "Tungasan",
+    ],
+    Talisay: [
+      "Biasong",
+      "Bulacao",
+      "Cadulawan",
+      "Camp Lapu-Lapu",
+      "Candulawan",
+      "Cansojong",
+      "Dumlog",
+      "Jaclupan",
+      "Lagtang",
+      "Lawaan I",
+      "Lawaan II",
+      "Lawaan III",
+      "Linao",
+      "Maghaway",
+      "Manipis",
+      "Mohon",
+      "Poblacion",
+      "Pooc",
+      "San Isidro",
+      "San Roque",
+      "Tabunok",
+      "Tangke",
+      "Tapul",
+    ],
   },
   "Davao del Sur": {
-    "Davao City": ["Agdao", "Angalan", "Bago Aplaya", "Bago Gallera", "Baguio", "Baliok", "Bangkas Heights", "Baracatan", "Barangay 1-A", "Barangay 2-A", "Barangay 3-A", "Barangay 4-A", "Barangay 5-A", "Barangay 6-A", "Barangay 7-A", "Barangay 8-A", "Barangay 9-A", "Barangay 10-A", "Benda", "Bucana", "Buda", "Buhangin", "Bunawan", "Calinan", "Callawa", "Catalunan Grande", "Catalunan Pequeño", "Cawayan", "Centro", "Communal", "Crossing Bayabas", "Dacudao", "Daliao", "Dominga", "Dumoy", "Eden", "Gumitan", "Ilang", "Inayangan", "Indangan", "Kilate", "Lacson", "Lamanan", "Lampianao", "Langub", "Leon Garcia", "Libby", "Los Amigos", "Lubogan", "Lumiad", "Ma-a", "Magsaysay", "Malabog", "Malagos", "Malamba", "Manambulan", "Mandug", "Manuel Guianga", "Mapula", "Marapangi", "Marilog", "Matina Aplaya", "Matina Crossing", "Matina Pangi", "Megkawayan", "Mintal", "Mudiang", "Mulig", "New Carmen", "New Valencia", "Obrero", "Pampanga", "Panacan", "Panalum", "Pandaitan", "Pangyan", "Paquibato", "Paradise Embac", "Riverside", "Salaysay", "Saloy", "San Antonio", "San Isidro", "Santo Tomas", "Sasa", "Sibulan", "Sirib", "Suawan", "Subasta", "Tacunan", "Tagakpan", "Tagluno", "Tagurano", "Talandang", "Talomo", "Tamayong", "Tambobong", "Tamugan", "Tapak", "Tapia", "Tibuloy", "Tibungco", "Tigatto", "Toril", "Tugbok", "Tula", "Tumaga", "Ubalde", "Ula", "Vicente Hizon Sr.", "Waan", "Wangan", "Wilfredo Aquino"],
-    "Digos City": ["Aplaya", "Balabag", "Binaton", "Colorado", "Cogon", "Dahican", "Dawis", "Dulangan", "Goma", "Igpit", "Kapatagan", "Kiagot", "Lungag", "Mahayag", "Palili", "Poblacion", "Ruparan", "San Agustin", "San Jose", "San Miguel", "Sandawa", "Sinawilan", "Soong", "Tiguman", "Tres de Mayo", "Zone I", "Zone II", "Zone III"]
+    "Davao City": [
+      "Agdao",
+      "Angalan",
+      "Bago Aplaya",
+      "Bago Gallera",
+      "Baguio",
+      "Baliok",
+      "Bangkas Heights",
+      "Baracatan",
+      "Barangay 1-A",
+      "Barangay 2-A",
+      "Barangay 3-A",
+      "Barangay 4-A",
+      "Barangay 5-A",
+      "Barangay 6-A",
+      "Barangay 7-A",
+      "Barangay 8-A",
+      "Barangay 9-A",
+      "Barangay 10-A",
+      "Benda",
+      "Bucana",
+      "Buda",
+      "Buhangin",
+      "Bunawan",
+      "Calinan",
+      "Callawa",
+      "Catalunan Grande",
+      "Catalunan Pequeño",
+      "Cawayan",
+      "Centro",
+      "Communal",
+      "Crossing Bayabas",
+      "Dacudao",
+      "Daliao",
+      "Dominga",
+      "Dumoy",
+      "Eden",
+      "Gumitan",
+      "Ilang",
+      "Inayangan",
+      "Indangan",
+      "Kilate",
+      "Lacson",
+      "Lamanan",
+      "Lampianao",
+      "Langub",
+      "Leon Garcia",
+      "Libby",
+      "Los Amigos",
+      "Lubogan",
+      "Lumiad",
+      "Ma-a",
+      "Magsaysay",
+      "Malabog",
+      "Malagos",
+      "Malamba",
+      "Manambulan",
+      "Mandug",
+      "Manuel Guianga",
+      "Mapula",
+      "Marapangi",
+      "Marilog",
+      "Matina Aplaya",
+      "Matina Crossing",
+      "Matina Pangi",
+      "Megkawayan",
+      "Mintal",
+      "Mudiang",
+      "Mulig",
+      "New Carmen",
+      "New Valencia",
+      "Obrero",
+      "Pampanga",
+      "Panacan",
+      "Panalum",
+      "Pandaitan",
+      "Pangyan",
+      "Paquibato",
+      "Paradise Embac",
+      "Riverside",
+      "Salaysay",
+      "Saloy",
+      "San Antonio",
+      "San Isidro",
+      "Santo Tomas",
+      "Sasa",
+      "Sibulan",
+      "Sirib",
+      "Suawan",
+      "Subasta",
+      "Tacunan",
+      "Tagakpan",
+      "Tagluno",
+      "Tagurano",
+      "Talandang",
+      "Talomo",
+      "Tamayong",
+      "Tambobong",
+      "Tamugan",
+      "Tapak",
+      "Tapia",
+      "Tibuloy",
+      "Tibungco",
+      "Tigatto",
+      "Toril",
+      "Tugbok",
+      "Tula",
+      "Tumaga",
+      "Ubalde",
+      "Ula",
+      "Vicente Hizon Sr.",
+      "Waan",
+      "Wangan",
+      "Wilfredo Aquino",
+    ],
+    "Digos City": [
+      "Aplaya",
+      "Balabag",
+      "Binaton",
+      "Colorado",
+      "Cogon",
+      "Dahican",
+      "Dawis",
+      "Dulangan",
+      "Goma",
+      "Igpit",
+      "Kapatagan",
+      "Kiagot",
+      "Lungag",
+      "Mahayag",
+      "Palili",
+      "Poblacion",
+      "Ruparan",
+      "San Agustin",
+      "San Jose",
+      "San Miguel",
+      "Sandawa",
+      "Sinawilan",
+      "Soong",
+      "Tiguman",
+      "Tres de Mayo",
+      "Zone I",
+      "Zone II",
+      "Zone III",
+    ],
   },
-  "Laguna": {
-    "Calamba": ["Bagong Kalsada", "Banadero", "Banay-banay", "Barangay I", "Barangay II", "Barangay III", "Barangay IV", "Barangay V", "Barangay VI", "Barangay VII", "Batino", "Bubuyan", "Bucal", "Bunggo", "Burol", "Camaligan", "Canlubang", "Halang", "Hornalan", "Kay-Anlog", "La Mesa", "Laguerta", "Lawa", "Lecheria", "Lingga", "Looc", "Mabato", "Makiling", "Mapagong", "Masili", "Maunong", "Mayapa", "Milagrosa", "Paciano Rizal", "Palingon", "Palo-Alto", "Palayan", "Pansol", "Parian", "Prinza", "Punta", "Puting Lupa", "Real", "Saimsim", "Sampiruhan", "San Cristobal", "San Jose", "San Juan", "Sirang Lupa", "Sucol", "Turbina", "Ulango", "Uwisan"],
-    "San Pedro": ["Bagong Silang", "Calendola", "Chrysanthemum", "Cuyab", "Estrella", "G.S.I.S.", "Landayan", "Laram", "Magsaysay", "Maharlika", "Nueva", "Pacita I", "Pacita II", "Poblacion", "Riverside", "Rosario", "Sampaguita Village", "San Antonio", "San Roque", "San Vicente", "Santo Niño", "United Bayanihan", "United Better Living"],
-    "Biñan": ["Biñan", "Bungahan", "Canlalay", "Casile", "Dela Paz", "Ganado", "Langkiwa", "Loma", "Malaban", "Malamig", "Mampalasan", "Platero", "Poblacion", "San Antonio", "San Francisco", "San Jose", "San Vicente", "Santa Rosa", "Santo Domingo", "Santo Niño", "Soro-soro", "Timbao", "Tubigan", "Zapote"]
+  Laguna: {
+    Calamba: [
+      "Bagong Kalsada",
+      "Banadero",
+      "Banay-banay",
+      "Barangay I",
+      "Barangay II",
+      "Barangay III",
+      "Barangay IV",
+      "Barangay V",
+      "Barangay VI",
+      "Barangay VII",
+      "Batino",
+      "Bubuyan",
+      "Bucal",
+      "Bunggo",
+      "Burol",
+      "Camaligan",
+      "Canlubang",
+      "Halang",
+      "Hornalan",
+      "Kay-Anlog",
+      "La Mesa",
+      "Laguerta",
+      "Lawa",
+      "Lecheria",
+      "Lingga",
+      "Looc",
+      "Mabato",
+      "Makiling",
+      "Mapagong",
+      "Masili",
+      "Maunong",
+      "Mayapa",
+      "Milagrosa",
+      "Paciano Rizal",
+      "Palingon",
+      "Palo-Alto",
+      "Palayan",
+      "Pansol",
+      "Parian",
+      "Prinza",
+      "Punta",
+      "Puting Lupa",
+      "Real",
+      "Saimsim",
+      "Sampiruhan",
+      "San Cristobal",
+      "San Jose",
+      "San Juan",
+      "Sirang Lupa",
+      "Sucol",
+      "Turbina",
+      "Ulango",
+      "Uwisan",
+    ],
+    "San Pedro": [
+      "Bagong Silang",
+      "Calendola",
+      "Chrysanthemum",
+      "Cuyab",
+      "Estrella",
+      "G.S.I.S.",
+      "Landayan",
+      "Laram",
+      "Magsaysay",
+      "Maharlika",
+      "Nueva",
+      "Pacita I",
+      "Pacita II",
+      "Poblacion",
+      "Riverside",
+      "Rosario",
+      "Sampaguita Village",
+      "San Antonio",
+      "San Roque",
+      "San Vicente",
+      "Santo Niño",
+      "United Bayanihan",
+      "United Better Living",
+    ],
+    Biñan: [
+      "Biñan",
+      "Bungahan",
+      "Canlalay",
+      "Casile",
+      "Dela Paz",
+      "Ganado",
+      "Langkiwa",
+      "Loma",
+      "Malaban",
+      "Malamig",
+      "Mampalasan",
+      "Platero",
+      "Poblacion",
+      "San Antonio",
+      "San Francisco",
+      "San Jose",
+      "San Vicente",
+      "Santa Rosa",
+      "Santo Domingo",
+      "Santo Niño",
+      "Soro-soro",
+      "Timbao",
+      "Tubigan",
+      "Zapote",
+    ],
   },
-  "Pampanga": {
-    "Angeles City": ["Agapito del Rosario", "Amsic", "Balibago", "Capaya", "Claro M. Recto", "Cuayan", "Cutcut", "Cutud", "Lourdes Norte", "Lourdes Sur", "Malabañas", "Margot", "Mining", "Ninoy Aquino", "Pampang", "Pulung Bulu", "Pulung Cacutud", "Pulung Maragul", "Salapungan", "San Jose", "San Nicolas", "Santa Teresita", "Santa Trinidad", "Santo Cristo", "Santo Domingo", "Sapangbato", "Tabun", "Virgen delos Remedios"],
-    "San Fernando": ["Alasas", "Baliti", "Bulaon", "Cabalantian", "Calulut", "Dela Paz Norte", "Dela Paz Sur", "Dolores", "Juliana", "Lara", "Lourdes", "Magliman", "Maimpis", "Malino", "Malpitic", "Panipuan", "Pulung Bulu", "Quebiawan", "Saguin", "San Agustin", "San Felipe", "San Isidro", "San Jose", "San Juan", "San Nicolas", "San Pedro", "Santa Lucia", "Santa Teresita", "Santo Niño", "Santo Rosario", "Sindalan", "Telabastagan"],
-    "Mabalacat City": ["Atlu-Bola", "Bical", "Bundagul", "Cacutud", "Calumpang", "Camachiles", "Dapdap", "Dau", "Dolores", "Duquit", "Lakandula", "Mabiga", "Magalang", "Marcos Village", "Matimbo", "Poblacion", "Pulung Maragul", "Rustia", "Sabang", "San Francisco", "San Joaquin", "San Roque", "Santa Ines", "Santo Rosario", "Sapang Bato", "Tabun"]
+  Pampanga: {
+    "Angeles City": [
+      "Agapito del Rosario",
+      "Amsic",
+      "Balibago",
+      "Capaya",
+      "Claro M. Recto",
+      "Cuayan",
+      "Cutcut",
+      "Cutud",
+      "Lourdes Norte",
+      "Lourdes Sur",
+      "Malabañas",
+      "Margot",
+      "Mining",
+      "Ninoy Aquino",
+      "Pampang",
+      "Pulung Bulu",
+      "Pulung Cacutud",
+      "Pulung Maragul",
+      "Salapungan",
+      "San Jose",
+      "San Nicolas",
+      "Santa Teresita",
+      "Santa Trinidad",
+      "Santo Cristo",
+      "Santo Domingo",
+      "Sapangbato",
+      "Tabun",
+      "Virgen delos Remedios",
+    ],
+    "San Fernando": [
+      "Alasas",
+      "Baliti",
+      "Bulaon",
+      "Cabalantian",
+      "Calulut",
+      "Dela Paz Norte",
+      "Dela Paz Sur",
+      "Dolores",
+      "Juliana",
+      "Lara",
+      "Lourdes",
+      "Magliman",
+      "Maimpis",
+      "Malino",
+      "Malpitic",
+      "Panipuan",
+      "Pulung Bulu",
+      "Quebiawan",
+      "Saguin",
+      "San Agustin",
+      "San Felipe",
+      "San Isidro",
+      "San Jose",
+      "San Juan",
+      "San Nicolas",
+      "San Pedro",
+      "Santa Lucia",
+      "Santa Teresita",
+      "Santo Niño",
+      "Santo Rosario",
+      "Sindalan",
+      "Telabastagan",
+    ],
+    "Mabalacat City": [
+      "Atlu-Bola",
+      "Bical",
+      "Bundagul",
+      "Cacutud",
+      "Calumpang",
+      "Camachiles",
+      "Dapdap",
+      "Dau",
+      "Dolores",
+      "Duquit",
+      "Lakandula",
+      "Mabiga",
+      "Magalang",
+      "Marcos Village",
+      "Matimbo",
+      "Poblacion",
+      "Pulung Maragul",
+      "Rustia",
+      "Sabang",
+      "San Francisco",
+      "San Joaquin",
+      "San Roque",
+      "Santa Ines",
+      "Santo Rosario",
+      "Sapang Bato",
+      "Tabun",
+    ],
   },
-  "Bulacan": {
-    "Malolos": ["Anilao", "Atlag", "Babatnin", "Bagna", "Balayong", "Balite", "Bangkal", "Barihan", "Bulihan", "Bungahan", "Caingin", "Calero", "Caliligawan", "Canalate", "Caniogan", "Capitol Village", "Dakila", "Guinhawa", "Liang", "Ligas", "Longos", "Look 1st", "Look 2nd", "Lugam", "Mambog", "Masile", "Mojon", "Namayan", "Niugan", "Pamarawan", "Panasahan", "Pinagbakahan", "San Agustin", "San Gabriel", "San Juan", "San Pablo", "San Vicente", "Santa Rosa", "Santiago", "Santisima Trinidad", "Santo Cristo", "Santo Niño", "Sumapang Bata", "Sumapang Matanda", "Taal", "Tikay"],
-    "Meycauayan": ["Bancal", "Banga", "Bayugo", "Calvario", "Camalig", "Libtong", "Loma de Gato", "Longos", "Malhacan", "Pajo", "Pandayan", "Pantoc", "Poblacion", "Tugatog", "Ubihan", "Zamora"],
-    "Marilao": ["Abangan Norte", "Abangan Sur", "Abitang", "Ibayo", "Lambakin", "Lias", "Loma de Gato", "Nagbalon", "Patubig", "Poblacion", "Prenza I", "Prenza II", "Santa Rosa I", "Santa Rosa II", "Saog", "Tabing Ilog"],
-    "San Jose del Monte": ["Assumption", "Bagong Buhay I", "Bagong Buhay II", "Bagong Buhay III", "Ciudad Real", "Dulong Bayan", "Fatima I", "Fatima II", "Fatima III", "Fatima IV", "Fatima V", "Francisco Homes-Guijo", "Francisco Homes-Mulawin", "Francisco Homes-Narra", "Francisco Homes-Yakal", "Gaya-gaya", "Graceville", "Kaypian", "Kaybanban", "Lawang Pare", "Maharlika", "Minuyan I", "Minuyan II", "Minuyan III", "Minuyan IV", "Minuyan V", "Muzon", "Paradise III", "Poblacion", "San Manuel", "San Martin I", "San Martin II", "San Martin III", "San Martin IV", "San Pedro", "San Rafael I", "San Rafael II", "San Rafael III", "San Rafael IV", "San Rafael V", "Santo Cristo", "Santo Niño I", "Santo Niño II", "Sapang Palay", "Tungkong Mangga"]
+  Bulacan: {
+    Malolos: [
+      "Anilao",
+      "Atlag",
+      "Babatnin",
+      "Bagna",
+      "Balayong",
+      "Balite",
+      "Bangkal",
+      "Barihan",
+      "Bulihan",
+      "Bungahan",
+      "Caingin",
+      "Calero",
+      "Caliligawan",
+      "Canalate",
+      "Caniogan",
+      "Capitol Village",
+      "Dakila",
+      "Guinhawa",
+      "Liang",
+      "Ligas",
+      "Longos",
+      "Look 1st",
+      "Look 2nd",
+      "Lugam",
+      "Mambog",
+      "Masile",
+      "Mojon",
+      "Namayan",
+      "Niugan",
+      "Pamarawan",
+      "Panasahan",
+      "Pinagbakahan",
+      "San Agustin",
+      "San Gabriel",
+      "San Juan",
+      "San Pablo",
+      "San Vicente",
+      "Santa Rosa",
+      "Santiago",
+      "Santisima Trinidad",
+      "Santo Cristo",
+      "Santo Niño",
+      "Sumapang Bata",
+      "Sumapang Matanda",
+      "Taal",
+      "Tikay",
+    ],
+    Meycauayan: [
+      "Bancal",
+      "Banga",
+      "Bayugo",
+      "Calvario",
+      "Camalig",
+      "Libtong",
+      "Loma de Gato",
+      "Longos",
+      "Malhacan",
+      "Pajo",
+      "Pandayan",
+      "Pantoc",
+      "Poblacion",
+      "Tugatog",
+      "Ubihan",
+      "Zamora",
+    ],
+    Marilao: [
+      "Abangan Norte",
+      "Abangan Sur",
+      "Abitang",
+      "Ibayo",
+      "Lambakin",
+      "Lias",
+      "Loma de Gato",
+      "Nagbalon",
+      "Patubig",
+      "Poblacion",
+      "Prenza I",
+      "Prenza II",
+      "Santa Rosa I",
+      "Santa Rosa II",
+      "Saog",
+      "Tabing Ilog",
+    ],
+    "San Jose del Monte": [
+      "Assumption",
+      "Bagong Buhay I",
+      "Bagong Buhay II",
+      "Bagong Buhay III",
+      "Ciudad Real",
+      "Dulong Bayan",
+      "Fatima I",
+      "Fatima II",
+      "Fatima III",
+      "Fatima IV",
+      "Fatima V",
+      "Francisco Homes-Guijo",
+      "Francisco Homes-Mulawin",
+      "Francisco Homes-Narra",
+      "Francisco Homes-Yakal",
+      "Gaya-gaya",
+      "Graceville",
+      "Kaypian",
+      "Kaybanban",
+      "Lawang Pare",
+      "Maharlika",
+      "Minuyan I",
+      "Minuyan II",
+      "Minuyan III",
+      "Minuyan IV",
+      "Minuyan V",
+      "Muzon",
+      "Paradise III",
+      "Poblacion",
+      "San Manuel",
+      "San Martin I",
+      "San Martin II",
+      "San Martin III",
+      "San Martin IV",
+      "San Pedro",
+      "San Rafael I",
+      "San Rafael II",
+      "San Rafael III",
+      "San Rafael IV",
+      "San Rafael V",
+      "Santo Cristo",
+      "Santo Niño I",
+      "Santo Niño II",
+      "Sapang Palay",
+      "Tungkong Mangga",
+    ],
   },
-  "Cavite": {
-    "Bacoor": ["Alima", "Aniban I", "Aniban II", "Aniban III", "Aniban IV", "Aniban V", "Banay-banay", "Bayanan", "Campo Santo", "Daang Bukid", "Digman", "Dulong Bayan", "Ginintu", "Habay I", "Habay II", "Kaingin", "Kaong", "Ligas I", "Ligas II", "Ligas III", "Mabolo I", "Mabolo II", "Mabolo III", "Maliksi I", "Maliksi II", "Maliksi III", "Molino I", "Molino II", "Molino III", "Molino IV", "Molino V", "Molino VI", "Molino VII", "Niog I", "Niog II", "Niog III", "Panapaan I", "Panapaan II", "Panapaan III", "Panapaan IV", "Panapaan V", "Panapaan VI", "Panapaan VII", "Panapaan VIII", "Queens Row Central", "Queens Row East", "Queens Row West", "Real I", "Real II", "Salinas I", "Salinas II", "San Nicolas I", "San Nicolas II", "San Nicolas III", "Sineguelasan", "Springville", "Tabing Dagat", "Talaba I", "Talaba II", "Talaba III", "Talaba IV", "Talaba V", "Talaba VI", "Talaba VII", "Villa San Miguel I", "Villa San Miguel II", "Zapote I", "Zapote II", "Zapote III", "Zapote IV", "Zapote V"],
-    "Imus": ["Anabu I-A", "Anabu I-B", "Anabu I-C", "Anabu I-D", "Anabu I-E", "Anabu I-F", "Anabu I-G", "Anabu II-A", "Anabu II-B", "Anabu II-C", "Anabu II-D", "Anabu II-E", "Anabu II-F", "Bayan Luma I", "Bayan Luma II", "Bayan Luma III", "Bayan Luma IV", "Bayan Luma V", "Bayan Luma VI", "Bayan Luma VII", "Bayan Luma VIII", "Bayan Luma IX", "Bucandala I", "Bucandala II", "Bucandala III", "Bucandala IV", "Bucandala V", "Buhay na Tubig", "Carsadang Bago I", "Carsadang Bago II", "Magdalo", "Malagasang I-A", "Malagasang I-B", "Malagasang I-C", "Malagasang I-D", "Malagasang I-E", "Malagasang I-F", "Malagasang I-G", "Malagasang II-A", "Malagasang II-B", "Malagasang II-C", "Malagasang II-D", "Malagasang II-E", "Malagasang II-F", "Medicion I-A", "Medicion I-B", "Medicion I-C", "Medicion I-D", "Medicion II-A", "Medicion II-B", "Medicion II-C", "Medicion II-D", "Medicion II-E", "Medicion II-F", "Palico I", "Palico II", "Palico III", "Palico IV", "Panacan I", "Panacan II", "Panacan III", "Poblacion I-A", "Poblacion I-B", "Poblacion I-C", "Poblacion II-A", "Poblacion II-B", "Poblacion III-A", "Poblacion III-B", "Poblacion IV-A", "Poblacion IV-B", "Poblacion IV-C", "Poblacion IV-D", "Tanzang Luma I", "Tanzang Luma II", "Tanzang Luma III", "Tanzang Luma IV", "Tanzang Luma V", "Tanzang Luma VI", "Toclong I-A", "Toclong I-B", "Toclong I-C", "Toclong II-A", "Toclong II-B"]
+  Cavite: {
+    Bacoor: [
+      "Alima",
+      "Aniban I",
+      "Aniban II",
+      "Aniban III",
+      "Aniban IV",
+      "Aniban V",
+      "Banay-banay",
+      "Bayanan",
+      "Campo Santo",
+      "Daang Bukid",
+      "Digman",
+      "Dulong Bayan",
+      "Ginintu",
+      "Habay I",
+      "Habay II",
+      "Kaingin",
+      "Kaong",
+      "Ligas I",
+      "Ligas II",
+      "Ligas III",
+      "Mabolo I",
+      "Mabolo II",
+      "Mabolo III",
+      "Maliksi I",
+      "Maliksi II",
+      "Maliksi III",
+      "Molino I",
+      "Molino II",
+      "Molino III",
+      "Molino IV",
+      "Molino V",
+      "Molino VI",
+      "Molino VII",
+      "Niog I",
+      "Niog II",
+      "Niog III",
+      "Panapaan I",
+      "Panapaan II",
+      "Panapaan III",
+      "Panapaan IV",
+      "Panapaan V",
+      "Panapaan VI",
+      "Panapaan VII",
+      "Panapaan VIII",
+      "Queens Row Central",
+      "Queens Row East",
+      "Queens Row West",
+      "Real I",
+      "Real II",
+      "Salinas I",
+      "Salinas II",
+      "San Nicolas I",
+      "San Nicolas II",
+      "San Nicolas III",
+      "Sineguelasan",
+      "Springville",
+      "Tabing Dagat",
+      "Talaba I",
+      "Talaba II",
+      "Talaba III",
+      "Talaba IV",
+      "Talaba V",
+      "Talaba VI",
+      "Talaba VII",
+      "Villa San Miguel I",
+      "Villa San Miguel II",
+      "Zapote I",
+      "Zapote II",
+      "Zapote III",
+      "Zapote IV",
+      "Zapote V",
+    ],
+    Imus: [
+      "Anabu I-A",
+      "Anabu I-B",
+      "Anabu I-C",
+      "Anabu I-D",
+      "Anabu I-E",
+      "Anabu I-F",
+      "Anabu I-G",
+      "Anabu II-A",
+      "Anabu II-B",
+      "Anabu II-C",
+      "Anabu II-D",
+      "Anabu II-E",
+      "Anabu II-F",
+      "Bayan Luma I",
+      "Bayan Luma II",
+      "Bayan Luma III",
+      "Bayan Luma IV",
+      "Bayan Luma V",
+      "Bayan Luma VI",
+      "Bayan Luma VII",
+      "Bayan Luma VIII",
+      "Bayan Luma IX",
+      "Bucandala I",
+      "Bucandala II",
+      "Bucandala III",
+      "Bucandala IV",
+      "Bucandala V",
+      "Buhay na Tubig",
+      "Carsadang Bago I",
+      "Carsadang Bago II",
+      "Magdalo",
+      "Malagasang I-A",
+      "Malagasang I-B",
+      "Malagasang I-C",
+      "Malagasang I-D",
+      "Malagasang I-E",
+      "Malagasang I-F",
+      "Malagasang I-G",
+      "Malagasang II-A",
+      "Malagasang II-B",
+      "Malagasang II-C",
+      "Malagasang II-D",
+      "Malagasang II-E",
+      "Malagasang II-F",
+      "Medicion I-A",
+      "Medicion I-B",
+      "Medicion I-C",
+      "Medicion I-D",
+      "Medicion II-A",
+      "Medicion II-B",
+      "Medicion II-C",
+      "Medicion II-D",
+      "Medicion II-E",
+      "Medicion II-F",
+      "Palico I",
+      "Palico II",
+      "Palico III",
+      "Palico IV",
+      "Panacan I",
+      "Panacan II",
+      "Panacan III",
+      "Poblacion I-A",
+      "Poblacion I-B",
+      "Poblacion I-C",
+      "Poblacion II-A",
+      "Poblacion II-B",
+      "Poblacion III-A",
+      "Poblacion III-B",
+      "Poblacion IV-A",
+      "Poblacion IV-B",
+      "Poblacion IV-C",
+      "Poblacion IV-D",
+      "Tanzang Luma I",
+      "Tanzang Luma II",
+      "Tanzang Luma III",
+      "Tanzang Luma IV",
+      "Tanzang Luma V",
+      "Tanzang Luma VI",
+      "Toclong I-A",
+      "Toclong I-B",
+      "Toclong I-C",
+      "Toclong II-A",
+      "Toclong II-B",
+    ],
   },
-  "Batangas": {
-    "Batangas City": ["Alangilan", "Balagtas", "Balete", "Banaba Center", "Banaba Ibaba", "Banaba Kanluran", "Banaba Silangan", "Bilogo", "Bolbok", "Bukal", "Calicanto", "Calo", "Catandala", "Concepcion", "Conde Itaas", "Conde Labac", "Cumba", "Dumantay", "Gulod Itaas", "Gulod Labac", "Haligue Kanluran", "Haligue Silangan", "Ilijan", "Kumintang Ibaba", "Kumintang Ilaya", "Libjo", "Liponpon", "Maapaz", "Mahabang Dahilig", "Mahabang Parang", "Mahacot Kanluran", "Mahacot Silangan", "Malalim", "Malibayo", "Malitam", "Maruclap", "Mohon", "Pallocan Kanluran", "Pallocan Silangan", "Pinamucan", "Pinamucan Ibaba", "Poblacion", "Sampaga", "San Agapito", "San Agustin Kanluran", "San Agustin Silangan", "San Andres", "San Antonio", "San Isidro", "San Jose Sico", "Santa Clara", "Santa Rita Kita", "Santa Rita Aplaya", "Santo Domingo", "Santo Niño", "Simlong", "Sirang Lupa", "Sorosoro Ilaya", "Sorosoro Karsada", "Tabangao", "Talahib Pandayan", "Talahib Payapa", "Talumpok Kanluran", "Talumpok Silangan", "Tinga Itaas", "Tinga Labac", "Tingga Itaas", "Wawa"]
+  Batangas: {
+    "Batangas City": [
+      "Alangilan",
+      "Balagtas",
+      "Balete",
+      "Banaba Center",
+      "Banaba Ibaba",
+      "Banaba Kanluran",
+      "Banaba Silangan",
+      "Bilogo",
+      "Bolbok",
+      "Bukal",
+      "Calicanto",
+      "Calo",
+      "Catandala",
+      "Concepcion",
+      "Conde Itaas",
+      "Conde Labac",
+      "Cumba",
+      "Dumantay",
+      "Gulod Itaas",
+      "Gulod Labac",
+      "Haligue Kanluran",
+      "Haligue Silangan",
+      "Ilijan",
+      "Kumintang Ibaba",
+      "Kumintang Ilaya",
+      "Libjo",
+      "Liponpon",
+      "Maapaz",
+      "Mahabang Dahilig",
+      "Mahabang Parang",
+      "Mahacot Kanluran",
+      "Mahacot Silangan",
+      "Malalim",
+      "Malibayo",
+      "Malitam",
+      "Maruclap",
+      "Mohon",
+      "Pallocan Kanluran",
+      "Pallocan Silangan",
+      "Pinamucan",
+      "Pinamucan Ibaba",
+      "Poblacion",
+      "Sampaga",
+      "San Agapito",
+      "San Agustin Kanluran",
+      "San Agustin Silangan",
+      "San Andres",
+      "San Antonio",
+      "San Isidro",
+      "San Jose Sico",
+      "Santa Clara",
+      "Santa Rita Kita",
+      "Santa Rita Aplaya",
+      "Santo Domingo",
+      "Santo Niño",
+      "Simlong",
+      "Sirang Lupa",
+      "Sorosoro Ilaya",
+      "Sorosoro Karsada",
+      "Tabangao",
+      "Talahib Pandayan",
+      "Talahib Payapa",
+      "Talumpok Kanluran",
+      "Talumpok Silangan",
+      "Tinga Itaas",
+      "Tinga Labac",
+      "Tingga Itaas",
+      "Wawa",
+    ],
   },
-  "Rizal": {
-    "Antipolo": ["Bagong Nayon", "Beverly Hills", "Calawis", "Cupang", "Dalig", "dela Paz", "Inarawan", "Mambugan", "Mayamot", "Muntindilaw", "San Jose", "San Juan", "San Luis", "San Roque", "Santa Cruz", "Santo Niño", "Sta. Maria"]
+  Rizal: {
+    Antipolo: [
+      "Bagong Nayon",
+      "Beverly Hills",
+      "Calawis",
+      "Cupang",
+      "Dalig",
+      "dela Paz",
+      "Inarawan",
+      "Mambugan",
+      "Mayamot",
+      "Muntindilaw",
+      "San Jose",
+      "San Juan",
+      "San Luis",
+      "San Roque",
+      "Santa Cruz",
+      "Santo Niño",
+      "Sta. Maria",
+    ],
   },
   "Ilocos Norte": {
-    "Laoag City": ["Barit-Pandan", "Bengcag", "Buttong", "Gabu Norte", "Gabu Sur", "Nangalisan", "Poblacion", "San Matias", "Santa Angela", "Suyo", "Vira", "Zanjera Norte"]
+    "Laoag City": [
+      "Barit-Pandan",
+      "Bengcag",
+      "Buttong",
+      "Gabu Norte",
+      "Gabu Sur",
+      "Nangalisan",
+      "Poblacion",
+      "San Matias",
+      "Santa Angela",
+      "Suyo",
+      "Vira",
+      "Zanjera Norte",
+    ],
   },
-  "Albay": {
-    "Legazpi City": ["Arimbay", "Bagacay", "Banquerohan", "Bariis", "Bigaa", "Bitano", "Bogtong", "Bonot", "Buenavista", "Cabagan", "Cabagñan", "Cogon", "Cruzada", "Cutmog", "Dap-dap", "Dinagaan", "Dita", "Estanza", "Gogon", "Ilawod", "Kapantawan", "Kawit", "Lamba", "Legazpi Port", "Maoyod", "Padang", "Pawa", "Pigcale", "Poblacion", "Puro", "Rawis", "Sagpon", "San Joaquin", "San Rafael", "San Roque", "Tula-tula", "Victory Village Central", "Victory Village Norte", "Victory Village Sur", "Washington Drive"]
+  Albay: {
+    "Legazpi City": [
+      "Arimbay",
+      "Bagacay",
+      "Banquerohan",
+      "Bariis",
+      "Bigaa",
+      "Bitano",
+      "Bogtong",
+      "Bonot",
+      "Buenavista",
+      "Cabagan",
+      "Cabagñan",
+      "Cogon",
+      "Cruzada",
+      "Cutmog",
+      "Dap-dap",
+      "Dinagaan",
+      "Dita",
+      "Estanza",
+      "Gogon",
+      "Ilawod",
+      "Kapantawan",
+      "Kawit",
+      "Lamba",
+      "Legazpi Port",
+      "Maoyod",
+      "Padang",
+      "Pawa",
+      "Pigcale",
+      "Poblacion",
+      "Puro",
+      "Rawis",
+      "Sagpon",
+      "San Joaquin",
+      "San Rafael",
+      "San Roque",
+      "Tula-tula",
+      "Victory Village Central",
+      "Victory Village Norte",
+      "Victory Village Sur",
+      "Washington Drive",
+    ],
   },
-  "Palawan": {
-    "Puerto Princesa": ["Bagong Pag-asa", "Bagong Sikat", "Bagong Silang", "Bahile", "Barangay Bancao-bancao", "Barangay IV", "Barangay Maningning", "Barangay Maunlad", "Binduyan", "Buenavista", "Cabayugan", "Concepcion", "Inagawan", "Irawan", "Iwahig", "Kalipapa", "Kamuning", "Langogan", "Liwanag", "Lucbuan", "Luzviminda", "Magkakaibigan", "Makinabang", "Mandaragat", "Marufinas", "Masigla", "Maunlad", "Milagrosa", "Model", "Napsan", "New Pangkat", "Poblacion", "Salvacion", "San Jose", "San Manuel", "San Miguel", "San Pedro", "San Rafael", "Santa Cruz", "Santa Lourdes", "Santa Lucia", "Santa Monica", "Sicsican", "Simpocan", "Tagabinet", "Tagburos", "Tagumpay", "Tanabag", "Tanglaw", "Tiniguiban", "Tumarbong"]
-  }
+  Palawan: {
+    "Puerto Princesa": [
+      "Bagong Pag-asa",
+      "Bagong Sikat",
+      "Bagong Silang",
+      "Bahile",
+      "Barangay Bancao-bancao",
+      "Barangay IV",
+      "Barangay Maningning",
+      "Barangay Maunlad",
+      "Binduyan",
+      "Buenavista",
+      "Cabayugan",
+      "Concepcion",
+      "Inagawan",
+      "Irawan",
+      "Iwahig",
+      "Kalipapa",
+      "Kamuning",
+      "Langogan",
+      "Liwanag",
+      "Lucbuan",
+      "Luzviminda",
+      "Magkakaibigan",
+      "Makinabang",
+      "Mandaragat",
+      "Marufinas",
+      "Masigla",
+      "Maunlad",
+      "Milagrosa",
+      "Model",
+      "Napsan",
+      "New Pangkat",
+      "Poblacion",
+      "Salvacion",
+      "San Jose",
+      "San Manuel",
+      "San Miguel",
+      "San Pedro",
+      "San Rafael",
+      "Santa Cruz",
+      "Santa Lourdes",
+      "Santa Lucia",
+      "Santa Monica",
+      "Sicsican",
+      "Simpocan",
+      "Tagabinet",
+      "Tagburos",
+      "Tagumpay",
+      "Tanabag",
+      "Tanglaw",
+      "Tiniguiban",
+      "Tumarbong",
+    ],
+  },
 };
 
 const getProvinces = () => Object.keys(philippineLocations);
-const getCitiesByProvince = (province) => province ? Object.keys(philippineLocations[province] || {}) : [];
+const getCitiesByProvince = (province) =>
+  province ? Object.keys(philippineLocations[province] || {}) : [];
 const getBarangaysByCity = (province, city) => {
   if (!province || !city) return [];
   return philippineLocations[province]?.[city] || [];
@@ -105,76 +1217,70 @@ export default function VAProfile() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
-  
+
   // Cascading dropdown state for location
-  const [selectedProvince, setSelectedProvince] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
   const [availableCities, setAvailableCities] = useState([]);
   const [availableBarangays, setAvailableBarangays] = useState([]);
 
   // Fetch current VA profile
-  const { data: profile, isLoading } = useQuery(
-    'vaProfile',
-    async () => {
-      const response = await api.get('/vas/me');
-      return response.data.data;
-    }
-  );
+  const { data: profile, isLoading } = useQuery("vaProfile", async () => {
+    const response = await api.get("/vas/me");
+    return response.data.data;
+  });
 
   // Fetch specialties
-  const { data: specialties = [] } = useQuery(
-    'specialties',
-    async () => {
-      const response = await api.get('/specialties');
-      return response.data.data;
-    }
-  );
+  const { data: specialties = [] } = useQuery("specialties", async () => {
+    const response = await api.get("/specialties");
+    return response.data.data;
+  });
 
   // Update profile mutation
   const updateProfileMutation = useMutation(
     async (data) => {
-      const response = await api.put('/vas/me', data);
+      const response = await api.put("/vas/me", data);
       return response.data;
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries('vaProfile');
-        toast.success('Profile updated successfully');
+        queryClient.invalidateQueries("vaProfile");
+        toast.success("Profile updated successfully");
       },
       onError: (error) => {
-        toast.error(error.response?.data?.error || 'Failed to update profile');
+        toast.error(error.response?.data?.error || "Failed to update profile");
       },
     }
   );
 
   const formik = useFormik({
     initialValues: {
-      name: profile?.name || '',
-      hero: profile?.hero || '',
-      bio: profile?.bio || '',
+      name: profile?.name || "",
+      hero: profile?.hero || "",
+      bio: profile?.bio || "",
       location: {
-        street: profile?.location?.street || '',
-        province: profile?.location?.province || profile?.location?.state || '', // Backward compatibility
-        city: profile?.location?.city || '',
-        barangay: profile?.location?.barangay || '',
-        postal_code: profile?.location?.postal_code || '',
-        country: 'Philippines',
-        country_code: 'PH'
+        street: profile?.location?.street || "",
+        province: profile?.location?.province || profile?.location?.state || "", // Backward compatibility
+        city: profile?.location?.city || "",
+        barangay: profile?.location?.barangay || "",
+        postal_code: profile?.location?.postal_code || "",
+        country: "Philippines",
+        country_code: "PH",
       },
-      email: profile?.email || '',
-      phone: profile?.phone || '',
-      website: profile?.website || '',
-      meta: profile?.meta || '',
-      instagram: profile?.instagram || '',
-      linkedin: profile?.linkedin || '',
-      whatsapp: profile?.whatsapp || '',
-      twitter: profile?.twitter || '',
-      viber: profile?.viber || '',
-      schedulingLink: profile?.schedulingLink || '',
-      preferredMinHourlyRate: profile?.preferredMinHourlyRate || '',
-      preferredMaxHourlyRate: profile?.preferredMaxHourlyRate || '',
-      specialtyIds: profile?.specialties?.map(s => s._id) || [],
-      searchStatus: profile?.searchStatus || 'actively_looking',
+      email: profile?.email || "",
+      phone: profile?.phone || "",
+      website: profile?.website || "",
+      meta: profile?.meta || "",
+      instagram: profile?.instagram || "",
+      linkedin: profile?.linkedin || "",
+      whatsapp: profile?.whatsapp || "",
+      twitter: profile?.twitter || "",
+      viber: profile?.viber || "",
+      schedulingLink: profile?.schedulingLink || "",
+      preferredMinHourlyRate: profile?.preferredMinHourlyRate || "",
+      preferredMaxHourlyRate: profile?.preferredMaxHourlyRate || "",
+      specialtyIds: profile?.specialties?.map((s) => s._id) || [],
+      searchStatus: profile?.searchStatus || "actively_looking",
       roleType: {
         part_time_contract: profile?.roleType?.part_time_contract || false,
         full_time_contract: profile?.roleType?.full_time_contract || false,
@@ -187,19 +1293,27 @@ export default function VAProfile() {
         principal: profile?.roleLevel?.principal || false,
         c_level: profile?.roleLevel?.c_level || false,
       },
-      profileReminderNotifications: profile?.profileReminderNotifications ?? true,
-      productAnnouncementNotifications: profile?.productAnnouncementNotifications ?? true,
+      profileReminderNotifications:
+        profile?.profileReminderNotifications ?? true,
+      productAnnouncementNotifications:
+        profile?.productAnnouncementNotifications ?? true,
       // DISC Assessment fields
-      discPrimaryType: profile?.discAssessment?.primaryType || '',
-      discDominance: profile?.discAssessment?.scores?.dominance || '',
-      discInfluence: profile?.discAssessment?.scores?.influence || '',
-      discSteadiness: profile?.discAssessment?.scores?.steadiness || '',
-      discConscientiousness: profile?.discAssessment?.scores?.conscientiousness || '',
+      discPrimaryType: profile?.discAssessment?.primaryType || "",
+      discDominance: profile?.discAssessment?.scores?.dominance || "",
+      discInfluence: profile?.discAssessment?.scores?.influence || "",
+      discSteadiness: profile?.discAssessment?.scores?.steadiness || "",
+      discConscientiousness:
+        profile?.discAssessment?.scores?.conscientiousness || "",
     },
     validationSchema,
     enableReinitialize: true,
     onSubmit: (values) => {
-      updateProfileMutation.mutate(values);
+      console.log('Form submitted with values:', values);
+      if (!updateProfileMutation.isLoading) {
+        updateProfileMutation.mutate(values);
+      } else {
+        console.log('Mutation already in progress, skipping submission');
+      }
     },
   });
 
@@ -207,38 +1321,36 @@ export default function VAProfile() {
   const handleProvinceChange = (e) => {
     const province = e.target.value;
     setSelectedProvince(province);
-    setSelectedCity('');
+    setSelectedCity("");
     setAvailableCities(getCitiesByProvince(province));
     setAvailableBarangays([]);
-    
+
     // Update formik values
-    formik.setFieldValue('location.province', province);
-    formik.setFieldValue('location.city', '');
-    formik.setFieldValue('location.barangay', '');
+    formik.setFieldValue("location.province", province);
+    formik.setFieldValue("location.city", "");
+    formik.setFieldValue("location.barangay", "");
   };
 
   const handleCityChange = (e) => {
     const city = e.target.value;
     setSelectedCity(city);
     setAvailableBarangays(getBarangaysByCity(selectedProvince, city));
-    
+
     // Update formik values
-    formik.setFieldValue('location.city', city);
-    formik.setFieldValue('location.barangay', '');
+    formik.setFieldValue("location.city", city);
+    formik.setFieldValue("location.barangay", "");
   };
-
-
 
   // Initialize cascading dropdowns when profile loads
   React.useEffect(() => {
     if (profile?.location) {
       const province = profile.location.province || profile.location.state;
       const city = profile.location.city;
-      
+
       if (province) {
         setSelectedProvince(province);
         setAvailableCities(getCitiesByProvince(province));
-        
+
         if (city) {
           setSelectedCity(city);
           setAvailableBarangays(getBarangaysByCity(province, city));
@@ -247,39 +1359,76 @@ export default function VAProfile() {
     }
   }, [profile]);
 
+
+
   // Calculate profile completion percentage
   const profileCompletion = useMemo(() => {
     const values = formik.values;
     const requiredFields = [
       // Essential fields (high weight)
-      { field: 'name', weight: 10, check: () => values.name?.trim() },
-      { field: 'hero', weight: 10, check: () => values.hero?.trim() },
-      { field: 'bio', weight: 15, check: () => values.bio?.length >= 100 },
-      { field: 'location', weight: 10, check: () => values.location?.city && values.location?.province && values.location?.barangay },
-      { field: 'email', weight: 10, check: () => values.email?.trim() },
-      { field: 'specialties', weight: 15, check: () => values.specialtyIds?.length > 0 },
-      { field: 'roleType', weight: 5, check: () => Object.values(values.roleType || {}).some(Boolean) },
-      { field: 'roleLevel', weight: 5, check: () => Object.values(values.roleLevel || {}).some(Boolean) },
-      
+      { field: "name", weight: 10, check: () => values.name?.trim() },
+      { field: "hero", weight: 10, check: () => values.hero?.trim() },
+      { field: "bio", weight: 15, check: () => values.bio?.length >= 100 },
+      {
+        field: "location",
+        weight: 10,
+        check: () =>
+          values.location?.city &&
+          values.location?.province &&
+          values.location?.barangay,
+      },
+      { field: "email", weight: 10, check: () => values.email?.trim() },
+      {
+        field: "specialties",
+        weight: 15,
+        check: () => values.specialtyIds?.length > 0,
+      },
+      {
+        field: "roleType",
+        weight: 5,
+        check: () => Object.values(values.roleType || {}).some(Boolean),
+      },
+      {
+        field: "roleLevel",
+        weight: 5,
+        check: () => Object.values(values.roleLevel || {}).some(Boolean),
+      },
+
       // Enhanced fields (medium weight)
-      { field: 'hourlyRate', weight: 10, check: () => values.preferredMinHourlyRate && values.preferredMaxHourlyRate },
-      { field: 'phone', weight: 5, check: () => values.phone?.trim() },
-      { field: 'onlinePresence', weight: 5, check: () => values.website?.trim() || values.linkedin?.trim() },
-      { field: 'discAssessment', weight: 10, check: () => values.discPrimaryType }
+      {
+        field: "hourlyRate",
+        weight: 10,
+        check: () =>
+          values.preferredMinHourlyRate && values.preferredMaxHourlyRate,
+      },
+      { field: "phone", weight: 5, check: () => values.phone?.trim() },
+      {
+        field: "onlinePresence",
+        weight: 5,
+        check: () => values.website?.trim() || values.linkedin?.trim(),
+      },
+      {
+        field: "discAssessment",
+        weight: 10,
+        check: () => values.discPrimaryType,
+      },
     ];
 
-    const totalWeight = requiredFields.reduce((sum, field) => sum + field.weight, 0);
+    const totalWeight = requiredFields.reduce(
+      (sum, field) => sum + field.weight,
+      0
+    );
     const completedWeight = requiredFields.reduce((sum, field) => {
       return sum + (field.check() ? field.weight : 0);
     }, 0);
 
     const percentage = Math.round((completedWeight / totalWeight) * 100);
-    const missingFields = requiredFields.filter(field => !field.check());
+    const missingFields = requiredFields.filter((field) => !field.check());
 
     return {
       percentage,
       missingFields,
-      isComplete: percentage === 100
+      isComplete: percentage === 100,
     };
   }, [formik.values]);
 
@@ -288,14 +1437,14 @@ export default function VAProfile() {
     if (!file) return;
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select a valid image file');
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file");
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image file size must be less than 5MB');
+      toast.error("Image file size must be less than 5MB");
       return;
     }
 
@@ -309,21 +1458,23 @@ export default function VAProfile() {
     // Upload to server
     setUploadingCover(true);
     const formData = new FormData();
-    formData.append('image', file);
-    formData.append('type', 'cover');
+    formData.append("image", file);
+    formData.append("type", "cover");
 
     try {
-      const response = await api.post('/vas/me/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const response = await api.post("/vas/me/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      
+
       // Update the profile with new cover image URL
-      await api.put('/vas/me', { coverImage: response.data.url });
-      queryClient.invalidateQueries('vaProfile');
-      toast.success('Cover image updated successfully');
+      await api.put("/vas/me", { coverImage: response.data.url });
+      queryClient.invalidateQueries("vaProfile");
+      toast.success("Cover image updated successfully");
     } catch (error) {
-      console.error('Cover upload error:', error);
-      toast.error(error.response?.data?.error || 'Failed to upload cover image');
+      console.error("Cover upload error:", error);
+      toast.error(
+        error.response?.data?.error || "Failed to upload cover image"
+      );
       setCoverPreview(null);
     } finally {
       setUploadingCover(false);
@@ -335,14 +1486,14 @@ export default function VAProfile() {
     if (!file) return;
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select a valid image file');
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file");
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image file size must be less than 5MB');
+      toast.error("Image file size must be less than 5MB");
       return;
     }
 
@@ -356,21 +1507,23 @@ export default function VAProfile() {
     // Upload to server
     setUploadingAvatar(true);
     const formData = new FormData();
-    formData.append('image', file);
-    formData.append('type', 'avatar');
+    formData.append("image", file);
+    formData.append("type", "avatar");
 
     try {
-      const response = await api.post('/vas/me/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const response = await api.post("/vas/me/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      
+
       // Update the profile with new avatar URL
-      await api.put('/vas/me', { avatar: response.data.url });
-      queryClient.invalidateQueries('vaProfile');
-      toast.success('Profile picture updated successfully');
+      await api.put("/vas/me", { avatar: response.data.url });
+      queryClient.invalidateQueries("vaProfile");
+      toast.success("Profile picture updated successfully");
     } catch (error) {
-      console.error('Avatar upload error:', error);
-      toast.error(error.response?.data?.error || 'Failed to upload profile picture');
+      console.error("Avatar upload error:", error);
+      toast.error(
+        error.response?.data?.error || "Failed to upload profile picture"
+      );
       setAvatarPreview(null);
     } finally {
       setUploadingAvatar(false);
@@ -382,14 +1535,14 @@ export default function VAProfile() {
     if (!file) return;
 
     // Validate file type
-    if (!file.type.startsWith('video/')) {
-      toast.error('Please select a valid video file');
+    if (!file.type.startsWith("video/")) {
+      toast.error("Please select a valid video file");
       return;
     }
 
     // Validate file size (max 500MB)
     if (file.size > 500 * 1024 * 1024) {
-      toast.error('Video file size must be less than 500MB');
+      toast.error("Video file size must be less than 500MB");
       return;
     }
 
@@ -397,23 +1550,25 @@ export default function VAProfile() {
     setVideoProgress(0);
 
     const formData = new FormData();
-    formData.append('video', file);
+    formData.append("video", file);
 
     try {
-      const response = await api.post('/vas/me/upload-video', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const response = await api.post("/vas/me/upload-video", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
           setVideoProgress(percentCompleted);
         },
       });
-      
-      await api.put('/vas/me', { videoIntroduction: response.data.url });
-      queryClient.invalidateQueries('vaProfile');
-      toast.success('Video uploaded successfully');
+
+      await api.put("/vas/me", { videoIntroduction: response.data.url });
+      queryClient.invalidateQueries("vaProfile");
+      toast.success("Video uploaded successfully");
     } catch (error) {
-      console.error('Video upload error:', error);
-      toast.error(error.response?.data?.error || 'Failed to upload video');
+      console.error("Video upload error:", error);
+      toast.error(error.response?.data?.error || "Failed to upload video");
     } finally {
       setUploadingVideo(false);
       setVideoProgress(0);
@@ -444,7 +1599,10 @@ export default function VAProfile() {
               {!profileCompletion.isComplete && (
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 relative">
-                    <svg className="w-8 h-8 transform -rotate-90" viewBox="0 0 32 32">
+                    <svg
+                      className="w-8 h-8 transform -rotate-90"
+                      viewBox="0 0 32 32"
+                    >
                       <circle
                         cx="16"
                         cy="16"
@@ -461,20 +1619,28 @@ export default function VAProfile() {
                         stroke="currentColor"
                         strokeWidth="3"
                         fill="transparent"
-                        strokeDasharray={`${profileCompletion.percentage * 0.88} 88`}
+                        strokeDasharray={`${
+                          profileCompletion.percentage * 0.88
+                        } 88`}
                         className={
-                          profileCompletion.percentage >= 80 ? 'text-green-500' :
-                          profileCompletion.percentage >= 60 ? 'text-yellow-500' :
-                          'text-red-500'
+                          profileCompletion.percentage >= 80
+                            ? "text-green-500"
+                            : profileCompletion.percentage >= 60
+                            ? "text-yellow-500"
+                            : "text-red-500"
                         }
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className={`text-xs font-bold ${
-                        profileCompletion.percentage >= 80 ? 'text-green-600' :
-                        profileCompletion.percentage >= 60 ? 'text-yellow-600' :
-                        'text-red-600'
-                      }`}>
+                      <span
+                        className={`text-xs font-bold ${
+                          profileCompletion.percentage >= 80
+                            ? "text-green-600"
+                            : profileCompletion.percentage >= 60
+                            ? "text-yellow-600"
+                            : "text-red-600"
+                        }`}
+                      >
                         {profileCompletion.percentage}%
                       </span>
                     </div>
@@ -508,9 +1674,15 @@ export default function VAProfile() {
                     <CheckCircleIcon className="h-5 w-5 text-green-400" />
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-green-800">🎉 Profile Complete!</h3>
+                    <h3 className="text-sm font-medium text-green-800">
+                      🎉 Profile Complete!
+                    </h3>
                     <div className="mt-2 text-sm text-green-700">
-                      <p>Excellent! Your profile is 100% complete. Businesses can now find and connect with you more easily. Keep your information updated to stay competitive.</p>
+                      <p>
+                        Excellent! Your profile is 100% complete. Businesses can
+                        now find and connect with you more easily. Keep your
+                        information updated to stay competitive.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -523,9 +1695,12 @@ export default function VAProfile() {
             <section className="bg-white shadow px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h2 className="text-lg font-medium leading-6 text-gray-900">Profile</h2>
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">
+                    Profile
+                  </h2>
                   <p className="mt-2 text-sm text-gray-500">
-                    This information will be displayed publicly so be careful what you share.
+                    This information will be displayed publicly so be careful
+                    what you share.
                   </p>
                 </div>
 
@@ -533,7 +1708,10 @@ export default function VAProfile() {
                   <div className="space-y-6">
                     {/* Name */}
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="name"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Full Name
                       </label>
                       <div className="mt-1">
@@ -546,22 +1724,28 @@ export default function VAProfile() {
                           onBlur={formik.handleBlur}
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.name && formik.errors.name
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                              ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                              : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
                           }`}
                         />
                       </div>
                       <p className="mt-2 text-sm text-gray-500">
-                        Your name will be displayed on your profile and in search results.
+                        Your name will be displayed on your profile and in
+                        search results.
                       </p>
                       {formik.touched.name && formik.errors.name && (
-                        <p className="mt-1 text-sm text-red-600">{formik.errors.name}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {formik.errors.name}
+                        </p>
                       )}
                     </div>
 
                     {/* Hero */}
                     <div>
-                      <label htmlFor="hero" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="hero"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Hero Statement
                       </label>
                       <div className="mt-1">
@@ -575,8 +1759,8 @@ export default function VAProfile() {
                           placeholder="e.g., Virtual Assistant specializing in e-commerce support"
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.hero && formik.errors.hero
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                              ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                              : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
                           }`}
                         />
                       </div>
@@ -584,7 +1768,9 @@ export default function VAProfile() {
                         A brief statement that describes what you do.
                       </p>
                       {formik.touched.hero && formik.errors.hero && (
-                        <p className="mt-1 text-sm text-red-600">{formik.errors.hero}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {formik.errors.hero}
+                        </p>
                       )}
                     </div>
 
@@ -593,7 +1779,10 @@ export default function VAProfile() {
                       <div className="space-y-4">
                         {/* Street Address */}
                         <div>
-                          <label htmlFor="location.street" className="block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="location.street"
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Street Address
                           </label>
                           <div className="mt-1">
@@ -611,7 +1800,10 @@ export default function VAProfile() {
 
                         {/* Province */}
                         <div>
-                          <label htmlFor="location.province" className="block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="location.province"
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Province *
                           </label>
                           <div className="mt-1">
@@ -622,26 +1814,35 @@ export default function VAProfile() {
                               onChange={handleProvinceChange}
                               onBlur={formik.handleBlur}
                               className={`block w-full rounded-md shadow-sm sm:text-sm ${
-                                formik.touched.location?.province && formik.errors.location?.province
-                                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                  : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                                formik.touched.location?.province &&
+                                formik.errors.location?.province
+                                  ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                                  : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
                               }`}
                             >
                               <option value="">Select Province</option>
-                              {getProvinces().map(province => (
-                                <option key={province} value={province}>{province}</option>
+                              {getProvinces().map((province) => (
+                                <option key={province} value={province}>
+                                  {province}
+                                </option>
                               ))}
                             </select>
                           </div>
-                          {formik.touched.location?.province && formik.errors.location?.province && (
-                            <p className="mt-1 text-sm text-red-600">{formik.errors.location.province}</p>
-                          )}
+                          {formik.touched.location?.province &&
+                            formik.errors.location?.province && (
+                              <p className="mt-1 text-sm text-red-600">
+                                {formik.errors.location.province}
+                              </p>
+                            )}
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {/* City */}
                           <div>
-                            <label htmlFor="location.city" className="block text-sm font-medium text-gray-700">
+                            <label
+                              htmlFor="location.city"
+                              className="block text-sm font-medium text-gray-700"
+                            >
                               City *
                             </label>
                             <div className="mt-1">
@@ -653,25 +1854,38 @@ export default function VAProfile() {
                                 onBlur={formik.handleBlur}
                                 disabled={!selectedProvince}
                                 className={`block w-full rounded-md shadow-sm sm:text-sm ${
-                                  formik.touched.location?.city && formik.errors.location?.city
-                                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                    : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
-                                } ${!selectedProvince ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                                  formik.touched.location?.city &&
+                                  formik.errors.location?.city
+                                    ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                                    : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
+                                } ${
+                                  !selectedProvince
+                                    ? "bg-gray-50 cursor-not-allowed"
+                                    : ""
+                                }`}
                               >
                                 <option value="">Select City</option>
-                                {availableCities.map(city => (
-                                  <option key={city} value={city}>{city}</option>
+                                {availableCities.map((city) => (
+                                  <option key={city} value={city}>
+                                    {city}
+                                  </option>
                                 ))}
                               </select>
                             </div>
-                            {formik.touched.location?.city && formik.errors.location?.city && (
-                              <p className="mt-1 text-sm text-red-600">{formik.errors.location.city}</p>
-                            )}
+                            {formik.touched.location?.city &&
+                              formik.errors.location?.city && (
+                                <p className="mt-1 text-sm text-red-600">
+                                  {formik.errors.location.city}
+                                </p>
+                              )}
                           </div>
 
                           {/* Barangay */}
                           <div>
-                            <label htmlFor="location.barangay" className="block text-sm font-medium text-gray-700">
+                            <label
+                              htmlFor="location.barangay"
+                              className="block text-sm font-medium text-gray-700"
+                            >
                               Barangay *
                             </label>
                             <div className="mt-1">
@@ -683,27 +1897,40 @@ export default function VAProfile() {
                                 onBlur={formik.handleBlur}
                                 disabled={!selectedCity}
                                 className={`block w-full rounded-md shadow-sm sm:text-sm ${
-                                  formik.touched.location?.barangay && formik.errors.location?.barangay
-                                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                    : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
-                                } ${!selectedCity ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                                  formik.touched.location?.barangay &&
+                                  formik.errors.location?.barangay
+                                    ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                                    : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
+                                } ${
+                                  !selectedCity
+                                    ? "bg-gray-50 cursor-not-allowed"
+                                    : ""
+                                }`}
                               >
                                 <option value="">Select Barangay</option>
-                                {availableBarangays.map(barangay => (
-                                  <option key={barangay} value={barangay}>{barangay}</option>
+                                {availableBarangays.map((barangay) => (
+                                  <option key={barangay} value={barangay}>
+                                    {barangay}
+                                  </option>
                                 ))}
                               </select>
                             </div>
-                            {formik.touched.location?.barangay && formik.errors.location?.barangay && (
-                              <p className="mt-1 text-sm text-red-600">{formik.errors.location.barangay}</p>
-                            )}
+                            {formik.touched.location?.barangay &&
+                              formik.errors.location?.barangay && (
+                                <p className="mt-1 text-sm text-red-600">
+                                  {formik.errors.location.barangay}
+                                </p>
+                              )}
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {/* Postal Code */}
                           <div>
-                            <label htmlFor="location.postal_code" className="block text-sm font-medium text-gray-700">
+                            <label
+                              htmlFor="location.postal_code"
+                              className="block text-sm font-medium text-gray-700"
+                            >
                               Postal Code
                             </label>
                             <div className="mt-1">
@@ -720,7 +1947,7 @@ export default function VAProfile() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="mt-4 p-3 bg-blue-50 rounded-md">
                         <div className="flex">
                           <div className="flex-shrink-0">
@@ -728,7 +1955,9 @@ export default function VAProfile() {
                           </div>
                           <div className="ml-3">
                             <p className="text-sm text-blue-700">
-                              🇵🇭 All VAs on Linkage VA Hub are based in the Philippines (GMT+8 timezone). This helps businesses plan collaboration and meetings.
+                              🇵🇭 All VAs on Linkage VA Hub are based in the
+                              Philippines (GMT+8 timezone). This helps
+                              businesses plan collaboration and meetings.
                             </p>
                           </div>
                         </div>
@@ -737,7 +1966,9 @@ export default function VAProfile() {
 
                     {/* Avatar */}
                     <div>
-                      <span className="block text-sm font-medium text-gray-700">Profile Picture</span>
+                      <span className="block text-sm font-medium text-gray-700">
+                        Profile Picture
+                      </span>
                       <div className="mt-1 flex items-center">
                         <div className="relative">
                           {profile?.avatar || avatarPreview ? (
@@ -749,7 +1980,7 @@ export default function VAProfile() {
                           ) : (
                             <div className="h-24 w-24 rounded-full bg-gray-300 flex items-center justify-center">
                               <span className="text-3xl font-medium text-gray-700">
-                                {formik.values.name?.[0]?.toUpperCase() || 'V'}
+                                {formik.values.name?.[0]?.toUpperCase() || "V"}
                               </span>
                             </div>
                           )}
@@ -778,15 +2009,23 @@ export default function VAProfile() {
 
                     {/* Cover Image */}
                     <div>
-                      <span className="block text-sm font-medium text-gray-700">Cover Image</span>
+                      <span className="block text-sm font-medium text-gray-700">
+                        Cover Image
+                      </span>
                       <p className="mt-1 text-sm text-gray-500">
-                        Upload a professional banner image for your profile. Best dimensions: 1200×400 pixels. PNG, JPG, GIF up to 10MB.
+                        Upload a professional banner image for your profile.
+                        Best dimensions: 1200×400 pixels. PNG, JPG, GIF up to
+                        10MB.
                       </p>
                       <div className="relative mt-2">
                         <div className="relative h-48 rounded-md overflow-hidden bg-gray-100">
                           <img
                             className="w-full h-full object-cover"
-                            src={coverPreview || profile?.coverImage || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&h=300&fit=crop'}
+                            src={
+                              coverPreview ||
+                              profile?.coverImage ||
+                              "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&h=300&fit=crop"
+                            }
                             alt="Cover"
                           />
                           {uploadingCover && (
@@ -820,13 +2059,20 @@ export default function VAProfile() {
             <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Contact Information</h3>
-                  <p className="mt-1 text-sm text-gray-500">Your contact details for employers to reach you.</p>
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">
+                    Contact Information
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Your contact details for employers to reach you.
+                  </p>
                 </div>
                 <div className="mt-5 md:mt-0 md:col-span-2">
                   <div className="space-y-6">
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="email"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Email Address
                       </label>
                       <div className="mt-1">
@@ -840,16 +2086,22 @@ export default function VAProfile() {
                           placeholder="your.email@example.com"
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.email && formik.errors.email
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                              ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                              : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
                           }`}
                         />
                       </div>
-                      <p className="mt-2 text-sm text-gray-500">Your professional email address for employers to contact you.</p>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Your professional email address for employers to contact
+                        you.
+                      </p>
                     </div>
-                    
+
                     <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="phone"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Phone Number
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
@@ -866,7 +2118,10 @@ export default function VAProfile() {
                           className="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                         />
                       </div>
-                      <p className="mt-2 text-sm text-gray-500">Your primary phone number for employers to contact you directly.</p>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Your primary phone number for employers to contact you
+                        directly.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -877,24 +2132,40 @@ export default function VAProfile() {
             <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h2 className="text-lg font-medium leading-6 text-gray-900">Video Introduction</h2>
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">
+                    Video Introduction
+                  </h2>
                   <p className="mt-2 text-sm text-gray-500">
-                    A short video introduction helps you stand out. Upload a 1-2 minute video telling employers about yourself.
+                    A short video introduction helps you stand out. Upload a 1-2
+                    minute video telling employers about yourself.
                   </p>
-                  <p className="mt-2 text-sm text-gray-500">Videos up to 1GB are supported.</p>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Videos up to 1GB are supported.
+                  </p>
                 </div>
 
                 <div className="mt-5 md:mt-0 md:col-span-2">
                   <div className="space-y-6">
                     {profile?.videoIntroduction ? (
                       <div>
-                        <div className="relative bg-gray-100 rounded-lg overflow-hidden" style={{ aspectRatio: '16/9' }}>
-                          <video controls className="w-full h-full object-cover">
-                            <source src={profile.videoIntroduction} type="video/mp4" />
+                        <div
+                          className="relative bg-gray-100 rounded-lg overflow-hidden"
+                          style={{ aspectRatio: "16/9" }}
+                        >
+                          <video
+                            controls
+                            className="w-full h-full object-cover"
+                          >
+                            <source
+                              src={profile.videoIntroduction}
+                              type="video/mp4"
+                            />
                             Your browser does not support the video tag.
                           </video>
                         </div>
-                        <p className="mt-2 text-sm text-green-600 text-center">✓ Video uploaded successfully</p>
+                        <p className="mt-2 text-sm text-green-600 text-center">
+                          ✓ Video uploaded successfully
+                        </p>
                         <div className="text-center mt-4">
                           <button
                             type="button"
@@ -911,7 +2182,7 @@ export default function VAProfile() {
                         <div className="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-blue-100 mb-4">
                           <VideoCameraIcon className="h-12 w-12 text-blue-600" />
                         </div>
-                        
+
                         <button
                           type="button"
                           onClick={() => videoInputRef.current?.click()}
@@ -920,9 +2191,13 @@ export default function VAProfile() {
                           <ArrowUpTrayIcon className="-ml-1 mr-3 h-6 w-6" />
                           Upload Video Introduction
                         </button>
-                        
-                        <p className="mt-3 text-sm text-gray-500">Upload a 1-2 minute video introducing yourself</p>
-                        <p className="mt-1 text-xs text-gray-400">MP4, MOV, WebM up to 1GB</p>
+
+                        <p className="mt-3 text-sm text-gray-500">
+                          Upload a 1-2 minute video introducing yourself
+                        </p>
+                        <p className="mt-1 text-xs text-gray-400">
+                          MP4, MOV, WebM up to 1GB
+                        </p>
                       </div>
                     )}
 
@@ -931,22 +2206,41 @@ export default function VAProfile() {
                         <div className="flex items-center">
                           <div className="flex-shrink-0">
                             <div className="animate-spin h-8 w-8 text-blue-600">
-                              <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              <svg
+                                className="h-8 w-8"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
                               </svg>
                             </div>
                           </div>
                           <div className="ml-4 flex-1">
-                            <h3 className="text-sm font-medium text-blue-800">Uploading video...</h3>
+                            <h3 className="text-sm font-medium text-blue-800">
+                              Uploading video...
+                            </h3>
                             <div className="mt-2">
                               <div className="bg-white rounded-full h-2">
-                                <div 
-                                  className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                <div
+                                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                                   style={{ width: `${videoProgress}%` }}
                                 ></div>
                               </div>
-                              <p className="mt-2 text-sm text-blue-600">{videoProgress}% complete</p>
+                              <p className="mt-2 text-sm text-blue-600">
+                                {videoProgress}% complete
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -969,12 +2263,17 @@ export default function VAProfile() {
             <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h2 className="text-lg font-medium leading-6 text-gray-900">Bio</h2>
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">
+                    Bio
+                  </h2>
                   <p className="mt-2 text-sm text-gray-500">
-                    Share some information about yourself. What you did before, what you're doing now, and what you're looking for next.
+                    Share some information about yourself. What you did before,
+                    what you're doing now, and what you're looking for next.
                   </p>
 
-                  <h4 className="font-medium uppercase tracking-wide text-gray-500 text-sm mt-4">EXAMPLES</h4>
+                  <h4 className="font-medium uppercase tracking-wide text-gray-500 text-sm mt-4">
+                    EXAMPLES
+                  </h4>
                   <ul className="text-sm text-gray-500 list-disc list-inside">
                     <li className="mt-1">Where you're originally from</li>
                     <li className="mt-1">What you've accomplished</li>
@@ -984,7 +2283,9 @@ export default function VAProfile() {
                     <li className="mt-1">What makes you unique</li>
                   </ul>
 
-                  <p className="mt-4 text-sm text-gray-500">You can use Markdown for formatting.</p>
+                  <p className="mt-4 text-sm text-gray-500">
+                    You can use Markdown for formatting.
+                  </p>
                 </div>
 
                 <div className="mt-5 md:mt-0 md:col-span-2">
@@ -999,15 +2300,18 @@ export default function VAProfile() {
                         onBlur={formik.handleBlur}
                         className={`block w-full rounded-md shadow-sm sm:text-sm ${
                           formik.touched.bio && formik.errors.bio
-                            ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                            : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                            ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                            : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
                         }`}
                       />
                       <p className="mt-2 text-sm text-gray-500">
-                        {formik.values.bio.length} characters. Minimum 100 characters.
+                        {formik.values.bio.length} characters. Minimum 100
+                        characters.
                       </p>
                       {formik.touched.bio && formik.errors.bio && (
-                        <p className="mt-1 text-sm text-red-600">{formik.errors.bio}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {formik.errors.bio}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -1019,17 +2323,30 @@ export default function VAProfile() {
             <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div>
-                  <h2 className="text-lg font-medium leading-6 text-gray-900">Specialties</h2>
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">
+                    Specialties
+                  </h2>
                   <p className="mt-2 text-sm text-gray-500">
-                    Pick the things you're good at, have experience with, or want to learn.
+                    Pick the things you're good at, have experience with, or
+                    want to learn.
                   </p>
                   <p className="mt-2 text-sm text-gray-500">
-                    Missing a specialty? <a href="mailto:hello@linkage.ph?subject=New specialty suggestion" className="text-gray-700 font-medium underline hover:text-gray-900">Let us know</a>.
+                    Missing a specialty?{" "}
+                    <a
+                      href="mailto:hello@linkage.ph?subject=New specialty suggestion"
+                      className="text-gray-700 font-medium underline hover:text-gray-900"
+                    >
+                      Let us know
+                    </a>
+                    .
                   </p>
 
-                  <h4 className="font-medium uppercase tracking-wide text-gray-500 text-sm mt-4">NOTE</h4>
+                  <h4 className="font-medium uppercase tracking-wide text-gray-500 text-sm mt-4">
+                    NOTE
+                  </h4>
                   <p className="mt-1 text-sm text-gray-500">
-                    These affect the search results and are public, so be honest about your skills.
+                    These affect the search results and are public, so be honest
+                    about your skills.
                   </p>
                 </div>
 
@@ -1042,18 +2359,31 @@ export default function VAProfile() {
                             type="checkbox"
                             id={`specialty-${specialty._id}`}
                             value={specialty._id}
-                            checked={formik.values.specialtyIds.includes(specialty._id)}
+                            checked={formik.values.specialtyIds.includes(
+                              specialty._id
+                            )}
                             onChange={(e) => {
                               const { checked, value } = e.target;
                               if (checked) {
-                                formik.setFieldValue('specialtyIds', [...formik.values.specialtyIds, value]);
+                                formik.setFieldValue("specialtyIds", [
+                                  ...formik.values.specialtyIds,
+                                  value,
+                                ]);
                               } else {
-                                formik.setFieldValue('specialtyIds', formik.values.specialtyIds.filter(id => id !== value));
+                                formik.setFieldValue(
+                                  "specialtyIds",
+                                  formik.values.specialtyIds.filter(
+                                    (id) => id !== value
+                                  )
+                                );
                               }
                             }}
                             className="h-4 w-4 border-gray-300 rounded text-gray-600 focus:ring-gray-500"
                           />
-                          <label htmlFor={`specialty-${specialty._id}`} className="ml-3 text-sm text-gray-700">
+                          <label
+                            htmlFor={`specialty-${specialty._id}`}
+                            className="ml-3 text-sm text-gray-700"
+                          >
                             {specialty.name}
                           </label>
                         </div>
@@ -1068,23 +2398,30 @@ export default function VAProfile() {
             <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div>
-                  <h2 className="text-lg font-medium leading-6 text-gray-900">DISC Personality Assessment</h2>
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">
+                    DISC Personality Assessment
+                  </h2>
                   <p className="mt-2 text-sm text-gray-500">
-                    Help businesses understand your personality type and working style by completing a DISC assessment.
+                    Help businesses understand your personality type and working
+                    style by completing a DISC assessment.
                   </p>
                   <p className="mt-2 text-sm text-gray-500">
-                    <a 
-                      href="https://openpsychometrics.org/tests/ODAT/" 
-                      target="_blank" 
+                    <a
+                      href="https://openpsychometrics.org/tests/ODAT/"
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-gray-700 font-medium underline hover:text-gray-900"
                     >
                       Take the free DISC test
-                    </a> (4-6 minutes) and enter your results below.
+                    </a>{" "}
+                    (4-6 minutes) and enter your results below.
                   </p>
-                  <h4 className="font-medium uppercase tracking-wide text-gray-500 text-sm mt-4">ABOUT DISC</h4>
+                  <h4 className="font-medium uppercase tracking-wide text-gray-500 text-sm mt-4">
+                    ABOUT DISC
+                  </h4>
                   <p className="mt-1 text-sm text-gray-500">
-                    DISC measures four personality types: Dominance (D), Influence (I), Steadiness (S), and Conscientiousness (C).
+                    DISC measures four personality types: Dominance (D),
+                    Influence (I), Steadiness (S), and Conscientiousness (C).
                   </p>
                 </div>
 
@@ -1092,28 +2429,46 @@ export default function VAProfile() {
                   <div className="space-y-6">
                     {/* Primary DISC Type */}
                     <div>
-                      <label htmlFor="discPrimaryType" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="discPrimaryType"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Primary DISC Type
                       </label>
                       <select
                         id="discPrimaryType"
                         name="discPrimaryType"
-                        value={formik.values.discPrimaryType || ''}
+                        value={formik.values.discPrimaryType || ""}
                         onChange={formik.handleChange}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                       >
                         <option value="">Select your primary type</option>
-                        <option value="D">D - Dominance (Direct, Results-oriented, Firm, Strong-willed)</option>
-                        <option value="I">I - Influence (Outgoing, Enthusiastic, Optimistic, People-oriented)</option>
-                        <option value="S">S - Steadiness (Even-tempered, Accommodating, Patient, Humble)</option>
-                        <option value="C">C - Conscientiousness (Analytical, Reserved, Precise, Systematic)</option>
+                        <option value="D">
+                          D - Dominance (Direct, Results-oriented, Firm,
+                          Strong-willed)
+                        </option>
+                        <option value="I">
+                          I - Influence (Outgoing, Enthusiastic, Optimistic,
+                          People-oriented)
+                        </option>
+                        <option value="S">
+                          S - Steadiness (Even-tempered, Accommodating, Patient,
+                          Humble)
+                        </option>
+                        <option value="C">
+                          C - Conscientiousness (Analytical, Reserved, Precise,
+                          Systematic)
+                        </option>
                       </select>
                     </div>
 
                     {/* DISC Scores */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="discDominance" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="discDominance"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Dominance Score (0-100)
                         </label>
                         <input
@@ -1122,14 +2477,17 @@ export default function VAProfile() {
                           name="discDominance"
                           min="0"
                           max="100"
-                          value={formik.values.discDominance || ''}
+                          value={formik.values.discDominance || ""}
                           onChange={formik.handleChange}
                           className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                           placeholder="0"
                         />
                       </div>
                       <div>
-                        <label htmlFor="discInfluence" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="discInfluence"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Influence Score (0-100)
                         </label>
                         <input
@@ -1138,14 +2496,17 @@ export default function VAProfile() {
                           name="discInfluence"
                           min="0"
                           max="100"
-                          value={formik.values.discInfluence || ''}
+                          value={formik.values.discInfluence || ""}
                           onChange={formik.handleChange}
                           className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                           placeholder="0"
                         />
                       </div>
                       <div>
-                        <label htmlFor="discSteadiness" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="discSteadiness"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Steadiness Score (0-100)
                         </label>
                         <input
@@ -1154,14 +2515,17 @@ export default function VAProfile() {
                           name="discSteadiness"
                           min="0"
                           max="100"
-                          value={formik.values.discSteadiness || ''}
+                          value={formik.values.discSteadiness || ""}
                           onChange={formik.handleChange}
                           className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                           placeholder="0"
                         />
                       </div>
                       <div>
-                        <label htmlFor="discConscientiousness" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="discConscientiousness"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Conscientiousness Score (0-100)
                         </label>
                         <input
@@ -1170,7 +2534,7 @@ export default function VAProfile() {
                           name="discConscientiousness"
                           min="0"
                           max="100"
-                          value={formik.values.discConscientiousness || ''}
+                          value={formik.values.discConscientiousness || ""}
                           onChange={formik.handleChange}
                           className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                           placeholder="0"
@@ -1183,14 +2547,23 @@ export default function VAProfile() {
                       <div className="bg-green-50 border border-green-200 rounded-md p-4">
                         <div className="flex">
                           <div className="flex-shrink-0">
-                            <InformationCircleIcon className="h-5 w-5 text-green-400" aria-hidden="true" />
+                            <InformationCircleIcon
+                              className="h-5 w-5 text-green-400"
+                              aria-hidden="true"
+                            />
                           </div>
                           <div className="ml-3">
                             <h3 className="text-sm font-medium text-green-800">
                               DISC Assessment Completed
                             </h3>
                             <div className="mt-2 text-sm text-green-700">
-                              <p>Your primary type is <strong>{formik.values.discPrimaryType}</strong>. This will be displayed on your public profile to help businesses understand your working style.</p>
+                              <p>
+                                Your primary type is{" "}
+                                <strong>{formik.values.discPrimaryType}</strong>
+                                . This will be displayed on your public profile
+                                to help businesses understand your working
+                                style.
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -1205,8 +2578,12 @@ export default function VAProfile() {
             <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h2 className="text-lg font-medium leading-6 text-gray-900">Work preferences</h2>
-                  <p className="mt-2 text-sm text-gray-500">Let businesses know your work preferences and availability.</p>
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">
+                    Work preferences
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Let businesses know your work preferences and availability.
+                  </p>
                 </div>
 
                 <div className="mt-5 md:mt-0 md:col-span-2">
@@ -1224,16 +2601,24 @@ export default function VAProfile() {
                               name="searchStatus"
                               type="radio"
                               value="actively_looking"
-                              checked={formik.values.searchStatus === 'actively_looking'}
+                              checked={
+                                formik.values.searchStatus ===
+                                "actively_looking"
+                              }
                               onChange={formik.handleChange}
                               className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300"
                             />
                           </div>
                           <div className="ml-3 text-sm">
-                            <label htmlFor="actively_looking" className="font-medium text-gray-700">
+                            <label
+                              htmlFor="actively_looking"
+                              className="font-medium text-gray-700"
+                            >
                               Actively looking
                             </label>
-                            <p className="text-gray-500">You're actively looking for new opportunities.</p>
+                            <p className="text-gray-500">
+                              You're actively looking for new opportunities.
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-start">
@@ -1243,16 +2628,22 @@ export default function VAProfile() {
                               name="searchStatus"
                               type="radio"
                               value="open"
-                              checked={formik.values.searchStatus === 'open'}
+                              checked={formik.values.searchStatus === "open"}
                               onChange={formik.handleChange}
                               className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300"
                             />
                           </div>
                           <div className="ml-3 text-sm">
-                            <label htmlFor="open" className="font-medium text-gray-700">
+                            <label
+                              htmlFor="open"
+                              className="font-medium text-gray-700"
+                            >
                               Open to opportunities
                             </label>
-                            <p className="text-gray-500">You're not looking but open to hearing about new opportunities.</p>
+                            <p className="text-gray-500">
+                              You're not looking but open to hearing about new
+                              opportunities.
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-start">
@@ -1262,16 +2653,23 @@ export default function VAProfile() {
                               name="searchStatus"
                               type="radio"
                               value="not_interested"
-                              checked={formik.values.searchStatus === 'not_interested'}
+                              checked={
+                                formik.values.searchStatus === "not_interested"
+                              }
                               onChange={formik.handleChange}
                               className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300"
                             />
                           </div>
                           <div className="ml-3 text-sm">
-                            <label htmlFor="not_interested" className="font-medium text-gray-700">
+                            <label
+                              htmlFor="not_interested"
+                              className="font-medium text-gray-700"
+                            >
                               Not interested
                             </label>
-                            <p className="text-gray-500">You're not interested in new opportunities.</p>
+                            <p className="text-gray-500">
+                              You're not interested in new opportunities.
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-start">
@@ -1281,16 +2679,23 @@ export default function VAProfile() {
                               name="searchStatus"
                               type="radio"
                               value="invisible"
-                              checked={formik.values.searchStatus === 'invisible'}
+                              checked={
+                                formik.values.searchStatus === "invisible"
+                              }
                               onChange={formik.handleChange}
                               className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300"
                             />
                           </div>
                           <div className="ml-3 text-sm">
-                            <label htmlFor="invisible" className="font-medium text-gray-700">
+                            <label
+                              htmlFor="invisible"
+                              className="font-medium text-gray-700"
+                            >
                               Invisible
                             </label>
-                            <p className="text-gray-500">Your profile is hidden from search results.</p>
+                            <p className="text-gray-500">
+                              Your profile is hidden from search results.
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -1302,7 +2707,9 @@ export default function VAProfile() {
                         <legend className="text-base font-medium text-gray-900">
                           Role type
                         </legend>
-                        <p className="text-sm text-gray-500">What type of work are you interested in?</p>
+                        <p className="text-sm text-gray-500">
+                          What type of work are you interested in?
+                        </p>
                       </div>
                       <div className="mt-4 space-y-4">
                         <div className="flex items-center">
@@ -1314,7 +2721,10 @@ export default function VAProfile() {
                             onChange={formik.handleChange}
                             className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
                           />
-                          <label htmlFor="part_time_contract" className="ml-3 block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="part_time_contract"
+                            className="ml-3 block text-sm font-medium text-gray-700"
+                          >
                             Part-time contract
                           </label>
                         </div>
@@ -1327,7 +2737,10 @@ export default function VAProfile() {
                             onChange={formik.handleChange}
                             className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
                           />
-                          <label htmlFor="full_time_contract" className="ml-3 block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="full_time_contract"
+                            className="ml-3 block text-sm font-medium text-gray-700"
+                          >
                             Full-time contract
                           </label>
                         </div>
@@ -1336,11 +2749,16 @@ export default function VAProfile() {
                             id="full_time_employment"
                             name="roleType.full_time_employment"
                             type="checkbox"
-                            checked={formik.values.roleType.full_time_employment}
+                            checked={
+                              formik.values.roleType.full_time_employment
+                            }
                             onChange={formik.handleChange}
                             className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
                           />
-                          <label htmlFor="full_time_employment" className="ml-3 block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="full_time_employment"
+                            className="ml-3 block text-sm font-medium text-gray-700"
+                          >
                             Full-time employment
                           </label>
                         </div>
@@ -1353,7 +2771,9 @@ export default function VAProfile() {
                         <legend className="text-base font-medium text-gray-900">
                           Role level
                         </legend>
-                        <p className="text-sm text-gray-500">What level of role are you looking for?</p>
+                        <p className="text-sm text-gray-500">
+                          What level of role are you looking for?
+                        </p>
                       </div>
                       <div className="mt-4 space-y-4">
                         <div className="flex items-center">
@@ -1365,7 +2785,10 @@ export default function VAProfile() {
                             onChange={formik.handleChange}
                             className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
                           />
-                          <label htmlFor="junior" className="ml-3 block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="junior"
+                            className="ml-3 block text-sm font-medium text-gray-700"
+                          >
                             Junior
                           </label>
                         </div>
@@ -1378,7 +2801,10 @@ export default function VAProfile() {
                             onChange={formik.handleChange}
                             className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
                           />
-                          <label htmlFor="mid" className="ml-3 block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="mid"
+                            className="ml-3 block text-sm font-medium text-gray-700"
+                          >
                             Mid
                           </label>
                         </div>
@@ -1391,7 +2817,10 @@ export default function VAProfile() {
                             onChange={formik.handleChange}
                             className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
                           />
-                          <label htmlFor="senior" className="ml-3 block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="senior"
+                            className="ml-3 block text-sm font-medium text-gray-700"
+                          >
                             Senior
                           </label>
                         </div>
@@ -1404,7 +2833,10 @@ export default function VAProfile() {
                             onChange={formik.handleChange}
                             className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
                           />
-                          <label htmlFor="principal" className="ml-3 block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="principal"
+                            className="ml-3 block text-sm font-medium text-gray-700"
+                          >
                             Principal
                           </label>
                         </div>
@@ -1417,7 +2849,10 @@ export default function VAProfile() {
                             onChange={formik.handleChange}
                             className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
                           />
-                          <label htmlFor="c_level" className="ml-3 block text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="c_level"
+                            className="ml-3 block text-sm font-medium text-gray-700"
+                          >
                             C-level
                           </label>
                         </div>
@@ -1432,14 +2867,21 @@ export default function VAProfile() {
             <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h2 className="text-lg font-medium leading-6 text-gray-900">Online presence</h2>
-                  <p className="mt-2 text-sm text-gray-500">Where can people find you online?</p>
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">
+                    Online presence
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Where can people find you online?
+                  </p>
                 </div>
 
                 <div className="mt-5 md:mt-0 md:col-span-2">
                   <div className="space-y-6">
                     <div>
-                      <label htmlFor="website" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="website"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Website
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
@@ -1458,7 +2900,10 @@ export default function VAProfile() {
                     </div>
 
                     <div>
-                      <label htmlFor="meta" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="meta"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Facebook
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
@@ -1477,7 +2922,10 @@ export default function VAProfile() {
                     </div>
 
                     <div>
-                      <label htmlFor="instagram" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="instagram"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Instagram
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
@@ -1496,7 +2944,10 @@ export default function VAProfile() {
                     </div>
 
                     <div>
-                      <label htmlFor="linkedin" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="linkedin"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         LinkedIn
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
@@ -1515,7 +2966,10 @@ export default function VAProfile() {
                     </div>
 
                     <div>
-                      <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="whatsapp"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         WhatsApp
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
@@ -1535,7 +2989,10 @@ export default function VAProfile() {
                     </div>
 
                     <div>
-                      <label htmlFor="twitter" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="twitter"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Twitter
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
@@ -1554,7 +3011,10 @@ export default function VAProfile() {
                     </div>
 
                     <div>
-                      <label htmlFor="viber" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="viber"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Viber
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
@@ -1581,7 +3041,9 @@ export default function VAProfile() {
             <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
               <fieldset className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <legend className="text-lg font-medium leading-6 text-gray-900">Notifications</legend>
+                  <legend className="text-lg font-medium leading-6 text-gray-900">
+                    Notifications
+                  </legend>
                 </div>
 
                 <div className="mt-5 md:mt-0 md:col-span-2 space-y-4">
@@ -1599,10 +3061,16 @@ export default function VAProfile() {
                           />
                         </div>
                         <div className="ml-3 text-sm">
-                          <label htmlFor="profileReminderNotifications" className="font-medium text-gray-700">
+                          <label
+                            htmlFor="profileReminderNotifications"
+                            className="font-medium text-gray-700"
+                          >
                             Profile reminders
                           </label>
-                          <p className="text-gray-500">Get notified when you haven't updated your profile in a while.</p>
+                          <p className="text-gray-500">
+                            Get notified when you haven't updated your profile
+                            in a while.
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -1615,16 +3083,23 @@ export default function VAProfile() {
                             id="productAnnouncementNotifications"
                             name="productAnnouncementNotifications"
                             type="checkbox"
-                            checked={formik.values.productAnnouncementNotifications}
+                            checked={
+                              formik.values.productAnnouncementNotifications
+                            }
                             onChange={formik.handleChange}
                             className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
                           />
                         </div>
                         <div className="ml-3 text-sm">
-                          <label htmlFor="productAnnouncementNotifications" className="font-medium text-gray-700">
+                          <label
+                            htmlFor="productAnnouncementNotifications"
+                            className="font-medium text-gray-700"
+                          >
                             Product announcements
                           </label>
-                          <p className="text-gray-500">Get notified about new features and updates.</p>
+                          <p className="text-gray-500">
+                            Get notified about new features and updates.
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -1640,7 +3115,9 @@ export default function VAProfile() {
                 disabled={updateProfileMutation.isLoading}
                 className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
               >
-                {updateProfileMutation.isLoading ? 'Updating...' : 'Update profile'}
+                {updateProfileMutation.isLoading
+                  ? "Updating..."
+                  : "Update profile"}
               </button>
             </div>
           </form>

@@ -124,8 +124,8 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/videosdk', videosdkRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
-// Static files for uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Static files for uploads with CORS
+app.use('/uploads', cors(corsOptions), express.static(path.join(__dirname, 'uploads')));
 
 // Error handler (must be last)
 app.use(errorHandler);
