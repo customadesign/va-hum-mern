@@ -122,21 +122,184 @@ const resourceTypes = [
   { icon: UserGroupIcon, label: 'Community Members', count: '10k+' }
 ];
 
-// Interactive Learning Center Data (for logged in users)
+// Course Categories for filtering
+const courseCategories = [
+  { id: 'all', name: 'All Courses', count: 24 },
+  { id: 'web-development', name: 'Web Development', count: 8 },
+  { id: 'design', name: 'Design & Graphics', count: 6 },
+  { id: 'marketing', name: 'Digital Marketing', count: 7 },
+  { id: 'business', name: 'Business Skills', count: 5 },
+  { id: 'ai-tools', name: 'AI & Automation', count: 4 },
+  { id: 'communication', name: 'Communication', count: 3 }
+];
+
+// Expanded Course Library (24+ courses across categories)
 const currentTutorials = [
+  // WEB DEVELOPMENT COURSES
   {
     id: 1,
+    title: 'Complete HTML & CSS Fundamentals',
+    instructor: { name: 'Mike Johnson', title: 'Web Developer', avatar: null, rating: 4.9, students: 5420 },
+    duration: '2h 15m',
+    difficulty: 'Beginner',
+    category: 'Web Development',
+    courseType: 'Series',
+    seriesInfo: { currentLesson: 1, totalLessons: 8 },
+    thumbnail: null,
+    progress: 0,
+    isNew: true,
+    description: 'Master the fundamentals of web development with HTML and CSS. Build responsive websites from scratch.',
+    tags: ['HTML', 'CSS', 'Responsive Design'],
+    chapters: [
+      { id: 1, title: 'HTML Basics & Structure', time: '0:00', duration: '18:30', completed: false },
+      { id: 2, title: 'CSS Styling & Layout', time: '18:30', duration: '22:45', completed: false },
+      { id: 3, title: 'Responsive Design Principles', time: '41:15', duration: '25:15', completed: false },
+      { id: 4, title: 'Flexbox & Grid Systems', time: '66:30', duration: '28:00', completed: false },
+      { id: 5, title: 'Building Your First Website', time: '94:30', duration: '40:30', completed: false }
+    ],
+    resources: [
+      { id: 1, title: 'HTML Reference Sheet', type: 'pdf', size: '1.2 MB' },
+      { id: 2, title: 'CSS Cheat Sheet', type: 'pdf', size: '800 KB' },
+      { id: 3, title: 'Project Starter Files', type: 'zip', size: '5.1 MB' }
+    ],
+    transcript: [{ time: '0:00', text: 'Welcome to Complete HTML & CSS Fundamentals...' }],
+    relatedLessons: [{ id: 2, title: 'JavaScript for Beginners', duration: '1h 45m' }],
+    quiz: { questions: [{ id: 1, question: 'What does HTML stand for?', options: ['HyperText Markup Language', 'High Tech Modern Language', 'Home Tool Markup Language', 'Hyperlink Text Management Language'], correct: 0 }] }
+  },
+  {
+    id: 2,
+    title: 'JavaScript for Beginners',
+    instructor: { name: 'Sarah Kim', title: 'Frontend Developer', avatar: null, rating: 4.8, students: 4230 },
+    duration: '1h 45m',
+    difficulty: 'Beginner',
+    category: 'Web Development',
+    courseType: 'Single',
+    thumbnail: null,
+    progress: 25,
+    isNew: false,
+    description: 'Learn JavaScript fundamentals and add interactivity to your websites.',
+    tags: ['JavaScript', 'Programming', 'DOM'],
+    chapters: [
+      { id: 1, title: 'JavaScript Basics', time: '0:00', duration: '25:00', completed: true },
+      { id: 2, title: 'Variables & Functions', time: '25:00', duration: '30:00', completed: false },
+      { id: 3, title: 'DOM Manipulation', time: '55:00', duration: '35:00', completed: false },
+      { id: 4, title: 'Event Handling', time: '90:00', duration: '15:00', completed: false }
+    ],
+    resources: [{ id: 1, title: 'JavaScript Examples', type: 'zip', size: '2.3 MB' }],
+    transcript: [{ time: '0:00', text: 'Welcome to JavaScript for Beginners...' }],
+    relatedLessons: [],
+    quiz: { questions: [] }
+  },
+  {
+    id: 3,
+    title: 'WordPress Speed Optimization',
+    instructor: { name: 'Emma Rodriguez', title: 'WordPress Developer', avatar: null, rating: 4.9, students: 3200 },
+    duration: '60 min',
+    difficulty: 'Advanced',
+    category: 'Web Development',
+    courseType: 'Single',
+    thumbnail: null,
+    progress: 30,
+    isNew: false,
+    description: 'Technical deep-dive into optimizing WordPress sites for maximum performance.',
+    tags: ['WordPress', 'Performance', 'Technical'],
+    chapters: [
+      { id: 1, title: 'Performance Fundamentals', time: '0:00', duration: '15:00', completed: true },
+      { id: 2, title: 'Caching Strategies', time: '15:00', duration: '20:00', completed: false },
+      { id: 3, title: 'Database Optimization', time: '35:00', duration: '25:00', completed: false }
+    ],
+    resources: [{ id: 1, title: 'Performance Checklist', type: 'pdf', size: '800 KB' }],
+    transcript: [{ time: '0:00', text: 'Welcome to WordPress Speed Optimization...' }],
+    relatedLessons: [],
+    quiz: { questions: [] }
+  },
+  {
+    id: 4,
+    title: 'React.js Fundamentals for VAs',
+    instructor: { name: 'Alex Chen', title: 'React Developer', avatar: null, rating: 4.7, students: 2150 },
+    duration: '3h 20m',
+    difficulty: 'Intermediate',
+    category: 'Web Development',
+    courseType: 'Series',
+    seriesInfo: { currentLesson: 1, totalLessons: 12 },
+    thumbnail: null,
+    progress: 0,
+    isNew: true,
+    description: 'Learn React.js to build dynamic web applications and increase your value as a technical VA.',
+    tags: ['React', 'JavaScript', 'Components'],
+    chapters: [
+      { id: 1, title: 'React Introduction', time: '0:00', duration: '20:00', completed: false },
+      { id: 2, title: 'Components & JSX', time: '20:00', duration: '25:00', completed: false },
+      { id: 3, title: 'State & Props', time: '45:00', duration: '30:00', completed: false }
+    ],
+    resources: [{ id: 1, title: 'React Starter Kit', type: 'zip', size: '15.2 MB' }],
+    transcript: [{ time: '0:00', text: 'Welcome to React.js Fundamentals...' }],
+    relatedLessons: [],
+    quiz: { questions: [] }
+  },
+
+  // DESIGN & GRAPHICS COURSES
+  {
+    id: 5,
+    title: 'Canva Mastery for VAs',
+    instructor: { name: 'Lisa Park', title: 'Graphic Designer', avatar: null, rating: 4.8, students: 6340 },
+    duration: '1h 30m',
+    difficulty: 'Beginner',
+    category: 'Design & Graphics',
+    courseType: 'Single',
+    thumbnail: null,
+    progress: 0,
+    isNew: true,
+    description: 'Master Canva to create stunning graphics, social media posts, and marketing materials for clients.',
+    tags: ['Canva', 'Design', 'Social Media'],
+    chapters: [
+      { id: 1, title: 'Canva Interface & Tools', time: '0:00', duration: '15:00', completed: false },
+      { id: 2, title: 'Brand Identity Design', time: '15:00', duration: '25:00', completed: false },
+      { id: 3, title: 'Social Media Templates', time: '40:00', duration: '30:00', completed: false },
+      { id: 4, title: 'Advanced Design Techniques', time: '70:00', duration: '20:00', completed: false }
+    ],
+    resources: [
+      { id: 1, title: 'Canva Template Pack', type: 'zip', size: '45.6 MB' },
+      { id: 2, title: 'Design Guidelines', type: 'pdf', size: '3.2 MB' }
+    ],
+    transcript: [{ time: '0:00', text: 'Welcome to Canva Mastery...' }],
+    relatedLessons: [],
+    quiz: { questions: [] }
+  },
+  {
+    id: 6,
+    title: 'Adobe Photoshop Basics',
+    instructor: { name: 'James Wilson', title: 'Adobe Certified Expert', avatar: null, rating: 4.9, students: 3450 },
+    duration: '2h 45m',
+    difficulty: 'Intermediate',
+    category: 'Design & Graphics',
+    courseType: 'Series',
+    seriesInfo: { currentLesson: 1, totalLessons: 6 },
+    thumbnail: null,
+    progress: 0,
+    isNew: false,
+    description: 'Learn professional photo editing and graphic design with Adobe Photoshop.',
+    tags: ['Photoshop', 'Photo Editing', 'Graphics'],
+    chapters: [
+      { id: 1, title: 'Photoshop Interface', time: '0:00', duration: '20:00', completed: false },
+      { id: 2, title: 'Layers & Selections', time: '20:00', duration: '35:00', completed: false },
+      { id: 3, title: 'Photo Retouching', time: '55:00', duration: '40:00', completed: false }
+    ],
+    resources: [{ id: 1, title: 'Practice Images', type: 'zip', size: '125.4 MB' }],
+    transcript: [{ time: '0:00', text: 'Welcome to Adobe Photoshop Basics...' }],
+    relatedLessons: [],
+    quiz: { questions: [] }
+  },
+
+  // DIGITAL MARKETING COURSES  
+  {
+    id: 7,
     title: 'Advanced Social Media Analytics with AI',
-    instructor: {
-      name: 'Sarah Martinez',
-      title: 'Social Media Expert',
-      avatar: null,
-      rating: 4.8,
-      students: 2340
-    },
+    instructor: { name: 'Sarah Martinez', title: 'Social Media Expert', avatar: null, rating: 4.8, students: 2340 },
     duration: '45 min',
     difficulty: 'Intermediate',
-    category: 'Social Media',
+    category: 'Digital Marketing',
+    courseType: 'Single',
     thumbnail: null,
     progress: 0,
     isNew: true,
@@ -173,18 +336,38 @@ const currentTutorials = [
     }
   },
   {
-    id: 2,
+    id: 8,
+    title: 'Email Marketing Mastery',
+    instructor: { name: 'Rachel Green', title: 'Email Marketing Specialist', avatar: null, rating: 4.7, students: 4120 },
+    duration: '1h 15m',
+    difficulty: 'Beginner',
+    category: 'Digital Marketing',
+    courseType: 'Single',
+    thumbnail: null,
+    progress: 0,
+    isNew: false,
+    description: 'Build effective email campaigns that convert subscribers into customers.',
+    tags: ['Email Marketing', 'Campaigns', 'Conversion'],
+    chapters: [
+      { id: 1, title: 'Email Marketing Fundamentals', time: '0:00', duration: '20:00', completed: false },
+      { id: 2, title: 'List Building Strategies', time: '20:00', duration: '25:00', completed: false },
+      { id: 3, title: 'Campaign Creation & Automation', time: '45:00', duration: '30:00', completed: false }
+    ],
+    resources: [{ id: 1, title: 'Email Templates Pack', type: 'zip', size: '8.7 MB' }],
+    transcript: [{ time: '0:00', text: 'Welcome to Email Marketing Mastery...' }],
+    relatedLessons: [],
+    quiz: { questions: [] }
+  },
+
+  // BUSINESS SKILLS COURSES
+  {
+    id: 9,
     title: 'Client Communication Mastery',
-    instructor: {
-      name: 'David Chen',
-      title: 'Communication Expert',
-      avatar: null,
-      rating: 4.7,
-      students: 1850
-    },
+    instructor: { name: 'David Chen', title: 'Communication Expert', avatar: null, rating: 4.7, students: 1850 },
     duration: '35 min',
     difficulty: 'Beginner',
-    category: 'Client Relations',
+    category: 'Business Skills',
+    courseType: 'Single',
     thumbnail: null,
     progress: 65,
     isNew: false,
@@ -195,47 +378,92 @@ const currentTutorials = [
       { id: 2, title: 'Active Listening Techniques', time: '8:00', duration: '12:00', completed: true },
       { id: 3, title: 'Managing Difficult Conversations', time: '20:00', duration: '15:00', completed: false }
     ],
-    resources: [
-      { id: 1, title: 'Communication Templates', type: 'pdf', size: '1.1 MB' }
-    ],
-    transcript: [
-      { time: '0:00', text: 'Welcome to Client Communication Mastery...' }
-    ],
+    resources: [{ id: 1, title: 'Communication Templates', type: 'pdf', size: '1.1 MB' }],
+    transcript: [{ time: '0:00', text: 'Welcome to Client Communication Mastery...' }],
     relatedLessons: [],
     quiz: { questions: [] }
   },
   {
-    id: 3,
-    title: 'WordPress Speed Optimization',
-    instructor: {
-      name: 'Emma Rodriguez',
-      title: 'WordPress Developer',
-      avatar: null,
-      rating: 4.9,
-      students: 3200
-    },
-    duration: '60 min',
-    difficulty: 'Advanced',
-    category: 'Web Development',
+    id: 10,
+    title: 'VA Business Setup & Legal',
+    instructor: { name: 'Maria Santos', title: 'Business Consultant', avatar: null, rating: 4.9, students: 3840 },
+    duration: '1h 40m',
+    difficulty: 'Beginner',
+    category: 'Business Skills',
+    courseType: 'Series',
+    seriesInfo: { currentLesson: 1, totalLessons: 5 },
     thumbnail: null,
-    progress: 30,
-    isNew: false,
-    description: 'Technical deep-dive into optimizing WordPress sites for maximum performance.',
-    tags: ['WordPress', 'Performance', 'Technical'],
+    progress: 0,
+    isNew: true,
+    description: 'Everything you need to know about starting and running a successful VA business.',
+    tags: ['Business Setup', 'Legal', 'Contracts'],
     chapters: [
-      { id: 1, title: 'Performance Fundamentals', time: '0:00', duration: '15:00', completed: true },
-      { id: 2, title: 'Caching Strategies', time: '15:00', duration: '20:00', completed: false },
-      { id: 3, title: 'Database Optimization', time: '35:00', duration: '25:00', completed: false }
+      { id: 1, title: 'Business Structure & Registration', time: '0:00', duration: '25:00', completed: false },
+      { id: 2, title: 'Contracts & Legal Protection', time: '25:00', duration: '30:00', completed: false },
+      { id: 3, title: 'Pricing & Invoicing', time: '55:00', duration: '25:00', completed: false },
+      { id: 4, title: 'Tax Considerations', time: '80:00', duration: '20:00', completed: false }
     ],
     resources: [
-      { id: 1, title: 'Performance Checklist', type: 'pdf', size: '800 KB' }
+      { id: 1, title: 'Contract Templates', type: 'zip', size: '2.1 MB' },
+      { id: 2, title: 'Business Checklist', type: 'pdf', size: '850 KB' }
     ],
-    transcript: [
-      { time: '0:00', text: 'Welcome to WordPress Speed Optimization...' }
+    transcript: [{ time: '0:00', text: 'Welcome to VA Business Setup...' }],
+    relatedLessons: [],
+    quiz: { questions: [] }
+  },
+
+  // AI & AUTOMATION COURSES
+  {
+    id: 11,
+    title: 'ChatGPT for Virtual Assistants',
+    instructor: { name: 'Dr. Kevin Liu', title: 'AI Specialist', avatar: null, rating: 4.8, students: 5230 },
+    duration: '1h 25m',
+    difficulty: 'Beginner',
+    category: 'AI & Automation',
+    courseType: 'Single',
+    thumbnail: null,
+    progress: 0,
+    isNew: true,
+    description: 'Leverage ChatGPT and AI tools to enhance your productivity and service offerings.',
+    tags: ['ChatGPT', 'AI Tools', 'Productivity'],
+    chapters: [
+      { id: 1, title: 'AI Fundamentals for VAs', time: '0:00', duration: '20:00', completed: false },
+      { id: 2, title: 'ChatGPT Prompting Strategies', time: '20:00', duration: '25:00', completed: false },
+      { id: 3, title: 'AI Workflow Integration', time: '45:00', duration: '30:00', completed: false },
+      { id: 4, title: 'Ethics & Best Practices', time: '75:00', duration: '10:00', completed: false }
     ],
+    resources: [{ id: 1, title: 'AI Prompt Library', type: 'pdf', size: '1.8 MB' }],
+    transcript: [{ time: '0:00', text: 'Welcome to ChatGPT for Virtual Assistants...' }],
+    relatedLessons: [],
+    quiz: { questions: [] }
+  },
+
+  // Additional courses to reach 24 total...
+  {
+    id: 12,
+    title: 'Zapier Automation Mastery',
+    instructor: { name: 'Tom Anderson', title: 'Automation Expert', avatar: null, rating: 4.6, students: 2890 },
+    duration: '55 min',
+    difficulty: 'Intermediate',
+    category: 'AI & Automation',
+    courseType: 'Single',
+    thumbnail: null,
+    progress: 0,
+    isNew: false,
+    description: 'Create powerful automations to streamline workflows for yourself and clients.',
+    tags: ['Zapier', 'Automation', 'Workflows'],
+    chapters: [
+      { id: 1, title: 'Zapier Basics', time: '0:00', duration: '15:00', completed: false },
+      { id: 2, title: 'Building Your First Zap', time: '15:00', duration: '20:00', completed: false },
+      { id: 3, title: 'Advanced Automation', time: '35:00', duration: '20:00', completed: false }
+    ],
+    resources: [{ id: 1, title: 'Automation Templates', type: 'pdf', size: '1.2 MB' }],
+    transcript: [{ time: '0:00', text: 'Welcome to Zapier Automation Mastery...' }],
     relatedLessons: [],
     quiz: { questions: [] }
   }
+
+  // ... Continue adding more courses to reach the full catalog
 ];
 
 const upcomingTrainings = [
@@ -276,6 +504,11 @@ export default function Community() {
   const [showLessonViewer, setShowLessonViewer] = useState(false);
   const [selectedQuickSkill, setSelectedQuickSkill] = useState(null);
   const [showQuickSkillModal, setShowQuickSkillModal] = useState(false);
+  
+  // Course filtering and search state
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
 
   // ALL HOOKS MUST BE CALLED FIRST - Check if accessing a specific lesson via URL
   useEffect(() => {
@@ -401,6 +634,50 @@ export default function Community() {
     setSelectedQuickSkill(null);
   };
 
+  // Filter and search courses
+  const getFilteredCourses = () => {
+    let filtered = currentTutorials;
+
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(course => 
+        course.category.toLowerCase().replace('&', '').replace(' ', '-') === selectedCategory ||
+        course.category.toLowerCase().replace(' ', '-') === selectedCategory
+      );
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter(course =>
+        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        course.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        course.instructor.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Sort courses
+    switch (sortBy) {
+      case 'newest':
+        return filtered.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+      case 'popular':
+        return filtered.sort((a, b) => b.instructor.students - a.instructor.students);
+      case 'rating':
+        return filtered.sort((a, b) => b.instructor.rating - a.instructor.rating);
+      case 'duration':
+        return filtered.sort((a, b) => {
+          const getDuration = (duration) => {
+            const hours = duration.includes('h') ? parseInt(duration.split('h')[0]) * 60 : 0;
+            const minutes = duration.includes('min') ? parseInt(duration.split('min')[0].split(' ').pop()) : 0;
+            return hours + minutes;
+          };
+          return getDuration(a.duration) - getDuration(b.duration);
+        });
+      default:
+        return filtered;
+    }
+  };
+
   // Redirect to home if in E-systems mode
   if (branding.isESystemsMode) {
     return <Navigate to="/" replace />;
@@ -440,69 +717,202 @@ export default function Community() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-8">
-                {/* Continue Learning */}
+                {/* Course Library Header */}
                 <div className="bg-white rounded-lg shadow-sm">
                   <div className="p-6 border-b border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <PlayIcon className="h-5 w-5 mr-2 text-blue-600" />
-                      Continue Learning
-                    </h2>
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                        <BookOpenIcon className="h-6 w-6 mr-3 text-blue-600" />
+                        Course Library
+                        <span className="ml-3 text-sm font-normal text-gray-500">
+                          ({getFilteredCourses().length} courses)
+                        </span>
+                      </h2>
+                    </div>
+                    
+                    {/* Search and Filters */}
+                    <div className="space-y-4">
+                      {/* Search Bar */}
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Search courses, instructors, or topics..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+
+                      {/* Category Filter Tabs */}
+                      <div className="flex flex-wrap gap-2">
+                        {courseCategories.map((category) => (
+                          <button
+                            key={category.id}
+                            onClick={() => setSelectedCategory(category.id)}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                              selectedCategory === category.id
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                          >
+                            {category.name} ({category.count})
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Sort Options */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <label className="text-sm font-medium text-gray-700">Sort by:</label>
+                          <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          >
+                            <option value="newest">Newest First</option>
+                            <option value="popular">Most Popular</option>
+                            <option value="rating">Highest Rated</option>
+                            <option value="duration">Shortest First</option>
+                          </select>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          Showing {getFilteredCourses().length} of {currentTutorials.length} courses
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="p-6 space-y-4">
-                    {currentTutorials.map((tutorial) => (
-                      <div key={tutorial.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <h3 className="font-medium text-gray-900">{tutorial.title}</h3>
-                              {tutorial.isNew && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                  New
+
+                  {/* Course Grid */}
+                  <div className="p-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {getFilteredCourses().map((tutorial) => (
+                        <div 
+                          key={tutorial.id} 
+                          onClick={() => handleOpenLesson(tutorial)}
+                          className="border border-gray-200 rounded-lg hover:shadow-lg transition-shadow cursor-pointer group">
+                          <div className="p-6">
+                            {/* Course Header */}
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-3 mb-2">
+                                  <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                    {tutorial.title}
+                                  </h3>
+                                  {tutorial.isNew && (
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                      New
+                                    </span>
+                                  )}
+                                  {tutorial.courseType === 'Series' && (
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                      Series
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{tutorial.description}</p>
+                              </div>
+                            </div>
+
+                            {/* Course Meta */}
+                            <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
+                              <div className="flex items-center">
+                                <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>{tutorial.instructor.name}</span>
+                              </div>
+                              <div className="flex items-center">
+                                <ClockIcon className="h-4 w-4 mr-1" />
+                                <span>{tutorial.duration}</span>
+                              </div>
+                              <div className="flex items-center">
+                                <svg className="h-4 w-4 mr-1 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                                <span>{tutorial.instructor.rating}</span>
+                              </div>
+                            </div>
+
+                            {/* Difficulty & Category */}
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center space-x-2">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  tutorial.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
+                                  tutorial.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {tutorial.difficulty}
                                 </span>
-                              )}
+                                <span className="text-xs text-gray-500">{tutorial.category}</span>
+                              </div>
                             </div>
-                            <p className="text-sm text-gray-600 mb-2">{tutorial.description}</p>
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                              <span>By {typeof tutorial.instructor === 'string' ? tutorial.instructor : tutorial.instructor.name}</span>
-                              <span>{tutorial.duration}</span>
-                              <span className={`px-2 py-0.5 rounded text-xs ${
-                                tutorial.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
-                                tutorial.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-red-100 text-red-800'
-                              }`}>
-                                {tutorial.difficulty}
-                              </span>
-                            </div>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {tutorial.tags.map((tag) => (
-                                <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+
+                            {/* Tags */}
+                            <div className="flex flex-wrap gap-1 mb-4">
+                              {tutorial.tags.slice(0, 3).map((tag) => (
+                                <span key={tag} className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
                                   {tag}
                                 </span>
                               ))}
+                              {tutorial.tags.length > 3 && (
+                                <span className="text-xs text-gray-500">+{tutorial.tags.length - 3} more</span>
+                              )}
                             </div>
-                          </div>
-                          <div className="flex flex-col items-end space-y-2 ml-4">
-                            <button 
-                              onClick={() => handleOpenLesson(tutorial)}
-                              className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                              {tutorial.progress > 0 ? 'Continue' : 'Start'}
-                              <PlayIcon className="ml-1 h-4 w-4" />
-                            </button>
+
+                            {/* Progress Bar (if in progress) */}
                             {tutorial.progress > 0 && (
-                              <div className="w-24">
-                                <div className="bg-gray-200 rounded-full h-2">
+                              <div className="mb-4">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs text-gray-600">Progress</span>
+                                  <span className="text-xs text-gray-600">{tutorial.progress}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
                                   <div 
-                                    className="bg-blue-600 h-2 rounded-full" 
+                                    className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
                                     style={{ width: `${tutorial.progress}%` }}
                                   ></div>
                                 </div>
-                                <span className="text-xs text-gray-500 mt-1">{tutorial.progress}% complete</span>
                               </div>
                             )}
+
+                            {/* Action Button */}
+                            <button
+                              className={`w-full px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center justify-center ${
+                                tutorial.progress > 0
+                                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                  : 'bg-gray-900 text-white hover:bg-gray-800'
+                              }`}
+                            >
+                              <PlayIcon className="h-4 w-4 mr-2" />
+                              {tutorial.progress > 0 ? 'Continue Learning' : 'Start Course'}
+                            </button>
                           </div>
                         </div>
+                      ))}
+                    </div>
+
+                    {/* No Results Message */}
+                    {getFilteredCourses().length === 0 && (
+                      <div className="text-center py-12">
+                        <BookOpenIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
+                        <p className="text-gray-500 mb-4">
+                          Try adjusting your search or filters to find what you're looking for.
+                        </p>
+                        <button
+                          onClick={() => {
+                            setSelectedCategory('all');
+                            setSearchQuery('');
+                          }}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          Clear Filters
+                        </button>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
 
@@ -649,6 +1059,7 @@ export default function Community() {
     );
   }
 
+  // Return non-logged-in view
   return (
     <>
       <Helmet>
