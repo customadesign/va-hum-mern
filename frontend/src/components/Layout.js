@@ -14,10 +14,19 @@ function classNames(...classes) {
 
 export default function Layout() {
   const { user, logout, isVA, isBusiness } = useAuth();
-  const { branding } = useBranding();
+  const { branding, loading: brandingLoading } = useBranding();
   const navigate = useNavigate();
   const { unreadCount } = useNotifications();
   const [isHoveringBell, setIsHoveringBell] = useState(false);
+
+  // Show loading spinner while branding context is loading
+  if (brandingLoading || !branding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   const navigation = [
     { name: 'Home', href: '/', current: false },

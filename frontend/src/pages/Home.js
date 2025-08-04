@@ -8,8 +8,9 @@ import VACard from '../components/VACard';
 import { useBranding } from '../contexts/BrandingContext';
 
 export default function Home() {
-  const { branding } = useBranding();
+  const { branding, loading: brandingLoading } = useBranding();
   
+  // ALL HOOKS MUST BE CALLED FIRST - Get featured VAs data
   const { data: featuredVAs, isLoading } = useQuery(
     'featuredVAs',
     async () => {
@@ -17,6 +18,15 @@ export default function Home() {
       return response.data.data;
     }
   );
+
+  // CONDITIONAL RETURNS AFTER ALL HOOKS - Show loading spinner while branding context is loading
+  if (brandingLoading || !branding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <>

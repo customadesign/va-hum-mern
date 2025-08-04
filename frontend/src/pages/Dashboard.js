@@ -6,7 +6,16 @@ import { useBranding } from '../contexts/BrandingContext';
 
 export default function Dashboard() {
   const { user, isVA, isBusiness } = useAuth();
-  const { branding } = useBranding();
+  const { branding, loading: brandingLoading } = useBranding();
+
+  // Show loading spinner while branding context is loading
+  if (brandingLoading || !branding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <>

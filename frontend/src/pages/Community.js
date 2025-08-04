@@ -204,25 +204,7 @@ export default function Community() {
   const [selectedQuickSkill, setSelectedQuickSkill] = useState(null);
   const [showQuickSkillModal, setShowQuickSkillModal] = useState(false);
 
-  // Show loading spinner while contexts are loading
-  if (brandingLoading || authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  // Ensure branding is loaded before checking properties
-  if (!branding) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  // Check if accessing a specific lesson via URL
+  // ALL HOOKS MUST BE CALLED FIRST - Check if accessing a specific lesson via URL
   useEffect(() => {
     if (lessonId) {
       // Find the lesson by ID or create a default one
@@ -278,6 +260,24 @@ export default function Community() {
 
     return () => clearInterval(interval);
   }, [user]);
+
+  // CONDITIONAL RETURNS AFTER ALL HOOKS - Show loading spinner while contexts are loading
+  if (brandingLoading || authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  // Ensure branding is loaded before checking properties
+  if (!branding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   // Handler for opening lesson viewer
   const handleOpenLesson = (tutorial) => {

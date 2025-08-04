@@ -23,8 +23,9 @@ const validationSchema = Yup.object({
 export default function Register() {
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
-  const { branding } = useBranding();
+  const { branding, loading: brandingLoading } = useBranding();
 
+  // ALL HOOKS MUST BE CALLED FIRST - Form handling
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -44,6 +45,15 @@ export default function Register() {
       }
     },
   });
+
+  // CONDITIONAL RETURNS AFTER ALL HOOKS - Show loading spinner while branding context is loading
+  if (brandingLoading || !branding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <>

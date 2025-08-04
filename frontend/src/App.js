@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ToastContainer } from 'react-toastify';
@@ -13,6 +13,7 @@ import { BrandingProvider } from './contexts/BrandingContext';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Pages
 import Home from './pages/Home';
@@ -48,15 +49,24 @@ const queryClient = new QueryClient({
   },
 });
 
+// Loading component for Suspense fallback
+const SuspenseLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+  </div>
+);
+
 function App() {
   return (
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <Router>
-          <BrandingProvider>
-            <AuthProvider>
-            <div className="h-full flex flex-col">
-              <Routes>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <Router>
+            <BrandingProvider>
+              <AuthProvider>
+                <Suspense fallback={<SuspenseLoader />}>
+                  <div className="h-full flex flex-col">
+                    <Routes>
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Home />} />
                   <Route path="about" element={<About />} />
@@ -100,13 +110,15 @@ function App() {
                 pauseOnFocusLoss
                 draggable
                 pauseOnHover
-              />
-            </div>
-          </AuthProvider>
-        </BrandingProvider>
-        </Router>
-      </QueryClientProvider>
-    </HelmetProvider>
+                                  />
+                  </div>
+                </Suspense>
+              </AuthProvider>
+            </BrandingProvider>
+          </Router>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </ErrorBoundary>
   );
 }
 
