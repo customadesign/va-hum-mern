@@ -82,9 +82,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const linkedinLogin = () => {
-    // Redirect to LinkedIn OAuth endpoint - use production API URL
+    // Redirect to LinkedIn OAuth endpoint - use correct API URL based on branding
     const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://linkage-va-hub-api.onrender.com' 
+      ? (branding?.isESystemsMode ? 'https://esystems-backend.onrender.com' : 'https://linkage-va-hub-api.onrender.com')
       : 'http://localhost:5000';
     window.location.href = `${backendUrl}/api/auth/linkedin`;
   };

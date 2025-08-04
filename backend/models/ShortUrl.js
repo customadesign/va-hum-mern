@@ -20,7 +20,11 @@ const shortUrlSchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false // Not required for public shares
+  },
+  isPublicShare: {
+    type: Boolean,
+    default: false
   },
   clicks: {
     type: Number,

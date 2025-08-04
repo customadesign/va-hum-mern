@@ -2,7 +2,7 @@ const ShortUrl = require('../models/ShortUrl');
 const VA = require('../models/VA');
 const { catchAsync } = require('../utils/errorHandler');
 
-// Create a shortened URL for a VA profile
+// Create a shortened URL for a VA profile (authenticated users only)
 const createShortUrl = catchAsync(async (req, res) => {
   const { vaId } = req.params;
   const userId = req.user.id;
@@ -56,6 +56,66 @@ const createShortUrl = catchAsync(async (req, res) => {
     data: {
       shortUrl: shortUrl,
       fullShortUrl: `${req.protocol}://${req.get('host')}/s/${shortCode}`
+    }
+  });
+});
+
+// Create a shortened URL for a VA profile (PUBLIC - no authentication required)
+const createPublicVAShortUrl = catchAsync(async (req, res) => {
+  const { vaId } = req.params;
+
+  // Verify the VA exists
+  const va = await VA.findById(vaId);
+  if (!va) {
+    return res.status(404).json({ error: 'VA profile not found' });
+  }
+
+  // Check if a short URL already exists for this VA
+  const existingShortUrl = await ShortUrl.findOne({ vaId, isActive: true });
+  if (existingShortUrl) {
+    // Return the existing short URL instead of error - public sharing should work
+    const fullShortUrl = existingShortUrl.fullShortUrl || `${req.protocol}://${req.get('host')}/s/${existingShortUrl.shortCode}`;
+    return res.status(200).json({ 
+      success: true,
+      data: {
+        shortUrl: existingShortUrl,
+        fullShortUrl: fullShortUrl
+      }
+    });
+  }
+
+  // Generate unique short code
+  let shortCode;
+  let attempts = 0;
+  const maxAttempts = 10;
+
+  do {
+    shortCode = ShortUrl.generateShortCode();
+    attempts++;
+    if (attempts > maxAttempts) {
+      return res.status(500).json({ error: 'Unable to generate unique short code' });
+    }
+  } while (!(await ShortUrl.isCodeUnique(shortCode)));
+
+  // Create the short URL
+  const originalUrl = `${req.protocol}://${req.get('host')}/vas/${vaId}`;
+  const shortUrl = new ShortUrl({
+    originalUrl,
+    shortCode,
+    vaId,
+    createdBy: null, // No user required for public sharing
+    isPublicShare: true // Mark as public share
+  });
+
+  await shortUrl.save();
+
+  const fullShortUrl = `${req.protocol}://${req.get('host')}/s/${shortCode}`;
+  
+  res.status(201).json({
+    success: true,
+    data: {
+      shortUrl: shortUrl,
+      fullShortUrl: fullShortUrl
     }
   });
 });
@@ -176,6 +236,7 @@ const reactivateShortUrl = catchAsync(async (req, res) => {
 
 module.exports = {
   createShortUrl,
+  createPublicVAShortUrl,
   redirectShortUrl,
   getShortUrlInfo,
   getUserShortUrls,

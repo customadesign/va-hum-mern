@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect } = require('../middleware/auth');
 const {
   createShortUrl,
+  createPublicVAShortUrl,
   redirectShortUrl,
   getShortUrlInfo,
   getUserShortUrls,
@@ -10,14 +11,17 @@ const {
   reactivateShortUrl
 } = require('../controllers/shortUrlController');
 
-// Public route for redirecting short URLs
+// Public routes (no authentication required)
 router.get('/:shortCode', redirectShortUrl);
+
+// Public VA profile sharing - anyone can create shareable links
+router.post('/vas/:vaId', createPublicVAShortUrl);
 
 // Protected routes (require authentication)
 router.use(protect);
 
-// Create short URL for a VA profile
-router.post('/vas/:vaId', createShortUrl);
+// Create short URL for own VA profile (authenticated)
+router.post('/user/vas/:vaId', createShortUrl);
 
 // Get short URL info and analytics
 router.get('/info/:shortCode', getShortUrlInfo);
