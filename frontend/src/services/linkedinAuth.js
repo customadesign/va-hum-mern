@@ -3,8 +3,10 @@
 
 const LINKEDIN_CONFIG = {
   clientId: process.env.REACT_APP_LINKEDIN_CLIENT_ID,
-  redirectUri: `${window.location.origin}/auth/linkedin/callback`,
-  scope: 'openid profile email w_organization_social', // Permissions needed
+  redirectUri: process.env.NODE_ENV === 'production' 
+    ? 'https://esystems-backend.onrender.com/api/auth/linkedin/callback'
+    : 'http://localhost:5000/api/auth/linkedin/callback',
+  scope: 'r_liteprofile r_emailaddress', // Basic permissions for authentication
   state: 'esystems_auth_' + Math.random().toString(36).substring(7),
 };
 
