@@ -103,7 +103,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="pb-5 sm:flex sm:items-center sm:justify-between">
             <h2 className="text-lg leading-6 font-medium text-gray-900">
-              Featured Virtual Assistants
+              Success Stories - Our Top Earning VAs
             </h2>
           </div>
 
@@ -138,14 +138,14 @@ export default function Home() {
                   to="/vas"
                   className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                 >
-                  View all VAs
+                  Join Our Community
                   <ArrowRightCircleIcon className="ml-3 -mr-1 h-5 w-5" aria-hidden="true" />
                 </Link>
               </div>
             </>
           ) : (
             <div className="text-center py-12 text-gray-500">
-              No featured virtual assistants available at the moment.
+              Be the first to join our community of successful virtual assistants.
             </div>
           )}
         </div>
