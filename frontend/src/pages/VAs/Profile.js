@@ -15,8 +15,9 @@ const validationSchema = Yup.object({
   hero: Yup.string().required('Hero statement is required'),
   bio: Yup.string().required('Bio is required').min(100, 'Bio must be at least 100 characters'),
   location: Yup.object({
+    province: Yup.string().required('Province is required'),
     city: Yup.string().required('City is required'),
-    state: Yup.string().required('Province is required'),
+    barangay: Yup.string().required('Barangay is required'),
   }),
   email: Yup.string().email('Invalid email').required('Email is required'),
   phone: Yup.string(),
@@ -29,22 +30,39 @@ const validationSchema = Yup.object({
   viber: Yup.string(),
 });
 
-const philippineProvinces = [
-  "Metro Manila", "Abra", "Agusan del Norte", "Agusan del Sur", "Aklan", "Albay", 
-  "Antique", "Apayao", "Aurora", "Basilan", "Bataan", "Batanes", "Batangas", 
-  "Benguet", "Biliran", "Bohol", "Bukidnon", "Bulacan", "Cagayan", "Camarines Norte", 
-  "Camarines Sur", "Camiguin", "Capiz", "Catanduanes", "Cavite", "Cebu", "Cotabato", 
-  "Davao de Oro", "Davao del Norte", "Davao del Sur", "Davao Occidental", "Davao Oriental", 
-  "Dinagat Islands", "Eastern Samar", "Guimaras", "Ifugao", "Ilocos Norte", "Ilocos Sur", 
-  "Iloilo", "Isabela", "Kalinga", "La Union", "Laguna", "Lanao del Norte", "Lanao del Sur", 
-  "Leyte", "Maguindanao", "Marinduque", "Masbate", "Misamis Occidental", "Misamis Oriental", 
-  "Mountain Province", "Negros Occidental", "Negros Oriental", "Northern Samar", "Nueva Ecija", 
-  "Nueva Vizcaya", "Occidental Mindoro", "Oriental Mindoro", "Palawan", "Pampanga", 
-  "Pangasinan", "Quezon", "Quirino", "Rizal", "Romblon", "Samar", "Sarangani", 
-  "Siquijor", "Sorsogon", "South Cotabato", "Southern Leyte", "Sultan Kudarat", "Sulu", 
-  "Surigao del Norte", "Surigao del Sur", "Tarlac", "Tawi-Tawi", "Zambales", 
-  "Zamboanga del Norte", "Zamboanga del Sur", "Zamboanga Sibugay"
-];
+// Philippine location data with provinces, cities, and sample barangays
+const philippineLocations = {
+  "Metro Manila": {
+    "Manila": ["Binondo", "Ermita", "Intramuros", "Malate", "Paco", "Pandacan", "Port Area", "Quiapo", "Sampaloc", "San Andres", "San Miguel", "San Nicolas", "Santa Ana", "Santa Cruz", "Santa Mesa", "Tondo"],
+    "Quezon City": ["Alicia", "Bagong Pag-asa", "Bahay Toro", "Balingasa", "Bungad", "Central", "Commonwealth", "Culiat", "Diliman", "Holy Spirit", "Kamuning", "Kristong Hari", "Libis", "Malaking Bahay", "Mariana", "New Era", "North Fairview", "Novaliches Proper", "Old Balara", "Pasong Putik Proper", "Project 6", "Sacred Heart", "San Bartolome", "Tandang Sora", "White Plains"],
+    "Makati": ["Bangkal", "Bel-Air", "Cembo", "Comembo", "Dasmariñas", "East Rembo", "Forbes Park", "Guadalupe Nuevo", "Guadalupe Viejo", "Kasilawan", "La Paz", "Magallanes", "Olympia", "Palanan", "Pembo", "Pinagkaisahan", "Pio del Pilar", "Poblacion", "Post Proper Northside", "Post Proper Southside", "Rizal", "San Antonio", "San Isidro", "San Lorenzo", "Santa Cruz", "Singkamas", "South Cembo", "Tejeros", "Urdaneta", "Valenzuela", "West Rembo"],
+    "Taguig": ["Bagumbayan", "Bambang", "Calzada", "Central Bicutan", "Central Signal Village", "Fort Bonifacio", "Hagonoy", "Ibayo-Tipas", "Katuparan", "Ligid-Tipas", "Lower Bicutan", "Maharlika Village", "Napindan", "New Lower Bicutan", "North Daang Hari", "North Signal Village", "Palingon", "Pinagsama", "San Miguel", "Santa Ana", "South Daang Hari", "South Signal Village", "Tanyag", "Tuktukan", "Upper Bicutan", "Ususan", "Wawa", "Western Bicutan"]
+  },
+  "Cebu": {
+    "Cebu City": ["Adlaon", "Agsungot", "Apas", "Bacayan", "Banilad", "Basak Pardo", "Basak San Nicolas", "Binaliw", "Bonbon", "Budla-an", "Buhisan", "Capitol Site", "Carreta", "Central", "Cogon Pardo", "Cogon Ramos", "Day-as", "Duljo Fatima", "Ermita", "Guadalupe", "Guba", "Hipodromo", "Inayawan", "Kalubihan", "Kamagayan", "Kamputhaw", "Kasambagan", "Kinasang-an Pardo", "Labangon", "Lahug", "Lorega San Miguel", "Luz", "Mabini", "Mabolo", "Malubog", "Mambaling", "Pahina Central", "Pahina San Nicolas", "Pardo", "Pari-an", "Paril", "Pasil", "Poblacion Pardo", "Pulangbato", "Pung-ol Sibugay", "Punta Princesa", "Quiot", "Sambag I", "Sambag II", "San Antonio", "San Jose", "San Nicolas Central", "San Roque", "Santa Cruz", "Santo Niño", "Sapangdaku", "Sawang Calero", "Sinsin", "Sirao", "Suba", "Sudlon I", "Sudlon II", "T. Padilla", "Tabunan", "Tagba-o", "Talamban", "Taptap", "Tejero", "Tinago", "Tisa", "To-ong", "Zapatera"],
+    "Mandaue City": ["Alang-alang", "Bakilid", "Banilad", "Basak", "Cabancalan", "Cambaro", "Canduman", "Casili", "Casuntingan", "Centro", "Cubacub", "Guizo", "Ibabao-Estancia", "Jagobiao", "Labogon", "Looc", "Maguikay", "Mantuyong", "Opao", "Pakna-an", "Pagsabungan", "Subangdaku", "Tabok", "Tawason", "Tingub", "Tipolo", "Umapad"],
+    "Lapu-Lapu City": ["Agus", "Babag", "Bankal", "Baring", "Basak", "Buaya", "Calawisan", "Canjulao", "Caw-oy", "Caubian", "Gun-ob", "Ibo", "Looc", "Mactan", "Maribago", "Marigondon", "Pajac", "Poblacion", "Pajo", "Punta Engaño", "Pusok", "Sabang", "Santa Rosa", "Subabasbas", "Talima", "Tingo", "Tungasan"]
+  },
+  "Davao del Sur": {
+    "Davao City": ["Agdao", "Angalan", "Bagong", "Bago Aplaya", "Bago Gallera", "Baguio", "Baliok", "Bangkas Heights", "Baracatan", "Barangay 1-A", "Barangay 2-A", "Barangay 3-A", "Barangay 4-A", "Barangay 5-A", "Barangay 6-A", "Barangay 7-A", "Barangay 8-A", "Barangay 9-A", "Barangay 10-A", "Benda", "Bucana", "Buda", "Buhangin", "Bunawan", "Calinan", "Callawa", "Catalunan Grande", "Catalunan Pequeño", "Cawayan", "Centro", "Communal", "Crossing Bayabas", "Dacudao", "Dalag", "Daliao", "Daliaon Plantation", "Dominga", "Dumoy", "Eden", "Gumitan", "Ilang", "Inayangan", "Indangan", "Kilate", "Lacson", "Lamanan", "Lampianao", "Langub", "Leon Garcia", "Libby", "Lizada", "Los Amigos", "Lubogan", "Lumiad", "Ma-a", "Magsaysay", "Malabog", "Malagos", "Malamba", "Manambulan", "Mandug", "Manuel Guianga", "Mapula", "Marapangi", "Marilog", "Matina Aplaya", "Matina Crossing", "Matina Pangi", "Megkawayan", "Mintal", "Mudiang", "Mulig", "New Carmen", "New Valencia", "Obrero", "Pampanga", "Panacan", "Panalum", "Pandaitan", "Pangyan", "Paquibato", "Paradise Embac", "Riverside", "Salaysay", "Saloy", "San Antonio", "San Isidro", "Santo Tomas", "Sasa", "Sibulan", "Sirib", "Suawan", "Subasta", "Tacunan", "Tagakpan", "Tagluno", "Tagurano", "Talandang", "Talomo", "Tamayong", "Tambobong", "Tamugan", "Tapak", "Tapia", "Tibuloy", "Tibungco", "Tigatto", "Toril", "Tugbok", "Tula", "Tumaga", "Ubalde", "Ula", "Vicente Hizon Sr.", "Waan", "Wangan", "Wilfredo Aquino"],
+    "Digos City": ["Aplaya", "Balabag", "Binaton", "Colorado", "Cogon", "Dahican", "Dawis", "Dulangan", "Goma", "Igpit", "Kapatagan", "Kiagot", "Lungag", "Mahayag", "Palili", "Poblacion", "Ruparan", "San Agustin", "San Jose", "San Miguel", "Sandawa", "Sinawilan", "Soong", "Tiguman", "Tres de Mayo", "Zone I", "Zone II", "Zone III"]
+  },
+  "Laguna": {
+    "Calamba": ["Bagong Kalsada", "Banadero", "Banay-banay", "Barangay I", "Barangay II", "Barangay III", "Barangay IV", "Barangay V", "Barangay VI", "Barangay VII", "Batino", "Bubuyan", "Bucal", "Bunggo", "Burol", "Camaligan", "Canlubang", "Halang", "Hornalan", "Kay-Anlog", "La Mesa", "Laguerta", "Lawa", "Lecheria", "Lingga", "Looc", "Mabato", "Makiling", "Mapagong", "Masili", "Maunong", "Mayapa", "Milagrosa", "Paciano Rizal", "Palingon", "Palo-Alto", "Palayan", "Pansol", "Parian", "Prinza", "Punta", "Puting Lupa", "Real", "Saimsim", "Sampiruhan", "San Cristobal", "San Jose", "San Juan", "Sirang Lupa", "Sucol", "Turbina", "Ulango", "Uwisan"],
+    "San Pedro": ["Bagong Silang", "Calendola", "Chrysanthemum", "Cuyab", "Estrella", "G.S.I.S.", "Landayan", "Laram", "Magsaysay", "Maharlika", "Nueva", "Pacita I", "Pacita II", "Poblacion", "Riverside", "Rosario", "Sampaguita Village", "San Antonio", "San Roque", "San Vicente", "Santo Niño", "United Bayanihan", "United Better Living"]
+  },
+  "Pampanga": {
+    "Angeles City": ["Agapito del Rosario", "Amsic", "Balibago", "Capaya", "Claro M. Recto", "Cuayan", "Cutcut", "Cutud", "Lourdes Norte", "Lourdes Sur", "Malabañas", "Margot", "Mining", "Ninoy Aquino", "Pampang", "Pulung Bulu", "Pulung Cacutud", "Pulung Maragul", "Salapungan", "San Jose", "San Nicolas", "Santa Teresita", "Santa Trinidad", "Santo Cristo", "Santo Domingo", "Sapangbato", "Tabun", "Virgen delos Remedios"],
+    "San Fernando": ["Alasas", "Baliti", "Bulaon", "Cabalantian", "Calulut", "Dela Paz Norte", "Dela Paz Sur", "Dolores", "Juliana", "Lara", "Lourdes", "Magliman", "Maimpis", "Malino", "Malpitic", "Panipuan", "Pulung Bulu", "Quebiawan", "Saguin", "San Agustin", "San Felipe", "San Isidro", "San Jose", "San Juan", "San Nicolas", "San Pedro", "Santa Lucia", "Santa Teresita", "Santo Niño", "Santo Rosario", "Sindalan", "Telabastagan"]
+  }
+};
+
+const getProvinces = () => Object.keys(philippineLocations);
+const getCitiesByProvince = (province) => province ? Object.keys(philippineLocations[province] || {}) : [];
+const getBarangaysByCity = (province, city) => {
+  if (!province || !city) return [];
+  return philippineLocations[province]?.[city] || [];
+};
 
 export default function VAProfile() {
   const queryClient = useQueryClient();
@@ -57,6 +75,12 @@ export default function VAProfile() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
+  
+  // Cascading dropdown state for location
+  const [selectedProvince, setSelectedProvince] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [availableCities, setAvailableCities] = useState([]);
+  const [availableBarangays, setAvailableBarangays] = useState([]);
 
   // Fetch current VA profile
   const { data: profile, isLoading } = useQuery(
@@ -100,8 +124,9 @@ export default function VAProfile() {
       bio: profile?.bio || '',
       location: {
         street: profile?.location?.street || '',
+        province: profile?.location?.province || profile?.location?.state || '', // Backward compatibility
         city: profile?.location?.city || '',
-        state: profile?.location?.state || '',
+        barangay: profile?.location?.barangay || '',
         postal_code: profile?.location?.postal_code || '',
         country: 'Philippines',
         country_code: 'PH'
@@ -148,6 +173,48 @@ export default function VAProfile() {
     },
   });
 
+  // Cascading dropdown handlers
+  const handleProvinceChange = (e) => {
+    const province = e.target.value;
+    setSelectedProvince(province);
+    setSelectedCity('');
+    setAvailableCities(getCitiesByProvince(province));
+    setAvailableBarangays([]);
+    
+    // Update formik values
+    formik.setFieldValue('location.province', province);
+    formik.setFieldValue('location.city', '');
+    formik.setFieldValue('location.barangay', '');
+  };
+
+  const handleCityChange = (e) => {
+    const city = e.target.value;
+    setSelectedCity(city);
+    setAvailableBarangays(getBarangaysByCity(selectedProvince, city));
+    
+    // Update formik values
+    formik.setFieldValue('location.city', city);
+    formik.setFieldValue('location.barangay', '');
+  };
+
+  // Initialize cascading dropdowns when profile loads
+  React.useEffect(() => {
+    if (profile?.location) {
+      const province = profile.location.province || profile.location.state;
+      const city = profile.location.city;
+      
+      if (province) {
+        setSelectedProvince(province);
+        setAvailableCities(getCitiesByProvince(province));
+        
+        if (city) {
+          setSelectedCity(city);
+          setAvailableBarangays(getBarangaysByCity(province, city));
+        }
+      }
+    }
+  }, [profile]);
+
   // Calculate profile completion percentage
   const profileCompletion = useMemo(() => {
     const values = formik.values;
@@ -156,7 +223,7 @@ export default function VAProfile() {
       { field: 'name', weight: 10, check: () => values.name?.trim() },
       { field: 'hero', weight: 10, check: () => values.hero?.trim() },
       { field: 'bio', weight: 15, check: () => values.bio?.length >= 100 },
-      { field: 'location', weight: 10, check: () => values.location?.city && values.location?.state },
+      { field: 'location', weight: 10, check: () => values.location?.city && values.location?.province && values.location?.barangay },
       { field: 'email', weight: 10, check: () => values.email?.trim() },
       { field: 'specialties', weight: 15, check: () => values.specialtyIds?.length > 0 },
       { field: 'roleType', weight: 5, check: () => Object.values(values.roleType || {}).some(Boolean) },
@@ -510,30 +577,98 @@ export default function VAProfile() {
                           </div>
                         </div>
 
+                        {/* Province */}
+                        <div>
+                          <label htmlFor="location.province" className="block text-sm font-medium text-gray-700">
+                            Province *
+                          </label>
+                          <div className="mt-1">
+                            <select
+                              name="location.province"
+                              id="location.province"
+                              value={formik.values.location.province}
+                              onChange={handleProvinceChange}
+                              onBlur={formik.handleBlur}
+                              className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                                formik.touched.location?.province && formik.errors.location?.province
+                                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                  : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                              }`}
+                            >
+                              <option value="">Select Province</option>
+                              {getProvinces().map(province => (
+                                <option key={province} value={province}>{province}</option>
+                              ))}
+                            </select>
+                          </div>
+                          {formik.touched.location?.province && formik.errors.location?.province && (
+                            <p className="mt-1 text-sm text-red-600">{formik.errors.location.province}</p>
+                          )}
+                        </div>
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {/* City/Municipality */}
+                          {/* City */}
                           <div>
                             <label htmlFor="location.city" className="block text-sm font-medium text-gray-700">
-                              City/Municipality *
+                              City *
                             </label>
                             <div className="mt-1">
-                              <input
-                                type="text"
+                              <select
                                 name="location.city"
                                 id="location.city"
                                 value={formik.values.location.city}
-                                onChange={formik.handleChange}
+                                onChange={handleCityChange}
                                 onBlur={formik.handleBlur}
-                                placeholder="e.g. Manila, Cebu City, Davao"
+                                disabled={!selectedProvince}
                                 className={`block w-full rounded-md shadow-sm sm:text-sm ${
                                   formik.touched.location?.city && formik.errors.location?.city
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                                     : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
-                                }`}
-                              />
+                                } ${!selectedProvince ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                              >
+                                <option value="">Select City</option>
+                                {availableCities.map(city => (
+                                  <option key={city} value={city}>{city}</option>
+                                ))}
+                              </select>
                             </div>
+                            {formik.touched.location?.city && formik.errors.location?.city && (
+                              <p className="mt-1 text-sm text-red-600">{formik.errors.location.city}</p>
+                            )}
                           </div>
 
+                          {/* Barangay */}
+                          <div>
+                            <label htmlFor="location.barangay" className="block text-sm font-medium text-gray-700">
+                              Barangay *
+                            </label>
+                            <div className="mt-1">
+                              <select
+                                name="location.barangay"
+                                id="location.barangay"
+                                value={formik.values.location.barangay}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                disabled={!selectedCity}
+                                className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                                  formik.touched.location?.barangay && formik.errors.location?.barangay
+                                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                    : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                                } ${!selectedCity ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                              >
+                                <option value="">Select Barangay</option>
+                                {availableBarangays.map(barangay => (
+                                  <option key={barangay} value={barangay}>{barangay}</option>
+                                ))}
+                              </select>
+                            </div>
+                            {formik.touched.location?.barangay && formik.errors.location?.barangay && (
+                              <p className="mt-1 text-sm text-red-600">{formik.errors.location.barangay}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {/* Postal Code */}
                           <div>
                             <label htmlFor="location.postal_code" className="block text-sm font-medium text-gray-700">
@@ -550,32 +685,6 @@ export default function VAProfile() {
                                 className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                               />
                             </div>
-                          </div>
-                        </div>
-
-                        {/* Province */}
-                        <div>
-                          <label htmlFor="location.state" className="block text-sm font-medium text-gray-700">
-                            Province *
-                          </label>
-                          <div className="mt-1">
-                            <select
-                              name="location.state"
-                              id="location.state"
-                              value={formik.values.location.state}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                              className={`block w-full rounded-md shadow-sm sm:text-sm ${
-                                formik.touched.location?.state && formik.errors.location?.state
-                                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                  : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
-                              }`}
-                            >
-                              <option value="">Select Province</option>
-                              {philippineProvinces.map(province => (
-                                <option key={province} value={province}>{province}</option>
-                              ))}
-                            </select>
                           </div>
                         </div>
                       </div>
