@@ -31,7 +31,7 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>{branding.isESystemsMode ? 'E-Systems Management - Find Skilled Team Members' : 'Linkage VA Hub - Register as a Virtual Assistant and Start Earning'}</title>
+        <title>{branding.isESystemsMode ? 'E-Systems Management - Find Skilled Team Members' : 'Linkage VA Hub - Join and Start Earning $4+ Per Hour as a Virtual Assistant'}</title>
         <meta name="description" content={branding.isESystemsMode ? 'Access pre-screened, skilled professionals for your business needs' : 'Join Linkage VA Hub and access high-paying virtual assistant jobs starting at $4 per hour. Register today and build your VA career.'} />
       </Helmet>
 
@@ -50,8 +50,8 @@ export default function Home() {
                       </>
                     ) : (
                       <>
-                        <span className="block text-gray-600">Register for a Linkage VA</span>
-                        <span className="block text-gray-800">account and start earning</span>
+                        <span className="block text-gray-600">Join Linkage VA Hub &</span>
+                        <span className="block text-gray-800">start earning today</span>
                       </>
                     )}
                   </h1>
@@ -63,8 +63,8 @@ export default function Home() {
                       </>
                     ) : (
                       <>
-                        Join Linkage VA Hub and access high-paying virtual assistant opportunities.
-                        <span className="md:block">Get VA jobs starting at $4 per hour and build your career.</span>
+                        Access high-paying virtual assistant opportunities and build your career.
+                        <span className="md:block">Get VA jobs starting at <span className="font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">$4 per hour</span> with growth potential.</span>
                       </>
                     )}
                   </p>
