@@ -1,12 +1,79 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { useBranding } from '../contexts/BrandingContext';
+import { useQuery } from 'react-query';
+import api from '../services/api';
 
 export default function Dashboard() {
   const { user, isVA, isBusiness } = useAuth();
   const { branding, loading: brandingLoading } = useBranding();
+
+  // Fetch VA profile data for profile completion calculation
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      const response = await api.get('/users/profile');
+      return response.data;
+    },
+    enabled: !!user && isVA
+  });
+
+  // Fetch analytics data
+  const { data: analytics } = useQuery({
+    queryKey: ['analytics', user?.id],
+    queryFn: async () => {
+      const response = await api.get('/analytics/dashboard');
+      return response.data;
+    },
+    enabled: !!user,
+    onError: () => {
+      // Return default data if API doesn't exist yet
+      return {
+        activeConversations: 0,
+        profileViews: 0,
+        contactsMade: 0
+      };
+    }
+  });
+
+  // Calculate profile completion percentage using same logic as ProfileCompletion component
+  const profileCompletion = useMemo(() => {
+    if (!isVA || !profile) return { percentage: 0, isComplete: false, missingFields: [] };
+
+    const requiredFields = [
+      // Essential fields (high weight)
+      { field: 'name', weight: 10, check: () => profile.name?.trim() },
+      { field: 'hero', weight: 10, check: () => profile.hero?.trim() },
+      { field: 'bio', weight: 15, check: () => profile.bio?.length >= 100 },
+      { field: 'location', weight: 10, check: () => profile.location?.city && profile.location?.state },
+      { field: 'email', weight: 10, check: () => profile.email?.trim() },
+      { field: 'specialties', weight: 15, check: () => profile.specialtyIds?.length > 0 },
+      { field: 'roleType', weight: 5, check: () => Object.values(profile.roleType || {}).some(Boolean) },
+      { field: 'roleLevel', weight: 5, check: () => Object.values(profile.roleLevel || {}).some(Boolean) },
+      
+      // Enhanced fields (medium weight)
+      { field: 'hourlyRate', weight: 10, check: () => profile.preferredMinHourlyRate && profile.preferredMaxHourlyRate },
+      { field: 'phone', weight: 5, check: () => profile.phone?.trim() },
+      { field: 'onlinePresence', weight: 5, check: () => profile.website?.trim() || profile.linkedin?.trim() },
+      { field: 'discAssessment', weight: 10, check: () => profile.discPrimaryType }
+    ];
+
+    const totalWeight = requiredFields.reduce((sum, field) => sum + field.weight, 0);
+    const completedWeight = requiredFields.reduce((sum, field) => {
+      return sum + (field.check() ? field.weight : 0);
+    }, 0);
+
+    const percentage = Math.round((completedWeight / totalWeight) * 100);
+    const missingFields = requiredFields.filter(field => !field.check());
+
+    return {
+      percentage,
+      isComplete: percentage >= 100,
+      missingFields
+    };
+  }, [profile, isVA]);
 
   // Show loading spinner while branding context is loading
   if (brandingLoading || !branding) {
@@ -46,7 +113,7 @@ export default function Dashboard() {
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Profile Completion</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-blue-900">75%</div>
+                      <div className="text-2xl font-semibold text-blue-900">{isVA ? profileCompletion.percentage : '100'}%</div>
                     </dd>
                   </dl>
                 </div>
@@ -74,7 +141,7 @@ export default function Dashboard() {
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Active Conversations</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-sky-900">0</div>
+                      <div className="text-2xl font-semibold text-sky-900">{analytics?.activeConversations || 0}</div>
                     </dd>
                   </dl>
                 </div>
@@ -104,7 +171,9 @@ export default function Dashboard() {
                       {isVA ? 'Profile Views' : (branding.isESystemsMode ? 'Team Members Contacted' : 'VAs Contacted')}
                     </dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-indigo-900">0</div>
+                      <div className="text-2xl font-semibold text-indigo-900">
+                        {isVA ? (analytics?.profileViews || 0) : (analytics?.contactsMade || 0)}
+                      </div>
                     </dd>
                   </dl>
                 </div>
@@ -219,8 +288,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Profile Completion Encouragement Banner - Only show for VAs */}
-        {isVA && (
+        {/* Profile Completion Encouragement Banner - Only show for VAs with incomplete profiles */}
+        {isVA && !profileCompletion.isComplete && (
           <div className="mt-8">
             <div className="bg-gradient-to-r from-emerald-50 to-cyan-50 border border-emerald-200 rounded-xl shadow-sm overflow-hidden">
               <div className="px-6 py-5">
@@ -283,10 +352,10 @@ export default function Dashboard() {
               <div className="bg-gradient-to-r from-emerald-100 to-cyan-100 px-6 py-3 border-t border-emerald-200">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600 font-medium">Profile Completeness</span>
-                  <span className="text-emerald-700 font-semibold">75% Complete</span>
+                  <span className="text-emerald-700 font-semibold">{profileCompletion.percentage}% Complete</span>
                 </div>
                 <div className="mt-2 bg-white rounded-full h-2 overflow-hidden shadow-inner">
-                  <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all duration-500 ease-out" style={{width: '75%'}}></div>
+                  <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all duration-500 ease-out" style={{width: `${profileCompletion.percentage}%`}}></div>
                 </div>
                 <p className="mt-2 text-xs text-gray-500">
                   Just a few more details needed to reach 100% and maximize your placement opportunities!
