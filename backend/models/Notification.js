@@ -86,8 +86,8 @@ notificationSchema.virtual('title').get(function() {
   return titles[this.type] || 'Notification';
 });
 
-// Virtual to get formatted message
-notificationSchema.virtual('message').get(function() {
+// Virtual to get formatted message text
+notificationSchema.virtual('messageText').get(function() {
   // If params.message exists, use it
   if (this.params && this.params.message) {
     return this.params.message;

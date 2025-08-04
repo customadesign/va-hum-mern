@@ -336,6 +336,94 @@ export default function VADetail() {
                 </div>
               )}
 
+              {/* DISC Personality Assessment */}
+              {va.discAssessment?.isCompleted && (
+                <div className="bg-white shadow rounded-lg p-6 mt-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Personality Profile (DISC)</h3>
+                  <div className="space-y-4">
+                    {/* Primary Type */}
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-900">Primary Type</h4>
+                        <p className="text-lg font-semibold text-gray-800">
+                          {va.discAssessment.primaryType} - {
+                            va.discAssessment.primaryType === 'D' ? 'Dominance' :
+                            va.discAssessment.primaryType === 'I' ? 'Influence' :
+                            va.discAssessment.primaryType === 'S' ? 'Steadiness' :
+                            va.discAssessment.primaryType === 'C' ? 'Conscientiousness' : ''
+                          }
+                        </p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {va.discAssessment.primaryType === 'D' && 'Direct, Results-oriented, Firm, Strong-willed'}
+                          {va.discAssessment.primaryType === 'I' && 'Outgoing, Enthusiastic, Optimistic, People-oriented'}
+                          {va.discAssessment.primaryType === 'S' && 'Even-tempered, Accommodating, Patient, Humble'}
+                          {va.discAssessment.primaryType === 'C' && 'Analytical, Reserved, Precise, Systematic'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* DISC Scores */}
+                    {(va.discAssessment.scores?.dominance || va.discAssessment.scores?.influence || 
+                      va.discAssessment.scores?.steadiness || va.discAssessment.scores?.conscientiousness) && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-900 mb-3">Assessment Scores</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          {va.discAssessment.scores?.dominance && (
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium text-red-800">Dominance (D)</span>
+                                <span className="text-lg font-bold text-red-600">{va.discAssessment.scores.dominance}</span>
+                              </div>
+                            </div>
+                          )}
+                          {va.discAssessment.scores?.influence && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium text-yellow-800">Influence (I)</span>
+                                <span className="text-lg font-bold text-yellow-600">{va.discAssessment.scores.influence}</span>
+                              </div>
+                            </div>
+                          )}
+                          {va.discAssessment.scores?.steadiness && (
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium text-green-800">Steadiness (S)</span>
+                                <span className="text-lg font-bold text-green-600">{va.discAssessment.scores.steadiness}</span>
+                              </div>
+                            </div>
+                          )}
+                          {va.discAssessment.scores?.conscientiousness && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium text-blue-800">Conscientiousness (C)</span>
+                                <span className="text-lg font-bold text-blue-600">{va.discAssessment.scores.conscientiousness}</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Assessment Info */}
+                    <div className="border-t pt-3">
+                      <p className="text-xs text-gray-500">
+                        DISC assessment completed
+                        {va.discAssessment.completedAt && 
+                          ` on ${new Date(va.discAssessment.completedAt).toLocaleDateString()}`
+                        }. Learn more about <a 
+                          href="https://openpsychometrics.org/tests/ODAT/" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="underline hover:text-gray-700"
+                        >
+                          DISC personality assessment
+                        </a>.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Online Presence */}
               <div className="bg-white shadow rounded-lg p-6 mt-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Online Presence</h3>

@@ -216,7 +216,7 @@ export default function Notifications() {
                         'text-sm',
                         !notification.readAt ? 'font-semibold text-gray-900' : 'text-gray-700'
                       )}>
-                        {notification.message}
+                        {notification.messageText}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         {formatNotificationDate(notification.createdAt)}

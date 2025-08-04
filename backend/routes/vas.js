@@ -709,6 +709,32 @@ router.put('/me', protect, authorize('va'), async (req, res) => {
       }
     });
 
+    // Handle DISC assessment fields specially
+    if (req.body.discPrimaryType !== undefined || 
+        req.body.discDominance !== undefined ||
+        req.body.discInfluence !== undefined ||
+        req.body.discSteadiness !== undefined ||
+        req.body.discConscientiousness !== undefined) {
+      
+      updateData.discAssessment = {
+        isCompleted: false,
+        primaryType: req.body.discPrimaryType || null,
+        scores: {
+          dominance: req.body.discDominance ? parseInt(req.body.discDominance) : null,
+          influence: req.body.discInfluence ? parseInt(req.body.discInfluence) : null,
+          steadiness: req.body.discSteadiness ? parseInt(req.body.discSteadiness) : null,
+          conscientiousness: req.body.discConscientiousness ? parseInt(req.body.discConscientiousness) : null
+        },
+        testUrl: 'https://openpsychometrics.org/tests/ODAT/'
+      };
+
+      // Mark as completed if primary type is provided
+      if (req.body.discPrimaryType) {
+        updateData.discAssessment.isCompleted = true;
+        updateData.discAssessment.completedAt = new Date();
+      }
+    }
+
     const va = await VA.findOneAndUpdate(
       { user: req.user._id },
       updateData,

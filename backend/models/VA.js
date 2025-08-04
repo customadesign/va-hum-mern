@@ -299,6 +299,52 @@ const vaSchema = new mongoose.Schema({
         trim: true,
       },
     ],
+    // DISC Personality Assessment
+    discAssessment: {
+      isCompleted: {
+        type: Boolean,
+        default: false
+      },
+      primaryType: {
+        type: String,
+        enum: ['D', 'I', 'S', 'C', null],
+        default: null
+      },
+      scores: {
+        dominance: {
+          type: Number,
+          min: 0,
+          max: 100,
+          default: null
+        },
+        influence: {
+          type: Number,
+          min: 0,
+          max: 100,
+          default: null
+        },
+        steadiness: {
+          type: Number,
+          min: 0,
+          max: 100,
+          default: null
+        },
+        conscientiousness: {
+          type: Number,
+          min: 0,
+          max: 100,
+          default: null
+        }
+      },
+      completedAt: {
+        type: Date,
+        default: null
+      },
+      testUrl: {
+        type: String,
+        default: 'https://openpsychometrics.org/tests/ODAT/'
+      }
+    },
     languages: [
       {
         language: {

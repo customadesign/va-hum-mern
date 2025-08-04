@@ -133,6 +133,12 @@ export default function VAProfile() {
       },
       profileReminderNotifications: profile?.profileReminderNotifications ?? true,
       productAnnouncementNotifications: profile?.productAnnouncementNotifications ?? true,
+      // DISC Assessment fields
+      discPrimaryType: profile?.discAssessment?.primaryType || '',
+      discDominance: profile?.discAssessment?.scores?.dominance || '',
+      discInfluence: profile?.discAssessment?.scores?.influence || '',
+      discSteadiness: profile?.discAssessment?.scores?.steadiness || '',
+      discConscientiousness: profile?.discAssessment?.scores?.conscientiousness || '',
     },
     validationSchema,
     enableReinitialize: true,
@@ -827,6 +833,143 @@ export default function VAProfile() {
                         </div>
                       ))}
                     </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* DISC Personality Assessment */}
+            <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
+              <div className="md:grid md:grid-cols-3 md:gap-6">
+                <div>
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">DISC Personality Assessment</h2>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Help businesses understand your personality type and working style by completing a DISC assessment.
+                  </p>
+                  <p className="mt-2 text-sm text-gray-500">
+                    <a 
+                      href="https://openpsychometrics.org/tests/ODAT/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-gray-700 font-medium underline hover:text-gray-900"
+                    >
+                      Take the free DISC test
+                    </a> (4-6 minutes) and enter your results below.
+                  </p>
+                  <h4 className="font-medium uppercase tracking-wide text-gray-500 text-sm mt-4">ABOUT DISC</h4>
+                  <p className="mt-1 text-sm text-gray-500">
+                    DISC measures four personality types: Dominance (D), Influence (I), Steadiness (S), and Conscientiousness (C).
+                  </p>
+                </div>
+
+                <div className="mt-5 md:mt-0 md:col-span-2">
+                  <div className="space-y-6">
+                    {/* Primary DISC Type */}
+                    <div>
+                      <label htmlFor="discPrimaryType" className="block text-sm font-medium text-gray-700">
+                        Primary DISC Type
+                      </label>
+                      <select
+                        id="discPrimaryType"
+                        name="discPrimaryType"
+                        value={formik.values.discPrimaryType || ''}
+                        onChange={formik.handleChange}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                      >
+                        <option value="">Select your primary type</option>
+                        <option value="D">D - Dominance (Direct, Results-oriented, Firm, Strong-willed)</option>
+                        <option value="I">I - Influence (Outgoing, Enthusiastic, Optimistic, People-oriented)</option>
+                        <option value="S">S - Steadiness (Even-tempered, Accommodating, Patient, Humble)</option>
+                        <option value="C">C - Conscientiousness (Analytical, Reserved, Precise, Systematic)</option>
+                      </select>
+                    </div>
+
+                    {/* DISC Scores */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="discDominance" className="block text-sm font-medium text-gray-700">
+                          Dominance Score (0-100)
+                        </label>
+                        <input
+                          type="number"
+                          id="discDominance"
+                          name="discDominance"
+                          min="0"
+                          max="100"
+                          value={formik.values.discDominance || ''}
+                          onChange={formik.handleChange}
+                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="discInfluence" className="block text-sm font-medium text-gray-700">
+                          Influence Score (0-100)
+                        </label>
+                        <input
+                          type="number"
+                          id="discInfluence"
+                          name="discInfluence"
+                          min="0"
+                          max="100"
+                          value={formik.values.discInfluence || ''}
+                          onChange={formik.handleChange}
+                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="discSteadiness" className="block text-sm font-medium text-gray-700">
+                          Steadiness Score (0-100)
+                        </label>
+                        <input
+                          type="number"
+                          id="discSteadiness"
+                          name="discSteadiness"
+                          min="0"
+                          max="100"
+                          value={formik.values.discSteadiness || ''}
+                          onChange={formik.handleChange}
+                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="discConscientiousness" className="block text-sm font-medium text-gray-700">
+                          Conscientiousness Score (0-100)
+                        </label>
+                        <input
+                          type="number"
+                          id="discConscientiousness"
+                          name="discConscientiousness"
+                          min="0"
+                          max="100"
+                          value={formik.values.discConscientiousness || ''}
+                          onChange={formik.handleChange}
+                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Assessment Status */}
+                    {formik.values.discPrimaryType && (
+                      <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                        <div className="flex">
+                          <div className="flex-shrink-0">
+                            <InformationCircleIcon className="h-5 w-5 text-green-400" aria-hidden="true" />
+                          </div>
+                          <div className="ml-3">
+                            <h3 className="text-sm font-medium text-green-800">
+                              DISC Assessment Completed
+                            </h3>
+                            <div className="mt-2 text-sm text-green-700">
+                              <p>Your primary type is <strong>{formik.values.discPrimaryType}</strong>. This will be displayed on your public profile to help businesses understand your working style.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
