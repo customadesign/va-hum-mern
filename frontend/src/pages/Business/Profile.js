@@ -235,6 +235,7 @@ export default function BusinessProfile() {
                           value={formik.values.company}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
+                          placeholder="Your Company"
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.company && formik.errors.company
                               ? "border-red-300 focus:ring-red-500 focus:border-red-500"
@@ -296,7 +297,7 @@ export default function BusinessProfile() {
                           value={formik.values.bio}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
-                          placeholder="Tell VAs about your company, culture, and what you're looking for..."
+                          placeholder="Tell us about your business..."
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.bio && formik.errors.bio
                               ? "border-red-300 focus:ring-red-500 focus:border-red-500"

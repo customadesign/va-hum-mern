@@ -1416,13 +1416,6 @@ export default function VAProfile() {
         check: () => Object.values(values.roleLevel || {}).some(Boolean),
       },
 
-      // Enhanced fields (medium weight)
-      {
-        field: "hourlyRate",
-        weight: 10,
-        check: () =>
-          values.preferredMinHourlyRate && values.preferredMaxHourlyRate,
-      },
       { field: "phone", weight: 5, check: () => values.phone?.trim() },
       {
         field: "onlinePresence",
@@ -1458,6 +1451,11 @@ export default function VAProfile() {
       completedWeight,
       percentage,
       missingFields: missingFields.map((f) => f.field),
+      missingFieldsDetails: missingFields.map((f) => ({
+        field: f.field,
+        weight: f.weight,
+        checkResult: f.check(),
+      })),
       formValues: {
         name: values.name,
         hero: values.hero,
@@ -1467,6 +1465,10 @@ export default function VAProfile() {
         specialtyIds: values.specialtyIds,
         roleType: values.roleType,
         roleLevel: values.roleLevel,
+        phone: values.phone,
+        website: values.website,
+        linkedin: values.linkedin,
+        discPrimaryType: values.discPrimaryType,
       },
     });
 
@@ -1707,9 +1709,6 @@ export default function VAProfile() {
             )}
           </div>
 
-          {/* Profile Completion Progress - also available in footer */}
-          <ProfileCompletion className="mx-4 lg:mx-0 mb-6" />
-
           {/* Profile Complete Celebration */}
           {profileCompletion.isComplete && (
             <div className="mx-4 lg:mx-0 mb-6">
@@ -1734,6 +1733,56 @@ export default function VAProfile() {
               </div>
             </div>
           )}
+
+          {/* Missing Fields Indicator */}
+          {!profileCompletion.isComplete &&
+            profileCompletion.missingFields.length > 0 && (
+              <div className="mx-4 lg:mx-0 mb-6">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <InformationCircleIcon className="h-5 w-5 text-amber-400" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-amber-800">
+                        Complete these fields to reach 100%:
+                      </h3>
+                      <div className="mt-2 text-sm text-amber-700">
+                        <ul className="list-disc list-inside space-y-1">
+                          {profileCompletion.missingFields.map((field) => (
+                            <li key={field.field}>
+                              {field.field === "name"
+                                ? "Full Name"
+                                : field.field === "hero"
+                                ? "Hero Statement"
+                                : field.field === "bio"
+                                ? "Bio (50+ characters)"
+                                : field.field === "location"
+                                ? "Location (Province, City, Barangay)"
+                                : field.field === "email"
+                                ? "Email Address"
+                                : field.field === "specialties"
+                                ? "Specialties (select at least one)"
+                                : field.field === "roleType"
+                                ? "Role Type (select at least one)"
+                                : field.field === "roleLevel"
+                                ? "Role Level (select at least one)"
+                                : field.field === "phone"
+                                ? "Phone Number"
+                                : field.field === "onlinePresence"
+                                ? "Website or LinkedIn"
+                                : field.field === "discAssessment"
+                                ? "DISC Assessment"
+                                : field.field}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
           <form onSubmit={formik.handleSubmit} className="space-y-8">
             {/* Profile Section */}
