@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { useBranding } from '../contexts/BrandingContext';
 import { useAuth } from '../contexts/AuthContext';
+import LessonViewer from '../components/LessonViewer';
+import QuickSkillModal from '../components/QuickSkillModal';
 import {
   AcademicCapIcon,
   CodeBracketIcon,
@@ -194,7 +196,27 @@ const achievements = [
 export default function Community() {
   const { branding } = useBranding();
   const { user } = useAuth();
+  const { lessonId } = useParams();
+  const navigate = useNavigate();
   const [timeToNext, setTimeToNext] = useState('');
+  const [selectedLesson, setSelectedLesson] = useState(null);
+  const [showLessonViewer, setShowLessonViewer] = useState(false);
+  const [selectedQuickSkill, setSelectedQuickSkill] = useState(null);
+  const [showQuickSkillModal, setShowQuickSkillModal] = useState(false);
+
+  // Check if accessing a specific lesson via URL
+  useEffect(() => {
+    if (lessonId && user) {
+      // Find the lesson by ID or create a default one
+      const lesson = currentTutorials.find(t => t.id === parseInt(lessonId)) || {
+        id: lessonId,
+        title: 'Lesson ' + lessonId,
+        // Add default lesson properties
+      };
+      setSelectedLesson(lesson);
+      setShowLessonViewer(true);
+    }
+  }, [lessonId, user]);
 
   // Countdown timer for next live training
   useEffect(() => {
@@ -230,6 +252,34 @@ export default function Community() {
 
     return () => clearInterval(interval);
   }, [user]);
+
+  // Handler for opening lesson viewer
+  const handleOpenLesson = (tutorial) => {
+    setSelectedLesson(tutorial);
+    setShowLessonViewer(true);
+    // Update URL to reflect the lesson being viewed
+    navigate(`/community/lesson/${tutorial.id}`, { replace: true });
+  };
+
+  // Handler for closing lesson viewer
+  const handleCloseLesson = () => {
+    setShowLessonViewer(false);
+    setSelectedLesson(null);
+    // Return to community page
+    navigate('/community', { replace: true });
+  };
+
+  // Handler for opening quick skill modal
+  const handleOpenQuickSkill = (skill) => {
+    setSelectedQuickSkill(skill);
+    setShowQuickSkillModal(true);
+  };
+
+  // Handler for closing quick skill modal
+  const handleCloseQuickSkill = () => {
+    setShowQuickSkillModal(false);
+    setSelectedQuickSkill(null);
+  };
 
   // Redirect to home if in E-systems mode
   if (branding.isESystemsMode) {
@@ -312,7 +362,9 @@ export default function Community() {
                             </div>
                           </div>
                           <div className="flex flex-col items-end space-y-2 ml-4">
-                            <button className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            <button 
+                              onClick={() => handleOpenLesson(tutorial)}
+                              className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
                               {tutorial.progress > 0 ? 'Continue' : 'Start'}
                               <PlayIcon className="ml-1 h-4 w-4" />
                             </button>
@@ -350,7 +402,10 @@ export default function Community() {
                         { title: 'Client Onboarding Checklist', time: '12 min', category: 'Business' },
                         { title: 'Keyword Research Basics', time: '15 min', category: 'SEO' }
                       ].map((skill, index) => (
-                        <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                        <div 
+                          key={index} 
+                          onClick={() => handleOpenQuickSkill(skill)}
+                          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
                           <div className="flex items-center justify-between">
                             <div>
                               <h4 className="font-medium text-gray-900">{skill.title}</h4>
@@ -449,6 +504,23 @@ export default function Community() {
             </div>
           </div>
         </div>
+
+        {/* Lesson Viewer Modal */}
+        {showLessonViewer && (
+          <LessonViewer
+            lesson={selectedLesson}
+            onClose={handleCloseLesson}
+          />
+        )}
+
+        {/* Quick Skill Modal */}
+        {showQuickSkillModal && (
+          <QuickSkillModal
+            skill={selectedQuickSkill}
+            isOpen={showQuickSkillModal}
+            onClose={handleCloseQuickSkill}
+          />
+        )}
       </>
     );
   }

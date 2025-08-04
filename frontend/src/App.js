@@ -33,6 +33,7 @@ import ProfileSetup from './pages/ProfileSetup';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import NotFound from './pages/NotFound';
+import Notifications from './pages/Notifications';
 
 // Admin Pages
 import AdminDashboard from './pages/Admin/Dashboard';
@@ -60,6 +61,7 @@ function App() {
                   <Route index element={<Home />} />
                   <Route path="about" element={<About />} />
                   <Route path="community" element={<Community />} />
+                  <Route path="community/lesson/:lessonId" element={<Community />} />
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
                   <Route path="forgot-password" element={<ForgotPassword />} />
@@ -77,6 +79,7 @@ function App() {
                     <Route path="business/profile" element={<BusinessProfile />} />
                     <Route path="conversations" element={<Conversations />} />
                     <Route path="conversations/:id" element={<ConversationDetail />} />
+                    <Route path="notifications" element={<Notifications />} />
                   </Route>
                   
                   {/* Admin Routes */}
