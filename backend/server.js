@@ -73,6 +73,10 @@ const io = socketio(server, {
   cors: corsOptions
 });
 
+// Initialize Passport configuration
+require('./config/passport');
+app.use(passport.initialize());
+
 // Security middleware
 app.use(helmet());
 app.use(cors(corsOptions));
