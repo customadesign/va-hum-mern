@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import api from '../../services/api';
 import { CameraIcon, InformationCircleIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
 import { PhotoIcon, VideoCameraIcon, ArrowUpTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
+import ProfileCompletion from '../../components/ProfileCompletion';
 
 const validationSchema = Yup.object({
   name: Yup.string().required('Name is required'),
@@ -396,7 +397,8 @@ export default function VAProfile() {
             )}
           </div>
 
-          {/* Profile completion widget has been moved to the footer */}
+          {/* Profile Completion Progress - also available in footer */}
+          <ProfileCompletion className="mx-4 lg:mx-0 mb-6" />
 
           {/* Profile Complete Celebration */}
           {profileCompletion.isComplete && (
