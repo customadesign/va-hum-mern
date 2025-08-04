@@ -118,6 +118,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     login,
+    linkedinLogin,
     register,
     logout,
     updateUser,
