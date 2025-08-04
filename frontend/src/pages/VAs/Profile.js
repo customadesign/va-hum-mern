@@ -20,9 +20,7 @@ import ProfileCompletion from "../../components/ProfileCompletion";
 const validationSchema = Yup.object({
   name: Yup.string(),
   hero: Yup.string().required("Hero statement is required"),
-  bio: Yup.string()
-    .required("Bio is required")
-    .min(100, "Bio must be at least 100 characters"),
+  bio: Yup.string(),
   location: Yup.object({
     province: Yup.string().required("Province is required"),
     city: Yup.string().required("City is required"),
@@ -1254,15 +1252,19 @@ export default function VAProfile() {
   // Update profile mutation
   const updateProfileMutation = useMutation(
     async (data) => {
+      console.log("Mutation called with data:", data);
       const response = await api.put("/vas/me", data);
+      console.log("API response:", response);
       return response.data;
     },
     {
-      onSuccess: () => {
+      onSuccess: (data) => {
+        console.log("Mutation successful:", data);
         queryClient.invalidateQueries("vaProfile");
         toast.success("Profile updated successfully");
       },
       onError: (error) => {
+        console.error("Mutation error:", error);
         toast.error(error.response?.data?.error || "Failed to update profile");
       },
     }
@@ -1270,9 +1272,9 @@ export default function VAProfile() {
 
   const formik = useFormik({
     initialValues: {
-      name: "",
+      name: profile?.name || "",
       hero: profile?.hero || "",
-      bio: "",
+      bio: profile?.bio || "",
       location: {
         street: profile?.location?.street || "",
         province: profile?.location?.province || profile?.location?.state || "", // Backward compatibility
@@ -1324,7 +1326,10 @@ export default function VAProfile() {
     enableReinitialize: true,
     onSubmit: (values) => {
       console.log("Form submitted with values:", values);
+      console.log("Name value:", values.name);
+      console.log("Bio value:", values.bio);
       if (!updateProfileMutation.isLoading) {
+        console.log("Submitting form...");
         updateProfileMutation.mutate(values);
       } else {
         console.log("Mutation already in progress, skipping submission");
