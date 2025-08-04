@@ -10,7 +10,7 @@ const router = express.Router();
 const LINKEDIN_CONFIG = {
   clientId: process.env.LINKEDIN_CLIENT_ID,
   clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-  redirectUri: process.env.LINKEDIN_REDIRECT_URI || `${process.env.CLIENT_URL}/auth/linkedin/callback`,
+  redirectUri: process.env.LINKEDIN_REDIRECT_URI || 'https://esystems-management-hub.onrender.com/auth/linkedin/callback',
 };
 
 // @desc    Handle LinkedIn OAuth callback

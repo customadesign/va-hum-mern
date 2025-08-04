@@ -27,7 +27,7 @@ if (credentials.clientID && credentials.clientSecret) {
     clientID: credentials.clientID,
     clientSecret: credentials.clientSecret,
     callbackURL: process.env.NODE_ENV === 'production' 
-      ? (isESystemsMode() ? "https://esystems-backend.onrender.com/api/auth/linkedin/callback" : "https://linkage-va-hub-api.onrender.com/api/auth/linkedin/callback")
+      ? (isESystemsMode() ? "https://esystems-management-hub.onrender.com/api/auth/linkedin/callback" : "https://linkage-va-hub-api.onrender.com/api/auth/linkedin/callback")
       : "/api/auth/linkedin/callback",
     scope: ['r_liteprofile', 'r_emailaddress'],
   }, async (accessToken, refreshToken, profile, done) => {

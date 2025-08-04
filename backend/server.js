@@ -35,13 +35,21 @@ const courseRoutes = require('./routes/courses');
 const videosdkRoutes = require('./routes/videosdk');
 const analyticsRoutes = require('./routes/analytics');
 
-// E Systems only routes
+// LinkedIn auth routes (E Systems mode)
 let linkedinAuthRoutes = null;
 if (process.env.ESYSTEMS_MODE === 'true') {
   try {
-    linkedinAuthRoutes = require('../esystems-backend/routes/linkedinAuth');
+    // First try to load from backend/routes
+    linkedinAuthRoutes = require('./routes/linkedinAuth');
+    console.log('LinkedIn routes loaded from backend/routes');
   } catch (error) {
-    console.log('LinkedIn routes not found, skipping...');
+    // Fallback to esystems-backend if exists
+    try {
+      linkedinAuthRoutes = require('../esystems-backend/routes/linkedinAuth');
+      console.log('LinkedIn routes loaded from esystems-backend');
+    } catch (fallbackError) {
+      console.log('LinkedIn routes not found in either location, skipping...');
+    }
   }
 }
 

@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
   const linkedinLogin = () => {
     // E-Systems frontend ALWAYS routes to E-Systems backend
     const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://esystems-backend.onrender.com'  // Always E-Systems backend
+      ? 'https://esystems-management-hub.onrender.com'  // Updated to correct backend URL
       : 'http://localhost:5000';
       
     console.log('E-Systems LinkedIn OAuth redirecting to:', `${backendUrl}/api/auth/linkedin`);
