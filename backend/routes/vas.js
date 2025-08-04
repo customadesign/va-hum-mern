@@ -475,7 +475,7 @@ router.post('/:id/avatar', protect, authorize('va'), async (req, res) => {
       }
     });
   } else {
-    // Local upload
+    // Fallback to local upload (Supabase not configured)
     upload.single('avatar')(req, res, async (err) => {
       if (err) {
         return res.status(400).json({
@@ -803,8 +803,8 @@ router.get('/test-upload', async (req, res) => {
 // @desc    Upload image for VA profile (avatar or cover)
 // @access  Private (VA only)
 router.post('/me/upload', protect, authorize('va'), async (req, res, next) => {
-  // Use Supabase in production if configured
-  if (process.env.NODE_ENV === 'production' && supabase) {
+  // Use Supabase if configured (development or production)
+  if (supabase) {
     console.log('Attempting Supabase upload...');
     
     // First try with Supabase

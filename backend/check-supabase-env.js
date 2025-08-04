@@ -20,6 +20,6 @@ try {
 
 console.log('\n=== File Upload Configuration ===');
 const isProduction = process.env.NODE_ENV === 'production';
-const useSupabase = isProduction && process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY;
+const useSupabase = process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY;
 console.log('Production mode:', isProduction ? '✅ Yes' : '❌ No');
 console.log('Use Supabase for uploads:', useSupabase ? '✅ Yes' : '❌ No (using local storage)');
