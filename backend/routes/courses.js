@@ -29,7 +29,7 @@ const {
   generateToken,
   listMeetings,
   validateApiKey
-} = require('../controllers/videosdkController');
+} = require('../controllers/videoSDKController');
 
 
 

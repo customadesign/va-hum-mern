@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const videosdkController = require('../controllers/videosdkController');
+const videosdkController = require('../controllers/videoSDKController');
 const auth = require('../middleware/auth');
 
 // Apply authentication middleware to all videosdk routes
