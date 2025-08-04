@@ -128,7 +128,7 @@ export default function Analytics() {
             </div>
           </div>
 
-          {/* Completed Projects / Active Projects */}
+          {/* Employers Worked With / Active Projects */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -136,11 +136,11 @@ export default function Analytics() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">
-                  {isVA ? 'Completed Projects' : 'Active Projects'}
+                  {isVA ? 'Employers Worked With' : 'Active Projects'}
                 </p>
                 <p className="text-2xl font-semibold text-gray-900">
                   {isVA 
-                    ? (dashboardAnalytics?.completedProjects || 0)
+                    ? (dashboardAnalytics?.employersWorkedWith || 0)
                     : (dashboardAnalytics?.activeProjects || 0)
                   }
                 </p>

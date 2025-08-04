@@ -31,7 +31,7 @@ exports.getDashboardAnalytics = async (req, res) => {
         profileViews: Math.floor(Math.random() * 50), // Mock data - replace with real queries
         activeConversations: Math.floor(Math.random() * 5),
         totalEarnings: Math.floor(Math.random() * 10000),
-        completedProjects: Math.floor(Math.random() * 20),
+        employersWorkedWith: Math.floor(Math.random() * 8), // Number of different employers/clients
         averageRating: (4 + Math.random()).toFixed(1),
         responseTime: '2 hours'
       };
