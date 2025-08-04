@@ -27,6 +27,7 @@ import VAList from './pages/VAs/List';
 import VADetail from './pages/VAs/Detail';
 import VAProfile from './pages/VAs/Profile';
 import BusinessProfile from './pages/Business/Profile';
+import ProfileRouter from './components/ProfileRouter';
 import Conversations from './pages/Conversations';
 import ConversationDetail from './pages/Conversations/Detail';
 import Dashboard from './pages/Dashboard';
@@ -87,7 +88,7 @@ function App() {
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="analytics" element={<Analytics />} />
                     <Route path="profile-setup" element={<ProfileSetup />} />
-                    <Route path="va/profile" element={<VAProfile />} />
+                    <Route path="va/profile" element={<ProfileRouter />} />
                     <Route path="business/profile" element={<BusinessProfile />} />
                     <Route path="conversations" element={<Conversations />} />
                     <Route path="conversations/:id" element={<ConversationDetail />} />

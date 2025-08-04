@@ -6,21 +6,80 @@ import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import { useBranding } from '../../contexts/BrandingContext';
-import { CameraIcon, InformationCircleIcon } from '@heroicons/react/24/solid';
+import { 
+  CameraIcon, 
+  InformationCircleIcon, 
+  PlusIcon, 
+  TrashIcon,
+  BuildingOfficeIcon,
+  GlobeAltIcon,
+  StarIcon
+} from '@heroicons/react/24/solid';
+
+// Industry options adapted for business needs
+const INDUSTRIES = [
+  'Accounting', 'Advertising & Marketing', 'Agriculture', 'Architecture & Planning',
+  'Automotive', 'Banking', 'Biotechnology', 'Construction', 'Consulting',
+  'Consumer Electronics', 'Consumer Goods', 'Design', 'E-Learning',
+  'Education', 'Energy', 'Engineering', 'Entertainment', 'Fashion & Apparel',
+  'Financial Services', 'Food & Beverages', 'Government', 'Healthcare',
+  'Hospitality', 'Human Resources', 'Information Technology', 'Insurance',
+  'Internet', 'Legal', 'Logistics & Supply Chain', 'Manufacturing',
+  'Media & Communications', 'Non-profit', 'Oil & Gas', 'Pharmaceuticals',
+  'Real Estate', 'Retail', 'Security & Investigations', 'Software',
+  'Telecommunications', 'Transportation', 'Travel & Tourism', 'Utilities',
+  'Venture Capital & Private Equity', 'Other'
+];
+
+// Company size options
+const COMPANY_SIZES = [
+  '1-10', '11-50', '51-200', '201-500', '501-1000', '1001-5000', '5001-10000', '10000+'
+];
+
+// Work environment options
+const WORK_ENVIRONMENTS = [
+  { value: 'remote', label: 'Remote' },
+  { value: 'hybrid', label: 'Hybrid' },
+  { value: 'onsite', label: 'On-site' },
+  { value: 'flexible', label: 'Flexible' }
+];
 
 const validationSchema = Yup.object({
+  // Basic Information
   contactName: Yup.string().required('Contact name is required'),
   company: Yup.string().required('Company name is required'),
-  bio: Yup.string().required('Company bio is required').min(50, 'Bio must be at least 50 characters'),
+  bio: Yup.string().required('Company description is required').min(100, 'Description must be at least 100 characters'),
   contactRole: Yup.string().required('Contact role is required'),
   email: Yup.string().email('Invalid email').required('Email is required'),
   phone: Yup.string(),
   website: Yup.string().url('Must be a valid URL'),
+  
+  // Company Details
+  industry: Yup.string().required('Industry is required'),
+  companySize: Yup.string().required('Company size is required'),
+  foundedYear: Yup.number().min(1800).max(new Date().getFullYear()),
+  headquartersLocation: Yup.string(),
+  workEnvironment: Yup.string(),
+  
+  // Address
   streetAddress: Yup.string(),
   city: Yup.string(),
   state: Yup.string(),
   postalCode: Yup.string(),
   country: Yup.string(),
+  
+  // Professional Information
+  missionStatement: Yup.string(),
+  companyCulture: Yup.string(),
+  vaRequirements: Yup.string(),
+  workingHours: Yup.string(),
+  
+  // Social Media
+  linkedin: Yup.string().url('Must be a valid URL'),
+  facebook: Yup.string().url('Must be a valid URL'),
+  twitter: Yup.string().url('Must be a valid URL'),
+  instagram: Yup.string().url('Must be a valid URL'),
+  youtube: Yup.string().url('Must be a valid URL'),
 });
 
 export default function BusinessProfile() {
@@ -58,6 +117,7 @@ export default function BusinessProfile() {
 
   const formik = useFormik({
     initialValues: {
+      // Basic Information
       contactName: profile?.contactName || '',
       company: profile?.company || '',
       bio: profile?.bio || '',
@@ -65,11 +125,44 @@ export default function BusinessProfile() {
       email: profile?.email || '',
       phone: profile?.phone || '',
       website: profile?.website || '',
+      
+      // Company Details
+      industry: profile?.industry || '',
+      companySize: profile?.companySize || '',
+      foundedYear: profile?.foundedYear || '',
+      employeeCount: profile?.employeeCount || '',
+      headquartersLocation: profile?.headquartersLocation || '',
+      workEnvironment: profile?.workEnvironment || '',
+      
+      // Address
       streetAddress: profile?.streetAddress || '',
       city: profile?.city || '',
       state: profile?.state || '',
       postalCode: profile?.postalCode || '',
       country: profile?.country || '',
+      
+      // Professional Information
+      missionStatement: profile?.missionStatement || '',
+      companyCulture: profile?.companyCulture || '',
+      vaRequirements: profile?.vaRequirements || '',
+      workingHours: profile?.workingHours || '',
+      
+      // Arrays
+      specialties: profile?.specialties || [],
+      benefits: profile?.benefits || [],
+      certifications: profile?.certifications || [],
+      awards: profile?.awards || [],
+      companyValues: profile?.companyValues || [],
+      languages: profile?.languages || [],
+      
+      // Social Media
+      linkedin: profile?.linkedin || '',
+      facebook: profile?.facebook || '',
+      twitter: profile?.twitter || '',
+      instagram: profile?.instagram || '',
+      youtube: profile?.youtube || '',
+      
+      // Settings
       vaNotifications: profile?.vaNotifications || 'no',
       invisible: profile?.invisible || false,
       surveyRequestNotifications: profile?.surveyRequestNotifications ?? true,
@@ -114,6 +207,59 @@ export default function BusinessProfile() {
     }
   };
 
+  // Helper functions for array management
+  const addArrayItem = (fieldName, newItem = '') => {
+    if (newItem.trim()) {
+      const currentArray = formik.values[fieldName] || [];
+      formik.setFieldValue(fieldName, [...currentArray, newItem.trim()]);
+    }
+  };
+
+  const removeArrayItem = (fieldName, index) => {
+    const currentArray = formik.values[fieldName] || [];
+    const newArray = currentArray.filter((_, i) => i !== index);
+    formik.setFieldValue(fieldName, newArray);
+  };
+
+  const updateArrayItem = (fieldName, index, newValue) => {
+    const currentArray = formik.values[fieldName] || [];
+    const newArray = [...currentArray];
+    newArray[index] = newValue;
+    formik.setFieldValue(fieldName, newArray);
+  };
+
+  // Calculate profile completion
+  const calculateCompletion = () => {
+    const requiredFields = ['contactName', 'company', 'bio', 'industry', 'companySize', 'contactRole', 'email'];
+    const professionalFields = ['missionStatement', 'companyCulture', 'workEnvironment', 'headquartersLocation'];
+    const socialFields = ['linkedin', 'facebook', 'twitter', 'instagram'];
+    const arrayFields = ['specialties', 'benefits', 'companyValues'];
+
+    let completed = 0;
+    let total = requiredFields.length + professionalFields.length + arrayFields.length + 1; // +1 for at least one social
+
+    // Required fields
+    requiredFields.forEach(field => {
+      if (formik.values[field] && formik.values[field].toString().length > 0) completed++;
+    });
+
+    // Professional fields
+    professionalFields.forEach(field => {
+      if (formik.values[field] && formik.values[field].length > 0) completed++;
+    });
+
+    // Array fields (at least one item each)
+    arrayFields.forEach(field => {
+      if (formik.values[field] && formik.values[field].length > 0) completed++;
+    });
+
+    // At least one social link
+    const hasSocial = socialFields.some(field => formik.values[field] && formik.values[field].length > 0);
+    if (hasSocial) completed++;
+
+    return Math.round((completed / total) * 100);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -130,21 +276,40 @@ export default function BusinessProfile() {
 
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col space-y-6">
-          <h1 className="text-3xl font-bold leading-tight text-gray-900 mx-4 lg:mx-0 mt-8 lg:mt-16">
-            {branding.isESystemsMode ? 'Company Profile' : 'Business Profile'}
-          </h1>
+          <div className="flex items-center justify-between mx-4 lg:mx-0 mt-8 lg:mt-16">
+            <h1 className="text-3xl font-bold leading-tight text-gray-900">
+              {branding.isESystemsMode ? 'Company Profile' : 'Business Profile'}
+            </h1>
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <div className="text-sm text-gray-500">Profile Completion</div>
+                <div className="flex items-center">
+                  <div className="text-2xl font-bold text-gray-900">{calculateCompletion()}%</div>
+                  <StarIcon className="h-5 w-5 text-yellow-400 ml-1" />
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Profile Completion Progress */}
           <div className="mx-4 lg:mx-0">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <InformationCircleIcon className="h-5 w-5 text-blue-400" />
+                  <BuildingOfficeIcon className="h-6 w-6 text-blue-500" />
                 </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-blue-800">Complete Your Profile</h3>
+                <div className="ml-3 flex-1">
+                  <h3 className="text-sm font-medium text-blue-800">Build Your Professional Company Profile</h3>
                   <div className="mt-2 text-sm text-blue-700">
-                    <p>A complete profile helps VAs understand your company and needs better.</p>
+                    <p>Create a comprehensive profile similar to LinkedIn to attract top VAs. Complete all sections to maximize your visibility.</p>
+                  </div>
+                  <div className="mt-3">
+                    <div className="bg-white rounded-full h-2">
+                      <div 
+                        className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${calculateCompletion()}%` }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -38,9 +38,7 @@ const analyticsRoutes = require('./routes/analytics');
 // Import middleware
 const errorHandler = require('./middleware/error');
 
-// Initialize Passport configuration
-require('./config/passport');
-app.use(passport.initialize());
+
 
 // CORS configuration
 const corsOptions = {
