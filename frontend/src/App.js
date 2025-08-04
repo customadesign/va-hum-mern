@@ -28,6 +28,7 @@ import VADetail from './pages/VAs/Detail';
 import VAProfile from './pages/VAs/Profile';
 import BusinessProfile from './pages/Business/Profile';
 import ProfileRouter from './components/ProfileRouter';
+import { LinkedInCallback } from './components/LinkedInLoginButton';
 import Conversations from './pages/Conversations';
 import ConversationDetail from './pages/Conversations/Detail';
 import Dashboard from './pages/Dashboard';
@@ -78,6 +79,7 @@ function App() {
                   <Route path="register" element={<Register />} />
                   <Route path="forgot-password" element={<ForgotPassword />} />
                   <Route path="reset-password/:token" element={<ResetPassword />} />
+                  <Route path="auth/linkedin/callback" element={<LinkedInCallback />} />
                   <Route path="vas" element={<VAList />} />
                   <Route path="vas/:id" element={<VADetail />} />
                   <Route path="terms" element={<Terms />} />
