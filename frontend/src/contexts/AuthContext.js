@@ -82,27 +82,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const linkedinLogin = () => {
-    // Redirect to LinkedIn OAuth endpoint - determine backend URL based on environment/hostname
-    const hostname = window.location.hostname;
-    const origin = window.location.origin;
-    const isESystemsMode = process.env.REACT_APP_BRAND === 'esystems' || 
-                          hostname.includes('esystems') || 
-                          origin.includes('esystems');
-    
-    // Debug logging for troubleshooting
-    console.log('LinkedIn Login Debug:', {
-      hostname,
-      origin,
-      REACT_APP_BRAND: process.env.REACT_APP_BRAND,
-      isESystemsMode,
-      NODE_ENV: process.env.NODE_ENV
-    });
-    
+    // E-Systems frontend ALWAYS routes to E-Systems backend
     const backendUrl = process.env.NODE_ENV === 'production' 
-      ? (isESystemsMode ? 'https://esystems-backend.onrender.com' : 'https://linkage-va-hub-api.onrender.com')
+      ? 'https://esystems-backend.onrender.com'  // Always E-Systems backend
       : 'http://localhost:5000';
       
-    console.log('LinkedIn OAuth redirecting to:', `${backendUrl}/api/auth/linkedin`);
+    console.log('E-Systems LinkedIn OAuth redirecting to:', `${backendUrl}/api/auth/linkedin`);
     window.location.href = `${backendUrl}/api/auth/linkedin`;
   };
 
