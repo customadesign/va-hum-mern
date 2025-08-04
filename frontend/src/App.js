@@ -35,6 +35,7 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import NotFound from './pages/NotFound';
 import Notifications from './pages/Notifications';
+import Analytics from './pages/Analytics';
 
 // Admin Pages
 import AdminDashboard from './pages/Admin/Dashboard';
@@ -84,6 +85,7 @@ function App() {
                   {/* Protected Routes */}
                   <Route element={<PrivateRoute />}>
                     <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="analytics" element={<Analytics />} />
                     <Route path="profile-setup" element={<ProfileSetup />} />
                     <Route path="va/profile" element={<VAProfile />} />
                     <Route path="business/profile" element={<BusinessProfile />} />
