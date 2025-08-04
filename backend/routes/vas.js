@@ -46,9 +46,20 @@ router.get('/', optionalAuth, async (req, res) => {
       searchStatus: { $in: ['actively_looking', 'open'] }
     };
 
-    // Search
+    // Search with fallback
     if (search) {
-      query.$text = { $search: search };
+      // Try to use text search, but prepare fallback
+      try {
+        query.$text = { $search: search };
+      } catch (error) {
+        // If text search fails, use regex as fallback
+        console.warn('Text search failed, using regex fallback:', error.message);
+        query.$or = [
+          { name: { $regex: search, $options: 'i' } },
+          { bio: { $regex: search, $options: 'i' } },
+          { hero: { $regex: search, $options: 'i' } }
+        ];
+      }
     }
 
     // Filters
@@ -93,20 +104,52 @@ router.get('/', optionalAuth, async (req, res) => {
       query.availability = availability;
     }
 
-    // Execute query with pagination
+    // Execute query with pagination and error handling
     const skip = (page - 1) * limit;
     
-    const [vas, total] = await Promise.all([
-      VA.find(query)
-        .populate('location')
-        .populate('specialties')
-        .populate('roleLevel')
-        .populate('roleType')
-        .sort(sort)
-        .skip(skip)
-        .limit(parseInt(limit)),
-      VA.countDocuments(query)
-    ]);
+    let vas, total;
+    
+    try {
+      [vas, total] = await Promise.all([
+        VA.find(query)
+          .populate('location')
+          .populate('specialties')
+          .populate('roleLevel')
+          .populate('roleType')
+          .sort(sort)
+          .skip(skip)
+          .limit(parseInt(limit)),
+        VA.countDocuments(query)
+      ]);
+    } catch (searchError) {
+      // If text search fails (likely due to missing index), use regex fallback
+      console.warn('Text search failed, trying regex fallback:', searchError.message);
+      
+      if (search && query.$text) {
+        // Replace text search with regex search
+        delete query.$text;
+        query.$or = [
+          { name: { $regex: search, $options: 'i' } },
+          { bio: { $regex: search, $options: 'i' } },
+          { hero: { $regex: search, $options: 'i' } }
+        ];
+        
+        // Retry with regex search
+        [vas, total] = await Promise.all([
+          VA.find(query)
+            .populate('location')
+            .populate('specialties')
+            .populate('roleLevel')
+            .populate('roleType')
+            .sort(sort)
+            .skip(skip)
+            .limit(parseInt(limit)),
+          VA.countDocuments(query)
+        ]);
+      } else {
+        throw searchError; // Re-throw if it's not a text search issue
+      }
+    }
 
     // Additional filtering for role types and levels
     let filteredVAs = vas;
@@ -134,27 +177,8 @@ router.get('/', optionalAuth, async (req, res) => {
       );
     }
 
-    // Apply AI-powered search if search query exists
-    let processedVAs = filteredVAs;
-    
-    if (search && search.trim()) {
-      try {
-        // Use AI to analyze search query and score VAs
-        processedVAs = await analyzeSearchQuery(search, filteredVAs);
-        console.log(`AI search processed ${processedVAs.length} VAs for query: "${search}"`);
-      } catch (aiError) {
-        console.error('AI search failed, falling back to basic search:', aiError);
-        // Fallback to enhanced text search
-        processedVAs = fallbackSearch(search, filteredVAs);
-      }
-      
-      // Apply pagination after AI scoring
-      const startIndex = (page - 1) * limit;
-      processedVAs = processedVAs.slice(startIndex, startIndex + parseInt(limit));
-    }
-
     // Transform the data structure to match frontend expectations
-    const transformedVAs = processedVAs.map(va => ({
+    const transformedVAs = filteredVAs.map(va => ({
       ...va.toObject(),
       roleType: va.roleType ? {
         part_time_contract: va.roleType.partTimeContract || false,
