@@ -1386,7 +1386,11 @@ export default function VAProfile() {
       // Essential fields (high weight)
       { field: "name", weight: 10, check: () => values.name?.trim() },
       { field: "hero", weight: 10, check: () => values.hero?.trim() },
-      { field: "bio", weight: 15, check: () => values.bio?.length >= 100 },
+      {
+        field: "bio",
+        weight: 15,
+        check: () => values.bio?.trim() && values.bio.length >= 50,
+      },
       {
         field: "location",
         weight: 10,
@@ -1437,11 +1441,34 @@ export default function VAProfile() {
       0
     );
     const completedWeight = requiredFields.reduce((sum, field) => {
-      return sum + (field.check() ? field.weight : 0);
+      const isCompleted = field.check();
+      console.log(
+        `Field ${field.field}: ${
+          isCompleted ? "completed" : "missing"
+        } (weight: ${field.weight})`
+      );
+      return sum + (isCompleted ? field.weight : 0);
     }, 0);
 
     const percentage = Math.round((completedWeight / totalWeight) * 100);
     const missingFields = requiredFields.filter((field) => !field.check());
+
+    console.log("Profile completion calculation:", {
+      totalWeight,
+      completedWeight,
+      percentage,
+      missingFields: missingFields.map((f) => f.field),
+      formValues: {
+        name: values.name,
+        hero: values.hero,
+        bio: values.bio,
+        email: values.email,
+        location: values.location,
+        specialtyIds: values.specialtyIds,
+        roleType: values.roleType,
+        roleLevel: values.roleLevel,
+      },
+    });
 
     return {
       percentage,

@@ -40,9 +40,9 @@ export default function ProfileSetup() {
       } else if (type === 'business') {
         // Create Business profile
         const response = await api.post('/businesses', {
-          contactName: 'Your Name',
-          company: 'Your Company',
-          bio: 'Tell us about your business...'
+          contactName: '',
+          company: '',
+          bio: ''
         });
         
         // Update user context

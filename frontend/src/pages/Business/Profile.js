@@ -1,21 +1,23 @@
-import React, { useState, useRef } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { toast } from 'react-toastify';
-import api from '../../services/api';
-import { useBranding } from '../../contexts/BrandingContext';
-import { CameraIcon, InformationCircleIcon } from '@heroicons/react/24/solid';
+import React, { useState, useRef } from "react";
+import { Helmet } from "react-helmet-async";
+import { useQuery, useMutation, useQueryClient } from "react-query";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { toast } from "react-toastify";
+import api from "../../services/api";
+import { useBranding } from "../../contexts/BrandingContext";
+import { CameraIcon, InformationCircleIcon } from "@heroicons/react/24/solid";
 
 const validationSchema = Yup.object({
-  contactName: Yup.string().required('Contact name is required'),
-  company: Yup.string().required('Company name is required'),
-  bio: Yup.string().required('Company bio is required').min(50, 'Bio must be at least 50 characters'),
-  contactRole: Yup.string().required('Contact role is required'),
-  email: Yup.string().email('Invalid email').required('Email is required'),
+  contactName: Yup.string().required("Contact name is required"),
+  company: Yup.string().required("Company name is required"),
+  bio: Yup.string()
+    .required("Company bio is required")
+    .min(50, "Bio must be at least 50 characters"),
+  contactRole: Yup.string().required("Contact role is required"),
+  email: Yup.string().email("Invalid email").required("Email is required"),
   phone: Yup.string(),
-  website: Yup.string().url('Must be a valid URL'),
+  website: Yup.string().url("Must be a valid URL"),
   streetAddress: Yup.string(),
   city: Yup.string(),
   state: Yup.string(),
@@ -31,46 +33,48 @@ export default function BusinessProfile() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   // Fetch current business profile
-  const { data: profile, isLoading } = useQuery(
-    'businessProfile',
-    async () => {
-      const response = await api.get('/businesses/me');
-      return response.data.data;
-    }
-  );
+  const { data: profile, isLoading } = useQuery("businessProfile", async () => {
+    const response = await api.get("/businesses/me");
+    return response.data.data;
+  });
 
   // Update profile mutation
   const updateProfileMutation = useMutation(
     async (data) => {
-      const response = await api.put('/businesses/me', data);
+      const response = await api.put("/businesses/me", data);
       return response.data;
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries('businessProfile');
-        toast.success('Profile updated successfully');
+        queryClient.invalidateQueries("businessProfile");
+        toast.success("Profile updated successfully");
       },
       onError: (error) => {
-        toast.error(error.response?.data?.error || 'Failed to update profile');
+        toast.error(error.response?.data?.error || "Failed to update profile");
       },
     }
   );
 
   const formik = useFormik({
     initialValues: {
-      contactName: profile?.contactName || '',
-      company: profile?.company || '',
-      bio: profile?.bio || '',
-      contactRole: profile?.contactRole || '',
-      email: profile?.email || '',
-      phone: profile?.phone || '',
-      website: profile?.website || '',
-      streetAddress: profile?.streetAddress || '',
-      city: profile?.city || '',
-      state: profile?.state || '',
-      postalCode: profile?.postalCode || '',
-      country: profile?.country || '',
-      vaNotifications: profile?.vaNotifications || 'no',
+      contactName:
+        profile?.contactName === "Your Name" ? "" : profile?.contactName || "",
+      company:
+        profile?.company === "Your Company" ? "" : profile?.company || "",
+      bio:
+        profile?.bio === "Tell us about your business..."
+          ? ""
+          : profile?.bio || "",
+      contactRole: profile?.contactRole || "",
+      email: profile?.email || "",
+      phone: profile?.phone || "",
+      website: profile?.website || "",
+      streetAddress: profile?.streetAddress || "",
+      city: profile?.city || "",
+      state: profile?.state || "",
+      postalCode: profile?.postalCode || "",
+      country: profile?.country || "",
+      vaNotifications: profile?.vaNotifications || "no",
       invisible: profile?.invisible || false,
       surveyRequestNotifications: profile?.surveyRequestNotifications ?? true,
     },
@@ -95,19 +99,19 @@ export default function BusinessProfile() {
     // Upload to server
     setUploadingAvatar(true);
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append("image", file);
 
     try {
-      const response = await api.post('/businesses/me/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const response = await api.post("/businesses/me/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      
+
       // Update the profile with new avatar URL
-      await api.put('/businesses/me', { avatar: response.data.url });
-      queryClient.invalidateQueries('businessProfile');
-      toast.success('Company logo updated successfully');
+      await api.put("/businesses/me", { avatar: response.data.url });
+      queryClient.invalidateQueries("businessProfile");
+      toast.success("Company logo updated successfully");
     } catch (error) {
-      toast.error('Failed to upload company logo');
+      toast.error("Failed to upload company logo");
       setAvatarPreview(null);
     } finally {
       setUploadingAvatar(false);
@@ -131,7 +135,7 @@ export default function BusinessProfile() {
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col space-y-6">
           <h1 className="text-3xl font-bold leading-tight text-gray-900 mx-4 lg:mx-0 mt-8 lg:mt-16">
-            {branding.isESystemsMode ? 'Company Profile' : 'Business Profile'}
+            {branding.isESystemsMode ? "Company Profile" : "Business Profile"}
           </h1>
 
           {/* Profile Completion Progress */}
@@ -142,9 +146,14 @@ export default function BusinessProfile() {
                   <InformationCircleIcon className="h-5 w-5 text-blue-400" />
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-blue-800">Complete Your Profile</h3>
+                  <h3 className="text-sm font-medium text-blue-800">
+                    Complete Your Profile
+                  </h3>
                   <div className="mt-2 text-sm text-blue-700">
-                    <p>A complete profile helps VAs understand your company and needs better.</p>
+                    <p>
+                      A complete profile helps VAs understand your company and
+                      needs better.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -156,7 +165,9 @@ export default function BusinessProfile() {
             <section className="bg-white shadow px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h2 className="text-lg font-medium leading-6 text-gray-900">Company Information</h2>
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">
+                    Company Information
+                  </h2>
                   <p className="mt-2 text-sm text-gray-500">
                     Basic information about your company.
                   </p>
@@ -166,7 +177,9 @@ export default function BusinessProfile() {
                   <div className="space-y-6">
                     {/* Company Logo */}
                     <div>
-                      <span className="block text-sm font-medium text-gray-700">Company Logo</span>
+                      <span className="block text-sm font-medium text-gray-700">
+                        Company Logo
+                      </span>
                       <div className="mt-1 flex items-center">
                         <div className="relative">
                           {profile?.avatar || avatarPreview ? (
@@ -178,7 +191,8 @@ export default function BusinessProfile() {
                           ) : (
                             <div className="h-24 w-24 rounded-lg bg-gray-300 flex items-center justify-center">
                               <span className="text-2xl font-medium text-gray-700">
-                                {formik.values.company?.[0]?.toUpperCase() || 'C'}
+                                {formik.values.company?.[0]?.toUpperCase() ||
+                                  "C"}
                               </span>
                             </div>
                           )}
@@ -207,7 +221,10 @@ export default function BusinessProfile() {
 
                     {/* Company Name */}
                     <div>
-                      <label htmlFor="company" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="company"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Company Name *
                       </label>
                       <div className="mt-1">
@@ -220,19 +237,24 @@ export default function BusinessProfile() {
                           onBlur={formik.handleBlur}
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.company && formik.errors.company
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                              ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                              : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
                           }`}
                         />
                       </div>
                       {formik.touched.company && formik.errors.company && (
-                        <p className="mt-1 text-sm text-red-600">{formik.errors.company}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {formik.errors.company}
+                        </p>
                       )}
                     </div>
 
                     {/* Website */}
                     <div>
-                      <label htmlFor="website" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="website"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Company Website
                       </label>
                       <div className="mt-1">
@@ -246,19 +268,24 @@ export default function BusinessProfile() {
                           placeholder="https://example.com"
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.website && formik.errors.website
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                              ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                              : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
                           }`}
                         />
                       </div>
                       {formik.touched.website && formik.errors.website && (
-                        <p className="mt-1 text-sm text-red-600">{formik.errors.website}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {formik.errors.website}
+                        </p>
                       )}
                     </div>
 
                     {/* Company Bio */}
                     <div>
-                      <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="bio"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         About Your Company *
                       </label>
                       <div className="mt-1">
@@ -272,8 +299,8 @@ export default function BusinessProfile() {
                           placeholder="Tell VAs about your company, culture, and what you're looking for..."
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.bio && formik.errors.bio
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                              ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                              : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
                           }`}
                         />
                       </div>
@@ -281,7 +308,9 @@ export default function BusinessProfile() {
                         {formik.values.bio.length} characters (minimum 50)
                       </p>
                       {formik.touched.bio && formik.errors.bio && (
-                        <p className="mt-1 text-sm text-red-600">{formik.errors.bio}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {formik.errors.bio}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -293,13 +322,20 @@ export default function BusinessProfile() {
             <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Contact Information</h3>
-                  <p className="mt-1 text-sm text-gray-500">Contact details for VAs to reach you.</p>
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">
+                    Contact Information
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Contact details for VAs to reach you.
+                  </p>
                 </div>
                 <div className="mt-5 md:mt-0 md:col-span-2">
                   <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     <div className="sm:col-span-3">
-                      <label htmlFor="contactName" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="contactName"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Contact Name *
                       </label>
                       <div className="mt-1">
@@ -310,20 +346,28 @@ export default function BusinessProfile() {
                           value={formik.values.contactName}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
+                          placeholder="Your Name"
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
-                            formik.touched.contactName && formik.errors.contactName
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                            formik.touched.contactName &&
+                            formik.errors.contactName
+                              ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                              : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
                           }`}
                         />
                       </div>
-                      {formik.touched.contactName && formik.errors.contactName && (
-                        <p className="mt-1 text-sm text-red-600">{formik.errors.contactName}</p>
-                      )}
+                      {formik.touched.contactName &&
+                        formik.errors.contactName && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {formik.errors.contactName}
+                          </p>
+                        )}
                     </div>
 
                     <div className="sm:col-span-3">
-                      <label htmlFor="contactRole" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="contactRole"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Role/Title *
                       </label>
                       <div className="mt-1">
@@ -336,19 +380,26 @@ export default function BusinessProfile() {
                           onBlur={formik.handleBlur}
                           placeholder="e.g., CEO, HR Manager"
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
-                            formik.touched.contactRole && formik.errors.contactRole
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                            formik.touched.contactRole &&
+                            formik.errors.contactRole
+                              ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                              : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
                           }`}
                         />
                       </div>
-                      {formik.touched.contactRole && formik.errors.contactRole && (
-                        <p className="mt-1 text-sm text-red-600">{formik.errors.contactRole}</p>
-                      )}
+                      {formik.touched.contactRole &&
+                        formik.errors.contactRole && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {formik.errors.contactRole}
+                          </p>
+                        )}
                     </div>
 
                     <div className="sm:col-span-3">
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="email"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Email Address *
                       </label>
                       <div className="mt-1">
@@ -361,18 +412,23 @@ export default function BusinessProfile() {
                           onBlur={formik.handleBlur}
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.email && formik.errors.email
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                              ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                              : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
                           }`}
                         />
                       </div>
                       {formik.touched.email && formik.errors.email && (
-                        <p className="mt-1 text-sm text-red-600">{formik.errors.email}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {formik.errors.email}
+                        </p>
                       )}
                     </div>
 
                     <div className="sm:col-span-3">
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="phone"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Phone Number
                       </label>
                       <div className="mt-1">
@@ -396,13 +452,20 @@ export default function BusinessProfile() {
             <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Company Location</h3>
-                  <p className="mt-1 text-sm text-gray-500">Where your company is based.</p>
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">
+                    Company Location
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Where your company is based.
+                  </p>
                 </div>
                 <div className="mt-5 md:mt-0 md:col-span-2">
                   <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     <div className="sm:col-span-6">
-                      <label htmlFor="streetAddress" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="streetAddress"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Street Address
                       </label>
                       <div className="mt-1">
@@ -418,7 +481,10 @@ export default function BusinessProfile() {
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="city"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         City
                       </label>
                       <div className="mt-1">
@@ -434,7 +500,10 @@ export default function BusinessProfile() {
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label htmlFor="state" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="state"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         State / Province
                       </label>
                       <div className="mt-1">
@@ -450,7 +519,10 @@ export default function BusinessProfile() {
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="postalCode"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         ZIP / Postal Code
                       </label>
                       <div className="mt-1">
@@ -466,7 +538,10 @@ export default function BusinessProfile() {
                     </div>
 
                     <div className="sm:col-span-3">
-                      <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="country"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Country
                       </label>
                       <div className="mt-1">
@@ -489,17 +564,26 @@ export default function BusinessProfile() {
             <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Preferences</h3>
-                  <p className="mt-1 text-sm text-gray-500">Manage your notification and visibility settings.</p>
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">
+                    Preferences
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Manage your notification and visibility settings.
+                  </p>
                 </div>
                 <div className="mt-5 md:mt-0 md:col-span-2">
                   <div className="space-y-6">
                     {/* VA Notifications */}
                     <div>
-                      <label htmlFor="vaNotifications" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="vaNotifications"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         New VA Notifications
                       </label>
-                      <p className="text-sm text-gray-500">Get notified when new VAs join the platform</p>
+                      <p className="text-sm text-gray-500">
+                        Get notified when new VAs join the platform
+                      </p>
                       <div className="mt-2">
                         <select
                           id="vaNotifications"
@@ -528,10 +612,15 @@ export default function BusinessProfile() {
                         />
                       </div>
                       <div className="ml-3 text-sm">
-                        <label htmlFor="invisible" className="font-medium text-gray-700">
+                        <label
+                          htmlFor="invisible"
+                          className="font-medium text-gray-700"
+                        >
                           Make my profile invisible
                         </label>
-                        <p className="text-gray-500">Hide your profile from VAs</p>
+                        <p className="text-gray-500">
+                          Hide your profile from VAs
+                        </p>
                       </div>
                     </div>
 
@@ -548,10 +637,16 @@ export default function BusinessProfile() {
                         />
                       </div>
                       <div className="ml-3 text-sm">
-                        <label htmlFor="surveyRequestNotifications" className="font-medium text-gray-700">
+                        <label
+                          htmlFor="surveyRequestNotifications"
+                          className="font-medium text-gray-700"
+                        >
                           Survey notifications
                         </label>
-                        <p className="text-gray-500">Receive occasional surveys to help improve the platform</p>
+                        <p className="text-gray-500">
+                          Receive occasional surveys to help improve the
+                          platform
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -570,10 +665,14 @@ export default function BusinessProfile() {
               </button>
               <button
                 type="submit"
-                disabled={formik.isSubmitting || updateProfileMutation.isLoading}
+                disabled={
+                  formik.isSubmitting || updateProfileMutation.isLoading
+                }
                 className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {formik.isSubmitting || updateProfileMutation.isLoading ? 'Saving...' : 'Save Profile'}
+                {formik.isSubmitting || updateProfileMutation.isLoading
+                  ? "Saving..."
+                  : "Save Profile"}
               </button>
             </div>
           </form>
