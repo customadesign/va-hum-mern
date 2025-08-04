@@ -6,9 +6,10 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
-import { CameraIcon, InformationCircleIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
-import { PhotoIcon, VideoCameraIcon, ArrowUpTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { InformationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
+import { VideoCameraIcon, ArrowUpTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
 import ProfileCompletion from '../../components/ProfileCompletion';
+import GooglePlacesAutocomplete from '../../components/GooglePlacesAutocomplete';
 
 const validationSchema = Yup.object({
   name: Yup.string().required('Name is required'),
@@ -53,7 +54,14 @@ const philippineLocations = {
   },
   "Pampanga": {
     "Angeles City": ["Agapito del Rosario", "Amsic", "Balibago", "Capaya", "Claro M. Recto", "Cuayan", "Cutcut", "Cutud", "Lourdes Norte", "Lourdes Sur", "Malabañas", "Margot", "Mining", "Ninoy Aquino", "Pampang", "Pulung Bulu", "Pulung Cacutud", "Pulung Maragul", "Salapungan", "San Jose", "San Nicolas", "Santa Teresita", "Santa Trinidad", "Santo Cristo", "Santo Domingo", "Sapangbato", "Tabun", "Virgen delos Remedios"],
-    "San Fernando": ["Alasas", "Baliti", "Bulaon", "Cabalantian", "Calulut", "Dela Paz Norte", "Dela Paz Sur", "Dolores", "Juliana", "Lara", "Lourdes", "Magliman", "Maimpis", "Malino", "Malpitic", "Panipuan", "Pulung Bulu", "Quebiawan", "Saguin", "San Agustin", "San Felipe", "San Isidro", "San Jose", "San Juan", "San Nicolas", "San Pedro", "Santa Lucia", "Santa Teresita", "Santo Niño", "Santo Rosario", "Sindalan", "Telabastagan"]
+    "San Fernando": ["Alasas", "Baliti", "Bulaon", "Cabalantian", "Calulut", "Dela Paz Norte", "Dela Paz Sur", "Dolores", "Juliana", "Lara", "Lourdes", "Magliman", "Maimpis", "Malino", "Malpitic", "Panipuan", "Pulung Bulu", "Quebiawan", "Saguin", "San Agustin", "San Felipe", "San Isidro", "San Jose", "San Juan", "San Nicolas", "San Pedro", "Santa Lucia", "Santa Teresita", "Santo Niño", "Santo Rosario", "Sindalan", "Telabastagan"],
+    "Mabalacat City": ["Atlu-Bola", "Bical", "Bundagul", "Cacutud", "Calumpang", "Camachiles", "Dapdap", "Dau", "Dolores", "Duquit", "Lakandula", "Mabiga", "Magalang", "Marcos Village", "Matimbo", "Poblacion", "Pulung Maragul", "Rustia", "Sabang", "San Francisco", "San Joaquin", "San Roque", "Santa Ines", "Santo Rosario", "Sapang Bato", "Tabun"]
+  },
+  "Bulacan": {
+    "Malolos": ["Anilao", "Atlag", "Babatnin", "Bagna", "Balayong", "Balite", "Bangkal", "Barihan", "Bulihan", "Bungahan", "Caingin", "Calero", "Caliligawan", "Canalate", "Caniogan", "Capitol Village", "Dakila", "Guinhawa", "Liang", "Ligas", "Longos", "Look 1st", "Look 2nd", "Lugam", "Mambog", "Masile", "Mojon", "Namayan", "Niugan", "Pamarawan", "Panasahan", "Pinagbakahan", "San Agustin", "San Gabriel", "San Juan", "San Pablo", "San Vicente", "Santa Rosa", "Santiago", "Santisima Trinidad", "Santo Cristo", "Santo Niño", "Sumapang Bata", "Sumapang Matanda", "Taal", "Tikay"],
+    "Meycauayan": ["Bancal", "Banga", "Bayugo", "Calvario", "Camalig", "Libtong", "Loma de Gato", "Longos", "Malhacan", "Pajo", "Pandayan", "Pantoc", "Poblacion", "Tugatog", "Ubihan", "Zamora"],
+    "Marilao": ["Abangan Norte", "Abangan Sur", "Abitang", "Ibayo", "Lambakin", "Lias", "Loma de Gato", "Nagbalon", "Patubig", "Poblacion", "Prenza I", "Prenza II", "Santa Rosa I", "Santa Rosa II", "Saog", "Tabing Ilog"],
+    "Bocaue": ["Antipona", "Batia", "Biñang 1st", "Biñang 2nd", "Bolacan", "Bunlo", "Caingin", "Capihan", "Duhat", "Igulot", "Lolomboy", "Poblacion", "Sulucan", "Taal", "Tambobong", "Wakas"]
   }
 };
 
@@ -195,6 +203,68 @@ export default function VAProfile() {
     // Update formik values
     formik.setFieldValue('location.city', city);
     formik.setFieldValue('location.barangay', '');
+  };
+
+  // Handle Google Places selection
+  const handlePlaceSelect = (addressData) => {
+    // Update street address
+    formik.setFieldValue('location.street', addressData.street);
+    
+    // Update postal code
+    formik.setFieldValue('location.postal_code', addressData.postal_code);
+    
+    // Try to match province with our list
+    const matchedProvince = getProvinces().find(p => 
+      p.toLowerCase() === addressData.province.toLowerCase() ||
+      addressData.province.toLowerCase().includes(p.toLowerCase())
+    );
+    
+    if (matchedProvince) {
+      setSelectedProvince(matchedProvince);
+      formik.setFieldValue('location.province', matchedProvince);
+      
+      // Update available cities
+      const cities = getCitiesByProvince(matchedProvince);
+      setAvailableCities(cities);
+      
+      // Try to match city
+      const matchedCity = cities.find(c => 
+        c.toLowerCase() === addressData.city.toLowerCase() ||
+        addressData.city.toLowerCase().includes(c.toLowerCase()) ||
+        c.toLowerCase().includes(addressData.city.toLowerCase())
+      );
+      
+      if (matchedCity) {
+        setSelectedCity(matchedCity);
+        formik.setFieldValue('location.city', matchedCity);
+        
+        // Update available barangays
+        const barangays = getBarangaysByCity(matchedProvince, matchedCity);
+        setAvailableBarangays(barangays);
+        
+        // Try to match barangay
+        const matchedBarangay = barangays.find(b => 
+          b.toLowerCase() === addressData.barangay.toLowerCase() ||
+          addressData.barangay.toLowerCase().includes(b.toLowerCase()) ||
+          b.toLowerCase().includes(addressData.barangay.toLowerCase())
+        );
+        
+        if (matchedBarangay) {
+          formik.setFieldValue('location.barangay', matchedBarangay);
+        } else if (addressData.barangay) {
+          // If no match found but we have a barangay from Google, use it
+          formik.setFieldValue('location.barangay', addressData.barangay);
+        }
+      } else if (addressData.city) {
+        // If no match found but we have a city from Google, use it
+        formik.setFieldValue('location.city', addressData.city);
+      }
+    } else if (addressData.province) {
+      // If no match found but we have a province from Google, use it
+      formik.setFieldValue('location.province', addressData.province);
+    }
+    
+    toast.success('Address fields populated from selection');
   };
 
   // Initialize cascading dropdowns when profile loads
@@ -559,6 +629,26 @@ export default function VAProfile() {
                     {/* Location */}
                     <div>
                       <div className="space-y-4">
+                        {/* Google Places Autocomplete */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Quick Address Search
+                          </label>
+                          <GooglePlacesAutocomplete
+                            onPlaceSelect={handlePlaceSelect}
+                            placeholder="Type your address and select from suggestions..."
+                            defaultValue={formik.values.location.street}
+                            className="mb-2"
+                          />
+                          <p className="text-sm text-gray-500">
+                            Search for your address to automatically fill in the fields below
+                          </p>
+                        </div>
+
+                        <div className="border-t border-gray-200 pt-4">
+                          <p className="text-sm font-medium text-gray-700 mb-4">Or enter manually:</p>
+                        </div>
+
                         {/* Street Address */}
                         <div>
                           <label htmlFor="location.street" className="block text-sm font-medium text-gray-700">
