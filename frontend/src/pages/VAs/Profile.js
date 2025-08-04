@@ -1723,6 +1723,7 @@ export default function VAProfile() {
                           value={formik.values.name}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
+                          placeholder="Enter your full name"
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.name && formik.errors.name
                               ? "border-red-300 focus:ring-red-500 focus:border-red-500"
@@ -1970,7 +1971,10 @@ export default function VAProfile() {
                       <span className="block text-sm font-medium text-gray-700">
                         Profile Picture
                       </span>
-                      <div className="mt-1 flex items-center">
+                      <p className="mt-1 text-sm text-gray-500">
+                        Upload a professional profile picture. Best dimensions: 400×400 pixels (square). PNG, JPG, GIF up to 5MB.
+                      </p>
+                      <div className="mt-2 flex items-center">
                         <div className="relative">
                           {profile?.avatar || avatarPreview ? (
                             <img
