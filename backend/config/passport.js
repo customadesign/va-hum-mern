@@ -20,14 +20,17 @@ const getLinkedInCredentials = () => {
 
 const credentials = getLinkedInCredentials();
 
-passport.use(new LinkedInStrategy({
-  clientID: credentials.clientID,
-  clientSecret: credentials.clientSecret,
-  callbackURL: process.env.NODE_ENV === 'production' 
-    ? "https://linkage-va-hub-api.onrender.com/api/auth/linkedin/callback"
-    : "/api/auth/linkedin/callback",
-  scope: ['r_liteprofile', 'r_emailaddress'],
-}, async (accessToken, refreshToken, profile, done) => {
+// Only register LinkedIn strategy if credentials are available
+if (credentials.clientID && credentials.clientSecret) {
+  console.log('Initializing LinkedIn OAuth strategy...');
+  passport.use(new LinkedInStrategy({
+    clientID: credentials.clientID,
+    clientSecret: credentials.clientSecret,
+    callbackURL: process.env.NODE_ENV === 'production' 
+      ? "https://linkage-va-hub-api.onrender.com/api/auth/linkedin/callback"
+      : "/api/auth/linkedin/callback",
+    scope: ['r_liteprofile', 'r_emailaddress'],
+  }, async (accessToken, refreshToken, profile, done) => {
   try {
     console.log('LinkedIn OAuth Profile:', profile);
 
@@ -94,7 +97,17 @@ passport.use(new LinkedInStrategy({
     console.error('LinkedIn OAuth Error:', error);
     return done(error, null);
   }
-}));
+  }));
+} else {
+  console.warn('LinkedIn OAuth credentials not found - LinkedIn login will be disabled');
+  console.warn('Available vars:', {
+    LINKEDIN_CLIENT_ID: !!process.env.LINKEDIN_CLIENT_ID,
+    LINKEDIN_CLIENT_SECRET: !!process.env.LINKEDIN_CLIENT_SECRET,
+    LINKEDIN_ESYSTEMS_CLIENT_ID: !!process.env.LINKEDIN_ESYSTEMS_CLIENT_ID,
+    LINKEDIN_ESYSTEMS_CLIENT_SECRET: !!process.env.LINKEDIN_ESYSTEMS_CLIENT_SECRET,
+    isESystemsMode: isESystemsMode()
+  });
+}
 
 passport.serializeUser((user, done) => {
   done(null, user.id);

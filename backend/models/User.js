@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Please provide a name'],
+    required: false, // Make optional for backward compatibility
     trim: true
   },
   email: {
@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ['va', 'business'],
-    required: [true, 'Please specify user role']
+    required: false // Make optional for backward compatibility
   },
   isVerified: {
     type: Boolean,
