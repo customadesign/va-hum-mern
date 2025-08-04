@@ -916,39 +916,355 @@ export default function Community() {
                   </div>
                 </div>
 
-                {/* Quick Skills */}
+                {/* Quick Skills - Notion Style Guide */}
                 <div className="bg-white rounded-lg shadow-sm">
                   <div className="p-6 border-b border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <BoltIcon className="h-5 w-5 mr-2 text-yellow-600" />
-                      Quick Skills (5-15 min)
-                    </h2>
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                        <BoltIcon className="h-6 w-6 mr-3 text-yellow-600" />
+                        Quick Skills Mastery Guide
+                      </h2>
+                      <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                        4 Essential Skills • 5-15 min each
+                      </span>
+                    </div>
+                    <p className="text-gray-600 mt-2">
+                      Master these essential VA skills with our step-by-step guides. Each skill includes templates, examples, and actionable tips.
+                    </p>
                   </div>
-                  <div className="p-6">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {[
-                        { title: 'Instagram Story Templates', time: '8 min', category: 'Design' },
-                        { title: 'Email Subject Line Tips', time: '5 min', category: 'Marketing' },
-                        { title: 'Client Onboarding Checklist', time: '12 min', category: 'Business' },
-                        { title: 'Keyword Research Basics', time: '15 min', category: 'SEO' }
-                      ].map((skill, index) => (
-                        <div 
-                          key={index} 
-                          onClick={() => handleOpenQuickSkill(skill)}
-                          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-medium text-gray-900">{skill.title}</h4>
-                              <div className="flex items-center space-x-2 mt-1">
-                                <ClockIcon className="h-4 w-4 text-gray-400" />
-                                <span className="text-sm text-gray-500">{skill.time}</span>
-                                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">{skill.category}</span>
-                              </div>
-                            </div>
-                            <PlayIcon className="h-5 w-5 text-blue-600" />
+
+                  <div className="p-6 space-y-8">
+                    {/* Skill 1: Instagram Story Templates */}
+                    <div className="border-l-4 border-purple-400 pl-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-semibold text-gray-900 flex items-center">
+                          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                            <PaintBrushIcon className="h-5 w-5 text-purple-600" />
+                          </div>
+                          Instagram Story Templates
+                        </h3>
+                        <div className="flex items-center space-x-2">
+                          <ClockIcon className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm text-gray-500">8 min</span>
+                          <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">Design</span>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                        <p className="text-gray-700 mb-3">
+                          <strong>What you'll learn:</strong> Create engaging Instagram stories that boost engagement and drive sales for clients.
+                        </p>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-gray-900">✅ Templates Included:</h4>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                              <li>• Product showcase templates</li>
+                              <li>• Behind-the-scenes layouts</li>
+                              <li>• Call-to-action designs</li>
+                              <li>• Q&A and poll templates</li>
+                            </ul>
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-gray-900">🎯 Key Techniques:</h4>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                              <li>• Color psychology in design</li>
+                              <li>• Typography best practices</li>
+                              <li>• Brand consistency tips</li>
+                              <li>• Engagement optimization</li>
+                            </ul>
                           </div>
                         </div>
-                      ))}
+                      </div>
+                      
+                      <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                        <h4 className="font-medium text-gray-900 mb-2 flex items-center">
+                          <VideoCameraIcon className="h-4 w-4 mr-2 text-blue-600" />
+                          Video Tutorial Preview
+                        </h4>
+                        <div className="bg-gray-200 rounded-lg h-32 flex items-center justify-center text-gray-500 mb-2">
+                          <div className="text-center">
+                            <PlayIcon className="h-8 w-8 mx-auto mb-2" />
+                            <span className="text-sm">Watch: "Creating Your First Story Template"</span>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          See how to create professional Instagram story templates using free tools and boost client engagement by 300%.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center space-x-3">
+                        <button 
+                          onClick={() => handleOpenQuickSkill({title: 'Instagram Story Templates', time: '8 min', category: 'Design'})}
+                          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center">
+                          <PlayIcon className="h-4 w-4 mr-2" />
+                          Start Guide
+                        </button>
+                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                          Download Templates
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Skill 2: Email Subject Line Tips */}
+                    <div className="border-l-4 border-blue-400 pl-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-semibold text-gray-900 flex items-center">
+                          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                            <EnvelopeIcon className="h-5 w-5 text-blue-600" />
+                          </div>
+                          Email Subject Line Mastery
+                        </h3>
+                        <div className="flex items-center space-x-2">
+                          <ClockIcon className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm text-gray-500">5 min</span>
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Marketing</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                        <p className="text-gray-700 mb-3">
+                          <strong>What you'll learn:</strong> Write subject lines that increase open rates by 40% and drive more conversions.
+                        </p>
+                        <div className="grid md:grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-gray-900">📧 Proven Formulas:</h4>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                              <li>• Curiosity-driven headlines</li>
+                              <li>• Urgency and scarcity tactics</li>
+                              <li>• Personalization techniques</li>
+                            </ul>
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-gray-900">✉️ Examples:</h4>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                              <li>• "John, your exclusive invite..."</li>
+                              <li>• "Last chance: 50% off ends tonight"</li>
+                              <li>• "The secret that changed everything"</li>
+                            </ul>
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-gray-900">📊 A/B Testing:</h4>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                              <li>• Testing strategies</li>
+                              <li>• Metrics to track</li>
+                              <li>• Optimization tips</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-green-50 rounded-lg p-4 mb-4">
+                        <h4 className="font-medium text-gray-900 mb-2">💡 Quick Reference Cheat Sheet</h4>
+                        <div className="bg-white rounded border p-3">
+                          <div className="text-sm space-y-1">
+                            <div><strong>Power Words:</strong> Free, Exclusive, Limited, Secret, Proven, Instant</div>
+                            <div><strong>Optimal Length:</strong> 30-50 characters (mobile-friendly)</div>
+                            <div><strong>Avoid:</strong> ALL CAPS, excessive punctuation (!!!), spam words</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-3">
+                        <button 
+                          onClick={() => handleOpenQuickSkill({title: 'Email Subject Line Tips', time: '5 min', category: 'Marketing'})}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                          <PlayIcon className="h-4 w-4 mr-2" />
+                          Start Guide
+                        </button>
+                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                          Get Cheat Sheet
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Skill 3: Client Onboarding Checklist */}
+                    <div className="border-l-4 border-green-400 pl-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-semibold text-gray-900 flex items-center">
+                          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                            <UserGroupIcon className="h-5 w-5 text-green-600" />
+                          </div>
+                          Client Onboarding Checklist
+                        </h3>
+                        <div className="flex items-center space-x-2">
+                          <ClockIcon className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm text-gray-500">12 min</span>
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Business</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                        <p className="text-gray-700 mb-3">
+                          <strong>What you'll learn:</strong> Create a seamless onboarding process that impresses clients and sets clear expectations.
+                        </p>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-gray-900">📋 Complete Checklist:</h4>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                              <li>• Welcome packet template</li>
+                              <li>• Project scope document</li>
+                              <li>• Communication preferences</li>
+                              <li>• Access credentials form</li>
+                              <li>• Timeline and milestones</li>
+                            </ul>
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-gray-900">🎯 Key Benefits:</h4>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                              <li>• Reduced project confusion</li>
+                              <li>• Professional first impression</li>
+                              <li>• Clear expectations set</li>
+                              <li>• Improved client retention</li>
+                              <li>• Streamlined workflow</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-yellow-50 rounded-lg p-4 mb-4">
+                        <h4 className="font-medium text-gray-900 mb-2">⚠️ Common Onboarding Mistakes to Avoid</h4>
+                        <div className="grid md:grid-cols-2 gap-3 text-sm">
+                          <div className="bg-white rounded p-3 border-l-4 border-red-400">
+                            <strong className="text-red-600">Don't:</strong> Assume client knowledge
+                          </div>
+                          <div className="bg-white rounded p-3 border-l-4 border-red-400">
+                            <strong className="text-red-600">Don't:</strong> Skip contract details
+                          </div>
+                          <div className="bg-white rounded p-3 border-l-4 border-green-400">
+                            <strong className="text-green-600">Do:</strong> Explain every step clearly
+                          </div>
+                          <div className="bg-white rounded p-3 border-l-4 border-green-400">
+                            <strong className="text-green-600">Do:</strong> Set communication boundaries
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-3">
+                        <button 
+                          onClick={() => handleOpenQuickSkill({title: 'Client Onboarding Checklist', time: '12 min', category: 'Business'})}
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center">
+                          <PlayIcon className="h-4 w-4 mr-2" />
+                          Start Guide
+                        </button>
+                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                          Download Checklist
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Skill 4: Keyword Research Basics */}
+                    <div className="border-l-4 border-orange-400 pl-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-semibold text-gray-900 flex items-center">
+                          <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                            <svg className="h-5 w-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                          </div>
+                          Keyword Research Mastery
+                        </h3>
+                        <div className="flex items-center space-x-2">
+                          <ClockIcon className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm text-gray-500">15 min</span>
+                          <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">SEO</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                        <p className="text-gray-700 mb-3">
+                          <strong>What you'll learn:</strong> Find profitable keywords that drive traffic and help clients rank higher in search results.
+                        </p>
+                        <div className="grid md:grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-gray-900">🔍 Research Tools:</h4>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                              <li>• Google Keyword Planner</li>
+                              <li>• Ubersuggest (Free)</li>
+                              <li>• AnswerThePublic</li>
+                              <li>• Google Trends</li>
+                            </ul>
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-gray-900">📊 Key Metrics:</h4>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                              <li>• Search volume</li>
+                              <li>• Keyword difficulty</li>
+                              <li>• Cost per click (CPC)</li>
+                              <li>• Search intent</li>
+                            </ul>
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-gray-900">🎯 Strategies:</h4>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                              <li>• Long-tail keywords</li>
+                              <li>• Competitor analysis</li>
+                              <li>• Local SEO keywords</li>
+                              <li>• Content optimization</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                        <h4 className="font-medium text-gray-900 mb-2 flex items-center">
+                          <DocumentTextIcon className="h-4 w-4 mr-2 text-blue-600" />
+                          Step-by-Step Process
+                        </h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-start">
+                            <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5">1</span>
+                            <span>Brainstorm seed keywords related to the business</span>
+                          </div>
+                          <div className="flex items-start">
+                            <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5">2</span>
+                            <span>Use tools to expand keyword list and check metrics</span>
+                          </div>
+                          <div className="flex items-start">
+                            <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5">3</span>
+                            <span>Analyze competitor keywords and identify gaps</span>
+                          </div>
+                          <div className="flex items-start">
+                            <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5">4</span>
+                            <span>Prioritize keywords by difficulty vs. opportunity</span>
+                          </div>
+                          <div className="flex items-start">
+                            <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5">5</span>
+                            <span>Create content strategy around selected keywords</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-3">
+                        <button 
+                          onClick={() => handleOpenQuickSkill({title: 'Keyword Research Basics', time: '15 min', category: 'SEO'})}
+                          className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center">
+                          <PlayIcon className="h-4 w-4 mr-2" />
+                          Start Guide
+                        </button>
+                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                          Get Toolkit
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Call-to-Action Footer */}
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-b-lg">
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        Ready to Master All 4 Skills?
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        Join our community to access the complete guides, templates, and video tutorials.
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                          Get Full Access
+                        </button>
+                        <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                          Download All Templates
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
