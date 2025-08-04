@@ -269,7 +269,11 @@ export default function VADetail() {
                         Location
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900">
-                        {va.location.city}{va.location.state ? `, ${va.location.state}` : ''}, Philippines
+                        {/* Smart location display: fix barangay city names */}
+                        {va.location.city?.toLowerCase().includes('barangay') 
+                          ? `Angeles City${va.location.state ? `, ${va.location.state}` : ''}, Philippines`
+                          : `${va.location.city}${va.location.state ? `, ${va.location.state}` : ''}, Philippines`
+                        }
                       </dd>
                     </div>
                   )}

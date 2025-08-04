@@ -605,6 +605,7 @@ const philippineLocations = {
     "Angeles City": [
       "Agapito del Rosario",
       "Amsic",
+      "Anunas",
       "Balibago",
       "Capaya",
       "Claro M. Recto",

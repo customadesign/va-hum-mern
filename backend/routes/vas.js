@@ -16,7 +16,6 @@ const useSupabase = isProduction && process.env.SUPABASE_URL && process.env.SUPA
 const localUpload = require('../utils/upload');
 const { handleSupabaseUpload, uploadToSupabase, deleteFromSupabase } = require('../utils/supabaseStorage');
 const supabase = require('../config/supabase');
-const { analyzeSearchQuery, fallbackSearch } = require('../utils/aiSearch');
 
 // Use appropriate upload handler
 const upload = useSupabase ? require('../utils/supabaseStorage').uploadSupabase : localUpload;
@@ -97,19 +96,15 @@ router.get('/', optionalAuth, async (req, res) => {
     // Execute query with pagination
     const skip = (page - 1) * limit;
     
-    // For AI search, get more results initially then let AI scoring handle ranking
-    const searchLimit = search ? Math.max(parseInt(limit) * 3, 60) : parseInt(limit);
-    const searchSkip = search ? 0 : skip; // When using AI search, don't skip initially
-    
     const [vas, total] = await Promise.all([
       VA.find(query)
         .populate('location')
         .populate('specialties')
         .populate('roleLevel')
         .populate('roleType')
-        .sort(search ? '-searchScore' : sort) // Use default sort for AI search initially
-        .skip(searchSkip)
-        .limit(searchLimit),
+        .sort(sort)
+        .skip(skip)
+        .limit(parseInt(limit)),
       VA.countDocuments(query)
     ]);
 
