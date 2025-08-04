@@ -93,7 +93,7 @@ export default function Home() {
           <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 lg:pl-0">
             <img
               className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full"
-              src="https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/6890213c18e40e521ab87d65.jpeg"
+              src="https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/6890223018e40e48f3b87e2f.jpeg"
               alt="Two professional women working together as virtual assistants"
             />
           </div>
