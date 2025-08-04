@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
@@ -6,7 +6,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
-import { CameraIcon, InformationCircleIcon } from '@heroicons/react/24/solid';
+import { CameraIcon, InformationCircleIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
 import { PhotoIcon, VideoCameraIcon, ArrowUpTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
 
 const validationSchema = Yup.object({
@@ -146,6 +146,42 @@ export default function VAProfile() {
       updateProfileMutation.mutate(values);
     },
   });
+
+  // Calculate profile completion percentage
+  const profileCompletion = useMemo(() => {
+    const values = formik.values;
+    const requiredFields = [
+      // Essential fields (high weight)
+      { field: 'name', weight: 10, check: () => values.name?.trim() },
+      { field: 'hero', weight: 10, check: () => values.hero?.trim() },
+      { field: 'bio', weight: 15, check: () => values.bio?.length >= 100 },
+      { field: 'location', weight: 10, check: () => values.location?.city && values.location?.state },
+      { field: 'email', weight: 10, check: () => values.email?.trim() },
+      { field: 'specialties', weight: 15, check: () => values.specialtyIds?.length > 0 },
+      { field: 'roleType', weight: 5, check: () => Object.values(values.roleType || {}).some(Boolean) },
+      { field: 'roleLevel', weight: 5, check: () => Object.values(values.roleLevel || {}).some(Boolean) },
+      
+      // Enhanced fields (medium weight)
+      { field: 'hourlyRate', weight: 10, check: () => values.preferredMinHourlyRate && values.preferredMaxHourlyRate },
+      { field: 'phone', weight: 5, check: () => values.phone?.trim() },
+      { field: 'onlinePresence', weight: 5, check: () => values.website?.trim() || values.linkedin?.trim() },
+      { field: 'discAssessment', weight: 10, check: () => values.discPrimaryType }
+    ];
+
+    const totalWeight = requiredFields.reduce((sum, field) => sum + field.weight, 0);
+    const completedWeight = requiredFields.reduce((sum, field) => {
+      return sum + (field.check() ? field.weight : 0);
+    }, 0);
+
+    const percentage = Math.round((completedWeight / totalWeight) * 100);
+    const missingFields = requiredFields.filter(field => !field.check());
+
+    return {
+      percentage,
+      missingFields,
+      isComplete: percentage === 100
+    };
+  }, [formik.values]);
 
   const handleCoverChange = async (e) => {
     const file = e.target.files[0];
@@ -301,9 +337,52 @@ export default function VAProfile() {
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mx-4 lg:mx-0 mt-8 lg:mt-16">
-            <h1 className="text-3xl font-bold leading-tight text-gray-900">
-              Edit Your VA Profile
-            </h1>
+            <div className="flex items-center space-x-4">
+              <h1 className="text-3xl font-bold leading-tight text-gray-900">
+                Edit Your VA Profile
+              </h1>
+              {!profileCompletion.isComplete && (
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 relative">
+                    <svg className="w-8 h-8 transform -rotate-90" viewBox="0 0 32 32">
+                      <circle
+                        cx="16"
+                        cy="16"
+                        r="14"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        fill="transparent"
+                        className="text-gray-200"
+                      />
+                      <circle
+                        cx="16"
+                        cy="16"
+                        r="14"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        fill="transparent"
+                        strokeDasharray={`${profileCompletion.percentage * 0.88} 88`}
+                        className={
+                          profileCompletion.percentage >= 80 ? 'text-green-500' :
+                          profileCompletion.percentage >= 60 ? 'text-yellow-500' :
+                          'text-red-500'
+                        }
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className={`text-xs font-bold ${
+                        profileCompletion.percentage >= 80 ? 'text-green-600' :
+                        profileCompletion.percentage >= 60 ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {profileCompletion.percentage}%
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-500">Complete</span>
+                </div>
+              )}
+            </div>
             {profile?._id && (
               <div className="mt-4 sm:mt-0">
                 <Link
@@ -318,21 +397,121 @@ export default function VAProfile() {
           </div>
 
           {/* Profile Completion Progress */}
-          <div className="mx-4 lg:mx-0">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <InformationCircleIcon className="h-5 w-5 text-blue-400" />
+          {!profileCompletion.isComplete && (
+            <div className="sticky top-4 z-40 mx-4 lg:mx-0 mb-6">
+              <div className={`rounded-lg p-4 border shadow-lg ${
+                profileCompletion.percentage >= 80 ? 'bg-green-50 border-green-200' :
+                profileCompletion.percentage >= 60 ? 'bg-yellow-50 border-yellow-200' :
+                'bg-red-50 border-red-200'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      {profileCompletion.percentage >= 80 ? (
+                        <CheckCircleIcon className="h-5 w-5 text-green-400" />
+                      ) : (
+                        <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
+                      )}
+                    </div>
+                    <div className="ml-3">
+                      <h3 className={`text-sm font-medium ${
+                        profileCompletion.percentage >= 80 ? 'text-green-800' :
+                        profileCompletion.percentage >= 60 ? 'text-yellow-800' :
+                        'text-red-800'
+                      }`}>
+                        Profile {profileCompletion.percentage}% Complete
+                      </h3>
+                      <p className={`text-sm ${
+                        profileCompletion.percentage >= 80 ? 'text-green-700' :
+                        profileCompletion.percentage >= 60 ? 'text-yellow-700' :
+                        'text-red-700'
+                      }`}>
+                        {profileCompletion.percentage >= 80 
+                          ? 'Almost there! Complete your profile to maximize visibility.'
+                          : profileCompletion.percentage >= 60 
+                            ? 'Good progress! A few more details will help businesses find you.'
+                            : 'Complete your profile to help businesses find and connect with you.'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-lg font-bold ${
+                      profileCompletion.percentage >= 80 ? 'text-green-600' :
+                      profileCompletion.percentage >= 60 ? 'text-yellow-600' :
+                      'text-red-600'
+                    }`}>
+                      {profileCompletion.percentage}%
+                    </div>
+                  </div>
                 </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-blue-800">Complete Your Profile</h3>
-                  <div className="mt-2 text-sm text-blue-700">
-                    <p>A complete profile helps businesses find and connect with you.</p>
+                
+                {/* Progress Bar */}
+                <div className="mt-3">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all duration-500 ${
+                        profileCompletion.percentage >= 80 ? 'bg-green-500' :
+                        profileCompletion.percentage >= 60 ? 'bg-yellow-500' :
+                        'bg-red-500'
+                      }`}
+                      style={{ width: `${profileCompletion.percentage}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Missing Fields Hints */}
+                {profileCompletion.missingFields.length > 0 && (
+                  <div className="mt-3">
+                    <p className={`text-xs ${
+                      profileCompletion.percentage >= 80 ? 'text-green-600' :
+                      profileCompletion.percentage >= 60 ? 'text-yellow-600' :
+                      'text-red-600'
+                    }`}>
+                      <strong>Still needed:</strong> {
+                        profileCompletion.missingFields.slice(0, 3).map(field => {
+                          const fieldNames = {
+                            'name': 'Full Name',
+                            'hero': 'Professional Title',
+                            'bio': 'Bio (100+ chars)',
+                            'location': 'Location',
+                            'email': 'Email',
+                            'specialties': 'Skills/Specialties',
+                            'roleType': 'Role Type',
+                            'roleLevel': 'Experience Level',
+                            'hourlyRate': 'Hourly Rate',
+                            'phone': 'Phone Number',
+                            'onlinePresence': 'Website/LinkedIn',
+                            'discAssessment': 'DISC Assessment'
+                          };
+                          return fieldNames[field.field] || field.field;
+                        }).join(', ')
+                      }{profileCompletion.missingFields.length > 3 && ` and ${profileCompletion.missingFields.length - 3} more`}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Profile Complete Celebration */}
+          {profileCompletion.isComplete && (
+            <div className="mx-4 lg:mx-0 mb-6">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <CheckCircleIcon className="h-5 w-5 text-green-400" />
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-green-800">🎉 Profile Complete!</h3>
+                    <div className="mt-2 text-sm text-green-700">
+                      <p>Excellent! Your profile is 100% complete. Businesses can now find and connect with you more easily. Keep your information updated to stay competitive.</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           <form onSubmit={formik.handleSubmit} className="space-y-8">
             {/* Profile Section */}
