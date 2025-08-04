@@ -5,6 +5,8 @@ import { useBranding } from '../contexts/BrandingContext';
 import { useAuth } from '../contexts/AuthContext';
 import LessonViewer from '../components/LessonViewer';
 import QuickSkillModal from '../components/QuickSkillModal';
+import ZoomWebinar from '../components/ZoomWebinar';
+import { useZoom } from '../hooks/useZoom';
 import {
   AcademicCapIcon,
   CodeBracketIcon,
@@ -498,6 +500,7 @@ export default function Community() {
   const { branding, loading: brandingLoading } = useBranding();
   const { user, loading: authLoading } = useAuth();
   const { lessonId } = useParams();
+  const { createAndJoinWebinar, isLoading: zoomLoading, error: zoomError } = useZoom();
   const navigate = useNavigate();
   const [timeToNext, setTimeToNext] = useState('');
   const [selectedLesson, setSelectedLesson] = useState(null);
@@ -509,6 +512,10 @@ export default function Community() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
+  
+  // Zoom webinar state
+  const [showZoomWebinar, setShowZoomWebinar] = useState(false);
+  const [zoomConfig, setZoomConfig] = useState(null);
 
   // ALL HOOKS MUST BE CALLED FIRST - Check if accessing a specific lesson via URL
   useEffect(() => {
@@ -632,6 +639,32 @@ export default function Community() {
   const handleCloseQuickSkill = () => {
     setShowQuickSkillModal(false);
     setSelectedQuickSkill(null);
+  };
+
+  // Handler for joining training (creating and joining Zoom webinar)
+  const handleJoinTraining = async (training) => {
+    try {
+      const trainingData = {
+        title: training.title,
+        description: training.description,
+        duration: 60, // 1 hour default
+        userName: user?.profile?.name || user?.name || 'Participant',
+        userEmail: user?.email || ''
+      };
+
+      const result = await createAndJoinWebinar(trainingData);
+      setZoomConfig(result.zoomConfig);
+      setShowZoomWebinar(true);
+    } catch (error) {
+      console.error('Failed to join training:', error);
+      // You could add a toast notification here
+    }
+  };
+
+  // Handler for leaving webinar
+  const handleLeaveWebinar = () => {
+    setShowZoomWebinar(false);
+    setZoomConfig(null);
   };
 
   // Filter and search courses
@@ -1295,8 +1328,23 @@ export default function Community() {
                         </div>
                         <div className="flex items-center justify-between mt-4 text-sm">
                           <span>{upcomingTrainings[0].attendees} registered</span>
-                          <button className="bg-white text-blue-600 px-4 py-2 rounded-md font-medium hover:bg-blue-50">
-                            Join Training
+                          <button 
+                            onClick={() => handleJoinTraining(upcomingTrainings[0])}
+                            disabled={zoomLoading}
+                            className={`bg-white text-blue-600 px-4 py-2 rounded-md font-medium transition-colors ${
+                              zoomLoading 
+                                ? 'opacity-50 cursor-not-allowed' 
+                                : 'hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                            }`}
+                          >
+                            {zoomLoading ? (
+                              <div className="flex items-center">
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-2"></div>
+                                Creating...
+                              </div>
+                            ) : (
+                              'Join Training'
+                            )}
                           </button>
                         </div>
                       </div>
@@ -1370,6 +1418,47 @@ export default function Community() {
               onClose={handleCloseQuickSkill}
             />
           </Suspense>
+        )}
+
+        {/* Zoom Webinar Modal */}
+        {showZoomWebinar && zoomConfig && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+              <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={handleLeaveWebinar}></div>
+              
+              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
+                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Live Training Session
+                    </h3>
+                    <button
+                      onClick={handleLeaveWebinar}
+                      className="bg-gray-200 rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+                    >
+                      <span className="sr-only">Close</span>
+                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  {zoomError && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                      <p className="font-bold">Error joining webinar:</p>
+                      <p>{zoomError}</p>
+                    </div>
+                  )}
+                  
+                  <ZoomWebinar
+                    webinarConfig={zoomConfig}
+                    onLeave={handleLeaveWebinar}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </>
     );
