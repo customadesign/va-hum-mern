@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const videosdkController = require('../controllers/videoSDKController');
-const auth = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 
 // Apply authentication middleware to all videosdk routes
-router.use(auth);
+router.use(protect);
 
 // Create a new meeting
 router.post('/meeting', videosdkController.createMeeting);
