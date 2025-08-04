@@ -82,9 +82,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const linkedinLogin = () => {
-    // Redirect to LinkedIn OAuth endpoint - use correct API URL based on branding
+    // Redirect to LinkedIn OAuth endpoint - determine backend URL based on environment/hostname
+    const isESystemsMode = process.env.REACT_APP_BRAND === 'esystems' || window.location.hostname.includes('esystems');
     const backendUrl = process.env.NODE_ENV === 'production' 
-      ? (branding?.isESystemsMode ? 'https://esystems-backend.onrender.com' : 'https://linkage-va-hub-api.onrender.com')
+      ? (isESystemsMode ? 'https://esystems-backend.onrender.com' : 'https://linkage-va-hub-api.onrender.com')
       : 'http://localhost:5000';
     window.location.href = `${backendUrl}/api/auth/linkedin`;
   };
