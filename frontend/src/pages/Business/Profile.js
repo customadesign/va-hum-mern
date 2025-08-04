@@ -178,6 +178,50 @@ export default function BusinessProfile() {
     },
   });
 
+  // LinkedIn Auto-fill Effect (E Systems only)
+  React.useEffect(() => {
+    if (!branding.isESystemsMode || linkedinFilled) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isLinkedInFlow = urlParams.get('linkedin') === 'true';
+    const linkedinData = sessionStorage.getItem('linkedinProfile');
+
+    if (isLinkedInFlow && linkedinData && linkedinAuth.isAvailable()) {
+      try {
+        const profileData = JSON.parse(linkedinData);
+        const mappedData = linkedinAuth.mapLinkedInDataToProfile(profileData);
+        
+        // Auto-fill the form with LinkedIn data
+        formik.setValues({
+          ...formik.values,
+          ...mappedData,
+        });
+
+        // Mark as LinkedIn filled and show success message
+        setLinkedinFilled(true);
+        setShowLinkedinSuccess(true);
+        
+        // Clear LinkedIn data from session
+        sessionStorage.removeItem('linkedinProfile');
+        
+        // Show success toast
+        toast.success('✨ Profile auto-filled from LinkedIn!', {
+          position: 'top-center',
+          autoClose: 5000,
+        });
+
+        // Hide success banner after 10 seconds
+        setTimeout(() => setShowLinkedinSuccess(false), 10000);
+
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch (error) {
+        console.error('Error auto-filling from LinkedIn:', error);
+        toast.error('Failed to auto-fill from LinkedIn data');
+      }
+    }
+  }, [branding.isESystemsMode, linkedinFilled, formik]);
+
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -319,6 +363,39 @@ export default function BusinessProfile() {
               </div>
             </div>
           </div>
+
+          {/* LinkedIn Auto-fill Success Banner */}
+          {showLinkedinSuccess && (
+            <div className="mx-4 lg:mx-0">
+              <div className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 rounded-lg p-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <SparklesIcon className="h-6 w-6 text-green-500" />
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <h3 className="text-sm font-medium text-green-800">
+                      🎉 LinkedIn Profile Auto-filled Successfully!
+                    </h3>
+                    <div className="mt-2 text-sm text-green-700">
+                      <p>
+                        Your company information has been automatically populated from your LinkedIn profile. 
+                        Please review and complete any missing information below.
+                      </p>
+                    </div>
+                    <div className="mt-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowLinkedinSuccess(false)}
+                        className="text-green-800 hover:text-green-600 text-sm underline"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <form onSubmit={formik.handleSubmit} className="space-y-8">
             {/* 1. Company Header - Like LinkedIn's Intro/Header card */}

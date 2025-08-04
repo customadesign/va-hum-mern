@@ -35,6 +35,16 @@ const courseRoutes = require('./routes/courses');
 const videosdkRoutes = require('./routes/videosdk');
 const analyticsRoutes = require('./routes/analytics');
 
+// E Systems only routes
+let linkedinAuthRoutes = null;
+if (process.env.ESYSTEMS_MODE === 'true') {
+  try {
+    linkedinAuthRoutes = require('../esystems-backend/routes/linkedinAuth');
+  } catch (error) {
+    console.log('LinkedIn routes not found, skipping...');
+  }
+}
+
 // Import middleware
 const errorHandler = require('./middleware/error');
 
@@ -132,6 +142,13 @@ app.use('/s', shortUrlRoutes); // Public short URL redirects
 app.use('/api/courses', courseRoutes);
 app.use('/api/videosdk', videosdkRoutes);
 app.use('/api/analytics', analyticsRoutes);
+
+// E Systems LinkedIn integration routes
+if (linkedinAuthRoutes) {
+  app.use('/api/auth/linkedin', linkedinAuthRoutes);
+  app.use('/api/linkedin', linkedinAuthRoutes);
+  console.log('LinkedIn authentication routes enabled for E Systems');
+}
 
 // Static files for uploads with CORS
 app.use('/uploads', cors(corsOptions), express.static(path.join(__dirname, 'uploads')));
