@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { useBranding } from '../contexts/BrandingContext';
@@ -194,8 +194,8 @@ const achievements = [
 ];
 
 export default function Community() {
-  const { branding } = useBranding();
-  const { user } = useAuth();
+  const { branding, loading: brandingLoading } = useBranding();
+  const { user, loading: authLoading } = useAuth();
   const { lessonId } = useParams();
   const navigate = useNavigate();
   const [timeToNext, setTimeToNext] = useState('');
@@ -204,19 +204,45 @@ export default function Community() {
   const [selectedQuickSkill, setSelectedQuickSkill] = useState(null);
   const [showQuickSkillModal, setShowQuickSkillModal] = useState(false);
 
+  // Show loading spinner while contexts are loading
+  if (brandingLoading || authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  // Ensure branding is loaded before checking properties
+  if (!branding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
   // Check if accessing a specific lesson via URL
   useEffect(() => {
-    if (lessonId && user) {
+    if (lessonId) {
       // Find the lesson by ID or create a default one
       const lesson = currentTutorials.find(t => t.id === parseInt(lessonId)) || {
-        id: lessonId,
-        title: 'Lesson ' + lessonId,
-        // Add default lesson properties
+        id: parseInt(lessonId),
+        title: `Lesson ${lessonId}`,
+        instructor: 'System',
+        duration: '30 min',
+        difficulty: 'Intermediate',
+        category: 'General',
+        thumbnail: null,
+        progress: 0,
+        isNew: false,
+        description: 'Interactive lesson content',
+        tags: ['Learning']
       };
       setSelectedLesson(lesson);
       setShowLessonViewer(true);
     }
-  }, [lessonId, user]);
+  }, [lessonId]);
 
   // Countdown timer for next live training
   useEffect(() => {
@@ -506,20 +532,24 @@ export default function Community() {
         </div>
 
         {/* Lesson Viewer Modal */}
-        {showLessonViewer && (
-          <LessonViewer
-            lesson={selectedLesson}
-            onClose={handleCloseLesson}
-          />
+        {showLessonViewer && selectedLesson && (
+          <Suspense fallback={<div>Loading lesson...</div>}>
+            <LessonViewer
+              lesson={selectedLesson}
+              onClose={handleCloseLesson}
+            />
+          </Suspense>
         )}
 
         {/* Quick Skill Modal */}
-        {showQuickSkillModal && (
-          <QuickSkillModal
-            skill={selectedQuickSkill}
-            isOpen={showQuickSkillModal}
-            onClose={handleCloseQuickSkill}
-          />
+        {showQuickSkillModal && selectedQuickSkill && (
+          <Suspense fallback={<div>Loading skill...</div>}>
+            <QuickSkillModal
+              skill={selectedQuickSkill}
+              isOpen={showQuickSkillModal}
+              onClose={handleCloseQuickSkill}
+            />
+          </Suspense>
         )}
       </>
     );
