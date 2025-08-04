@@ -8,20 +8,17 @@ import api from '../services/api';
 const ProfileCompletion = ({ className = '', showInFooter = false }) => {
   const { user, isVA } = useAuth();
 
-  // Only show for VAs
-  if (!isVA || !user) return null;
-
-  // Fetch VA profile data
+  // Fetch VA profile data - moved to top to avoid conditional hook call
   const { data: profile } = useQuery({
-    queryKey: ['profile', user.id],
+    queryKey: ['profile', user?.id],
     queryFn: async () => {
       const response = await api.get('/users/profile');
       return response.data;
     },
-    enabled: !!user
+    enabled: !!user && isVA  // Only fetch if user exists and is VA
   });
 
-  // Calculate profile completion percentage
+  // Calculate profile completion percentage - moved to top to avoid conditional hook call
   const profileCompletion = useMemo(() => {
     if (!profile) return { percentage: 0, isComplete: false, missingFields: [] };
 
@@ -57,6 +54,10 @@ const ProfileCompletion = ({ className = '', showInFooter = false }) => {
       missingFields
     };
   }, [profile]);
+
+  // Early returns after all hooks are called
+  // Only show for VAs
+  if (!isVA || !user) return null;
 
   // Don't show if profile is complete
   if (profileCompletion.isComplete) return null;
