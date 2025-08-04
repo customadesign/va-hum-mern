@@ -84,8 +84,14 @@ export default function Home() {
           <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 lg:pl-0">
             <img
               className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full"
-              src="https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/6890223018e40e48f3b87e2f.jpeg"
-              alt="Two professional women working together as virtual assistants"
+              src={branding.isESystemsMode 
+                ? "https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/689026eb18e40e681bb89047.webp"
+                : "https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/6890223018e40e48f3b87e2f.jpeg"
+              }
+              alt={branding.isESystemsMode 
+                ? "Professional team working together in modern office"
+                : "Two professional women working together as virtual assistants"
+              }
             />
           </div>
         </div>
