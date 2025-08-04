@@ -30,7 +30,7 @@ const locationRoutes = require('./routes/locations');
 const adminRoutes = require('./routes/admin');
 const shortUrlRoutes = require('./routes/shortUrls');
 const courseRoutes = require('./routes/courses');
-const zoomRoutes = require('./routes/zoom');
+const videosdkRoutes = require('./routes/videosdk');
 
 // Import middleware
 const errorHandler = require('./middleware/error');
@@ -120,7 +120,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/shorturls', shortUrlRoutes);
 app.use('/s', shortUrlRoutes); // Public short URL redirects
 app.use('/api/courses', courseRoutes);
-app.use('/api/zoom', zoomRoutes);
+app.use('/api/videosdk', videosdkRoutes);
 
 // Static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
