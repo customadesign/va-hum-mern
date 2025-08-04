@@ -561,18 +561,428 @@ export default function BusinessProfile() {
               </div>
             </section>
 
-            {/* Contact Information */}
-            <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
+            {/* 2. About/Summary - Like LinkedIn's About section */}
+            <section className="bg-white shadow px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Contact Information</h3>
-                  <p className="mt-1 text-sm text-gray-500">Contact details for VAs to reach you.</p>
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">About Your Company</h2>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Tell your company's story. This is like LinkedIn's About section.
+                  </p>
                 </div>
                 <div className="mt-5 md:mt-0 md:col-span-2">
-                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                    <div className="sm:col-span-3">
+                  <div className="space-y-6">
+                    {/* Company Description */}
+                    <div>
+                      <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+                        Company Description *
+                      </label>
+                      <div className="mt-1">
+                        <textarea
+                          id="bio"
+                          name="bio"
+                          rows={6}
+                          value={formik.values.bio}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          placeholder="Describe your company's mission, culture, values, and what makes you unique as an employer. Tell VAs why they should want to work with you..."
+                          className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                            formik.touched.bio && formik.errors.bio
+                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                          }`}
+                        />
+                      </div>
+                      <div className="mt-2 flex justify-between">
+                        <p className="text-sm text-gray-500">
+                          {formik.values.bio.length}/2600 characters (minimum 100)
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {formik.values.bio.length >= 100 ? '✓' : '○'} Complete
+                        </p>
+                      </div>
+                      {formik.touched.bio && formik.errors.bio && (
+                        <p className="mt-1 text-sm text-red-600">{formik.errors.bio}</p>
+                      )}
+                    </div>
+
+                    {/* Mission Statement */}
+                    <div>
+                      <label htmlFor="missionStatement" className="block text-sm font-medium text-gray-700">
+                        Mission Statement
+                      </label>
+                      <div className="mt-1">
+                        <textarea
+                          id="missionStatement"
+                          name="missionStatement"
+                          rows={2}
+                          value={formik.values.missionStatement}
+                          onChange={formik.handleChange}
+                          placeholder="Your company's mission in 1-2 sentences"
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Company Culture */}
+                    <div>
+                      <label htmlFor="companyCulture" className="block text-sm font-medium text-gray-700">
+                        Company Culture
+                      </label>
+                      <div className="mt-1">
+                        <textarea
+                          id="companyCulture"
+                          name="companyCulture"
+                          rows={3}
+                          value={formik.values.companyCulture}
+                          onChange={formik.handleChange}
+                          placeholder="Describe your company culture, work environment, and team dynamics"
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    {/* What You're Looking for in VAs */}
+                    <div>
+                      <label htmlFor="vaRequirements" className="block text-sm font-medium text-gray-700">
+                        What We Look for in Virtual Assistants
+                      </label>
+                      <div className="mt-1">
+                        <textarea
+                          id="vaRequirements"
+                          name="vaRequirements"
+                          rows={3}
+                          value={formik.values.vaRequirements}
+                          onChange={formik.handleChange}
+                          placeholder="Describe the skills, experience, and qualities you value in VAs"
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 4. Company Specialties - Like LinkedIn Skills */}
+            <section className="bg-white shadow px-4 py-5 lg:rounded-lg sm:p-6">
+              <div className="md:grid md:grid-cols-3 md:gap-6">
+                <div className="md:col-span-1">
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">Company Specialties</h2>
+                  <p className="mt-2 text-sm text-gray-500">
+                    What your company specializes in. Like LinkedIn skills for companies.
+                  </p>
+                </div>
+                <div className="mt-5 md:mt-0 md:col-span-2">
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap gap-2">
+                      {formik.values.specialties?.map((specialty, index) => (
+                        <div key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center">
+                          {specialty}
+                          <button
+                            type="button"
+                            onClick={() => removeArrayItem('specialties', index)}
+                            className="ml-2 text-blue-600 hover:text-blue-800"
+                          >
+                            <TrashIcon className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex">
+                      <input
+                        type="text"
+                        placeholder="Add a specialty (e.g. Digital Marketing, Web Development)"
+                        className="flex-1 rounded-l-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addArrayItem('specialties', e.target.value);
+                            e.target.value = '';
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          const input = e.target.previousElementSibling;
+                          addArrayItem('specialties', input.value);
+                          input.value = '';
+                        }}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <PlusIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 5. Benefits & Perks */}
+            <section className="bg-white shadow px-4 py-5 lg:rounded-lg sm:p-6">
+              <div className="md:grid md:grid-cols-3 md:gap-6">
+                <div className="md:col-span-1">
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">Benefits & Perks</h2>
+                  <p className="mt-2 text-sm text-gray-500">
+                    What you offer to VAs beyond compensation.
+                  </p>
+                </div>
+                <div className="mt-5 md:mt-0 md:col-span-2">
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap gap-2">
+                      {formik.values.benefits?.map((benefit, index) => (
+                        <div key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center">
+                          {benefit}
+                          <button
+                            type="button"
+                            onClick={() => removeArrayItem('benefits', index)}
+                            className="ml-2 text-green-600 hover:text-green-800"
+                          >
+                            <TrashIcon className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex">
+                      <input
+                        type="text"
+                        placeholder="Add a benefit (e.g. Flexible Hours, Professional Development)"
+                        className="flex-1 rounded-l-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addArrayItem('benefits', e.target.value);
+                            e.target.value = '';
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          const input = e.target.previousElementSibling;
+                          addArrayItem('benefits', input.value);
+                          input.value = '';
+                        }}
+                        className="bg-green-500 text-white px-4 py-2 rounded-r-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                      >
+                        <PlusIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 6. Company Values */}
+            <section className="bg-white shadow px-4 py-5 lg:rounded-lg sm:p-6">
+              <div className="md:grid md:grid-cols-3 md:gap-6">
+                <div className="md:col-span-1">
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">Company Values</h2>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Core values that guide your company culture.
+                  </p>
+                </div>
+                <div className="mt-5 md:mt-0 md:col-span-2">
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap gap-2">
+                      {formik.values.companyValues?.map((value, index) => (
+                        <div key={index} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm flex items-center">
+                          {value}
+                          <button
+                            type="button"
+                            onClick={() => removeArrayItem('companyValues', index)}
+                            className="ml-2 text-purple-600 hover:text-purple-800"
+                          >
+                            <TrashIcon className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex">
+                      <input
+                        type="text"
+                        placeholder="Add a company value (e.g. Innovation, Integrity, Collaboration)"
+                        className="flex-1 rounded-l-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addArrayItem('companyValues', e.target.value);
+                            e.target.value = '';
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          const input = e.target.previousElementSibling;
+                          addArrayItem('companyValues', input.value);
+                          input.value = '';
+                        }}
+                        className="bg-purple-500 text-white px-4 py-2 rounded-r-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      >
+                        <PlusIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 7. Social Media & Online Presence */}
+            <section className="bg-white shadow px-4 py-5 lg:rounded-lg sm:p-6">
+              <div className="md:grid md:grid-cols-3 md:gap-6">
+                <div className="md:col-span-1">
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">Social Media & Links</h2>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Your company's online presence and social media profiles.
+                  </p>
+                </div>
+                <div className="mt-5 md:mt-0 md:col-span-2">
+                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                    <div>
+                      <label htmlFor="linkedin" className="block text-sm font-medium text-gray-700">
+                        LinkedIn Company Page
+                      </label>
+                      <div className="mt-1">
+                        <input
+                          type="url"
+                          name="linkedin"
+                          id="linkedin"
+                          value={formik.values.linkedin}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          placeholder="https://linkedin.com/company/your-company"
+                          className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                            formik.touched.linkedin && formik.errors.linkedin
+                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                          }`}
+                        />
+                      </div>
+                      {formik.touched.linkedin && formik.errors.linkedin && (
+                        <p className="mt-1 text-sm text-red-600">{formik.errors.linkedin}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label htmlFor="facebook" className="block text-sm font-medium text-gray-700">
+                        Facebook Page
+                      </label>
+                      <div className="mt-1">
+                        <input
+                          type="url"
+                          name="facebook"
+                          id="facebook"
+                          value={formik.values.facebook}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          placeholder="https://facebook.com/your-company"
+                          className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                            formik.touched.facebook && formik.errors.facebook
+                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                          }`}
+                        />
+                      </div>
+                      {formik.touched.facebook && formik.errors.facebook && (
+                        <p className="mt-1 text-sm text-red-600">{formik.errors.facebook}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label htmlFor="twitter" className="block text-sm font-medium text-gray-700">
+                        Twitter/X Profile
+                      </label>
+                      <div className="mt-1">
+                        <input
+                          type="url"
+                          name="twitter"
+                          id="twitter"
+                          value={formik.values.twitter}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          placeholder="https://twitter.com/your-company"
+                          className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                            formik.touched.twitter && formik.errors.twitter
+                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                          }`}
+                        />
+                      </div>
+                      {formik.touched.twitter && formik.errors.twitter && (
+                        <p className="mt-1 text-sm text-red-600">{formik.errors.twitter}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label htmlFor="instagram" className="block text-sm font-medium text-gray-700">
+                        Instagram Profile
+                      </label>
+                      <div className="mt-1">
+                        <input
+                          type="url"
+                          name="instagram"
+                          id="instagram"
+                          value={formik.values.instagram}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          placeholder="https://instagram.com/your-company"
+                          className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                            formik.touched.instagram && formik.errors.instagram
+                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                          }`}
+                        />
+                      </div>
+                      {formik.touched.instagram && formik.errors.instagram && (
+                        <p className="mt-1 text-sm text-red-600">{formik.errors.instagram}</p>
+                      )}
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label htmlFor="youtube" className="block text-sm font-medium text-gray-700">
+                        YouTube Channel
+                      </label>
+                      <div className="mt-1">
+                        <input
+                          type="url"
+                          name="youtube"
+                          id="youtube"
+                          value={formik.values.youtube}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          placeholder="https://youtube.com/your-company"
+                          className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                            formik.touched.youtube && formik.errors.youtube
+                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                          }`}
+                        />
+                      </div>
+                      {formik.touched.youtube && formik.errors.youtube && (
+                        <p className="mt-1 text-sm text-red-600">{formik.errors.youtube}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 3. Contact Information */}
+            <section className="bg-white shadow px-4 py-5 lg:rounded-lg sm:p-6">
+              <div className="md:grid md:grid-cols-3 md:gap-6">
+                <div className="md:col-span-1">
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">Contact Information</h2>
+                  <p className="mt-2 text-sm text-gray-500">
+                    How VAs can reach you for opportunities.
+                  </p>
+                </div>
+                <div className="mt-5 md:mt-0 md:col-span-2">
+                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                    <div>
                       <label htmlFor="contactName" className="block text-sm font-medium text-gray-700">
-                        Contact Name *
+                        Primary Contact Name *
                       </label>
                       <div className="mt-1">
                         <input
@@ -582,10 +992,11 @@ export default function BusinessProfile() {
                           value={formik.values.contactName}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
+                          placeholder="John Smith"
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.contactName && formik.errors.contactName
                               ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                           }`}
                         />
                       </div>
@@ -594,7 +1005,7 @@ export default function BusinessProfile() {
                       )}
                     </div>
 
-                    <div className="sm:col-span-3">
+                    <div>
                       <label htmlFor="contactRole" className="block text-sm font-medium text-gray-700">
                         Role/Title *
                       </label>
@@ -606,11 +1017,11 @@ export default function BusinessProfile() {
                           value={formik.values.contactRole}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
-                          placeholder="e.g., CEO, HR Manager"
+                          placeholder="e.g., CEO, HR Director, Operations Manager"
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.contactRole && formik.errors.contactRole
                               ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                           }`}
                         />
                       </div>
@@ -619,9 +1030,9 @@ export default function BusinessProfile() {
                       )}
                     </div>
 
-                    <div className="sm:col-span-3">
+                    <div>
                       <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        Email Address *
+                        Business Email Address *
                       </label>
                       <div className="mt-1">
                         <input
@@ -631,10 +1042,11 @@ export default function BusinessProfile() {
                           value={formik.values.email}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
+                          placeholder="john@company.com"
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.email && formik.errors.email
                               ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : 'border-gray-300 focus:ring-gray-500 focus:border-gray-500'
+                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                           }`}
                         />
                       </div>
@@ -643,9 +1055,9 @@ export default function BusinessProfile() {
                       )}
                     </div>
 
-                    <div className="sm:col-span-3">
+                    <div>
                       <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                        Phone Number
+                        Business Phone Number
                       </label>
                       <div className="mt-1">
                         <input
@@ -655,7 +1067,24 @@ export default function BusinessProfile() {
                           value={formik.values.phone}
                           onChange={formik.handleChange}
                           placeholder="+1 (555) 123-4567"
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label htmlFor="workingHours" className="block text-sm font-medium text-gray-700">
+                        Working Hours / Time Zone
+                      </label>
+                      <div className="mt-1">
+                        <input
+                          type="text"
+                          name="workingHours"
+                          id="workingHours"
+                          value={formik.values.workingHours}
+                          onChange={formik.handleChange}
+                          placeholder="e.g., 9 AM - 5 PM EST, Monday - Friday"
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         />
                       </div>
                     </div>
@@ -668,8 +1097,8 @@ export default function BusinessProfile() {
             <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Company Location</h3>
-                  <p className="mt-1 text-sm text-gray-500">Where your company is based.</p>
+                  <h2 className="text-lg font-medium leading-6 text-gray-900">8. Office Location</h2>
+                  <p className="mt-2 text-sm text-gray-500">Physical address (optional, for VAs who prefer local companies).</p>
                 </div>
                 <div className="mt-5 md:mt-0 md:col-span-2">
                   <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">

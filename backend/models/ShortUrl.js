@@ -38,8 +38,7 @@ const shortUrlSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for faster lookups
-shortUrlSchema.index({ shortCode: 1 });
+// Index for faster lookups (shortCode already indexed due to unique: true)
 shortUrlSchema.index({ vaId: 1 });
 shortUrlSchema.index({ isActive: 1 });
 
