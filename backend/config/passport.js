@@ -6,7 +6,9 @@ const VA = require('../models/VA');
 passport.use(new LinkedInStrategy({
   clientID: process.env.LINKEDIN_CLIENT_ID,
   clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-  callbackURL: "/auth/linkedin/callback",
+  callbackURL: process.env.NODE_ENV === 'production' 
+    ? "https://linkage-va-hub-api.onrender.com/api/auth/linkedin/callback"
+    : "/api/auth/linkedin/callback",
   scope: ['r_liteprofile', 'r_emailaddress'],
 }, async (accessToken, refreshToken, profile, done) => {
   try {

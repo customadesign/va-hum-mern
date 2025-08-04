@@ -6,6 +6,7 @@ import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import { useBranding } from '../../contexts/BrandingContext';
+import linkedinAuth from '../../services/linkedinAuth';
 import { 
   CameraIcon, 
   InformationCircleIcon, 
@@ -13,7 +14,8 @@ import {
   TrashIcon,
   BuildingOfficeIcon,
   GlobeAltIcon,
-  StarIcon
+  StarIcon,
+  SparklesIcon
 } from '@heroicons/react/24/solid';
 
 // Industry options adapted for business needs
@@ -88,6 +90,8 @@ export default function BusinessProfile() {
   const avatarInputRef = useRef(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [linkedinFilled, setLinkedinFilled] = useState(false);
+  const [showLinkedinSuccess, setShowLinkedinSuccess] = useState(false);
 
   // Fetch current business profile
   const { data: profile, isLoading } = useQuery(

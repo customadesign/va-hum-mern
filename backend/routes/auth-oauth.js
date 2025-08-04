@@ -51,8 +51,9 @@ router.get('/linkedin/callback',
         redirectUrl = '/profile-setup';
       }
 
-      // Redirect to frontend with success
-      res.redirect(`${process.env.CLIENT_URL}${redirectUrl}`);
+      // Redirect to frontend with success - ensure HTTPS in production
+      const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+      res.redirect(`${clientUrl}${redirectUrl}`);
     } catch (error) {
       console.error('OAuth callback error:', error);
       res.redirect(`${process.env.CLIENT_URL}/login?error=auth_failed`);
