@@ -711,8 +711,58 @@ export default function Community() {
           </div>
         </div>
 
+        {/* Quick Skills Preview */}
+        <div className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center">
+                <BoltIcon className="h-8 w-8 mr-3 text-yellow-600" />
+                Quick Skills (5-15 min)
+              </h2>
+              <p className="text-lg text-gray-600">
+                Master essential VA skills with our bite-sized tutorials. Perfect for busy schedules.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              {[
+                { title: 'Instagram Story Templates', time: '8 min', category: 'Design', color: 'bg-purple-100 text-purple-800' },
+                { title: 'Email Subject Line Tips', time: '5 min', category: 'Marketing', color: 'bg-blue-100 text-blue-800' },
+                { title: 'Client Onboarding Checklist', time: '12 min', category: 'Business', color: 'bg-green-100 text-green-800' },
+                { title: 'Keyword Research Basics', time: '15 min', category: 'SEO', color: 'bg-orange-100 text-orange-800' }
+              ].map((skill, index) => (
+                <div 
+                  key={index}
+                  className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer group">
+                  <div className="flex items-center justify-between mb-4">
+                    <PlayIcon className="h-8 w-8 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                    <ClockIcon className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                    {skill.title}
+                  </h4>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">{skill.time}</span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${skill.color}`}>
+                      {skill.category}
+                    </span>
+                  </div>
+                  <div className="mt-4 text-center">
+                    <Link
+                      to="/register"
+                      className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Join to Access →
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Learning Paths */}
-        <div id="learning-paths" className="py-20">
+        <div id="learning-paths" className="py-20 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
