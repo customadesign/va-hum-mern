@@ -33,6 +33,18 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  // LinkedIn OAuth fields
+  linkedinId: {
+    type: String,
+    unique: true,
+    sparse: true // Allows multiple null values
+  },
+  linkedinProfile: {
+    firstName: String,
+    lastName: String,
+    profileUrl: String,
+    pictureUrl: String
+  },
   referralCode: {
     type: String,
     unique: true,

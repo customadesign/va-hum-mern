@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const passport = require('passport');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -19,6 +20,7 @@ console.log('MongoDB URI exists:', !!process.env.MONGODB_URI);
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const authOAuthRoutes = require('./routes/auth-oauth');
 const userRoutes = require('./routes/users');
 const vaRoutes = require('./routes/vas');
 const businessRoutes = require('./routes/businesses');
@@ -35,6 +37,10 @@ const analyticsRoutes = require('./routes/analytics');
 
 // Import middleware
 const errorHandler = require('./middleware/error');
+
+// Initialize Passport configuration
+require('./config/passport');
+app.use(passport.initialize());
 
 // CORS configuration
 const corsOptions = {
@@ -108,6 +114,7 @@ app.get('/', (req, res) => {
 
 // Mount routes
 app.use('/api/auth', authRoutes);
+app.use('/api/auth', authOAuthRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/vas', vaRoutes);
 app.use('/api/system', require('./routes/system'));

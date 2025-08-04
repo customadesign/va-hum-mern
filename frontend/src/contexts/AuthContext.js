@@ -21,6 +21,27 @@ export const AuthProvider = ({ children }) => {
   // Check if user is logged in on mount
   useEffect(() => {
     checkAuth();
+    
+    // Check for OAuth success/error parameters in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    const welcome = urlParams.get('welcome');
+    
+    if (error) {
+      if (error === 'oauth_failed') {
+        toast.error('LinkedIn authentication failed. Please try again.');
+      } else if (error === 'auth_failed') {
+        toast.error('Authentication failed. Please try again.');
+      }
+      // Clean up URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    if (welcome === 'true') {
+      toast.success('Welcome! Please complete your profile to get started.');
+      // Clean up URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   const checkAuth = async () => {
@@ -58,6 +79,12 @@ export const AuthProvider = ({ children }) => {
       toast.error(error.response?.data?.error || 'Login failed');
       throw error;
     }
+  };
+
+  const linkedinLogin = () => {
+    // Redirect to LinkedIn OAuth endpoint
+    const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    window.location.href = `${backendUrl}/api/auth/linkedin`;
   };
 
   const register = async (email, password, referralCode) => {
