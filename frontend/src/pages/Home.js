@@ -63,8 +63,7 @@ export default function Home() {
                       </>
                     ) : (
                       <>
-                        Access high-paying virtual assistant opportunities and build your career.
-                        <span className="md:block">Get VA jobs starting at <span className="font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">$4 per hour</span> with growth potential.</span>
+                        Access high-paying virtual assistant opportunities and build your career. Get VA jobs starting at <span className="font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">$4 per hour</span> with growth potential.
                       </>
                     )}
                   </p>
