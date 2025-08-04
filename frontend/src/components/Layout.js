@@ -5,6 +5,7 @@ import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useBranding } from '../contexts/BrandingContext';
+import ProfileCompletion from './ProfileCompletion';
 import { useNotifications } from '../hooks/useNotifications';
 import NotificationBadge from './NotificationBadge';
 
@@ -342,6 +343,12 @@ export default function Layout() {
       </main>
 
       <footer className="bg-white">
+        {/* Profile Completion Widget for VAs */}
+        <ProfileCompletion 
+          showInFooter={true} 
+          className="max-w-7xl mx-auto mb-6 px-4 sm:px-6 lg:px-8" 
+        />
+        
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex justify-center md:order-2">
