@@ -18,7 +18,7 @@ import {
 import ProfileCompletion from "../../components/ProfileCompletion";
 
 const validationSchema = Yup.object({
-  name: Yup.string().required("Name is required"),
+  name: Yup.string(),
   hero: Yup.string().required("Hero statement is required"),
   bio: Yup.string()
     .required("Bio is required")
@@ -38,11 +38,26 @@ const validationSchema = Yup.object({
   twitter: Yup.string(),
   viber: Yup.string(),
   // DISC Assessment fields
-  discPrimaryType: Yup.string().oneOf(['D', 'I', 'S', 'C', ''], 'Invalid DISC type'),
-  discDominance: Yup.number().transform((value) => (isNaN(value) ? undefined : value)).min(0).max(100),
-  discInfluence: Yup.number().transform((value) => (isNaN(value) ? undefined : value)).min(0).max(100),
-  discSteadiness: Yup.number().transform((value) => (isNaN(value) ? undefined : value)).min(0).max(100),
-  discConscientiousness: Yup.number().transform((value) => (isNaN(value) ? undefined : value)).min(0).max(100),
+  discPrimaryType: Yup.string().oneOf(
+    ["D", "I", "S", "C", ""],
+    "Invalid DISC type"
+  ),
+  discDominance: Yup.number()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .min(0)
+    .max(100),
+  discInfluence: Yup.number()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .min(0)
+    .max(100),
+  discSteadiness: Yup.number()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .min(0)
+    .max(100),
+  discConscientiousness: Yup.number()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .min(0)
+    .max(100),
 });
 
 // Philippine location data with provinces, cities, and barangays
@@ -1255,9 +1270,9 @@ export default function VAProfile() {
 
   const formik = useFormik({
     initialValues: {
-      name: profile?.name || "",
+      name: "",
       hero: profile?.hero || "",
-      bio: profile?.bio || "",
+      bio: "",
       location: {
         street: profile?.location?.street || "",
         province: profile?.location?.province || profile?.location?.state || "", // Backward compatibility
@@ -1308,11 +1323,11 @@ export default function VAProfile() {
     validationSchema,
     enableReinitialize: true,
     onSubmit: (values) => {
-      console.log('Form submitted with values:', values);
+      console.log("Form submitted with values:", values);
       if (!updateProfileMutation.isLoading) {
         updateProfileMutation.mutate(values);
       } else {
-        console.log('Mutation already in progress, skipping submission');
+        console.log("Mutation already in progress, skipping submission");
       }
     },
   });
@@ -1358,8 +1373,6 @@ export default function VAProfile() {
       }
     }
   }, [profile]);
-
-
 
   // Calculate profile completion percentage
   const profileCompletion = useMemo(() => {
@@ -1722,6 +1735,7 @@ export default function VAProfile() {
                           value={formik.values.name}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
+                          placeholder="Your Name"
                           className={`block w-full rounded-md shadow-sm sm:text-sm ${
                             formik.touched.name && formik.errors.name
                               ? "border-red-300 focus:ring-red-500 focus:border-red-500"
@@ -2266,22 +2280,6 @@ export default function VAProfile() {
                   <h2 className="text-lg font-medium leading-6 text-gray-900">
                     Bio
                   </h2>
-                  <p className="mt-2 text-sm text-gray-500">
-                    Share some information about yourself. What you did before,
-                    what you're doing now, and what you're looking for next.
-                  </p>
-
-                  <h4 className="font-medium uppercase tracking-wide text-gray-500 text-sm mt-4">
-                    EXAMPLES
-                  </h4>
-                  <ul className="text-sm text-gray-500 list-disc list-inside">
-                    <li className="mt-1">Where you're originally from</li>
-                    <li className="mt-1">What you've accomplished</li>
-                    <li className="mt-1">What you've learned</li>
-                    <li className="mt-1">What you're passionate about</li>
-                    <li className="mt-1">How you can help businesses</li>
-                    <li className="mt-1">What makes you unique</li>
-                  </ul>
 
                   <p className="mt-4 text-sm text-gray-500">
                     You can use Markdown for formatting.
@@ -2298,6 +2296,7 @@ export default function VAProfile() {
                         value={formik.values.bio}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
+                        placeholder="Tell us about yourself..."
                         className={`block w-full rounded-md shadow-sm sm:text-sm ${
                           formik.touched.bio && formik.errors.bio
                             ? "border-red-300 focus:ring-red-500 focus:border-red-500"

@@ -26,8 +26,8 @@ export default function ProfileSetup() {
       if (type === 'va') {
         // Create VA profile
         const response = await api.post('/vas', {
-          name: 'Your Name',
-          bio: 'Tell us about yourself...',
+          name: 'New VA',
+          bio: 'Please update your bio and profile information.',
           searchStatus: 'open'
         });
         
