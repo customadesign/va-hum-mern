@@ -5,17 +5,11 @@ const { catchAsync } = require('../utils/errorHandler');
 // Create a shortened URL for a VA profile
 const createShortUrl = catchAsync(async (req, res) => {
   const { vaId } = req.params;
-  const userId = req.user.id;
-
-  // Verify the VA exists and user has permission
+  
+  // Verify the VA exists
   const va = await VA.findById(vaId);
   if (!va) {
     return res.status(404).json({ error: 'VA profile not found' });
-  }
-
-  // Check if user owns this VA profile or is admin
-  if (va.user.toString() !== userId && req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Not authorized to create short URL for this profile' });
   }
 
   // Check if a short URL already exists for this VA
@@ -46,7 +40,7 @@ const createShortUrl = catchAsync(async (req, res) => {
     originalUrl,
     shortCode,
     vaId,
-    createdBy: userId
+    createdBy: req.user ? req.user.id : null  // Optional user if logged in
   });
 
   await shortUrl.save();

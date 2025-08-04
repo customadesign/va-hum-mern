@@ -13,11 +13,11 @@ const {
 // Public route for redirecting short URLs
 router.get('/:shortCode', redirectShortUrl);
 
+// Public route for creating VA profile short URLs (no auth required)
+router.post('/vas/:vaId', createShortUrl);
+
 // Protected routes (require authentication)
 router.use(protect);
-
-// Create short URL for a VA profile
-router.post('/vas/:vaId', createShortUrl);
 
 // Get short URL info and analytics
 router.get('/info/:shortCode', getShortUrlInfo);
