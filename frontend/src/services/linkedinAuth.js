@@ -1,29 +1,38 @@
 // LinkedIn OAuth and API integration service
 // Only used on E Systems side for employer login and profile auto-fill
 
+// Determine deployment URL based on brand
+const getDeploymentUrl = () => {
+  if (process.env.REACT_APP_BRAND === 'esystems') {
+    return 'https://esystems-management-hub.onrender.com';
+  }
+  return 'https://linkage-va-hub.onrender.com';
+};
+
 const LINKEDIN_CONFIG = {
   clientId: process.env.REACT_APP_LINKEDIN_CLIENT_ID,
   redirectUri: process.env.NODE_ENV === 'production' 
-    ? 'https://esystems-management-hub.onrender.com/auth/linkedin/callback'
+    ? `${getDeploymentUrl()}/auth/linkedin/callback`
     : 'http://localhost:3000/auth/linkedin/callback',
   scope: 'openid profile email', // Updated to use OpenID Connect scopes
-  state: 'esystems_auth_' + Math.random().toString(36).substring(7),
+  state: 'linkedin_auth_' + Math.random().toString(36).substring(7),
 };
 
 class LinkedInAuthService {
   constructor() {
     this.isESystemsMode = process.env.REACT_APP_BRAND === 'esystems';
+    this.deploymentUrl = getDeploymentUrl();
   }
 
-  // Check if LinkedIn integration is available (E Systems only)
+  // Check if LinkedIn integration is available
   isAvailable() {
-    return this.isESystemsMode && LINKEDIN_CONFIG.clientId;
+    return LINKEDIN_CONFIG.clientId; // Available for both deployments if configured
   }
 
   // Generate LinkedIn OAuth URL for login
   getAuthUrl() {
     if (!this.isAvailable()) {
-      throw new Error('LinkedIn integration is only available on E Systems');
+      throw new Error('LinkedIn integration is not configured');
     }
 
     const params = new URLSearchParams({
@@ -40,7 +49,7 @@ class LinkedInAuthService {
   // Handle LinkedIn OAuth callback
   async handleCallback(code, state) {
     if (!this.isAvailable()) {
-      throw new Error('LinkedIn integration is only available on E Systems');
+      throw new Error('LinkedIn integration is not configured');
     }
 
     // Note: State validation should be done but we're using a dynamic state
@@ -49,7 +58,7 @@ class LinkedInAuthService {
     try {
       // Exchange code for access token via our backend
       const apiUrl = process.env.NODE_ENV === 'production'
-        ? 'https://esystems-management-hub.onrender.com/api/auth/linkedin/callback'
+        ? `${this.deploymentUrl}/api/auth/linkedin/callback`
         : 'http://localhost:5000/api/auth/linkedin/callback';
         
       const response = await fetch(apiUrl, {
@@ -75,13 +84,13 @@ class LinkedInAuthService {
   // Fetch company profile data from LinkedIn
   async getCompanyProfile(accessToken, companyId = null) {
     if (!this.isAvailable()) {
-      throw new Error('LinkedIn integration is only available on E Systems');
+      throw new Error('LinkedIn integration is not configured');
     }
 
     try {
       // First, get user's organizations if no companyId provided
       const apiUrl = process.env.NODE_ENV === 'production'
-        ? 'https://esystems-management-hub.onrender.com'
+        ? this.deploymentUrl
         : 'http://localhost:5000';
         
       if (!companyId) {
@@ -222,7 +231,7 @@ class LinkedInAuthService {
   // Initiate LinkedIn login flow
   login() {
     if (!this.isAvailable()) {
-      throw new Error('LinkedIn integration is only available on E Systems');
+      throw new Error('LinkedIn integration is not configured');
     }
 
     const authUrl = this.getAuthUrl();

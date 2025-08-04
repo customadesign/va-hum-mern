@@ -35,13 +35,13 @@ const courseRoutes = require('./routes/courses');
 const videosdkRoutes = require('./routes/videosdk');
 const analyticsRoutes = require('./routes/analytics');
 
-// LinkedIn auth routes (E Systems mode)
+// LinkedIn auth routes (available for both deployments if configured)
 let linkedinAuthRoutes = null;
-if (process.env.ESYSTEMS_MODE === 'true') {
+if (process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET) {
   try {
     // First try to load from backend/routes
     linkedinAuthRoutes = require('./routes/linkedinAuth');
-    console.log('LinkedIn routes loaded from backend/routes');
+    console.log('LinkedIn routes loaded successfully');
   } catch (error) {
     // Fallback to esystems-backend if exists
     try {
@@ -151,11 +151,12 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/videosdk', videosdkRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
-// E Systems LinkedIn integration routes
+// LinkedIn integration routes (available for both deployments if configured)
 if (linkedinAuthRoutes) {
   app.use('/api/auth/linkedin', linkedinAuthRoutes);
   app.use('/api/linkedin', linkedinAuthRoutes);
-  console.log('LinkedIn authentication routes enabled for E Systems');
+  const deployment = process.env.ESYSTEMS_MODE === 'true' ? 'E Systems' : 'Linkage';
+  console.log(`LinkedIn authentication routes enabled for ${deployment}`);
 }
 
 // Static files for uploads with CORS

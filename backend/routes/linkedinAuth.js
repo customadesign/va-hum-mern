@@ -7,10 +7,22 @@ const Business = require('../models/Business');
 const router = express.Router();
 
 // LinkedIn OAuth configuration
+// Dynamically determine redirect URI based on deployment
+const getRedirectUri = () => {
+  if (process.env.LINKEDIN_REDIRECT_URI) {
+    return process.env.LINKEDIN_REDIRECT_URI;
+  }
+  // Default based on mode
+  if (process.env.ESYSTEMS_MODE === 'true') {
+    return 'https://esystems-management-hub.onrender.com/auth/linkedin/callback';
+  }
+  return 'https://linkage-va-hub.onrender.com/auth/linkedin/callback';
+};
+
 const LINKEDIN_CONFIG = {
   clientId: process.env.LINKEDIN_CLIENT_ID,
   clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-  redirectUri: process.env.LINKEDIN_REDIRECT_URI || 'https://esystems-management-hub.onrender.com/auth/linkedin/callback',
+  redirectUri: getRedirectUri(),
 };
 
 // @desc    Handle LinkedIn OAuth callback
@@ -18,9 +30,10 @@ const LINKEDIN_CONFIG = {
 // @access  Public (E Systems only)
 router.post('/callback', async (req, res) => {
   try {
-    // Only allow on E Systems mode
-    if (!process.env.ESYSTEMS_MODE) {
-      return res.status(403).json({ error: 'LinkedIn integration only available on E Systems' });
+    // LinkedIn integration available for both deployments
+    // Check if LinkedIn credentials are configured
+    if (!LINKEDIN_CONFIG.clientId || !LINKEDIN_CONFIG.clientSecret) {
+      return res.status(403).json({ error: 'LinkedIn integration not configured' });
     }
 
     const { code } = req.body;
@@ -88,7 +101,7 @@ router.post('/callback', async (req, res) => {
       user = new User({
         name: linkedinProfile.name,
         email: linkedinProfile.email,
-        role: 'business', // LinkedIn users are businesses
+        role: process.env.ESYSTEMS_MODE === 'true' ? 'business' : 'va', // Role based on deployment
         isVerified: true, // LinkedIn emails are verified
         linkedinId: linkedinProfile.sub,
         provider: 'linkedin',
@@ -150,9 +163,10 @@ router.post('/callback', async (req, res) => {
 // @access  Private (E Systems only)
 router.get('/company/:companyId', async (req, res) => {
   try {
-    // Only allow on E Systems mode
-    if (!process.env.ESYSTEMS_MODE) {
-      return res.status(403).json({ error: 'LinkedIn integration only available on E Systems' });
+    // LinkedIn integration available for both deployments
+    // Check if LinkedIn credentials are configured
+    if (!LINKEDIN_CONFIG.clientId || !LINKEDIN_CONFIG.clientSecret) {
+      return res.status(403).json({ error: 'LinkedIn integration not configured' });
     }
 
     const { companyId } = req.params;
@@ -185,9 +199,10 @@ router.get('/company/:companyId', async (req, res) => {
 // @access  Private (E Systems only)
 router.get('/organizations', async (req, res) => {
   try {
-    // Only allow on E Systems mode
-    if (!process.env.ESYSTEMS_MODE) {
-      return res.status(403).json({ error: 'LinkedIn integration only available on E Systems' });
+    // LinkedIn integration available for both deployments
+    // Check if LinkedIn credentials are configured
+    if (!LINKEDIN_CONFIG.clientId || !LINKEDIN_CONFIG.clientSecret) {
+      return res.status(403).json({ error: 'LinkedIn integration not configured' });
     }
 
     const accessToken = req.headers.authorization?.replace('Bearer ', '');
