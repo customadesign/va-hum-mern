@@ -127,7 +127,13 @@ const currentTutorials = [
   {
     id: 1,
     title: 'Advanced Social Media Analytics with AI',
-    instructor: 'Sarah Martinez',
+    instructor: {
+      name: 'Sarah Martinez',
+      title: 'Social Media Expert',
+      avatar: null,
+      rating: 4.8,
+      students: 2340
+    },
     duration: '45 min',
     difficulty: 'Intermediate',
     category: 'Social Media',
@@ -135,12 +141,47 @@ const currentTutorials = [
     progress: 0,
     isNew: true,
     description: 'Learn how to use AI tools to analyze social media performance and create data-driven strategies.',
-    tags: ['Analytics', 'AI', 'Strategy']
+    tags: ['Analytics', 'AI', 'Strategy'],
+    chapters: [
+      { id: 1, title: 'Introduction to AI Analytics', time: '0:00', duration: '5:42', completed: true },
+      { id: 2, title: 'Setting Up Your Analytics Dashboard', time: '5:42', duration: '8:15', completed: true },
+      { id: 3, title: 'Understanding Key Metrics', time: '13:57', duration: '10:30', completed: false },
+      { id: 4, title: 'AI-Powered Insights', time: '24:27', duration: '12:18', completed: false },
+      { id: 5, title: 'Creating Reports & Action Plans', time: '36:45', duration: '8:15', completed: false }
+    ],
+    resources: [
+      { id: 1, title: 'Analytics Dashboard Template', type: 'xlsx', size: '2.3 MB' },
+      { id: 2, title: 'AI Tools Comparison Guide', type: 'pdf', size: '1.5 MB' }
+    ],
+    transcript: [
+      { time: '0:00', text: 'Welcome to this comprehensive guide on using AI for social media analytics...' },
+      { time: '0:30', text: 'By the end of this lesson, you\'ll be able to leverage AI tools to provide deeper insights...' }
+    ],
+    relatedLessons: [
+      { id: 2, title: 'Content Strategy with ChatGPT', duration: '32 min' },
+      { id: 3, title: 'Automated Social Media Scheduling', duration: '28 min' }
+    ],
+    quiz: {
+      questions: [
+        {
+          id: 1,
+          question: 'What is the primary benefit of AI in social media analytics?',
+          options: ['Faster data processing', 'Pattern recognition', 'Predictive insights', 'All of the above'],
+          correct: 3
+        }
+      ]
+    }
   },
   {
     id: 2,
     title: 'Client Communication Mastery',
-    instructor: 'David Chen',
+    instructor: {
+      name: 'David Chen',
+      title: 'Communication Expert',
+      avatar: null,
+      rating: 4.7,
+      students: 1850
+    },
     duration: '35 min',
     difficulty: 'Beginner',
     category: 'Client Relations',
@@ -148,12 +189,31 @@ const currentTutorials = [
     progress: 65,
     isNew: false,
     description: 'Master the art of professional communication with clients to build stronger relationships.',
-    tags: ['Communication', 'Clients', 'Professional']
+    tags: ['Communication', 'Clients', 'Professional'],
+    chapters: [
+      { id: 1, title: 'Communication Fundamentals', time: '0:00', duration: '8:00', completed: true },
+      { id: 2, title: 'Active Listening Techniques', time: '8:00', duration: '12:00', completed: true },
+      { id: 3, title: 'Managing Difficult Conversations', time: '20:00', duration: '15:00', completed: false }
+    ],
+    resources: [
+      { id: 1, title: 'Communication Templates', type: 'pdf', size: '1.1 MB' }
+    ],
+    transcript: [
+      { time: '0:00', text: 'Welcome to Client Communication Mastery...' }
+    ],
+    relatedLessons: [],
+    quiz: { questions: [] }
   },
   {
     id: 3,
     title: 'WordPress Speed Optimization',
-    instructor: 'Emma Rodriguez',
+    instructor: {
+      name: 'Emma Rodriguez',
+      title: 'WordPress Developer',
+      avatar: null,
+      rating: 4.9,
+      students: 3200
+    },
     duration: '60 min',
     difficulty: 'Advanced',
     category: 'Web Development',
@@ -161,7 +221,20 @@ const currentTutorials = [
     progress: 30,
     isNew: false,
     description: 'Technical deep-dive into optimizing WordPress sites for maximum performance.',
-    tags: ['WordPress', 'Performance', 'Technical']
+    tags: ['WordPress', 'Performance', 'Technical'],
+    chapters: [
+      { id: 1, title: 'Performance Fundamentals', time: '0:00', duration: '15:00', completed: true },
+      { id: 2, title: 'Caching Strategies', time: '15:00', duration: '20:00', completed: false },
+      { id: 3, title: 'Database Optimization', time: '35:00', duration: '25:00', completed: false }
+    ],
+    resources: [
+      { id: 1, title: 'Performance Checklist', type: 'pdf', size: '800 KB' }
+    ],
+    transcript: [
+      { time: '0:00', text: 'Welcome to WordPress Speed Optimization...' }
+    ],
+    relatedLessons: [],
+    quiz: { questions: [] }
   }
 ];
 
@@ -207,11 +280,17 @@ export default function Community() {
   // ALL HOOKS MUST BE CALLED FIRST - Check if accessing a specific lesson via URL
   useEffect(() => {
     if (lessonId) {
-      // Find the lesson by ID or create a default one
+      // Find the lesson by ID or create a default one with complete structure
       const lesson = currentTutorials.find(t => t.id === parseInt(lessonId)) || {
         id: parseInt(lessonId),
         title: `Lesson ${lessonId}`,
-        instructor: 'System',
+        instructor: {
+          name: 'System',
+          title: 'Learning Platform',
+          avatar: null,
+          rating: 4.5,
+          students: 1000
+        },
         duration: '30 min',
         difficulty: 'Intermediate',
         category: 'General',
@@ -219,7 +298,22 @@ export default function Community() {
         progress: 0,
         isNew: false,
         description: 'Interactive lesson content',
-        tags: ['Learning']
+        tags: ['Learning'],
+        chapters: [
+          { id: 1, title: 'Introduction', time: '0:00', duration: '5:00', completed: false },
+          { id: 2, title: 'Main Content', time: '5:00', duration: '20:00', completed: false },
+          { id: 3, title: 'Summary', time: '25:00', duration: '5:00', completed: false }
+        ],
+        resources: [
+          { id: 1, title: 'Lesson Materials', type: 'pdf', size: '1.2 MB' }
+        ],
+        transcript: [
+          { time: '0:00', text: 'Welcome to this lesson...' }
+        ],
+        relatedLessons: [],
+        quiz: {
+          questions: []
+        }
       };
       setSelectedLesson(lesson);
       setShowLessonViewer(true);
@@ -235,8 +329,8 @@ export default function Community() {
     const updateCountdown = () => {
       const nextTraining = upcomingTrainings[0];
       const now = new Date();
-      const trainindDate = new Date(nextTraining.date);
-      const difference = trainindDate.getTime() - now.getTime();
+      const trainingDate = new Date(nextTraining.date);
+      const difference = trainingDate.getTime() - now.getTime();
 
       if (difference > 0) {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
@@ -369,7 +463,7 @@ export default function Community() {
                             </div>
                             <p className="text-sm text-gray-600 mb-2">{tutorial.description}</p>
                             <div className="flex items-center space-x-4 text-sm text-gray-500">
-                              <span>By {tutorial.instructor}</span>
+                              <span>By {typeof tutorial.instructor === 'string' ? tutorial.instructor : tutorial.instructor.name}</span>
                               <span>{tutorial.duration}</span>
                               <span className={`px-2 py-0.5 rounded text-xs ${
                                 tutorial.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
