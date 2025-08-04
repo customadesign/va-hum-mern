@@ -26,7 +26,7 @@ export default function ProfileSetup() {
       if (type === 'va') {
         // Create VA profile
         const response = await api.post('/vas', {
-          name: 'Your Name',
+          name: '',
           bio: 'Tell us about yourself...',
           searchStatus: 'open'
         });
@@ -40,7 +40,7 @@ export default function ProfileSetup() {
       } else if (type === 'business') {
         // Create Business profile
         const response = await api.post('/businesses', {
-          contactName: 'Your Name',
+          contactName: '',
           company: 'Your Company',
           bio: 'Tell us about your business...'
         });
