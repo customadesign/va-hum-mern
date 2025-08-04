@@ -8,14 +8,14 @@ const Specialty = require('../models/Specialty');
 const RoleLevel = require('../models/RoleLevel');
 const RoleType = require('../models/RoleType');
 const { protect, authorize, optionalAuth, checkESystemsVAAccess } = require('../middleware/auth');
-// Use Supabase storage in production, local storage in development
-const isProduction = process.env.NODE_ENV === 'production';
-const useSupabase = isProduction && process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY;
 
 // Import both upload utilities
 const localUpload = require('../utils/upload');
 const { handleSupabaseUpload, uploadToSupabase, deleteFromSupabase } = require('../utils/supabaseStorage');
 const supabase = require('../config/supabase');
+
+// Use Supabase storage when configured (development or production)
+const useSupabase = !!supabase;
 
 // Use appropriate upload handler
 const upload = useSupabase ? require('../utils/supabaseStorage').uploadSupabase : localUpload;
