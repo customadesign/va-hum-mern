@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import authService from '../services/auth';
+import linkedinAuthService from '../services/linkedinAuth';
 
 const AuthContext = createContext({});
 
@@ -82,13 +83,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   const linkedinLogin = () => {
-    // E-Systems frontend ALWAYS routes to E-Systems backend
-    const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://esystems-management-hub.onrender.com'  // Updated to correct backend URL
-      : 'http://localhost:5000';
+    try {
+      // Check if LinkedIn is available
+      if (!linkedinAuthService.isAvailable()) {
+        toast.error('LinkedIn authentication is not configured');
+        return;
+      }
       
-    console.log('E-Systems LinkedIn OAuth redirecting to:', `${backendUrl}/api/auth/linkedin`);
-    window.location.href = `${backendUrl}/api/auth/linkedin`;
+      // Get the OAuth URL and redirect
+      const authUrl = linkedinAuthService.getAuthUrl();
+      console.log('Redirecting to LinkedIn OAuth:', authUrl);
+      window.location.href = authUrl;
+    } catch (error) {
+      console.error('LinkedIn login error:', error);
+      toast.error('Failed to start LinkedIn authentication');
+    }
   };
 
   const register = async (email, password, referralCode) => {

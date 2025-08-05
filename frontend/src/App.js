@@ -28,7 +28,7 @@ import VADetail from './pages/VAs/Detail';
 import VAProfile from './pages/VAs/Profile';
 import BusinessProfile from './pages/Business/Profile';
 import ProfileRouter from './components/ProfileRouter';
-import { LinkedInCallback } from './components/LinkedInLoginButton';
+import LinkedInCallback from './pages/LinkedInCallback';
 import Conversations from './pages/Conversations';
 import ConversationDetail from './pages/Conversations/Detail';
 import Dashboard from './pages/Dashboard';
