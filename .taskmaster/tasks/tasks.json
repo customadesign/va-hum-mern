@@ -315,7 +315,64 @@
           7
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Core Matching Engine",
+            "description": "Develop the central matching algorithm using MongoDB aggregation pipeline for scoring and basic compatibility assessment",
+            "dependencies": [],
+            "details": "Create MongoDB aggregation framework for skills matching, implement scoring system based on skill keywords and experience levels, set up basic matching rules",
+            "status": "pending",
+            "testStrategy": "Unit testing of scoring accuracy, benchmark performance with varied dataset sizes"
+          },
+          {
+            "id": 2,
+            "title": "Build Location and Timezone Compatibility Module",
+            "description": "Create system to evaluate geographical and timezone compatibility between VAs and businesses",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "Implement timezone difference calculation, working hours overlap analysis, location-based scoring system",
+            "status": "pending",
+            "testStrategy": "Test timezone calculations across international date line, verify working hours compatibility logic"
+          },
+          {
+            "id": 3,
+            "title": "Develop Rate Negotiation Engine",
+            "description": "Create intelligent system for suggesting optimal rates based on skills, experience, and market data",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "Implement rate range calculation algorithm, market rate analysis, experience-based rate adjustment system",
+            "status": "pending",
+            "testStrategy": "Verify rate suggestions against market data, test edge cases for different skill levels"
+          },
+          {
+            "id": 4,
+            "title": "Integrate DISC Assessment System",
+            "description": "Incorporate DISC personality assessment results into the matching algorithm",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "Create DISC profile matching rules, implement personality compatibility scoring, develop team fit analysis",
+            "status": "pending",
+            "testStrategy": "Test DISC profile matching accuracy, verify compatibility calculations"
+          },
+          {
+            "id": 5,
+            "title": "Implement Caching and Performance Optimization",
+            "description": "Set up Redis caching system and optimize worker processes for improved performance",
+            "dependencies": [
+              "8.1",
+              "8.2",
+              "8.3",
+              "8.4"
+            ],
+            "details": "Configure Redis caching for frequently accessed data, implement Node.js worker processes for parallel processing, optimize database queries",
+            "status": "pending",
+            "testStrategy": "Performance testing under load, cache hit rate analysis, worker process efficiency testing"
+          }
+        ]
       },
       {
         "id": 9,
@@ -326,7 +383,63 @@
         "priority": "medium",
         "dependencies": [],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up VideoSDK Core Integration",
+            "description": "Initialize and configure VideoSDK Live React SDK with basic video call functionality",
+            "dependencies": [],
+            "details": "Install VideoSDK dependencies, configure environment variables, implement core video call components, set up basic room creation and joining logic",
+            "status": "pending",
+            "testStrategy": "Test basic video call connectivity, verify room creation and joining, validate participant handling"
+          },
+          {
+            "id": 2,
+            "title": "Implement Screen Sharing Features",
+            "description": "Add screen sharing capabilities with multi-participant support",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Integrate screen sharing API, implement UI controls, handle screen share permissions, manage multiple participant screen shares",
+            "status": "pending",
+            "testStrategy": "Test screen sharing across different browsers, verify quality and performance"
+          },
+          {
+            "id": 3,
+            "title": "Develop Recording System",
+            "description": "Implement cloud recording functionality with storage management",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Set up recording API integration, implement recording controls, configure cloud storage, manage recording metadata in MongoDB",
+            "status": "pending",
+            "testStrategy": "Verify recording quality, test storage integration, validate metadata management"
+          },
+          {
+            "id": 4,
+            "title": "Create Meeting Scheduler",
+            "description": "Implement meeting scheduling system with React Calendar integration",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Integrate React Calendar, implement meeting creation flow, set up notifications, store meeting data in MongoDB",
+            "status": "pending",
+            "testStrategy": "Test scheduling workflow, verify calendar sync, validate notification system"
+          },
+          {
+            "id": 5,
+            "title": "Implement Socket.io Signaling",
+            "description": "Set up real-time signaling system for video call coordination",
+            "dependencies": [
+              "9.1",
+              "9.2",
+              "9.3"
+            ],
+            "details": "Configure Socket.io server, implement event handling, manage connection states, handle room events and notifications",
+            "status": "pending",
+            "testStrategy": "Test real-time communication, verify event handling, validate connection stability"
+          }
+        ]
       },
       {
         "id": 10,
@@ -337,7 +450,66 @@
         "priority": "high",
         "dependencies": [],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configure Primary Storage with Supabase",
+            "description": "Set up and configure Supabase Storage as the primary file storage provider",
+            "dependencies": [],
+            "details": "Initialize Supabase client, configure storage bucket settings, implement file upload/download methods, set up access policies, integrate with CDN",
+            "status": "pending",
+            "testStrategy": "Test bucket access, file operations, CDN delivery, and permission settings"
+          },
+          {
+            "id": 2,
+            "title": "Implement AWS S3 Fallback System",
+            "description": "Configure AWS S3 as secondary storage and implement failover mechanism",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "Set up AWS S3 bucket, implement automatic failover detection, create fallback upload/download methods, configure cross-region replication",
+            "status": "pending",
+            "testStrategy": "Test failover scenarios, recovery procedures, and cross-provider synchronization"
+          },
+          {
+            "id": 3,
+            "title": "Develop Frontend Upload Interface",
+            "description": "Create React-based file upload interface using React Dropzone",
+            "dependencies": [
+              "10.1",
+              "10.2"
+            ],
+            "details": "Implement drag-and-drop interface, file type validation, size restriction checks, upload progress indicators, and error handling",
+            "status": "pending",
+            "testStrategy": "Test upload functionality, validation rules, and user feedback mechanisms"
+          },
+          {
+            "id": 4,
+            "title": "Create Express Middleware",
+            "description": "Develop Express middleware for file handling and validation",
+            "dependencies": [
+              "10.1",
+              "10.2"
+            ],
+            "details": "Implement file processing middleware, type validation, size checking, virus scanning integration, and temporary storage management",
+            "status": "pending",
+            "testStrategy": "Test middleware functions, validation rules, and error handling"
+          },
+          {
+            "id": 5,
+            "title": "Implement CDN Integration",
+            "description": "Set up CDN integration and optimize file delivery",
+            "dependencies": [
+              "10.1",
+              "10.2",
+              "10.3",
+              "10.4"
+            ],
+            "details": "Configure CDN endpoints, implement caching strategies, set up SSL certificates, optimize file delivery paths",
+            "status": "pending",
+            "testStrategy": "Test CDN performance, cache effectiveness, and global access speeds"
+          }
+        ]
       },
       {
         "id": 11,
@@ -348,7 +520,63 @@
         "priority": "high",
         "dependencies": [],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Authentication System",
+            "description": "Set up Clerk authentication and JWT fallback system with proper integration",
+            "dependencies": [],
+            "details": "Configure Clerk authentication provider, implement JWT token management for fallback scenarios, set up user session handling, integrate with existing Express middleware",
+            "status": "pending",
+            "testStrategy": "Test authentication flows, verify JWT token generation and validation, conduct session management testing"
+          },
+          {
+            "id": 2,
+            "title": "Configure Security Middleware",
+            "description": "Implement Express security middleware and rate limiting functionality",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "Set up Helmet.js for HTTP headers, implement rate limiting with Redis, configure XSS protection, enable HTTP/HTTPS security policies",
+            "status": "pending",
+            "testStrategy": "Load testing for rate limits, security header verification, penetration testing"
+          },
+          {
+            "id": 3,
+            "title": "Implement SOC 2 Compliance Measures",
+            "description": "Establish security controls and monitoring for SOC 2 compliance",
+            "dependencies": [
+              "11.1",
+              "11.2"
+            ],
+            "details": "Implement audit logging, set up security monitoring, establish access controls, create incident response procedures",
+            "status": "pending",
+            "testStrategy": "Audit log verification, security control testing, compliance checklist validation"
+          },
+          {
+            "id": 4,
+            "title": "Set up CORS and Input Validation",
+            "description": "Configure CORS policies and implement comprehensive input validation",
+            "dependencies": [
+              "11.2"
+            ],
+            "details": "Define CORS whitelist, implement request validation middleware, set up data sanitization, create input validation schemas",
+            "status": "pending",
+            "testStrategy": "CORS policy testing, input validation scenarios, boundary testing"
+          },
+          {
+            "id": 5,
+            "title": "Implement File Upload Security",
+            "description": "Establish secure file upload system with proper validation and scanning",
+            "dependencies": [
+              "11.2",
+              "11.4"
+            ],
+            "details": "Implement file type validation, set up virus scanning, configure secure storage, establish file size limits",
+            "status": "pending",
+            "testStrategy": "File upload vulnerability testing, malware detection verification, storage security testing"
+          }
+        ]
       },
       {
         "id": 12,
@@ -361,7 +589,63 @@
           11
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up Data Pipeline Architecture",
+            "description": "Implement MongoDB aggregation pipeline and data transformation layer",
+            "dependencies": [],
+            "details": "Create MongoDB aggregation pipelines for user engagement, business metrics, technical performance, and security monitoring. Implement data transformation utilities and caching layer.",
+            "status": "pending",
+            "testStrategy": "Unit test aggregation pipelines, validate data transformation accuracy, benchmark query performance"
+          },
+          {
+            "id": 2,
+            "title": "Implement Real-time WebSocket Integration",
+            "description": "Set up WebSocket connection and real-time data streaming",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Implement WebSocket server, configure event handlers, set up client-side socket listeners, and create real-time data update mechanisms",
+            "status": "pending",
+            "testStrategy": "Test WebSocket connection stability, verify real-time data accuracy, load test concurrent connections"
+          },
+          {
+            "id": 3,
+            "title": "Develop Chart.js Visualization Components",
+            "description": "Create reusable chart components using Chart.js 4.4.1",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Build chart components for different metrics, implement responsive layouts, create chart configuration system, add interaction handlers",
+            "status": "pending",
+            "testStrategy": "Test chart rendering, verify responsive behavior, validate interaction handling"
+          },
+          {
+            "id": 4,
+            "title": "Implement React Query Data Management",
+            "description": "Set up React Query for efficient data fetching and caching",
+            "dependencies": [
+              "12.1",
+              "12.2"
+            ],
+            "details": "Configure React Query client, implement query hooks, set up cache invalidation rules, create mutation handlers",
+            "status": "pending",
+            "testStrategy": "Test query caching, verify data freshness, validate error handling"
+          },
+          {
+            "id": 5,
+            "title": "Create Dashboard Layout and Integration",
+            "description": "Build main dashboard layout and integrate all components",
+            "dependencies": [
+              "12.3",
+              "12.4"
+            ],
+            "details": "Design dashboard grid layout, implement metric cards, create filter controls, add export functionality",
+            "status": "pending",
+            "testStrategy": "Test component integration, verify layout responsiveness, validate filter functionality"
+          }
+        ]
       },
       {
         "id": 13,
@@ -372,7 +656,63 @@
         "priority": "medium",
         "dependencies": [],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Course Content Management Backend",
+            "description": "Develop MongoDB and Express backend for course content storage and delivery",
+            "dependencies": [],
+            "details": "Set up MongoDB schemas for courses, lessons, and user progress. Implement Express routes for CRUD operations. Configure content delivery endpoints with proper authentication.",
+            "status": "pending",
+            "testStrategy": "API endpoint testing, database schema validation, content delivery performance testing"
+          },
+          {
+            "id": 2,
+            "title": "Create Video Streaming Integration",
+            "description": "Implement video content delivery system using React Player",
+            "dependencies": [
+              "13.1"
+            ],
+            "details": "Set up React Player component, implement video progress tracking, configure video streaming optimization, handle different video formats and quality levels",
+            "status": "pending",
+            "testStrategy": "Video playback testing, streaming performance analysis, browser compatibility verification"
+          },
+          {
+            "id": 3,
+            "title": "Develop Assessment and Progress Tracking System",
+            "description": "Create comprehensive assessment system with progress tracking",
+            "dependencies": [
+              "13.1",
+              "13.2"
+            ],
+            "details": "Implement quiz creation tools, automated grading system, progress tracking algorithms, and performance analytics dashboard",
+            "status": "pending",
+            "testStrategy": "Assessment functionality testing, progress calculation verification, analytics accuracy testing"
+          },
+          {
+            "id": 4,
+            "title": "Implement Real-time Updates with Socket.io",
+            "description": "Set up real-time communication system for live updates",
+            "dependencies": [
+              "13.1"
+            ],
+            "details": "Configure Socket.io for real-time notifications, implement live progress updates, handle concurrent user sessions, optimize connection management",
+            "status": "pending",
+            "testStrategy": "Real-time communication testing, concurrent user load testing, notification delivery verification"
+          },
+          {
+            "id": 5,
+            "title": "Create Certification Generation System",
+            "description": "Develop automated certificate creation and validation system",
+            "dependencies": [
+              "13.1",
+              "13.3"
+            ],
+            "details": "Implement certificate template system, automate certificate generation, create verification system, integrate with progress tracking",
+            "status": "pending",
+            "testStrategy": "Certificate generation testing, template rendering verification, validation system testing"
+          }
+        ]
       },
       {
         "id": 14,
