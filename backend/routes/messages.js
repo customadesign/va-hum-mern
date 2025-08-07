@@ -7,11 +7,12 @@ const Notification = require('../models/Notification');
 // HYBRID AUTH: Support both Clerk and legacy JWT during migration
 const { protect } = require('../middleware/hybridAuth');
 const { sendEmail } = require('../utils/email');
+const { profileCompletionGate } = require('../middleware/profileCompletion');
 
 // @route   POST /api/messages
-// @desc    Send a message in a conversation
+// @desc    Send a message in a conversation (requires 80% profile completion)
 // @access  Private (conversation participants only)
-router.post('/', protect, [
+router.post('/', protect, profileCompletionGate(80), [
   body('conversationId').notEmpty(),
   body('body').notEmpty().trim()
 ], async (req, res) => {

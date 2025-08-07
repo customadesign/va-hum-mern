@@ -4,6 +4,7 @@ const Conversation = require('../models/Conversation');
 const User = require('../models/User');
 // HYBRID AUTH: Support both Clerk and legacy JWT during migration
 const { protect } = require('../middleware/hybridAuth');
+const { profileCompletionGate } = require('../middleware/profileCompletion');
 
 // Get all conversations for the current user (or all for admin)
 router.get('/', protect, async (req, res) => {
@@ -78,7 +79,8 @@ router.get('/:id', protect, async (req, res) => {
 });
 
 // Start a new conversation with a VA
-router.post('/start/:vaId', protect, async (req, res) => {
+// Start conversation requires 80% profile completion
+router.post('/start/:vaId', protect, profileCompletionGate(80), async (req, res) => {
   try {
     const { message } = req.body;
     const vaId = req.params.vaId;

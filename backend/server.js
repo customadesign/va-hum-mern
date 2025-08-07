@@ -9,9 +9,22 @@ const mongoose = require('mongoose');
 const http = require('http');
 const socketio = require('socket.io');
 const path = require('path');
+const responseTime = require('response-time');
+const statusMonitor = require('express-status-monitor');
 
 // Load env vars
 dotenv.config();
+
+// Import monitoring configuration
+const {
+  initSentry,
+  initNewRelic,
+  PerformanceMetrics,
+  monitorDatabasePerformance,
+  performanceMiddleware,
+  errorTrackingMiddleware,
+  Sentry
+} = require('./config/monitoring');
 
 // Debug environment variables on startup
 console.log('Environment:', process.env.NODE_ENV || 'development');
@@ -34,6 +47,12 @@ const shortUrlRoutes = require('./routes/shortUrls');
 const courseRoutes = require('./routes/courses');
 const videosdkRoutes = require('./routes/videosdk');
 const analyticsRoutes = require('./routes/analytics');
+const fileRoutes = require('./routes/files');
+const profileRoutes = require('./routes/profile');
+const systemRoutes = require('./routes/system');
+const adminModerationRoutes = require('./routes/adminModeration');
+const monitoringRoutes = require('./routes/monitoring');
+const adminNotificationRoutes = require('./routes/adminNotifications');
 
 // CLERK authentication routes (replaces LinkedIn OAuth)
 let clerkAuthRoutes = null;
@@ -103,6 +122,46 @@ const io = socketio(server, {
   cors: corsOptions
 });
 
+// Initialize APM and monitoring
+initNewRelic(); // Initialize New Relic if configured
+initSentry(app); // Initialize Sentry if configured
+
+// Create performance metrics instance
+const performanceMetrics = new PerformanceMetrics();
+
+// Monitor database performance
+monitorDatabasePerformance(mongoose, performanceMetrics);
+
+// Sentry request handler (must be first)
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.requestHandler());
+  app.use(Sentry.Handlers.tracingHandler());
+}
+
+// Status monitor (development only)
+if (process.env.NODE_ENV !== 'production') {
+  app.use(statusMonitor({
+    title: 'Linkage VA Hub Status',
+    path: '/status',
+    spans: [{
+      interval: 1,
+      retention: 60
+    }, {
+      interval: 5,
+      retention: 60
+    }, {
+      interval: 15,
+      retention: 60
+    }]
+  }));
+}
+
+// Response time tracking
+app.use(responseTime());
+
+// Performance monitoring middleware
+app.use(performanceMiddleware(performanceMetrics));
+
 // Initialize Passport configuration (DEPRECATED - will be removed after Clerk migration)
 require('./config/passport');
 app.use(passport.initialize());
@@ -170,8 +229,15 @@ app.use('/s', shortUrlRoutes); // Public short URL redirects
 app.use('/api/courses', courseRoutes);
 app.use('/api/videosdk', videosdkRoutes);
 app.use('/api/analytics', analyticsRoutes);
-app.use('/api/files', require('./routes/files')); // File management routes
-app.use('/api/profile', require('./routes/profile')); // User profile management routes
+app.use('/api/files', fileRoutes); // File management routes
+app.use('/api/profile', profileRoutes); // User profile management routes
+app.use('/api/system', systemRoutes); // System status and health
+app.use('/api/admin/moderation', adminModerationRoutes); // Admin moderation tools
+app.use('/api/admin/notifications', adminNotificationRoutes); // Admin notification control
+
+// Monitoring routes
+monitoringRoutes.setMetrics(performanceMetrics);
+app.use('/api/monitoring', monitoringRoutes); // Performance monitoring
 
 // Clerk authentication routes (NEW - replaces LinkedIn OAuth)
 if (clerkAuthRoutes) {
@@ -191,6 +257,14 @@ if (linkedinAuthRoutes) {
 
 // Static files for uploads with CORS
 app.use('/uploads', cors(corsOptions), express.static(path.join(__dirname, 'uploads')));
+
+// Sentry error handler (must be before any other error middleware)
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.errorHandler());
+}
+
+// Performance error tracking middleware
+app.use(errorTrackingMiddleware(performanceMetrics));
 
 // Error handler (must be last)
 app.use(errorHandler);

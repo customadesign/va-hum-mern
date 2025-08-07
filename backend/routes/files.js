@@ -5,6 +5,13 @@ const File = require('../models/File');
 const { protect, authorize } = require('../middleware/auth');
 const { uploadLimiter } = require('../middleware/rateLimiter');
 const { handleSupabaseUpload, deleteFromSupabase } = require('../utils/supabaseStorage');
+const { 
+  handleUnifiedUpload, 
+  deleteWithFallback, 
+  getFileUrl,
+  checkStorageHealth,
+  StorageProvider 
+} = require('../utils/unifiedStorage');
 const supabase = require('../config/supabase');
 
 // @route   POST /api/files/upload
@@ -13,7 +20,7 @@ const supabase = require('../config/supabase');
 router.post('/upload',
   protect,
   uploadLimiter,
-  handleSupabaseUpload('file', 'uploads'),
+  handleUnifiedUpload('file', 'uploads'), // Use unified storage with fallback
   async (req, res) => {
     try {
       if (!req.file) {
@@ -25,15 +32,18 @@ router.post('/upload',
 
       const { category = 'general', description, tags, isPublic = false } = req.body;
 
-      // Create file metadata record
+      // Create file metadata record with storage provider info
       const file = await File.create({
         filename: req.file.filename || req.file.originalname,
         originalName: req.file.originalname,
         mimetype: req.file.mimetype,
         size: req.file.size,
-        url: req.file.path, // URL from Supabase
-        bucket: process.env.SUPABASE_BUCKET || 'linkage-va-hub',
+        url: req.file.path, // URL from storage provider
+        bucket: req.file.bucket || process.env.SUPABASE_BUCKET || process.env.AWS_S3_BUCKET,
         path: req.file.path,
+        storageProvider: req.file.storageProvider || StorageProvider.SUPABASE,
+        s3Key: req.file.s3Key, // Will be undefined for Supabase
+        etag: req.file.etag, // Will be undefined for Supabase
         uploadedBy: req.user._id,
         category,
         description,
@@ -63,9 +73,14 @@ router.post('/upload',
     } catch (error) {
       console.error('File upload error:', error);
       
-      // Try to delete uploaded file from Supabase if database save failed
+      // Try to delete uploaded file if database save failed
       if (req.file && req.file.path) {
-        await deleteFromSupabase(req.file.path, process.env.SUPABASE_BUCKET || 'linkage-va-hub');
+        await deleteWithFallback({
+          provider: req.file.storageProvider,
+          url: req.file.path,
+          bucket: req.file.bucket,
+          key: req.file.s3Key
+        });
       }
       
       res.status(500).json({
@@ -207,32 +222,38 @@ router.get('/:id/download',
       file.lastAccessed = new Date();
       await file.save();
 
-      // For Supabase, we can create a signed URL for private files
-      // or just return the public URL
+      // Get appropriate URL based on storage provider
+      let downloadUrl;
+      
       if (file.isPublic) {
-        res.json({
-          success: true,
-          url: file.url,
-          filename: file.originalName
-        });
+        downloadUrl = file.url;
       } else {
-        // Create a signed URL for private access (expires in 1 hour)
-        const { data, error } = await supabase
-          .storage
-          .from(file.bucket)
-          .createSignedUrl(file.path.replace(`${file.bucket}/`, ''), 3600);
+        // Handle different storage providers
+        if (file.storageProvider === StorageProvider.AWS_S3 && file.s3Key) {
+          // Use unified storage to get signed URL for S3
+          downloadUrl = await getFileUrl(file, 3600);
+        } else if (file.storageProvider === StorageProvider.SUPABASE) {
+          // Create a signed URL for Supabase
+          const { data, error } = await supabase
+            .storage
+            .from(file.bucket)
+            .createSignedUrl(file.path.replace(`${file.bucket}/`, ''), 3600);
 
-        if (error) {
-          throw error;
+          if (error) {
+            throw error;
+          }
+          downloadUrl = data.signedUrl;
+        } else {
+          downloadUrl = file.url;
         }
-
-        res.json({
-          success: true,
-          url: data.signedUrl,
-          filename: file.originalName,
-          expiresIn: 3600 // 1 hour
-        });
       }
+
+      res.json({
+        success: true,
+        url: downloadUrl,
+        filename: file.originalName,
+        expiresIn: file.isPublic ? null : 3600 // 1 hour for private files
+      });
     } catch (error) {
       console.error('Download file error:', error);
       res.status(500).json({
@@ -349,8 +370,13 @@ router.delete('/:id',
         });
       }
 
-      // Delete from Supabase
-      await deleteFromSupabase(file.url, file.bucket);
+      // Delete from storage provider
+      await deleteWithFallback({
+        provider: file.storageProvider,
+        url: file.url,
+        bucket: file.bucket,
+        key: file.s3Key
+      });
 
       // Soft delete in database
       await file.softDelete();
@@ -418,5 +444,30 @@ router.post('/cleanup',
     }
   }
 );
+
+// @route   GET /api/files/storage/health
+// @desc    Check storage provider health status
+// @access  Private
+router.get('/storage/health', protect, async (req, res) => {
+  try {
+    const health = await checkStorageHealth();
+
+    res.json({
+      success: true,
+      storage: {
+        ...health,
+        message: health.primary 
+          ? `Primary storage: ${health.primary}${health.fallback ? `, Fallback: ${health.fallback}` : ''}`
+          : 'No storage providers configured'
+      }
+    });
+  } catch (error) {
+    console.error('Storage health check error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to check storage health'
+    });
+  }
+});
 
 module.exports = router;

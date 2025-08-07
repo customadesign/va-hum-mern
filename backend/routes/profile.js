@@ -6,6 +6,7 @@ const File = require('../models/File');
 const { protect } = require('../middleware/auth');
 const { handleSupabaseUpload, deleteFromSupabase } = require('../utils/supabaseStorage');
 const { uploadLimiter } = require('../middleware/rateLimiter');
+const { getProfileCompletionStatus } = require('../middleware/profileCompletion');
 
 // @route   GET /api/profile
 // @desc    Get current user's profile
@@ -568,5 +569,10 @@ router.delete('/',
     }
   }
 );
+
+// @route   GET /api/profile/completion
+// @desc    Get profile completion status
+// @access  Private
+router.get('/completion', protect, getProfileCompletionStatus);
 
 module.exports = router;

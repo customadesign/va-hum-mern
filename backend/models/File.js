@@ -29,6 +29,19 @@ const fileSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  storageProvider: {
+    type: String,
+    enum: ['supabase', 's3', 'local'],
+    default: 'supabase'
+  },
+  s3Key: {
+    type: String, // AWS S3 object key
+    sparse: true
+  },
+  etag: {
+    type: String, // AWS S3 ETag for file verification
+    sparse: true
+  },
   uploadedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
