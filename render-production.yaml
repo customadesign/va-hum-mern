@@ -1,0 +1,296 @@
+# 🚀 PRODUCTION DEPLOYMENT CONFIGURATION
+# Linkage VA Hub MERN Stack with Hybrid Authentication
+# Updated for Clerk Primary Authentication + JWT Fallback
+
+services:
+  # =====================================
+  # LINKAGE VA HUB - MAIN DEPLOYMENT
+  # =====================================
+  
+  # Backend API Service
+  - type: web
+    name: linkage-va-hub-api
+    runtime: node
+    repo: https://github.com/customadesign/va-hum-mern-linkage.git
+    branch: main
+    rootDir: backend
+    buildCommand: npm install --production
+    startCommand: node server.js
+    plan: starter # Upgrade to standard for production traffic
+    
+    envVars:
+      # =====================================
+      # APPLICATION CONFIGURATION
+      # =====================================
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8000
+      - key: CLIENT_URL
+        value: https://linkage-va-hub.onrender.com
+      - key: SERVER_URL
+        value: https://linkage-va-hub-api.onrender.com
+        
+      # =====================================
+      # DATABASE CONFIGURATION
+      # =====================================
+      - key: MONGODB_URI
+        sync: false # Set manually in Render dashboard
+        
+      # =====================================
+      # HYBRID AUTHENTICATION SYSTEM
+      # =====================================
+      
+      # Clerk Configuration (Primary Authentication)
+      - key: CLERK_SECRET_KEY
+        sync: false # Set manually in Render dashboard
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false # Set manually in Render dashboard  
+      - key: CLERK_WEBHOOK_SECRET
+        sync: false # Set manually in Render dashboard
+      - key: CLERK_FRONTEND_API
+        value: https://smashing-sunbeam-70.clerk.accounts.dev
+      - key: CLERK_API_URL
+        value: https://api.clerk.com
+      - key: CLERK_JWKS_URL
+        value: https://smashing-sunbeam-70.clerk.accounts.dev/.well-known/jwks.json
+        
+      # JWT Configuration (Legacy Fallback)
+      - key: JWT_SECRET
+        generateValue: true # Render generates secure random value
+      - key: JWT_EXPIRE
+        value: 30d
+        
+      # =====================================
+      # OAUTH & SOCIAL AUTHENTICATION
+      # =====================================
+      - key: LINKEDIN_CLIENT_ID
+        sync: false # Set manually in Render dashboard
+      - key: LINKEDIN_CLIENT_SECRET
+        sync: false # Set manually in Render dashboard
+      - key: LINKEDIN_REDIRECT_URI
+        value: https://linkage-va-hub-api.onrender.com/api/linkedin/callback
+        
+      # =====================================
+      # FILE STORAGE CONFIGURATION
+      # =====================================
+      
+      # Supabase Storage (Primary)
+      - key: SUPABASE_URL
+        sync: false # Set manually in Render dashboard
+      - key: SUPABASE_ANON_KEY
+        sync: false # Set manually in Render dashboard
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false # Set manually in Render dashboard
+      - key: SUPABASE_BUCKET
+        value: linkage-va-hub-production
+        
+      # AWS S3 Configuration (Fallback)
+      - key: AWS_ACCESS_KEY_ID
+        sync: false # Set manually in Render dashboard
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false # Set manually in Render dashboard
+      - key: AWS_REGION
+        value: us-east-1
+      - key: AWS_BUCKET_NAME
+        value: linkage-va-hub-production-storage
+        
+      # =====================================
+      # COMMUNICATION SERVICES
+      # =====================================
+      
+      # Email Configuration
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        sync: false # Set manually in Render dashboard
+      - key: SMTP_PASS
+        sync: false # Set manually in Render dashboard
+        
+      # Video SDK Configuration
+      - key: VIDEOSDK_API_KEY
+        sync: false # Set manually in Render dashboard
+      - key: VIDEOSDK_SECRET_KEY
+        sync: false # Set manually in Render dashboard
+        
+      # =====================================
+      # SECURITY CONFIGURATION
+      # =====================================
+      - key: CORS_ORIGIN
+        value: https://linkage-va-hub.onrender.com
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000 # 15 minutes
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+        
+      # =====================================
+      # MONITORING & ANALYTICS
+      # =====================================
+      - key: SENTRY_DSN
+        sync: false # Set manually in Render dashboard
+      - key: NEW_RELIC_LICENSE_KEY
+        sync: false # Set manually in Render dashboard
+      - key: NEW_RELIC_APP_NAME
+        value: Linkage VA Hub Production
+
+    # Health check endpoint
+    healthCheckPath: /api/health
+
+  # Frontend Static Site
+  - type: web
+    name: linkage-va-hub
+    runtime: static
+    repo: https://github.com/customadesign/va-hum-mern-linkage.git
+    branch: main
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+        
+    envVars:
+      # =====================================
+      # FRONTEND CONFIGURATION
+      # =====================================
+      - key: NODE_ENV
+        value: production
+      - key: REACT_APP_ENV
+        value: production
+        
+      # API Configuration
+      - key: REACT_APP_API_URL
+        value: https://linkage-va-hub-api.onrender.com/api
+      - key: REACT_APP_SOCKET_URL
+        value: https://linkage-va-hub-api.onrender.com
+        
+      # Clerk Configuration
+      - key: REACT_APP_CLERK_PUBLISHABLE_KEY
+        sync: false # Set manually in Render dashboard
+      - key: VITE_CLERK_PUBLISHABLE_KEY
+        sync: false # Set manually in Render dashboard
+        
+      # VideoSDK Configuration
+      - key: REACT_APP_VIDEOSDK_API_KEY
+        sync: false # Set manually in Render dashboard
+        
+      # LinkedIn Integration
+      - key: REACT_APP_LINKEDIN_CLIENT_ID
+        sync: false # Set manually in Render dashboard
+        
+      # Analytics
+      - key: REACT_APP_GOOGLE_ANALYTICS_ID
+        sync: false # Set manually in Render dashboard
+      - key: REACT_APP_SENTRY_DSN
+        sync: false # Set manually in Render dashboard
+
+  # =====================================
+  # E-SYSTEMS DEPLOYMENT (OPTIONAL)
+  # =====================================
+  
+  # E-Systems Backend API Service
+  - type: web
+    name: esystems-backend-api
+    runtime: node
+    repo: https://github.com/customadesign/va-hum-mern-linkage.git
+    branch: main
+    rootDir: backend
+    buildCommand: npm install --production
+    startCommand: node server.js
+    plan: starter
+    
+    envVars:
+      # =====================================
+      # E-SYSTEMS CONFIGURATION
+      # =====================================
+      - key: NODE_ENV
+        value: production
+      - key: ESYSTEMS_MODE
+        value: true
+      - key: PORT
+        value: 8000
+      - key: CLIENT_URL
+        value: https://esystems-frontend.onrender.com
+      - key: ESYSTEMS_CLIENT_URL
+        value: https://esystems-frontend.onrender.com
+      - key: SERVER_URL
+        value: https://esystems-backend-api.onrender.com
+        
+      # Database (Shared with main deployment)
+      - key: MONGODB_URI
+        sync: false # Same as main deployment
+        
+      # Authentication (Same as main deployment)
+      - key: CLERK_SECRET_KEY
+        sync: false # Same as main deployment
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false # Same as main deployment
+      - key: CLERK_WEBHOOK_SECRET
+        sync: false # Same as main deployment
+      - key: CLERK_FRONTEND_API
+        value: https://smashing-sunbeam-70.clerk.accounts.dev
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE
+        value: 30d
+        
+      # LinkedIn OAuth (Business-focused)
+      - key: LINKEDIN_CLIENT_ID
+        sync: false # Same as main deployment
+      - key: LINKEDIN_CLIENT_SECRET
+        sync: false # Same as main deployment
+      - key: LINKEDIN_REDIRECT_URI
+        value: https://esystems-backend-api.onrender.com/api/linkedin/callback
+        
+      # Storage (Shared)
+      - key: SUPABASE_URL
+        sync: false # Same as main deployment
+      - key: SUPABASE_ANON_KEY
+        sync: false # Same as main deployment
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false # Same as main deployment
+      - key: SUPABASE_BUCKET
+        value: esystems-production
+        
+      # Security
+      - key: CORS_ORIGIN
+        value: https://esystems-frontend.onrender.com
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+
+    healthCheckPath: /api/health
+
+  # E-Systems Frontend Static Site
+  - type: web
+    name: esystems-frontend
+    runtime: static
+    repo: https://github.com/customadesign/va-hum-mern-linkage.git
+    branch: main
+    rootDir: esystems-frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+        
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REACT_APP_ENV
+        value: production
+      - key: REACT_APP_API_URL
+        value: https://esystems-backend-api.onrender.com/api
+      - key: REACT_APP_BRAND
+        value: esystems
+      - key: REACT_APP_CLERK_PUBLISHABLE_KEY
+        sync: false # Same as main deployment
+      - key: VITE_CLERK_PUBLISHABLE_KEY
+        sync: false # Same as main deployment

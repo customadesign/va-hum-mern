@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useQuery } from 'react-query';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/HybridAuthContext';
 import { useBranding } from '../../contexts/BrandingContext';
 import { 
   MapPinIcon, 

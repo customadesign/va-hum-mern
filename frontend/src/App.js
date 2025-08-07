@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 // Context Providers
 import { ClerkProvider } from '@clerk/clerk-react';
-import { AuthProvider } from './contexts/ClerkAuthContext';
+import { AuthProvider } from './contexts/HybridAuthContext';
 import { BrandingProvider } from './contexts/BrandingContext';
 
 // Layout Components
@@ -20,8 +20,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import About from './pages/About';
 import Community from './pages/Community';
-// import Login from './pages/Login'; // REPLACED: Using Clerk components
-// import Register from './pages/Register'; // REPLACED: Using Clerk components
+import Login from './pages/Login'; // Legacy JWT authentication support
+import Register from './pages/Register'; // Legacy JWT authentication support  
 // import ForgotPassword from './pages/ForgotPassword'; // REPLACED: Using Clerk components
 // import ResetPassword from './pages/ResetPassword'; // REPLACED: Using Clerk components
 import { ClerkSignIn, ClerkSignUp } from './components/ClerkAuthPages';
@@ -31,11 +31,11 @@ import VADetail from './pages/VAs/Detail';
 import VAProfile from './pages/VAs/Profile';
 import BusinessProfile from './pages/Business/Profile';
 import ProfileRouter from './components/ProfileRouter';
-// import LinkedInCallback from './pages/LinkedInCallback'; // REMOVED: Using Clerk OAuth instead
+import LinkedInCallback from './pages/LinkedInCallback'; // Legacy LinkedIn OAuth support
 import Conversations from './pages/Conversations';
 import ConversationDetail from './pages/Conversations/Detail';
 import Dashboard from './pages/Dashboard';
-// import ProfileSetup from './pages/ProfileSetup'; // REPLACED: Using ClerkProfileSetup
+import ProfileSetup from './pages/ProfileSetup'; // Legacy profile setup support
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import NotFound from './pages/NotFound';
@@ -88,8 +88,11 @@ function App() {
                   <Route path="community/lesson/:lessonId" element={<Community />} />
                   <Route path="sign-in/*" element={<ClerkSignIn />} />
                   <Route path="sign-up/*" element={<ClerkSignUp />} />
-                  {/* REMOVED: Legacy auth routes - now handled by Clerk */}
-                  {/* REMOVED: LinkedIn callback - now handled by Clerk */}
+                  {/* Hybrid Authentication: Support both Clerk and Legacy JWT */}
+                  <Route path="login" element={<Login />} />
+                  <Route path="register" element={<Register />} />
+                  <Route path="linkedin/callback" element={<LinkedInCallback />} />
+                  <Route path="profile-setup-legacy" element={<ProfileSetup />} />
                   <Route path="vas" element={<VAList />} />
                   <Route path="vas/:id" element={<VADetail />} />
                   <Route path="terms" element={<Terms />} />

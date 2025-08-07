@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/ClerkAuthContext';
+import { useAuth } from '../contexts/HybridAuthContext';
 import { toast } from 'react-toastify';
 
 const ClerkProfileSetup = () => {

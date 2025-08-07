@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import api from '../../services/api';
 import { format, isToday, isYesterday } from 'date-fns';
 import { useBranding } from '../../contexts/BrandingContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/HybridAuthContext';
 import {
   ArrowLeftIcon,
   PaperAirplaneIcon,

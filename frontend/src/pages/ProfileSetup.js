@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/HybridAuthContext';
 import { useBranding } from '../contexts/BrandingContext';
 import api from '../services/api';
 import { toast } from 'react-toastify';

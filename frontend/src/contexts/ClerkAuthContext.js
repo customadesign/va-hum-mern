@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import api from '../services/api';
+import api, { setTokenGetter } from '../services/api';
 
 const AuthContext = createContext({});
 
@@ -20,6 +20,11 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Set up API service to use Clerk token getter
+  useEffect(() => {
+    setTokenGetter(getToken);
+  }, [getToken]);
 
   // Sync user data when Clerk user changes
   useEffect(() => {
