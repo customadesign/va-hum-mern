@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Notification = require('../models/Notification');
-const { protect } = require('../middleware/auth');
+// HYBRID AUTH: Support both Clerk and legacy JWT during migration
+const { protect } = require('../middleware/hybridAuth');
 
 // @route   GET /api/notifications
 // @desc    Get user notifications

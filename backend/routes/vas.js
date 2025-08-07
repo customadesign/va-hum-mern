@@ -7,7 +7,9 @@ const Location = require('../models/Location');
 const Specialty = require('../models/Specialty');
 const RoleLevel = require('../models/RoleLevel');
 const RoleType = require('../models/RoleType');
-const { protect, authorize, optionalAuth, checkESystemsVAAccess } = require('../middleware/auth');
+// HYBRID AUTH: Support both Clerk and legacy JWT during migration
+const { protect, authorize, optionalAuth } = require('../middleware/hybridAuth');
+const { checkESystemsVAAccess } = require('../middleware/auth');
 // Use Supabase storage in production, local storage in development
 const isProduction = process.env.NODE_ENV === 'production';
 const useSupabase = isProduction && process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY;

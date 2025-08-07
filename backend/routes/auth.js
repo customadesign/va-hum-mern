@@ -1,14 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
 const { sendEmail } = require('../utils/email');
+const { authLimiter, passwordResetLimiter } = require('../middleware/rateLimiter');
 
 // @route   POST /api/auth/register
 // @desc    Register user
 // @access  Public
-router.post('/register', [
+router.post('/register', authLimiter, [
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 }),
   body('referralCode').optional().trim()
@@ -72,12 +74,15 @@ router.post('/register', [
       // Continue with registration even if email fails
     }
 
-    // Create token
+    // Create tokens
     const token = user.getSignedJwtToken();
+    const refreshToken = user.getRefreshToken();
+    await user.save();
 
     res.status(201).json({
       success: true,
       token,
+      refreshToken,
       user: {
         id: user._id,
         email: user.email,
@@ -96,7 +101,7 @@ router.post('/register', [
 // @route   POST /api/auth/login
 // @desc    Login user
 // @access  Public
-router.post('/login', [
+router.post('/login', authLimiter, [
   body('email').isEmail().normalizeEmail(),
   body('password').exists()
 ], async (req, res) => {
@@ -140,8 +145,10 @@ router.post('/login', [
     user.signInCount += 1;
     await user.save();
 
-    // Create token
+    // Create tokens
     const token = user.getSignedJwtToken();
+    const refreshToken = user.getRefreshToken();
+    await user.save();
 
     // Load related data
     await user.populate(['va', 'business']);
@@ -149,6 +156,7 @@ router.post('/login', [
     res.json({
       success: true,
       token,
+      refreshToken,
       user: {
         id: user._id,
         email: user.email,
@@ -241,7 +249,7 @@ router.post('/confirm-email/:token', async (req, res) => {
 // @route   POST /api/auth/forgot-password
 // @desc    Forgot password
 // @access  Public
-router.post('/forgot-password', [
+router.post('/forgot-password', passwordResetLimiter, [
   body('email').isEmail().normalizeEmail()
 ], async (req, res) => {
   const errors = validationResult(req);
@@ -297,7 +305,7 @@ router.post('/forgot-password', [
 // @route   PUT /api/auth/reset-password/:token
 // @desc    Reset password
 // @access  Public
-router.put('/reset-password/:token', [
+router.put('/reset-password/:token', passwordResetLimiter, [
   body('password').isLength({ min: 6 })
 ], async (req, res) => {
   const errors = validationResult(req);
@@ -346,6 +354,107 @@ router.put('/reset-password/:token', [
     });
   } catch (err) {
     console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   POST /api/auth/refresh
+// @desc    Refresh access token
+// @access  Public
+router.post('/refresh', async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        success: false,
+        error: 'Refresh token is required'
+      });
+    }
+
+    // Verify refresh token
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid refresh token'
+      });
+    }
+
+    // Check if it's a refresh token
+    if (decoded.type !== 'refresh') {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid token type'
+      });
+    }
+
+    // Find user and validate refresh token
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    // Validate stored refresh token
+    const isValid = await user.validateRefreshToken(refreshToken);
+    if (!isValid) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid or expired refresh token'
+      });
+    }
+
+    // Check if suspended
+    if (user.suspended) {
+      return res.status(403).json({
+        success: false,
+        error: 'Account suspended'
+      });
+    }
+
+    // Generate new access token
+    const newAccessToken = user.getSignedJwtToken();
+
+    res.json({
+      success: true,
+      token: newAccessToken
+    });
+  } catch (err) {
+    console.error('Refresh token error:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   POST /api/auth/logout
+// @desc    Logout user (invalidate refresh token)
+// @access  Private
+router.post('/logout', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    
+    if (user) {
+      user.refreshToken = undefined;
+      user.refreshTokenExpire = undefined;
+      await user.save();
+    }
+
+    res.json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  } catch (err) {
+    console.error('Logout error:', err);
     res.status(500).json({
       success: false,
       error: 'Server error'

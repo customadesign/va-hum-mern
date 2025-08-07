@@ -949,39 +949,9 @@ export default function Community() {
                   </div>
                 </div>
 
-                {/* Quick Skills - Notion Style Guide */}
-                <div className="bg-white rounded-lg shadow-sm">
-                  <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-                        <BoltIcon className="h-6 w-6 mr-3 text-yellow-600" />
-                        Quick Skills Mastery Guide
-                      </h2>
-                      <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                        4 Essential Skills • 5-15 min each
-                      </span>
-                    </div>
-                    <p className="text-gray-600 mt-2">
-                      Master these essential VA skills with our step-by-step guides. Each skill includes templates, examples, and actionable tips.
-                    </p>
-                  </div>
 
-                  <div className="p-6 space-y-8">
-                    {/* Skill 1: Instagram Story Templates */}
-                    <div className="border-l-4 border-purple-400 pl-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-semibold text-gray-900 flex items-center">
-                          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                            <PaintBrushIcon className="h-5 w-5 text-purple-600" />
-                          </div>
-                          Instagram Story Templates
-                        </h3>
-                        <div className="flex items-center space-x-2">
-                          <ClockIcon className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-500">8 min</span>
-                          <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">Design</span>
-                        </div>
-                      </div>
+
+
                       
                       <div className="bg-gray-50 rounded-lg p-4 mb-4">
                         <p className="text-gray-700 mb-3">

@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const Business = require('../models/Business');
-const { protect, authorize } = require('../middleware/auth');
+// HYBRID AUTH: Support both Clerk and legacy JWT during migration
+const { protect, authorize } = require('../middleware/hybridAuth');
 // For now, just use local upload until Supabase is configured
 const upload = require('../utils/upload');
 

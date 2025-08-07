@@ -5,7 +5,8 @@ const VA = require('../models/VA');
 const Business = require('../models/Business');
 const Conversation = require('../models/Conversation');
 const SiteConfig = require('../models/SiteConfig');
-const { protect, authorize } = require('../middleware/auth');
+// HYBRID AUTH: Support both Clerk and legacy JWT during migration
+const { protect, authorize } = require('../middleware/hybridAuth');
 
 // All routes require admin authorization
 router.use(protect, authorize('admin'));

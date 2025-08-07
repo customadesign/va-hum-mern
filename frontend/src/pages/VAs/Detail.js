@@ -253,10 +253,12 @@ export default function VADetail() {
               {va.videoIntroduction && (
                 <div className="bg-white shadow rounded-lg p-6 mt-6">
                   <h2 className="text-lg font-medium text-gray-900 mb-4">Video Introduction</h2>
-                  <video controls className="w-full rounded-lg">
-                    <source src={va.videoIntroduction} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
+                  <div className="flex justify-center">
+                    <video controls className="w-full max-w-md lg:max-w-lg rounded-lg" style={{ maxHeight: '400px' }}>
+                      <source src={va.videoIntroduction} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
                 </div>
               )}
 

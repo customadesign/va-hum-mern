@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Conversation = require('../models/Conversation');
 const User = require('../models/User');
-const { protect } = require('../middleware/auth');
+// HYBRID AUTH: Support both Clerk and legacy JWT during migration
+const { protect } = require('../middleware/hybridAuth');
 
 // Get all conversations for the current user (or all for admin)
 router.get('/', protect, async (req, res) => {

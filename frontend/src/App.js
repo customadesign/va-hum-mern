@@ -6,8 +6,16 @@ import { HelmetProvider } from 'react-helmet-async';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Context Providers
-import { AuthProvider } from './contexts/AuthContext';
+import { ClerkProvider } from '@clerk/clerk-react';
+import { AuthProvider } from './contexts/ClerkAuthContext';
 import { BrandingProvider } from './contexts/BrandingContext';
+
+// Get Clerk publishable key
+const clerkPubKey = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
+
+if (!clerkPubKey) {
+  throw new Error('Missing Clerk Publishable Key');
+}
 
 // Layout Components
 import Layout from './components/Layout';
@@ -19,20 +27,22 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import About from './pages/About';
 import Community from './pages/Community';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
+// import Login from './pages/Login'; // REPLACED: Using Clerk components
+// import Register from './pages/Register'; // REPLACED: Using Clerk components
+// import ForgotPassword from './pages/ForgotPassword'; // REPLACED: Using Clerk components
+// import ResetPassword from './pages/ResetPassword'; // REPLACED: Using Clerk components
+import { ClerkSignIn, ClerkSignUp } from './components/ClerkAuthPages';
+import ClerkProfileSetup from './components/ClerkProfileSetup';
 import VAList from './pages/VAs/List';
 import VADetail from './pages/VAs/Detail';
 import VAProfile from './pages/VAs/Profile';
 import BusinessProfile from './pages/Business/Profile';
 import ProfileRouter from './components/ProfileRouter';
-import LinkedInCallback from './pages/LinkedInCallback';
+// import LinkedInCallback from './pages/LinkedInCallback'; // REMOVED: Using Clerk OAuth instead
 import Conversations from './pages/Conversations';
 import ConversationDetail from './pages/Conversations/Detail';
 import Dashboard from './pages/Dashboard';
-import ProfileSetup from './pages/ProfileSetup';
+// import ProfileSetup from './pages/ProfileSetup'; // REPLACED: Using ClerkProfileSetup
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import NotFound from './pages/NotFound';
@@ -64,9 +74,10 @@ function App() {
     <ErrorBoundary>
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          <Router>
-            <BrandingProvider>
-              <AuthProvider>
+          <ClerkProvider publishableKey={clerkPubKey}>
+            <Router>
+              <BrandingProvider>
+                <AuthProvider>
                 <Suspense fallback={<SuspenseLoader />}>
                   <div className="h-full flex flex-col">
                     <Routes>
@@ -75,11 +86,10 @@ function App() {
                   <Route path="about" element={<About />} />
                   <Route path="community" element={<Community />} />
                   <Route path="community/lesson/:lessonId" element={<Community />} />
-                  <Route path="login" element={<Login />} />
-                  <Route path="register" element={<Register />} />
-                  <Route path="forgot-password" element={<ForgotPassword />} />
-                  <Route path="reset-password/:token" element={<ResetPassword />} />
-                  <Route path="auth/linkedin/callback" element={<LinkedInCallback />} />
+                  <Route path="sign-in/*" element={<ClerkSignIn />} />
+                  <Route path="sign-up/*" element={<ClerkSignUp />} />
+                  {/* REMOVED: Legacy auth routes - now handled by Clerk */}
+                  {/* REMOVED: LinkedIn callback - now handled by Clerk */}
                   <Route path="vas" element={<VAList />} />
                   <Route path="vas/:id" element={<VADetail />} />
                   <Route path="terms" element={<Terms />} />
@@ -89,7 +99,7 @@ function App() {
                   <Route element={<PrivateRoute />}>
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="analytics" element={<Analytics />} />
-                    <Route path="profile-setup" element={<ProfileSetup />} />
+                    <Route path="profile-setup" element={<ClerkProfileSetup />} />
                     <Route path="va/profile" element={<ProfileRouter />} />
                     <Route path="business/profile" element={<BusinessProfile />} />
                     <Route path="conversations" element={<Conversations />} />
@@ -118,9 +128,10 @@ function App() {
                                   />
                   </div>
                 </Suspense>
-              </AuthProvider>
-            </BrandingProvider>
-          </Router>
+                </AuthProvider>
+              </BrandingProvider>
+            </Router>
+          </ClerkProvider>
         </QueryClientProvider>
       </HelmetProvider>
     </ErrorBoundary>

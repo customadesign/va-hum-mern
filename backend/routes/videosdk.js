@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const videosdkController = require('../controllers/videoSDKController');
-const { protect } = require('../middleware/auth');
+// HYBRID AUTH: Support both Clerk and legacy JWT during migration
+const { protect } = require('../middleware/hybridAuth');
 
 // Apply authentication middleware to all videosdk routes
 router.use(protect);

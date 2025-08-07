@@ -1,0 +1,76 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "created": "2025-01-20T21:30:00.000Z",
+    "projectName": "Linkage VA Hub MERN Stack"
+  },
+  "tags": {
+    "master": {
+      "name": "master",
+      "description": "Main development tasks",
+      "metadata": {
+        "created": "2025-01-20T21:30:00.000Z"
+      },
+      "tasks": [
+        {
+          "id": 1,
+          "title": "Test Task - Manual Creation",
+          "description": "Simple test task to verify TaskMaster can read manually created tasks",
+          "status": "pending",
+          "priority": "medium",
+          "dependencies": [],
+          "details": "This task was created manually to test if TaskMaster can read and display tasks properly.",
+          "testStrategy": "Check if task appears in get_tasks output",
+          "subtasks": []
+        }
+      ]
+    }
+  },
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Implement Authentication System",
+        "description": "Set up user authentication system with registration, login, and JWT token management",
+        "details": "1. Use JWT for token-based authentication\n2. Implement user registration endpoint with email/password\n3. Create login endpoint with token generation\n4. Add password hashing using bcrypt\n5. Implement token validation middleware\n6. Set up refresh token mechanism",
+        "testStrategy": "1. Unit tests for auth controllers\n2. Integration tests for registration flow\n3. Test password hashing\n4. Validate JWT token generation/validation\n5. Test invalid login attempts",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Develop File Storage System",
+        "description": "Create secure file storage system with upload, download, and management capabilities",
+        "details": "1. Set up cloud storage integration (AWS S3 or similar)\n2. Create file upload endpoint with multipart support\n3. Implement file download functionality\n4. Add file metadata storage in database\n5. Implement file access controls\n6. Add file size and type validation",
+        "testStrategy": "1. Test file upload/download operations\n2. Verify file metadata storage\n3. Test file access permissions\n4. Validate file size limits\n5. Check supported file types",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Create User Profile Management",
+        "description": "Implement user profile system with CRUD operations and profile customization",
+        "details": "1. Create user profile database schema\n2. Implement profile CRUD endpoints\n3. Add profile picture upload\n4. Create profile settings management\n5. Implement user preferences storage\n6. Add profile validation",
+        "testStrategy": "1. Test profile CRUD operations\n2. Validate profile updates\n3. Test profile picture upload\n4. Verify settings persistence\n5. Check validation rules",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-07T08:32:08.998Z",
+      "updated": "2025-08-07T08:32:08.998Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

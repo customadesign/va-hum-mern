@@ -19,6 +19,7 @@
     "populate:api": "node scripts/populateConversations.js"
   },
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.13.23",
     "@supabase/supabase-js": "^2.53.0",
     "axios": "^1.11.0",
     "bcryptjs": "^2.4.3",

@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Specialty = require('../models/Specialty');
-const { protect, authorize } = require('../middleware/auth');
+// HYBRID AUTH: Support both Clerk and legacy JWT during migration
+const { protect, authorize } = require('../middleware/hybridAuth');
 
 // @route   GET /api/specialties
 // @desc    Get all specialties

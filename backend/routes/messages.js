@@ -4,7 +4,8 @@ const { body, validationResult } = require('express-validator');
 const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
 const Notification = require('../models/Notification');
-const { protect } = require('../middleware/auth');
+// HYBRID AUTH: Support both Clerk and legacy JWT during migration
+const { protect } = require('../middleware/hybridAuth');
 const { sendEmail } = require('../utils/email');
 
 // @route   POST /api/messages

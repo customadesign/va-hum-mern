@@ -1,0 +1,479 @@
+# Linkage VA Hub MERN Stack - Product Requirements Document (PRD)
+
+## Executive Summary
+
+The Linkage VA Hub MERN Stack is a comprehensive marketplace platform connecting Filipino virtual assistants (VAs) with businesses seeking skilled remote talent. The platform operates in dual-mode architecture with distinct user experiences for VA-focused marketplace (Linkage VA Hub) and employer-focused dashboard (E-Systems Management Hub), while sharing the same underlying database and infrastructure.
+
+## Project Overview
+
+### Vision
+Create a modern, scalable, and user-friendly platform that facilitates meaningful connections between talented Filipino virtual assistants and businesses worldwide, while providing specialized tools for both talent discovery and business management.
+
+### Target Users
+- **Primary**: Filipino Virtual Assistants seeking employment opportunities
+- **Secondary**: Businesses and entrepreneurs seeking skilled remote talent
+- **Tertiary**: E-Systems clients requiring dedicated employer-focused portal
+
+### Core Value Proposition
+- Streamlined VA-business matching with advanced filtering and search
+- Real-time communication and collaboration tools
+- Professional profile management with multimedia support
+- Dual-brand architecture supporting different user experiences
+- Integrated video conferencing and training capabilities
+
+## Technical Architecture
+
+### Technology Stack
+
+#### Frontend (React 18.2.0)
+- **UI Framework**: React with functional components and hooks
+- **Styling**: Tailwind CSS 3.3.6 with custom component library
+- **Routing**: React Router DOM 6.20.1 with protected routes
+- **State Management**: React Query 3.39.3 + Context API
+- **Form Handling**: Formik 2.4.5 with Yup validation
+- **Authentication**: Clerk (primary authentication service)
+- **Real-time**: Socket.io-client 4.6.2
+- **File Handling**: React Dropzone for uploads
+- **Video**: VideoSDK Live React SDK + React Player
+- **Charts**: Chart.js 4.4.1 with React ChartJS 2
+- **Notifications**: React Toastify 9.1.3
+
+#### Backend (Node.js/Express)
+- **Runtime**: Node.js with Express.js 4.18.2
+- **Database**: MongoDB 8.0.0 with Mongoose ODM
+- **Authentication**: Clerk (primary), JWT (fallback), LinkedIn OAuth2 with auto-profile filling
+- **File Storage**: Supabase Storage (primary), AWS S3 (fallback)
+- **Real-time**: Socket.io 4.6.2
+- **Email**: Nodemailer 6.9.7
+- **Security**: Helmet, CORS, express-rate-limit, express-validator
+- **Logging**: Winston 3.11.0
+- **Video Services**: VideoSDK API integration
+- **External APIs**: DISC Assessment, LinkedIn API, Zoom API
+
+#### Infrastructure & Deployment
+- **Cloud Database**: MongoDB Atlas (LinkageVAhub cluster)
+- **File Storage**: Supabase Storage (primary), AWS S3 (fallback)
+- **Hosting**: Render.com with dual-service architecture
+- **CDN/Assets**: Integrated with Supabase storage and AWS S3
+- **Environment Management**: Environment-specific configurations
+- **CI/CD**: Git-based deployment through Render
+
+### Database Schema
+
+#### Core Collections
+- **users**: Unified user accounts (VAs and businesses)
+- **vas**: Virtual assistant profiles with skills and portfolios
+- **businesses**: Business profiles with requirements and branding
+- **conversations**: Chat conversations between users
+- **messages**: Individual messages within conversations
+- **notifications**: System notifications with read status
+- **specialties**: VA skills and specialization categories
+- **locations**: Geographic location data
+- **courses**: Training courses and content
+- **lessons**: Individual lesson content within courses
+- **enrollments**: Course enrollment tracking
+- **progress**: Learning progress tracking
+
+#### Extended Collections
+- **role_types**: System role definitions
+- **role_levels**: User permission levels
+- **site_config**: System configuration and branding
+- **short_urls**: URL shortening service
+- **tasks**: Project and task management
+- **va_screening**: VA assessment and screening data
+
+## Feature Specifications
+
+### 1. Dual-Brand Architecture
+
+#### Linkage VA Hub (Main Platform)
+- **URL**: http://localhost:3000 (dev), https://linkage-va-hub.onrender.com (prod)
+- **Target**: VA-focused marketplace
+- **Branding**: "Linkage VA Hub" with primary brand colors
+- **Navigation**: "Virtual Assistants", "Community", "Dashboard"
+- **Registration**: Both VA and business registration enabled
+- **User Experience**: Discovery-focused with VA profiles prominently featured
+
+#### E-Systems Management Hub (Employer Portal)
+- **URL**: http://localhost:3001 (dev), https://esystems-management-hub.onrender.com (prod)
+- **Target**: Employer-focused dashboard
+- **Branding**: "E Systems Management" with distinct styling
+- **Navigation**: "Members", "Dashboard", "Analytics"
+- **Registration**: Business-only registration with auto-redirect to profile setup
+- **User Experience**: Management-focused with business tools and analytics
+- **Special Features**: LinkedIn OAuth integration for auto-profile filling
+
+### 2. User Authentication & Authorization
+
+#### Multi-Modal Authentication
+- **Clerk**: Primary authentication service with enterprise features
+- **JWT Fallback**: Backup authentication with secure token management
+- **LinkedIn OAuth**: Auto-profile filling for both platforms (E-Systems: business profiles, Linkage VA Hub: applicable profile fields)
+- **Password Security**: Clerk-managed with enterprise-grade security
+- **Session Management**: Clerk-handled with automatic refresh and logout
+
+#### User Types & Permissions
+- **Virtual Assistants**: Profile creation, skill showcasing, conversation access
+- **Businesses**: Profile creation, VA search, conversation initiation
+- **Admins**: Platform management, user moderation, analytics access
+- **System Modes**: Dynamic permission sets based on platform mode
+
+### 3. Profile Management System
+
+#### VA Profiles
+- **Basic Information**: Name, contact, location, availability
+- **Professional Details**: Skills, experience, hourly rate, specializations
+- **Portfolio**: Project samples, testimonials, certifications
+- **Media Assets**: Profile photos, introduction videos, work samples
+- **Assessment Integration**: DISC personality assessment results
+- **Verification Status**: Email confirmation, profile completion tracking
+
+#### Business Profiles
+- **Company Information**: Name, industry, size, founded year
+- **Requirements**: Needed skills, budget range, project types
+- **Branding**: Company logo, mission statement, values
+- **LinkedIn Integration**: 
+  - E-Systems: Auto-fill from LinkedIn company pages
+  - Linkage VA Hub: Auto-fill personal profile fields from LinkedIn
+- **Hiring History**: Previous VA collaborations, feedback
+
+### 4. Search & Discovery Engine
+
+#### Advanced Filtering System
+- **Skill-based**: Technology stacks, specializations, experience levels
+- **Geographic**: Location preferences, timezone compatibility
+- **Availability**: Hours, schedule flexibility, immediate availability
+- **Rate Range**: Budget-based filtering with currency support
+- **Experience Level**: Junior, mid-level, senior categorization
+
+#### Smart Matching Algorithm
+- **Compatibility Scoring**: Skills alignment with job requirements
+- **Location Optimization**: Timezone and cultural fit consideration
+- **Rate Negotiation**: Budget alignment and rate suggestions
+- **Personality Matching**: DISC assessment compatibility
+
+### 5. Communication Platform
+
+#### Real-time Messaging
+- **WebSocket Integration**: Socket.io for instant messaging
+- **Conversation Threading**: Organized chat history
+- **File Sharing**: Document and media sharing capabilities
+- **Message Status**: Read receipts, delivery confirmation
+- **Mobile Responsive**: Touch-optimized chat interface
+
+#### Video Conferencing Integration
+- **VideoSDK Integration**: Built-in video calls for interviews
+- **Meeting Scheduling**: Calendar integration for appointments
+- **Screen Sharing**: Collaborative work sessions
+- **Recording Capability**: Session recording for reference
+- **Multi-participant**: Group training sessions support
+
+### 6. Notification System
+
+#### Smart Notification Engine
+- **Real-time Updates**: Instant notifications for messages, matches
+- **Email Digests**: Periodic summaries of platform activity
+- **Push Notifications**: Browser-based alerts for urgent items
+- **Preference Management**: User-controlled notification settings
+- **Visual Indicators**: Badge counts, animation effects
+
+#### Notification Types
+- **System Announcements**: Platform updates, maintenance notifications
+- **User Activity**: Profile views, message received, match suggestions
+- **Training Updates**: Course completions, new lesson availability
+- **Business Activity**: New VA applications, project updates
+
+### 7. Learning Management System (LMS)
+
+#### Course Management
+- **Course Creation**: Admin tools for training content development
+- **Lesson Structure**: Modular content with progress tracking
+- **Video Integration**: React Player for educational content
+- **Assessment Tools**: Quizzes, assignments, skill verification
+- **Certification**: Course completion certificates
+
+#### Progress Tracking
+- **Individual Progress**: Personal learning dashboard
+- **Completion Metrics**: Course and lesson completion rates
+- **Skill Development**: Competency tracking over time
+- **Reporting**: Progress reports for businesses and VAs
+
+### 8. Administrative Dashboard
+
+#### User Management
+- **User Moderation**: Profile approval, content review
+- **Analytics Dashboard**: Platform usage statistics, user engagement
+- **Content Management**: Course creation, announcement publishing
+- **Support Tools**: Ticket management, user communication
+
+#### Business Intelligence
+- **Platform Metrics**: User growth, engagement rates, success metrics
+- **Financial Reporting**: Transaction tracking, revenue analytics
+- **Quality Assurance**: Success rate monitoring, feedback analysis
+
+## Technical Implementation Details
+
+### 1. Development Environment Setup
+
+#### Local Development
+- **Backend**: Port 8000 (was 5000, changed due to macOS conflicts)
+- **Frontend (Main)**: Port 3000
+- **Frontend (E-Systems)**: Port 3001
+- **Database**: MongoDB Atlas cloud connection
+- **File Storage**: Supabase with local fallback
+
+#### Environment Configuration
+```bash
+# Backend (.env)
+MONGODB_URI=mongodb+srv://marketing:TaNN6bttM920rEjL@linkagevahub.0g6dji.mongodb.net/linkagevahub
+NODE_ENV=development
+PORT=8000
+JWT_SECRET=secure_random_key
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_key
+
+# Frontend (.env)
+REACT_APP_API_URL=http://localhost:8000/api
+REACT_APP_SOCKET_URL=http://localhost:8000
+```
+
+### 2. Security Implementation
+
+#### Data Protection
+- **Clerk Security**: Enterprise-grade authentication with SOC 2 compliance
+- **JWT Fallback**: Secure token generation with expiration for backup systems
+- **Password Security**: Clerk-managed with advanced security policies
+- **CORS Configuration**: Proper cross-origin resource sharing
+- **Rate Limiting**: API endpoint protection
+- **Input Validation**: express-validator for request sanitization
+
+#### File Upload Security
+- **Supabase Storage**: Secure cloud file management (primary)
+- **AWS S3**: Enterprise-grade backup storage with IAM security
+- **File Type Validation**: Restricted file type uploads
+- **Size Limitations**: Configurable upload size limits
+- **Virus Scanning**: Integrated security checks
+
+### 3. Performance Optimization
+
+#### Frontend Optimization
+- **Code Splitting**: React lazy loading for components
+- **Image Optimization**: Compressed assets, lazy loading
+- **Caching Strategy**: React Query for API response caching
+- **Bundle Optimization**: Webpack optimization for production
+
+#### Backend Optimization
+- **Database Indexing**: Optimized MongoDB queries
+- **Compression**: gzip compression for responses
+- **Connection Pooling**: Efficient database connections
+- **Caching Layer**: Redis integration for session management
+
+### 4. Testing Strategy
+
+#### Automated Testing
+- **Unit Tests**: Jest for component and function testing
+- **Integration Tests**: API endpoint testing with Supertest
+- **E2E Testing**: User flow validation
+- **Performance Testing**: Load testing for scalability
+
+#### Quality Assurance
+- **Code Reviews**: Git-based review process
+- **Linting**: ESLint for code quality
+- **Type Safety**: PropTypes validation
+- **Security Audits**: Regular dependency vulnerability checks
+
+## Deployment Architecture
+
+### 1. Production Infrastructure
+
+#### Render.com Deployment
+- **Main Platform**: linkage-va-hub.onrender.com
+- **E-Systems Platform**: esystems-management-hub.onrender.com
+- **Backend API**: Shared API with mode detection
+- **Database**: MongoDB Atlas production cluster
+
+#### Environment Variables (Production)
+```bash
+# Backend Production
+NODE_ENV=production
+MONGODB_URI=production_mongo_uri
+JWT_SECRET=production_jwt_secret
+CLIENT_URL=https://linkage-va-hub.onrender.com
+ESYSTEMS_CLIENT_URL=https://esystems-management-hub.onrender.com
+
+# Frontend Production
+REACT_APP_API_URL=https://linkage-va-hub-api.onrender.com/api
+REACT_APP_BRAND=linkage (or esystems)
+```
+
+### 2. Continuous Integration/Deployment
+
+#### Git-based Deployment
+- **Repository**: GitHub integration with Render
+- **Automatic Deployment**: Git push triggers deployment
+- **Environment Management**: Branch-specific configurations
+- **Rollback Capability**: Quick reversion to previous versions
+
+#### Monitoring & Maintenance
+- **Health Checks**: Automated endpoint monitoring
+- **Log Management**: Winston-based logging system
+- **Error Tracking**: Comprehensive error reporting
+- **Performance Monitoring**: Response time and uptime tracking
+
+## API Specification
+
+### 1. Authentication Endpoints
+
+```
+POST /api/auth/register - User registration
+POST /api/auth/login - User authentication
+GET /api/auth/me - Current user profile
+POST /api/auth/logout - User logout
+POST /api/auth/forgot-password - Password reset request
+PUT /api/auth/reset-password/:token - Password reset execution
+```
+
+### 2. User Management Endpoints
+
+```
+GET /api/vas - Virtual assistant listings with filters
+GET /api/vas/:id - Individual VA profile
+PUT /api/vas/:id - Update VA profile
+POST /api/vas/:id/avatar - Upload VA profile photo
+
+GET /api/businesses/:id - Business profile
+PUT /api/businesses/:id - Update business profile
+POST /api/businesses/:id/avatar - Upload business logo
+```
+
+### 3. Communication Endpoints
+
+```
+GET /api/conversations - User's conversation list
+POST /api/conversations - Create new conversation
+GET /api/conversations/:id - Conversation details with messages
+POST /api/messages - Send new message
+GET /api/messages/:conversationId - Message history
+```
+
+### 4. Platform Endpoints
+
+```
+GET /api/specialties - Available skill categories
+GET /api/locations - Geographic location data
+GET /api/notifications - User notification list
+PUT /api/notifications/read - Mark notifications as read
+GET /api/system/branding - Platform branding configuration
+```
+
+## Integration Specifications
+
+### 1. Third-party Services
+
+#### LinkedIn OAuth Integration
+- **Scope**: Profile and company data access for both platforms
+- **E-Systems Use Case**: Complete business profile auto-filling from LinkedIn company pages
+- **Linkage VA Hub Use Case**: Personal profile auto-filling (name, headline, experience, education, skills)
+- **Security**: OAuth 2.0 with state validation and platform mode detection
+- **Data Mapping**: 
+  - E-Systems: Company information → business profile fields
+  - Linkage VA Hub: Personal LinkedIn → VA profile applicable fields (bio, experience, skills, location)
+
+#### VideoSDK Integration
+- **Features**: Video conferencing, screen sharing
+- **Authentication**: JWT-based access tokens
+- **Use Cases**: VA interviews, training sessions
+- **Scalability**: Multi-participant support
+
+#### DISC Assessment Integration
+- **Purpose**: Personality profiling for better matching
+- **Implementation**: External API integration
+- **Data Storage**: Assessment results in user profiles
+- **Privacy**: Secure handling of assessment data
+
+### 2. File Storage Integration
+
+#### Supabase Storage (Primary)
+- **Primary Storage**: Cloud-based file management
+- **File Types**: Images, videos, documents, portfolios
+- **Security**: Row-level security policies
+- **CDN**: Global content delivery
+
+#### AWS S3 (Fallback)
+- **Backup System**: Enterprise-grade cloud storage
+- **Reliability**: 99.999999999% durability
+- **Integration**: Seamless failover from Supabase
+- **Security**: IAM policies and bucket-level security
+- **CDN**: CloudFront integration available
+
+## Future Roadmap & Enhancements
+
+### 1. Phase 2 Features
+- **Payment Integration**: Secure transaction processing
+- **Project Management**: Collaborative workspace tools
+- **Advanced Analytics**: Business intelligence dashboard
+- **Mobile Applications**: Native iOS and Android apps
+
+### 2. Platform Scalability
+- **Microservices Architecture**: Service decomposition
+- **API Gateway**: Centralized API management
+- **Caching Layer**: Redis implementation
+- **CDN Integration**: Global content delivery optimization
+
+### 3. AI/ML Integration
+- **Smart Matching**: Machine learning-based recommendations
+- **Sentiment Analysis**: Communication quality assessment
+- **Predictive Analytics**: Success probability modeling
+- **Automated Screening**: AI-powered VA assessment
+
+## Technical Debt and Missing Features
+
+### Authentication System Improvements
+- **Clerk Primary Integration**: Migrate from JWT-primary to Clerk-primary authentication
+- **LinkedIn OAuth for Linkage VA Hub**: Extend LinkedIn integration to main platform for VA profile auto-filling
+- **Multi-factor Authentication**: Add 2FA support for enhanced security
+- **Social Login Options**: Google, Facebook, Twitter authentication
+
+### File Storage Enhancements
+- **AWS S3 Fallback Implementation**: Complete fallback storage system
+- **File Versioning**: Track file changes and provide rollback capability
+- **Advanced File Processing**: Image resizing, video transcoding
+- **Bulk Upload**: Multiple file upload with progress tracking
+
+### Advanced Search & Matching
+- **Elasticsearch Integration**: Enhanced search capabilities
+- **AI-Powered Matching**: Machine learning recommendation engine
+- **Saved Searches**: User preference persistence
+- **Advanced Filters**: Complex query combinations
+
+### Performance & Scalability
+- **Redis Caching**: Implement distributed caching layer
+- **Database Optimization**: Query optimization and indexing
+- **CDN Implementation**: Static asset delivery optimization
+- **Load Balancing**: Horizontal scaling preparation
+
+### Testing & Quality Assurance
+- **Comprehensive Test Suite**: Unit, integration, and E2E tests
+- **Automated Testing Pipeline**: CI/CD integration
+- **Performance Monitoring**: Real-time metrics and alerting
+- **Security Auditing**: Regular vulnerability assessments
+
+### User Experience Improvements
+- **Mobile Responsiveness**: Complete mobile optimization
+- **Accessibility Compliance**: WCAG 2.1 AA compliance
+- **Progressive Web App**: PWA implementation
+- **Dark Mode**: Theme switching capability
+
+### Administrative Features
+- **Advanced Analytics Dashboard**: Business intelligence and reporting
+- **User Management Tools**: Bulk operations and moderation
+- **Content Management System**: Dynamic content updates
+- **System Configuration**: Runtime setting adjustments
+
+## Conclusion
+
+The Linkage VA Hub MERN Stack represents a comprehensive, scalable platform designed to bridge the gap between Filipino virtual assistants and businesses worldwide. With its dual-brand architecture, robust feature set, and modern technology stack, the platform is positioned to become a leading marketplace in the remote work industry.
+
+The technical implementation leverages industry best practices, ensuring security, performance, and scalability while providing an exceptional user experience across both VA-focused and business-focused interfaces. The modular architecture and comprehensive API design enable future enhancements and integrations while maintaining system stability and reliability.
+
+This PRD serves as the foundation for continued development, providing clear specifications for all technical, functional, and business requirements necessary for the platform's success and growth.

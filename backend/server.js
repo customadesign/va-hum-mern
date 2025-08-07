@@ -35,18 +35,30 @@ const courseRoutes = require('./routes/courses');
 const videosdkRoutes = require('./routes/videosdk');
 const analyticsRoutes = require('./routes/analytics');
 
-// LinkedIn auth routes (available for both deployments if configured)
+// CLERK authentication routes (replaces LinkedIn OAuth)
+let clerkAuthRoutes = null;
+if (process.env.CLERK_SECRET_KEY) {
+  try {
+    clerkAuthRoutes = require('./routes/clerkAuth');
+    console.log('Clerk authentication routes loaded successfully');
+  } catch (error) {
+    console.log('Clerk routes not available yet:', error.message);
+  }
+}
+
+// LinkedIn auth routes (DEPRECATED - available for both deployments if configured)
+// TODO: Remove after Clerk migration is complete
 let linkedinAuthRoutes = null;
 if (process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET) {
   try {
     // First try to load from backend/routes
     linkedinAuthRoutes = require('./routes/linkedinAuth');
-    console.log('LinkedIn routes loaded successfully');
+    console.log('LinkedIn routes loaded successfully (DEPRECATED)');
   } catch (error) {
     // Fallback to esystems-backend if exists
     try {
       linkedinAuthRoutes = require('../esystems-backend/routes/linkedinAuth');
-      console.log('LinkedIn routes loaded from esystems-backend');
+      console.log('LinkedIn routes loaded from esystems-backend (DEPRECATED)');
     } catch (fallbackError) {
       console.log('LinkedIn routes not found in either location, skipping...');
     }
@@ -91,9 +103,17 @@ const io = socketio(server, {
   cors: corsOptions
 });
 
-// Initialize Passport configuration
+// Initialize Passport configuration (DEPRECATED - will be removed after Clerk migration)
 require('./config/passport');
 app.use(passport.initialize());
+
+// Initialize Clerk (NEW)
+if (process.env.CLERK_SECRET_KEY) {
+  const { ClerkExpressRequireAuth } = require('@clerk/clerk-sdk-node');
+  console.log('Clerk authentication initialized');
+} else {
+  console.log('Clerk not configured - using legacy authentication');
+}
 
 // Security middleware
 app.use(helmet());
@@ -150,13 +170,23 @@ app.use('/s', shortUrlRoutes); // Public short URL redirects
 app.use('/api/courses', courseRoutes);
 app.use('/api/videosdk', videosdkRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/files', require('./routes/files')); // File management routes
+app.use('/api/profile', require('./routes/profile')); // User profile management routes
 
-// LinkedIn integration routes (available for both deployments if configured)
+// Clerk authentication routes (NEW - replaces LinkedIn OAuth)
+if (clerkAuthRoutes) {
+  app.use('/api/clerk', clerkAuthRoutes);
+  const deployment = process.env.ESYSTEMS_MODE === 'true' ? 'E Systems' : 'Linkage';
+  console.log(`Clerk authentication routes enabled for ${deployment}`);
+}
+
+// LinkedIn integration routes (DEPRECATED - available for both deployments if configured)
+// TODO: Remove after Clerk migration is complete
 if (linkedinAuthRoutes) {
   app.use('/api/auth/linkedin', linkedinAuthRoutes);
   app.use('/api/linkedin', linkedinAuthRoutes);
   const deployment = process.env.ESYSTEMS_MODE === 'true' ? 'E Systems' : 'Linkage';
-  console.log(`LinkedIn authentication routes enabled for ${deployment}`);
+  console.log(`LinkedIn authentication routes enabled for ${deployment} (DEPRECATED)`);
 }
 
 // Static files for uploads with CORS
