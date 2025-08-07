@@ -1365,9 +1365,6 @@ export default function Community() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
 
         {/* Lesson Viewer Modal */}
         {showLessonViewer && selectedLesson && (

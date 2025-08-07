@@ -10,13 +10,6 @@ import { ClerkProvider } from '@clerk/clerk-react';
 import { AuthProvider } from './contexts/ClerkAuthContext';
 import { BrandingProvider } from './contexts/BrandingContext';
 
-// Get Clerk publishable key
-const clerkPubKey = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
-
-if (!clerkPubKey) {
-  throw new Error('Missing Clerk Publishable Key');
-}
-
 // Layout Components
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
@@ -51,6 +44,13 @@ import Analytics from './pages/Analytics';
 
 // Admin Pages
 import AdminDashboard from './pages/Admin/Dashboard';
+
+// Get Clerk publishable key
+const clerkPubKey = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
+
+if (!clerkPubKey) {
+  throw new Error('Missing Clerk Publishable Key');
+}
 
 // Create a client
 const queryClient = new QueryClient({
