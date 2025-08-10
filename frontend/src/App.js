@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ToastContainer } from 'react-toastify';
 import { HelmetProvider } from 'react-helmet-async';
@@ -88,6 +88,9 @@ function App() {
                   <Route path="community/lesson/:lessonId" element={<Community />} />
                   <Route path="sign-in/*" element={<ClerkSignIn />} />
                   <Route path="sign-up/*" element={<ClerkSignUp />} />
+                  {/* Redirect legacy forgot/reset password paths to Clerk */}
+                  <Route path="forgot-password" element={<Navigate to="/sign-in/forgot-password" replace />} />
+                  <Route path="reset-password" element={<Navigate to="/sign-in/forgot-password" replace />} />
                   {/* Hybrid Authentication: Support both Clerk and Legacy JWT */}
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
