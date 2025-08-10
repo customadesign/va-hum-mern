@@ -9,6 +9,16 @@ const getDeploymentUrl = () => {
   return 'https://linkage-va-hub.onrender.com';
 };
 
+// Backend API origin derived from REACT_APP_API_URL
+const getApiOrigin = () => {
+  try {
+    const api = process.env.REACT_APP_API_URL || '';
+    return new URL(api).origin;
+  } catch (e) {
+    return '';
+  }
+};
+
 const LINKEDIN_CONFIG = {
   clientId: process.env.REACT_APP_LINKEDIN_CLIENT_ID,
   redirectUri: process.env.NODE_ENV === 'production' 
@@ -22,6 +32,7 @@ class LinkedInAuthService {
   constructor() {
     this.isESystemsMode = process.env.REACT_APP_BRAND === 'esystems';
     this.deploymentUrl = getDeploymentUrl();
+    this.apiOrigin = getApiOrigin();
   }
 
   // Check if LinkedIn integration is available
@@ -56,12 +67,12 @@ class LinkedInAuthService {
     // In production, store state in sessionStorage before redirect
 
     try {
-      // Exchange code for access token via our backend
-      const apiUrl = process.env.NODE_ENV === 'production'
-        ? `${this.deploymentUrl}/api/auth/linkedin/callback`
+      // Exchange code for access token via our backend (use API origin, not frontend origin)
+      const callbackUrl = process.env.NODE_ENV === 'production'
+        ? `${this.apiOrigin}/api/auth/linkedin/callback`
         : 'http://localhost:5000/api/auth/linkedin/callback';
-        
-      const response = await fetch(apiUrl, {
+
+      const response = await fetch(callbackUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,11 +80,14 @@ class LinkedInAuthService {
         body: JSON.stringify({ code }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to authenticate with LinkedIn');
+      // Parse JSON defensively to surface any HTML/error responses clearly
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        const text = await response.text();
+        throw new Error(text || 'Failed to authenticate with LinkedIn');
       }
-
-      const data = await response.json();
       return data; // Should include access_token and user profile
     } catch (error) {
       console.error('LinkedIn callback error:', error);
@@ -89,12 +103,12 @@ class LinkedInAuthService {
 
     try {
       // First, get user's organizations if no companyId provided
-      const apiUrl = process.env.NODE_ENV === 'production'
-        ? this.deploymentUrl
+      const apiBase = process.env.NODE_ENV === 'production'
+        ? this.apiOrigin
         : 'http://localhost:5000';
         
       if (!companyId) {
-        const orgsResponse = await fetch(`${apiUrl}/api/linkedin/organizations`, {
+        const orgsResponse = await fetch(`${apiBase}/api/linkedin/organizations`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
           },
@@ -113,7 +127,7 @@ class LinkedInAuthService {
       }
 
       // Get company profile data
-      const companyResponse = await fetch(`${apiUrl}/api/linkedin/company/${companyId}`, {
+      const companyResponse = await fetch(`${apiBase}/api/linkedin/company/${companyId}`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
