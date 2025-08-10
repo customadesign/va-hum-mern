@@ -94,7 +94,7 @@ function App() {
                   {/* Hybrid Authentication: Support both Clerk and Legacy JWT */}
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
-                  <Route path="linkedin/callback" element={<LinkedInCallback />} />
+                  <Route path="auth/linkedin/callback" element={<LinkedInCallback />} />
                   <Route path="profile-setup-legacy" element={<ProfileSetup />} />
                   <Route path="vas" element={<VAList />} />
                   <Route path="vas/:id" element={<VADetail />} />
