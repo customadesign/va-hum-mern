@@ -2,6 +2,7 @@ services:
   # Backend API Service
   - type: web
     name: linkage-va-hub-api
+    plan: starter
     runtime: node
     repo: https://github.com/customadesign/va-hum-mern
     buildCommand: cd backend && npm install
