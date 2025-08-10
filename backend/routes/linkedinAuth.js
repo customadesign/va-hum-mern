@@ -42,19 +42,36 @@ router.post('/callback', async (req, res) => {
       return res.status(400).json({ error: 'Authorization code is required' });
     }
 
-    // Exchange code for access token
-    const tokenResponse = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', null, {
-      params: {
-        grant_type: 'authorization_code',
-        code,
-        client_id: LINKEDIN_CONFIG.clientId,
-        client_secret: LINKEDIN_CONFIG.clientSecret,
-        redirect_uri: LINKEDIN_CONFIG.redirectUri,
-      },
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    });
+    // Exchange code for access token (send as x-www-form-urlencoded body)
+    const formBody = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      client_id: LINKEDIN_CONFIG.clientId,
+      client_secret: LINKEDIN_CONFIG.clientSecret,
+      redirect_uri: LINKEDIN_CONFIG.redirectUri,
+    }).toString();
+
+    const tokenResponse = await axios.post(
+      'https://www.linkedin.com/oauth/v2/accessToken',
+      formBody,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        // Never throw on non-2xx so we can return a clean JSON error instead of a 502
+        validateStatus: () => true,
+        timeout: 15000,
+      }
+    );
+
+    if (tokenResponse.status !== 200 || !tokenResponse.data?.access_token) {
+      return res.status(400).json({
+        error: 'LinkedIn token exchange failed',
+        status: tokenResponse.status,
+        details: tokenResponse.data,
+        redirectUriUsed: LINKEDIN_CONFIG.redirectUri,
+      });
+    }
 
     const { access_token } = tokenResponse.data;
 
@@ -63,7 +80,17 @@ router.post('/callback', async (req, res) => {
       headers: {
         'Authorization': `Bearer ${access_token}`,
       },
+      validateStatus: () => true,
+      timeout: 15000,
     });
+
+    if (profileResponse.status !== 200) {
+      return res.status(400).json({
+        error: 'Failed to fetch LinkedIn profile',
+        status: profileResponse.status,
+        details: profileResponse.data,
+      });
+    }
 
     const linkedinProfile = profileResponse.data;
 
@@ -150,10 +177,10 @@ router.post('/callback', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('LinkedIn OAuth error:', error);
+    console.error('LinkedIn OAuth error:', error?.response?.data || error.message);
     res.status(500).json({ 
       error: 'Failed to authenticate with LinkedIn',
-      details: error.message 
+      details: error?.response?.data || error.message 
     });
   }
 });
