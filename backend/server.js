@@ -180,10 +180,14 @@ app.use(helmet());
 app.use(cors(corsOptions));
 app.use(compression());
 
-// Rate limiting
+// Rate limiting with safe defaults to avoid NaN/undefined crashes when env vars are missing
+const windowMinutes = parseInt(process.env.RATE_LIMIT_WINDOW || '15', 10);
+const maxRequests = parseInt(process.env.RATE_LIMIT_MAX || '300', 10);
+console.log('Rate limit config:', { windowMinutes, maxRequests });
+
 const limiter = rateLimit({
-  windowMs: process.env.RATE_LIMIT_WINDOW * 60 * 1000, // minutes to ms
-  max: process.env.RATE_LIMIT_MAX
+  windowMs: windowMinutes * 60 * 1000,
+  max: maxRequests
 });
 app.use('/api/', limiter);
 
