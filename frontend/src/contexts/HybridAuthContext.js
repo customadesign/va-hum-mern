@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   // Clerk auth hooks
   const { user: clerkUser, isLoaded: clerkLoaded, isSignedIn } = useUser();
   const { getToken: getClerkToken, signOut: clerkSignOut } = useClerkAuth();
-  const { signIn } = useSignIn();
+  const { signIn, isLoaded: signInLoaded } = useSignIn();
   
   // Local state
   const [user, setUser] = useState(null);
@@ -207,13 +207,18 @@ export const AuthProvider = ({ children }) => {
   // LinkedIn OAuth via Clerk
   const linkedinLogin = async () => {
     try {
+      // Ensure Clerk signIn is ready before starting OAuth
+      if (!signInLoaded || !signIn) {
+        toast.info('Preparing sign in... please try again in a moment');
+        return;
+      }
       // Use Clerk's LinkedIn OAuth instead of separate library
       // Try the specific strategy first, fallback to generic OAuth
       try {
         const result = await signIn.authenticateWithRedirect({
           strategy: 'oauth_linkedin_oidc', // Correct strategy name for LinkedIn
           redirectUrl: '/auth/linkedin/callback',
-          redirectUrlComplete: '/'
+          redirectUrlComplete: '/auth/linkedin/callback'
         });
         
         console.log('LinkedIn OAuth initiated via Clerk:', result);
@@ -224,7 +229,7 @@ export const AuthProvider = ({ children }) => {
         const result = await signIn.authenticateWithRedirect({
           strategy: 'oauth',
           redirectUrl: '/auth/linkedin/callback',
-          redirectUrlComplete: '/',
+          redirectUrlComplete: '/auth/linkedin/callback',
           additionalParams: {
             provider: 'linkedin'
           }

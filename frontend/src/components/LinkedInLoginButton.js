@@ -24,7 +24,7 @@ export default function LinkedInLoginButton({
       const result = await signIn.authenticateWithRedirect({
         strategy: 'oauth_linkedin_oidc', // Correct strategy name for LinkedIn
         redirectUrl: '/auth/linkedin/callback',
-        redirectUrlComplete: '/'
+        redirectUrlComplete: '/auth/linkedin/callback'
       });
       
       console.log('LinkedIn OAuth initiated via Clerk:', result);
@@ -60,44 +60,4 @@ export default function LinkedInLoginButton({
   );
 }
 
-// LinkedIn callback handler component for Clerk OAuth
-export function LinkedInCallback() {
-  const { branding } = useBranding();
-  
-  React.useEffect(() => {
-    const handleCallback = async () => {
-      // Only process on E Systems
-      if (!branding.isESystemsMode) {
-        window.location.href = '/login';
-        return;
-      }
-
-      // Clerk handles the OAuth callback automatically
-      // This component is mainly for redirect handling
-      console.log('LinkedIn OAuth callback via Clerk completed');
-      
-      // Redirect to profile setup
-      window.location.href = '/business/profile?linkedin=true';
-    };
-
-    handleCallback();
-  }, [branding.isESystemsMode]);
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Completing LinkedIn Authentication...
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Please wait while we complete your LinkedIn authentication.
-          </p>
-        </div>
-        <div className="flex justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    </div>
-  );
-}
+// Note: LinkedInCallback moved to pages/LinkedInCallback.js and decides target based on user state

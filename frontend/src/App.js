@@ -15,6 +15,7 @@ import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
 import ErrorBoundary from './components/ErrorBoundary';
+import PublicOnlyRoute from './components/PublicOnlyRoute';
 
 // Pages
 import Home from './pages/Home';
@@ -86,14 +87,16 @@ function App() {
                   <Route path="about" element={<About />} />
                   <Route path="community" element={<Community />} />
                   <Route path="community/lesson/:lessonId" element={<Community />} />
-                  <Route path="sign-in/*" element={<ClerkSignIn />} />
-                  <Route path="sign-up/*" element={<ClerkSignUp />} />
+                  <Route element={<PublicOnlyRoute />}>
+                    <Route path="sign-in/*" element={<ClerkSignIn />} />
+                    <Route path="sign-up/*" element={<ClerkSignUp />} />
+                    <Route path="login" element={<Login />} />
+                    <Route path="register" element={<Register />} />
+                  </Route>
                   {/* Redirect legacy forgot/reset password paths to Clerk */}
                   <Route path="forgot-password" element={<Navigate to="/sign-in/forgot-password" replace />} />
                   <Route path="reset-password" element={<Navigate to="/sign-in/forgot-password" replace />} />
-                  {/* Hybrid Authentication: Support both Clerk and Legacy JWT */}
-                  <Route path="login" element={<Login />} />
-                  <Route path="register" element={<Register />} />
+                  {/* Hybrid Authentication: Clerk and Legacy JWT (login/register now under PublicOnlyRoute) */}
                   <Route path="auth/linkedin/callback" element={<LinkedInCallback />} />
                   <Route path="profile-setup-legacy" element={<ProfileSetup />} />
                   <Route path="vas" element={<VAList />} />

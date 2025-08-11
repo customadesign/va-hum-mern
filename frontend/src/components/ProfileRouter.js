@@ -1,14 +1,14 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useBranding } from '../contexts/BrandingContext';
+import { useAuth } from '../contexts/HybridAuthContext';
 import VAProfile from '../pages/VAs/Profile';
 import BusinessProfile from '../pages/Business/Profile';
 
 export default function ProfileRouter() {
-  const { branding, loading: brandingLoading } = useBranding();
+  const { user, loading } = useAuth();
 
-  // Show loading while branding context loads
-  if (brandingLoading) {
+  // Show loading while auth loads
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
@@ -16,11 +16,17 @@ export default function ProfileRouter() {
     );
   }
 
-  // In E Systems mode, /va/profile should show the business profile
-  if (branding.isESystemsMode) {
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  if (user.role === 'va') {
+    return <VAProfile />;
+  }
+  if (user.role === 'business') {
     return <BusinessProfile />;
   }
 
-  // In regular mode, show the VA profile
-  return <VAProfile />;
+  // Fallback: if role not set yet, send to setup
+  return <Navigate to="/profile-setup" />;
 }

@@ -121,7 +121,7 @@ export default function Dashboard() {
             </div>
             <div className="bg-blue-50 px-5 py-3">
               <div className="text-sm">
-                <Link to={isVA ? '/va/profile' : '/business/profile'} className="font-medium text-blue-700 hover:text-blue-900">
+                 <Link to={(user?.role === 'va') ? '/va/profile' : '/business/profile'} className="font-medium text-blue-700 hover:text-blue-900">
                   Complete profile →
                 </Link>
               </div>

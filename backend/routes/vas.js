@@ -743,12 +743,31 @@ router.put('/me', protect, async (req, res) => {
       console.log('Updated specialties:', updateData.specialties);
     }
 
-    // First update the VA profile
-    const va = await VA.findOneAndUpdate(
-      { user: req.user._id },
-      updateData,
-      { new: true, runValidators: true }
-    );
+    // Try to find existing VA profile
+    let va = await VA.findOne({ user: req.user._id });
+
+    if (!va) {
+      console.log('PUT /api/vas/me - No existing VA, creating new VA profile');
+      // Create minimal VA profile if not exists (upsert behavior)
+      const defaultName = req.user.name || (req.user.email ? req.user.email.split('@')[0] : 'New Professional');
+      const minimalDoc = {
+        user: req.user._id,
+        name: updateData.name || defaultName,
+        bio: updateData.bio || 'Tell us about yourself...',
+        email: updateData.email || req.user.email,
+        searchStatus: updateData.searchStatus || 'open'
+      };
+      va = await VA.create(minimalDoc);
+      // Link to user
+      if (!req.user.va) {
+        req.user.va = va._id;
+        await req.user.save();
+      }
+    }
+
+    // Apply updates to the VA document
+    Object.assign(va, updateData);
+    await va.save();
 
     console.log('PUT /api/vas/me - VA after update:', {
       _id: va?._id,

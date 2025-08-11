@@ -12,12 +12,7 @@ export default function ProfileSetup() {
   const { updateUser } = useAuth();
   const { branding } = useBranding();
 
-  // Auto-redirect to business profile in E-systems mode
-  React.useEffect(() => {
-    if (branding.isESystemsMode) {
-      handleProfileTypeSelect('business');
-    }
-  }, [branding.isESystemsMode]);
+  // Note: Do not auto-create any profile to avoid wrong selection
 
   const handleProfileTypeSelect = async (type) => {
     setProfileType(type);

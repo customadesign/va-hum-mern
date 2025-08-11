@@ -42,21 +42,54 @@ router.put('/me', protect, async (req, res) => {
   try {
     let business = await Business.findOne({ user: req.user._id });
 
-    // Update fields
-    const updateFields = [
-      'contactName', 'company', 'bio', 'website', 'contactRole',
-      'email', 'phone', 'streetAddress', 'city', 'state', 
-      'postalCode', 'country', 'vaNotifications', 'invisible',
-      'surveyRequestNotifications'
-    ];
+  // Update fields (include companySize, industry and other profile fields)
+  const updateFields = [
+    // Basics
+    'contactName', 'company', 'bio', 'website', 'contactRole',
+    'email', 'phone',
+    // Address
+    'streetAddress', 'city', 'state', 'postalCode', 'country',
+    // Settings
+    'vaNotifications', 'invisible', 'surveyRequestNotifications',
+    // LinkedIn-like fields
+    'companySize', 'industry', 'foundedYear', 'employeeCount', 'companyCulture',
+    'workEnvironment', 'headquartersLocation', 'missionStatement', 'vaRequirements', 'workingHours',
+    // Arrays
+    'specialties', 'benefits', 'companyValues', 'languages',
+    // Socials
+    'linkedin', 'facebook', 'twitter', 'instagram', 'youtube',
+    // Media
+    'avatar'
+  ];
+
+  // Validators for enumerated/numeric fields
+  const allowedCompanySizes = ['1-10','11-50','51-200','201-500','501-1000','1001-5000','5001-10000','10000+'];
+  const allowedWorkEnvironments = ['remote','hybrid','onsite','flexible'];
 
     if (!business) {
       // Create if missing (upsert behavior)
       const doc = { user: req.user._id };
       updateFields.forEach(field => {
-        if (req.body[field] !== undefined) {
-          doc[field] = req.body[field];
+        if (req.body[field] === undefined) return;
+        let value = req.body[field];
+        if (typeof value === 'string' && value.trim() === '') return; // skip empty strings
+
+        // Enum sanitization
+        if (field === 'companySize') {
+          if (!allowedCompanySizes.includes(value)) return;
         }
+        if (field === 'workEnvironment') {
+          if (!allowedWorkEnvironments.includes(value)) return;
+        }
+
+        // Number conversion
+        if (field === 'foundedYear' || field === 'employeeCount') {
+          const num = Number(value);
+          if (!Number.isFinite(num)) return;
+          value = num;
+        }
+
+        doc[field] = value;
       });
       business = await Business.create(doc);
       // Link on user for future role checks
@@ -67,9 +100,23 @@ router.put('/me', protect, async (req, res) => {
     } else {
       // Update existing
       updateFields.forEach(field => {
-        if (req.body[field] !== undefined) {
-          business[field] = req.body[field];
+        if (req.body[field] === undefined) return;
+        let value = req.body[field];
+        if (typeof value === 'string' && value.trim() === '') return; // skip empty strings
+
+        if (field === 'companySize') {
+          if (!allowedCompanySizes.includes(value)) return;
         }
+        if (field === 'workEnvironment') {
+          if (!allowedWorkEnvironments.includes(value)) return;
+        }
+        if (field === 'foundedYear' || field === 'employeeCount') {
+          const num = Number(value);
+          if (!Number.isFinite(num)) return;
+          value = num;
+        }
+
+        business[field] = value;
       });
       await business.save();
     }
@@ -90,7 +137,7 @@ router.put('/me', protect, async (req, res) => {
 // @route   POST /api/businesses/me/upload
 // @desc    Upload business avatar
 // @access  Private/Business
-router.post('/me/upload', protect, authorize('business'), upload.single('image'), async (req, res) => {
+router.post('/me/upload', protect, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({

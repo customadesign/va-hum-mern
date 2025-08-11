@@ -17,7 +17,8 @@ export const ClerkSignIn = () => {
         <SignIn 
           path="/sign-in" 
           routing="path"
-          afterSignInUrl="/dashboard"
+          afterSignInUrl="/"
+          afterSignUpUrl="/profile-setup"
           appearance={{
             elements: {
               formButtonPrimary: 'bg-indigo-600 hover:bg-indigo-700 text-sm normal-case',
