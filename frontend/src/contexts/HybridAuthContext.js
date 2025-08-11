@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { useUser, useAuth as useClerkAuth, useSignIn } from '@clerk/clerk-react';
+import { useUser, useAuth as useClerkAuth, useSignIn, useSignUp } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import authService from '../services/auth';
@@ -20,6 +20,7 @@ export const AuthProvider = ({ children }) => {
   const { user: clerkUser, isLoaded: clerkLoaded, isSignedIn } = useUser();
   const { getToken: getClerkToken, signOut: clerkSignOut } = useClerkAuth();
   const { signIn, isLoaded: signInLoaded } = useSignIn();
+  const { signUp, isLoaded: signUpLoaded } = useSignUp();
   
   // Local state
   const [user, setUser] = useState(null);
@@ -148,10 +149,14 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data.user);
       setAuthMethod('clerk');
       
-      // Check if user needs to complete profile (only if no role AND no VA/Business profile)
-      if (!response.data.user.role && !response.data.user.va && !response.data.user.business) {
+      // If user has a profile, ensure they land on the correct profile page from sign-in
+      if (response.data.user.va && window.location.pathname === '/') {
+        navigate('/va/profile', { replace: true });
+      } else if (response.data.user.business && window.location.pathname === '/') {
+        navigate('/business/profile', { replace: true });
+      } else if (!response.data.user.va && !response.data.user.business) {
         if (window.location.pathname !== '/profile-setup') {
-          navigate('/profile-setup');
+          navigate('/profile-setup', { replace: true });
         }
       }
     } catch (error) {
@@ -207,15 +212,20 @@ export const AuthProvider = ({ children }) => {
   // LinkedIn OAuth via Clerk
   const linkedinLogin = async () => {
     try {
-      // Ensure Clerk signIn is ready before starting OAuth
-      if (!signInLoaded || !signIn) {
-        toast.info('Preparing sign in... please try again in a moment');
+      const path = window.location.pathname || '';
+      const isSignUpFlow = path.startsWith('/register') || path.startsWith('/sign-up');
+      const handler = isSignUpFlow ? signUp : signIn;
+      const handlerLoaded = isSignUpFlow ? signUpLoaded : signInLoaded;
+
+      // Ensure appropriate Clerk handler is ready before starting OAuth
+      if (!handlerLoaded || !handler) {
+        toast.info('Preparing authentication... please try again in a moment');
         return;
       }
       // Use Clerk's LinkedIn OAuth instead of separate library
       // Try the specific strategy first, fallback to generic OAuth
       try {
-        const result = await signIn.authenticateWithRedirect({
+        const result = await handler.authenticateWithRedirect({
           strategy: 'oauth_linkedin_oidc', // Correct strategy name for LinkedIn
           redirectUrl: '/auth/linkedin/callback',
           redirectUrlComplete: '/auth/linkedin/callback'
@@ -226,7 +236,7 @@ export const AuthProvider = ({ children }) => {
         // Fallback to generic OAuth method
         console.log('Specific strategy failed, trying generic OAuth:', strategyError);
         
-        const result = await signIn.authenticateWithRedirect({
+        const result = await handler.authenticateWithRedirect({
           strategy: 'oauth',
           redirectUrl: '/auth/linkedin/callback',
           redirectUrlComplete: '/auth/linkedin/callback',
@@ -273,15 +283,57 @@ export const AuthProvider = ({ children }) => {
         });
       }
       
-      setUser(response.data.user);
-      
-      // Redirect based on user type
-      if (response.data.user.va) {
-        navigate('/dashboard');
-      } else if (response.data.user.business) {
-        navigate('/vas');
-      } else {
-        navigate('/dashboard');
+      // Update local user and ensure the specific profile is created
+      const newUser = response.data.user;
+      setUser(newUser);
+
+      try {
+        if (newUser.role === 'va' && !newUser.va) {
+          // Create minimal VA profile if missing
+          await api.post('/vas', {
+            name: 'New Professional',
+            bio: 'Tell us about yourself...',
+            searchStatus: 'open'
+          });
+        } else if (newUser.role === 'business' && !newUser.business) {
+          // Create minimal Business profile if missing
+          await api.post('/businesses', {
+            contactName: 'Primary Contact',
+            company: 'Your Company',
+            bio: 'Tell us about your business...'
+          });
+        }
+      } catch (createErr) {
+        // Ignore "already has a profile" style errors
+        const msg = createErr?.response?.data?.error || '';
+        const alreadyHas = /already has a (VA|Business) profile/i.test(msg);
+        if (!alreadyHas) {
+          console.warn('Profile creation warning:', createErr?.response?.data || createErr.message);
+        }
+      }
+
+      // Refresh user to get va/business linkage, then route to profile
+      try {
+        const refreshed = await api.get('/clerk/me');
+        setUser(refreshed.data.user);
+        if (refreshed.data.user.va) {
+          navigate('/va/profile', { replace: true });
+        } else if (refreshed.data.user.business) {
+          navigate('/business/profile', { replace: true });
+        } else {
+          // Fallback, keep them on setup if still missing
+          navigate('/profile-setup', { replace: true });
+        }
+      } catch (refreshErr) {
+        console.warn('Post-setup refresh failed:', refreshErr?.response?.data || refreshErr.message);
+        // Best effort redirect based on role
+        if (newUser.role === 'va') {
+          navigate('/va/profile', { replace: true });
+        } else if (newUser.role === 'business') {
+          navigate('/business/profile', { replace: true });
+        } else {
+          navigate('/profile-setup', { replace: true });
+        }
       }
       
       toast.success('Profile completed successfully!');
@@ -342,8 +394,8 @@ export const AuthProvider = ({ children }) => {
     isVA: !!user?.va,
     isBusiness: !!user?.business,
     isAdmin: !!user?.admin,
-    // Consider profile complete if role exists OR linked VA/Business profile exists
-    needsProfileSetup: (isSignedIn && !user?.role && !user?.va && !user?.business) || (user && !user.role && !user.va && !user.business),
+    // Consider profile incomplete only when user is loaded and has no VA/Business
+    needsProfileSetup: !!user && !user.va && !user.business,
     
     // Auth methods
     login,

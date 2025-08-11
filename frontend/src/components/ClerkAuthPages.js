@@ -17,7 +17,7 @@ export const ClerkSignIn = () => {
         <SignIn 
           path="/sign-in" 
           routing="path"
-          afterSignInUrl="/"
+          afterSignInUrl="/va/profile"
           afterSignUpUrl="/profile-setup"
           appearance={{
             elements: {

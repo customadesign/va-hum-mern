@@ -209,8 +209,11 @@ exports.findOrCreateUser = async (clerkUser) => {
       return user;
     }
 
-    // Try to find existing user by email (for migration from old system)
-    const email = clerkUser.emailAddresses?.[0]?.emailAddress;
+    // Normalize Clerk shapes (SDK/browser vs server): support camelCase and snake_case
+    const email = clerkUser.emailAddresses?.[0]?.emailAddress
+      || clerkUser.primaryEmailAddress?.emailAddress
+      || clerkUser.email_addresses?.[0]?.email_address
+      || clerkUser.primary_email_address?.email_address;
     if (email) {
       user = await User.findOne({ email: email.toLowerCase() });
       
@@ -227,14 +230,33 @@ exports.findOrCreateUser = async (clerkUser) => {
     // Create new user
     user = new User({
       clerkUserId: clerkUser.id,
-      email: email?.toLowerCase(),
-      name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || null,
+      email: (email || '').toLowerCase(),
+      name: `${clerkUser.firstName || clerkUser.first_name || ''} ${clerkUser.lastName || clerkUser.last_name || ''}`.trim() || null,
       provider: 'clerk',
       isVerified: true // Clerk handles email verification
     });
 
-    await user.save();
-    return user;
+    try {
+      await user.save();
+      return user;
+    } catch (saveError) {
+      if (saveError && saveError.code === 11000 && saveError.keyPattern && saveError.keyPattern.email) {
+        const normalizedEmail = (email || '').toLowerCase();
+        const existing = await User.findOne({ email: normalizedEmail });
+        if (existing) {
+          existing.clerkUserId = clerkUser.id;
+          existing.provider = 'clerk';
+          existing.isVerified = true;
+          const proposedName = `${clerkUser.firstName || clerkUser.first_name || ''} ${clerkUser.lastName || clerkUser.last_name || ''}`.trim();
+          if (!existing.name && proposedName) {
+            existing.name = proposedName;
+          }
+          await existing.save();
+          return existing;
+        }
+      }
+      throw saveError;
+    }
   } catch (error) {
     console.error('Error in findOrCreateUser:', error);
     throw error;

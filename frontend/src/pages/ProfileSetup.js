@@ -26,34 +26,41 @@ export default function ProfileSetup() {
       if (type === 'va') {
         // Create VA profile
         const response = await api.post('/vas', {
-          name: '',
+          name: 'New Professional',
           bio: 'Tell us about yourself...',
           searchStatus: 'open'
         });
         
-        // Update user context (Clerk-aware endpoint)
-        const userResponse = await api.get('/clerk/me');
-        updateUser(userResponse.data.user);
-        
+        // Navigate immediately; refresh user context in background
         toast.success('VA profile created! Please complete your profile.');
-        navigate('/va/profile');
+        navigate('/va/profile', { replace: true });
+        try {
+          const userResponse = await api.get('/clerk/me');
+          updateUser(userResponse.data.user);
+        } catch (e) {
+          // non-blocking
+        }
       } else if (type === 'business') {
         // Create Business profile
         const response = await api.post('/businesses', {
-          contactName: '',
+          contactName: 'Primary Contact',
           company: 'Your Company',
           bio: 'Tell us about your business...'
         });
         
-        // Update user context (Clerk-aware endpoint)
-        const userResponse = await api.get('/clerk/me');
-        updateUser(userResponse.data.user);
-        
+        // Navigate immediately; refresh user context in background
         toast.success('Business profile created! Please complete your profile.');
-        navigate('/business/profile');
+        navigate('/business/profile', { replace: true });
+        try {
+          const userResponse = await api.get('/clerk/me');
+          updateUser(userResponse.data.user);
+        } catch (e) {
+          // non-blocking
+        }
       }
     } catch (error) {
-      toast.error('Failed to create profile. Please try again.');
+      console.error('Profile setup error:', error?.response?.data || error.message);
+      toast.error(error?.response?.data?.error || 'Failed to create profile. Please try again.');
     }
   };
 

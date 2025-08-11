@@ -7,6 +7,14 @@ const PrivateRoute = () => {
   const { loading, isAuthenticated, needsProfileSetup, isClerkUser, authMethod } = useAuth();
   const location = useLocation();
   const isAtProfileSetup = location.pathname === '/profile-setup';
+  const path = location.pathname;
+  const allowIfSetupPending = (
+    path === '/dashboard' ||
+    path === '/va/profile' ||
+    path === '/business/profile' ||
+    path === '/conversations' ||
+    path.startsWith('/conversations/')
+  );
 
   if (loading) {
     return (
@@ -22,7 +30,7 @@ const PrivateRoute = () => {
       return <Navigate to="/login" />;
     }
 
-    if (needsProfileSetup && !isAtProfileSetup) {
+    if (needsProfileSetup && !isAtProfileSetup && !allowIfSetupPending) {
       return <Navigate to="/profile-setup" />;
     }
 
@@ -34,7 +42,7 @@ const PrivateRoute = () => {
     return (
       <>
         <SignedIn>
-          {needsProfileSetup && !isAtProfileSetup ? <Navigate to="/profile-setup" /> : <Outlet />}
+          {needsProfileSetup && !isAtProfileSetup && !allowIfSetupPending ? <Navigate to="/profile-setup" replace /> : <Outlet />}
         </SignedIn>
         <SignedOut>
           <RedirectToSignIn />

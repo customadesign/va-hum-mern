@@ -20,12 +20,11 @@ export default function ProfileRouter() {
     return <Navigate to="/login" />;
   }
 
-  if (user.role === 'va') {
-    return <VAProfile />;
-  }
-  if (user.role === 'business') {
-    return <BusinessProfile />;
-  }
+  // Prefer concrete profile presence over role flag
+  if (user.va) return <VAProfile />;
+  if (user.business) return <BusinessProfile />;
+  if (user.role === 'va') return <VAProfile />;
+  if (user.role === 'business') return <BusinessProfile />;
 
   // Fallback: if role not set yet, send to setup
   return <Navigate to="/profile-setup" />;
