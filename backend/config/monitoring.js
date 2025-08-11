@@ -230,14 +230,16 @@ const performanceMiddleware = (metrics) => {
   return (req, res, next) => {
     const startTime = Date.now();
     
-    // Override res.end to capture response time
+    // Override res.end to capture response time (avoid setting headers after sent)
     const originalEnd = res.end;
     res.end = function(...args) {
       const responseTime = Date.now() - startTime;
       metrics.recordRequest(req.method, req.path, res.statusCode, responseTime);
       
-      // Add response time header
-      res.set('X-Response-Time', `${responseTime}ms`);
+      // Add response time header only if headers are not already sent
+      if (!res.headersSent) {
+        res.set('X-Response-Time', `${responseTime}ms`);
+      }
       
       originalEnd.apply(res, args);
     };

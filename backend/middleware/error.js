@@ -24,10 +24,16 @@ const errorHandler = (err, req, res, next) => {
     error = { message, statusCode: 400 };
   }
 
-  res.status(error.statusCode || 500).json({
-    success: false,
-    error: error.message || 'Server Error'
-  });
+  // Avoid 'headers already sent' by checking before writing
+  if (!res.headersSent) {
+    res.status(error.statusCode || 500).json({
+      success: false,
+      error: error.message || 'Server Error'
+    });
+  } else {
+    // If headers were already sent, delegate to default Express handler
+    return next(err);
+  }
 };
 
 module.exports = errorHandler;
