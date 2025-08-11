@@ -227,19 +227,35 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Clerk Profile Completion
+  // Profile Completion (Clerk or JWT)
   const completeProfile = async (profileData) => {
     try {
-      const token = await getClerkToken();
+      let response;
       
-      const response = await api.post('/clerk/complete-profile', {
-        clerkUserId: clerkUser.id,
-        ...profileData
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      if (authMethod === 'clerk') {
+        // Clerk user profile completion
+        const token = await getClerkToken();
+        
+        response = await api.post('/clerk/complete-profile', {
+          clerkUserId: clerkUser.id,
+          ...profileData
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+      } else {
+        // JWT user profile completion
+        const token = localStorage.getItem('token');
+        
+        response = await api.post('/auth/complete-profile', {
+          ...profileData
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+      }
       
       setUser(response.data.user);
       

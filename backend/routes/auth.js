@@ -246,6 +246,93 @@ router.post('/confirm-email/:token', async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/complete-profile
+// @desc    Complete user profile after registration
+// @access  Private
+router.post('/complete-profile', protect, async (req, res) => {
+  try {
+    const { role, referralCode } = req.body;
+    const userId = req.user.id;
+
+    // Validate role
+    if (!role || !['va', 'business'].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid role. Must be either "va" or "business"'
+      });
+    }
+
+    // Update user with role
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    // Update user role
+    user.role = role;
+    
+    // Handle referral code if provided
+    if (referralCode) {
+      const referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
+      if (referrer) {
+        user.referredBy = referrer._id;
+        referrer.referralCount = (referrer.referralCount || 0) + 1;
+        await referrer.save();
+      }
+    }
+
+    await user.save();
+
+    // Create VA or Business profile based on role
+    if (role === 'va') {
+      const VA = require('../models/VA');
+      const existingVA = await VA.findOne({ user: userId });
+      if (!existingVA) {
+        await VA.create({
+          user: userId,
+          name: user.name || user.email.split('@')[0],
+          email: user.email,
+          skills: [],
+          hourlyRate: 5,
+          bio: ''
+        });
+      }
+    } else if (role === 'business') {
+      const Business = require('../models/Business');
+      const existingBusiness = await Business.findOne({ user: userId });
+      if (!existingBusiness) {
+        await Business.create({
+          user: userId,
+          contactName: user.name || user.email.split('@')[0],
+          email: user.email,
+          company: '',
+          bio: ''
+        });
+      }
+    }
+
+    // Return updated user
+    const updatedUser = await User.findById(userId)
+      .select('-password')
+      .populate('va')
+      .populate('business');
+
+    res.json({
+      success: true,
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Complete profile error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to complete profile'
+    });
+  }
+});
+
 // @route   POST /api/auth/forgot-password
 // @desc    Forgot password
 // @access  Public

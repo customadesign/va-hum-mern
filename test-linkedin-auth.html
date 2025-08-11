@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LinkedIn Auth Test</title>
+</head>
+<body>
+    <h1>LinkedIn Authentication Test</h1>
+    
+    <h2>1. Test Direct LinkedIn OAuth URL</h2>
+    <p>This link should take you to LinkedIn to authorize:</p>
+    <a href="https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=862opndk5vhk47&redirect_uri=https://linkage-va-hub.onrender.com/auth/linkedin/callback&state=test123&scope=openid%20profile%20email" 
+       target="_blank" 
+       style="background: #0077B5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+        Test LinkedIn OAuth Flow
+    </a>
+    
+    <h2>2. Expected Flow:</h2>
+    <ol>
+        <li>Click the button above</li>
+        <li>You should see LinkedIn's authorization page</li>
+        <li>After authorizing, LinkedIn should redirect to: https://linkage-va-hub.onrender.com/auth/linkedin/callback</li>
+        <li>The frontend should then send the code to the backend</li>
+    </ol>
+    
+    <h2>3. Test Backend Directly:</h2>
+    <button onclick="testBackend()">Test Backend Callback</button>
+    <pre id="backend-result"></pre>
+    
+    <script>
+        async function testBackend() {
+            const result = document.getElementById('backend-result');
+            result.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('https://linkage-va-hub-api.onrender.com/api/auth/linkedin/callback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: 'test-code' })
+                });
+                
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+    
+    <h2>4. Configuration Check:</h2>
+    <button onclick="checkConfig()">Check Configuration</button>
+    <pre id="config-result"></pre>
+    
+    <script>
+        async function checkConfig() {
+            const result = document.getElementById('config-result');
+            result.textContent = 'Checking...';
+            
+            try {
+                const response = await fetch('https://linkage-va-hub-api.onrender.com/api/auth/linkedin/diagnostics');
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
