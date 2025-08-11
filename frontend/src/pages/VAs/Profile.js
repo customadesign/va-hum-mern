@@ -1254,11 +1254,19 @@ export default function VAProfile() {
     }
   );
 
+  // Determine placeholders vs stored defaults
+  const { user } = require('../../contexts/HybridAuthContext').useAuth();
+  const emailUsername = user?.email ? user.email.split('@')[0] : '';
+  const isDefaultBio = profile?.bio === 'Tell us about yourself...';
+  const isDefaultName =
+    profile?.name === 'New Professional' ||
+    (emailUsername && profile?.name === emailUsername);
+
   const formik = useFormik({
     initialValues: {
-      name: profile?.name || "",
+      name: isDefaultName ? "" : (profile?.name || ""),
       hero: profile?.hero || "",
-      bio: profile?.bio || "",
+      bio: isDefaultBio ? "" : (profile?.bio || ""),
       location: {
         street: profile?.location?.street || "",
         province: profile?.location?.province || profile?.location?.state || "", // Backward compatibility

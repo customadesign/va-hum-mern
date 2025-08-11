@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 export default function ProfileSetup() {
   const [profileType, setProfileType] = useState('');
   const navigate = useNavigate();
-  const { updateUser } = useAuth();
+  const { updateUser, clerkUser, user } = useAuth();
   const { branding } = useBranding();
 
   // Note: Do not auto-create any profile to avoid wrong selection
@@ -24,9 +24,12 @@ export default function ProfileSetup() {
       });
       
       if (type === 'va') {
+        const fullName = (clerkUser?.firstName || clerkUser?.lastName)
+          ? `${clerkUser?.firstName || ''} ${clerkUser?.lastName || ''}`.trim()
+          : (user?.name || (user?.email ? user.email.split('@')[0] : 'New Professional'));
         // Create VA profile
         const response = await api.post('/vas', {
-          name: 'New Professional',
+          name: fullName,
           bio: 'Tell us about yourself...',
           searchStatus: 'open'
         });
@@ -41,9 +44,12 @@ export default function ProfileSetup() {
           // non-blocking
         }
       } else if (type === 'business') {
+        const contactName = (clerkUser?.firstName || clerkUser?.lastName)
+          ? `${clerkUser?.firstName || ''} ${clerkUser?.lastName || ''}`.trim()
+          : (user?.name || (user?.email ? user.email.split('@')[0] : 'Primary Contact'));
         // Create Business profile
         const response = await api.post('/businesses', {
-          contactName: 'Primary Contact',
+          contactName,
           company: 'Your Company',
           bio: 'Tell us about your business...'
         });

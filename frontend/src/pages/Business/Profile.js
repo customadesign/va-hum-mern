@@ -118,12 +118,19 @@ export default function BusinessProfile() {
     }
   );
 
+  // If bio/contactName are still defaults from setup, show as placeholders
+  const { user } = require('../../contexts/HybridAuthContext').useAuth();
+  const emailUsername = user?.email ? user.email.split('@')[0] : '';
+  const isDefaultBio = profile?.bio === 'Tell us about your business...';
+  const isDefaultCompany = !profile?.company || profile?.company === 'Your Company';
+  const isDefaultContact = profile?.contactName === 'Primary Contact' || (emailUsername && profile?.contactName === emailUsername);
+
   const formik = useFormik({
     initialValues: {
       // Basic Information
-      contactName: profile?.contactName || '',
-      company: profile?.company || '',
-      bio: profile?.bio || '',
+      contactName: isDefaultContact ? '' : (profile?.contactName || ''),
+      company: isDefaultCompany ? '' : (profile?.company || ''),
+      bio: isDefaultBio ? '' : (profile?.bio || ''),
       contactRole: profile?.contactRole || '',
       email: profile?.email || '',
       phone: profile?.phone || '',
