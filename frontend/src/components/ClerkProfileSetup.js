@@ -3,12 +3,15 @@ import { useAuth } from '../contexts/HybridAuthContext';
 import { toast } from 'react-toastify';
 
 const ClerkProfileSetup = () => {
-  const { completeProfile, loading, clerkUser } = useAuth();
+  const { completeProfile, loading, clerkUser, user, authMethod } = useAuth();
   const [formData, setFormData] = useState({
     role: '',
     referralCode: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Get the current user (Clerk or JWT)
+  const currentUser = authMethod === 'clerk' ? clerkUser : user;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,6 +46,19 @@ const ClerkProfileSetup = () => {
       </div>
     );
   }
+  
+  // If no user data is available, show an error
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Profile Setup</h2>
+          <p className="text-gray-600 mb-4">Loading user information...</p>
+          <p className="text-sm text-gray-500">If this persists, please try refreshing the page.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -52,7 +68,7 @@ const ClerkProfileSetup = () => {
             Complete Your Profile
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Welcome {clerkUser?.firstName || clerkUser?.emailAddresses?.[0]?.emailAddress}! 
+            Welcome {currentUser?.firstName || currentUser?.name || currentUser?.emailAddresses?.[0]?.emailAddress || currentUser?.email}! 
             Let's set up your profile.
           </p>
         </div>
