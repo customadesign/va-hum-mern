@@ -6,6 +6,28 @@ const Business = require('../models/Business');
 
 const router = express.Router();
 
+// @desc    Health check for LinkedIn OAuth configuration
+// @route   GET /api/auth/linkedin/config-check
+// @access  Public
+router.get('/config-check', (req, res) => {
+  const redirectUri = getRedirectUri();
+  const config = {
+    configured: !!(process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET),
+    clientIdPresent: !!process.env.LINKEDIN_CLIENT_ID,
+    clientSecretPresent: !!process.env.LINKEDIN_CLIENT_SECRET,
+    redirectUri: redirectUri,
+    redirectUriEnv: process.env.LINKEDIN_REDIRECT_URI || 'not set',
+    esystemsMode: process.env.ESYSTEMS_MODE || 'false',
+    environment: process.env.NODE_ENV || 'development',
+    expectedFrontendCallback: redirectUri,
+    apiEndpoint: `${process.env.SERVER_URL || 'http://localhost:5000'}/api/auth/linkedin/callback`,
+    timestamp: new Date().toISOString()
+  };
+  
+  console.log('LinkedIn config check requested:', config);
+  res.json(config);
+});
+
 // LinkedIn OAuth configuration
 // Dynamically determine redirect URI based on deployment
 const getRedirectUri = () => {
@@ -40,12 +62,27 @@ router.options('/callback', (req, res) => {
 // @route   POST /api/auth/linkedin/callback
 // @access  Public
 router.post('/callback', async (req, res) => {
-  console.log('LinkedIn callback initiated');
-  console.log('Request body:', { code: req.body.code ? 'present' : 'missing' });
+  console.log('=== LinkedIn OAuth Callback Started ===');
+  console.log('Timestamp:', new Date().toISOString());
+  console.log('Request Headers:', {
+    origin: req.headers.origin,
+    referer: req.headers.referer,
+    contentType: req.headers['content-type']
+  });
+  console.log('Request body:', { 
+    code: req.body.code ? `present (${req.body.code.substring(0, 10)}...)` : 'missing',
+    fullBody: req.body 
+  });
   console.log('LinkedIn config:', {
-    clientId: LINKEDIN_CONFIG.clientId ? 'configured' : 'missing',
+    clientId: LINKEDIN_CONFIG.clientId ? `configured (${LINKEDIN_CONFIG.clientId.substring(0, 10)}...)` : 'missing',
     clientSecret: LINKEDIN_CONFIG.clientSecret ? 'configured' : 'missing',
-    redirectUri: LINKEDIN_CONFIG.redirectUri
+    redirectUri: LINKEDIN_CONFIG.redirectUri,
+    esystemsMode: process.env.ESYSTEMS_MODE
+  });
+  console.log('Environment:', {
+    NODE_ENV: process.env.NODE_ENV,
+    ESYSTEMS_MODE: process.env.ESYSTEMS_MODE,
+    LINKEDIN_REDIRECT_URI: process.env.LINKEDIN_REDIRECT_URI
   });
 
   try {
@@ -69,37 +106,81 @@ router.post('/callback', async (req, res) => {
     }
 
     // Exchange code for access token (send as x-www-form-urlencoded body)
-    const formBody = new URLSearchParams({
+    const tokenParams = {
       grant_type: 'authorization_code',
       code,
       client_id: LINKEDIN_CONFIG.clientId,
       client_secret: LINKEDIN_CONFIG.clientSecret,
       redirect_uri: LINKEDIN_CONFIG.redirectUri,
-    }).toString();
+    };
+    
+    console.log('Token exchange parameters:', {
+      grant_type: tokenParams.grant_type,
+      code: `${tokenParams.code.substring(0, 10)}...`,
+      client_id: `${tokenParams.client_id.substring(0, 10)}...`,
+      client_secret: 'hidden',
+      redirect_uri: tokenParams.redirect_uri
+    });
+    
+    const formBody = new URLSearchParams(tokenParams).toString();
 
-    console.log('Exchanging code for token with redirect URI:', LINKEDIN_CONFIG.redirectUri);
+    console.log('Exchanging code for token...');
+    console.log('LinkedIn token endpoint: https://www.linkedin.com/oauth/v2/accessToken');
+    console.log('Redirect URI being used:', LINKEDIN_CONFIG.redirectUri);
     const tokenResponse = await axios.post(
       'https://www.linkedin.com/oauth/v2/accessToken',
       formBody,
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json',
         },
         // Never throw on non-2xx so we can return a clean JSON error instead of a 502
         validateStatus: () => true,
         timeout: 15000,
       }
     );
-    console.log('Token exchange response status:', tokenResponse.status);
+    
+    console.log('Token exchange response:', {
+      status: tokenResponse.status,
+      statusText: tokenResponse.statusText,
+      headers: tokenResponse.headers,
+      data: tokenResponse.data
+    });
 
     if (tokenResponse.status !== 200 || !tokenResponse.data?.access_token) {
-      console.error('Token exchange failed:', tokenResponse.data);
+      console.error('=== Token Exchange Failed ===');
+      console.error('Response status:', tokenResponse.status);
+      console.error('Response data:', JSON.stringify(tokenResponse.data, null, 2));
+      
+      // Parse LinkedIn error response
+      let errorMessage = 'LinkedIn token exchange failed';
+      let errorDetails = tokenResponse.data;
+      
+      if (tokenResponse.data?.error) {
+        errorMessage = tokenResponse.data.error;
+        if (tokenResponse.data.error_description) {
+          errorDetails = tokenResponse.data.error_description;
+        }
+      }
+      
+      // Common error explanations
+      let hint = 'Check LinkedIn app configuration';
+      if (errorMessage === 'invalid_redirect_uri' || errorDetails?.includes('redirect_uri')) {
+        hint = `Redirect URI mismatch. Expected: ${LINKEDIN_CONFIG.redirectUri}. Ensure this EXACT URL is added to your LinkedIn app's OAuth 2.0 settings.`;
+      } else if (errorMessage === 'invalid_client') {
+        hint = 'Invalid client ID or secret. Verify your LinkedIn app credentials.';
+      } else if (errorMessage === 'invalid_grant') {
+        hint = 'Authorization code is invalid, expired, or already used. Try logging in again.';
+      }
+      
       return res.status(400).json({
-        error: 'LinkedIn token exchange failed',
+        error: errorMessage,
         status: tokenResponse.status,
-        details: tokenResponse.data,
+        details: errorDetails,
         redirectUriUsed: LINKEDIN_CONFIG.redirectUri,
-        hint: 'Check if redirect URI matches LinkedIn app configuration'
+        hint: hint,
+        timestamp: new Date().toISOString()
       });
     }
 
@@ -207,12 +288,29 @@ router.post('/callback', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('LinkedIn OAuth error:', error?.response?.data || error.message);
+    console.error('=== LinkedIn OAuth Error ===');
+    console.error('Error type:', error.name);
+    console.error('Error message:', error.message);
+    if (error.response) {
+      console.error('Error response:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+        headers: error.response.headers
+      });
+    }
     console.error('Stack trace:', error.stack);
+    console.error('Current config:', {
+      redirectUri: LINKEDIN_CONFIG.redirectUri,
+      clientIdPresent: !!LINKEDIN_CONFIG.clientId,
+      clientSecretPresent: !!LINKEDIN_CONFIG.clientSecret
+    });
+    
     res.status(500).json({ 
       error: 'Failed to authenticate with LinkedIn',
       details: error?.response?.data || error.message,
-      redirectUri: LINKEDIN_CONFIG.redirectUri
+      redirectUri: LINKEDIN_CONFIG.redirectUri,
+      timestamp: new Date().toISOString()
     });
   }
 });

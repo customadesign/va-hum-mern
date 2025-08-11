@@ -63,7 +63,21 @@ class LinkedInAuthService {
       scope: LINKEDIN_CONFIG.scope,
     });
 
-    return `https://www.linkedin.com/oauth/v2/authorization?${params.toString()}`;
+    const authUrl = `https://www.linkedin.com/oauth/v2/authorization?${params.toString()}`;
+    
+    console.log('=== LinkedIn OAuth URL Generated ===');
+    console.log('Auth URL:', authUrl);
+    console.log('OAuth Parameters:', {
+      response_type: 'code',
+      client_id: LINKEDIN_CONFIG.clientId ? `${LINKEDIN_CONFIG.clientId.substring(0, 10)}...` : 'missing',
+      redirect_uri: LINKEDIN_CONFIG.redirectUri,
+      state: LINKEDIN_CONFIG.state,
+      scope: LINKEDIN_CONFIG.scope
+    });
+    console.log('Environment:', process.env.NODE_ENV);
+    console.log('Brand:', process.env.REACT_APP_BRAND);
+    
+    return authUrl;
   }
 
   // Handle LinkedIn OAuth callback
@@ -83,16 +97,29 @@ class LinkedInAuthService {
       
       const callbackUrl = `${apiBase}/api/auth/linkedin/callback`;
       
+      console.log('=== LinkedIn Frontend Callback Handler ===');
       console.log('LinkedIn callback URL:', callbackUrl);
-      console.log('Sending code to backend for exchange');
+      console.log('Authorization code:', code ? `${code.substring(0, 10)}...` : 'missing');
+      console.log('State parameter:', state);
+      console.log('API Base:', apiBase);
+      console.log('Environment:', process.env.NODE_ENV);
+      console.log('Brand:', process.env.REACT_APP_BRAND);
+      console.log('Sending code to backend for exchange...');
 
       const response = await fetch(callbackUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({ code }),
         credentials: 'include', // Important for CORS
+      });
+      
+      console.log('Backend response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
       });
 
       // Parse JSON defensively to surface any HTML/error responses clearly
@@ -113,13 +140,43 @@ class LinkedInAuthService {
       }
       
       if (!response.ok) {
-        console.error('LinkedIn authentication failed:', data);
-        throw new Error(data.error || data.details || 'Failed to authenticate with LinkedIn');
+        console.error('=== LinkedIn Authentication Failed ===');
+        console.error('Response status:', response.status);
+        console.error('Response data:', data);
+        console.error('Error details:', {
+          error: data.error,
+          details: data.details,
+          hint: data.hint,
+          redirectUriUsed: data.redirectUriUsed,
+          timestamp: data.timestamp
+        });
+        
+        // Provide user-friendly error messages
+        let errorMessage = data.error || 'Failed to authenticate with LinkedIn';
+        if (data.hint) {
+          errorMessage += `. ${data.hint}`;
+        }
+        
+        throw new Error(errorMessage);
       }
+      
+      console.log('LinkedIn authentication successful:', {
+        success: data.success,
+        hasToken: !!data.token,
+        user: data.user
+      });
       
       return data; // Should include success, token, and user profile
     } catch (error) {
-      console.error('LinkedIn callback error:', error);
+      console.error('=== LinkedIn Callback Error ===');
+      console.error('Error type:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('Config used:', {
+        clientId: LINKEDIN_CONFIG.clientId ? `${LINKEDIN_CONFIG.clientId.substring(0, 10)}...` : 'missing',
+        redirectUri: LINKEDIN_CONFIG.redirectUri,
+        apiOrigin: this.apiOrigin
+      });
       throw error;
     }
   }
