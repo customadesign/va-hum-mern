@@ -100,12 +100,17 @@ const corsOptions = {
     if (process.env.NODE_ENV === 'production') {
       const allowedOrigins = [
         process.env.CLIENT_URL,
-        process.env.ESYSTEMS_CLIENT_URL
+        process.env.ESYSTEMS_CLIENT_URL,
+        'https://linkage-va-hub.onrender.com',
+        'https://esystems-management-hub.onrender.com',
+        'https://linkage-va-hub-api.onrender.com',
+        'https://esystems-management-hub-api.onrender.com'
       ].filter(Boolean); // Remove undefined values
       
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.log('CORS blocked origin:', origin);
         callback(new Error('Not allowed by CORS'));
       }
     } else {
@@ -113,7 +118,10 @@ const corsOptions = {
       callback(null, true);
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
 };
 
 // Create Express app

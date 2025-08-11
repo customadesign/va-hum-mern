@@ -12,7 +12,7 @@ const getRedirectUri = () => {
   if (process.env.LINKEDIN_REDIRECT_URI) {
     return process.env.LINKEDIN_REDIRECT_URI;
   }
-  // Default based on mode
+  // Default based on mode - frontend callback URL
   if (process.env.ESYSTEMS_MODE === 'true') {
     return 'https://esystems-management-hub.onrender.com/auth/linkedin/callback';
   }
@@ -25,21 +25,47 @@ const LINKEDIN_CONFIG = {
   redirectUri: getRedirectUri(),
 };
 
+// @desc    Handle preflight OPTIONS request for LinkedIn OAuth callback
+// @route   OPTIONS /api/auth/linkedin/callback
+// @access  Public
+router.options('/callback', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
+
 // @desc    Handle LinkedIn OAuth callback
 // @route   POST /api/auth/linkedin/callback
-// @access  Public (E Systems only)
+// @access  Public
 router.post('/callback', async (req, res) => {
+  console.log('LinkedIn callback initiated');
+  console.log('Request body:', { code: req.body.code ? 'present' : 'missing' });
+  console.log('LinkedIn config:', {
+    clientId: LINKEDIN_CONFIG.clientId ? 'configured' : 'missing',
+    clientSecret: LINKEDIN_CONFIG.clientSecret ? 'configured' : 'missing',
+    redirectUri: LINKEDIN_CONFIG.redirectUri
+  });
+
   try {
-    // LinkedIn integration available for both deployments
     // Check if LinkedIn credentials are configured
     if (!LINKEDIN_CONFIG.clientId || !LINKEDIN_CONFIG.clientSecret) {
-      return res.status(403).json({ error: 'LinkedIn integration not configured' });
+      console.error('LinkedIn credentials not configured');
+      return res.status(403).json({ 
+        error: 'LinkedIn integration not configured',
+        details: 'Missing client credentials' 
+      });
     }
 
     const { code } = req.body;
 
     if (!code) {
-      return res.status(400).json({ error: 'Authorization code is required' });
+      console.error('No authorization code provided');
+      return res.status(400).json({ 
+        error: 'Authorization code is required',
+        details: 'No code in request body' 
+      });
     }
 
     // Exchange code for access token (send as x-www-form-urlencoded body)
@@ -51,6 +77,7 @@ router.post('/callback', async (req, res) => {
       redirect_uri: LINKEDIN_CONFIG.redirectUri,
     }).toString();
 
+    console.log('Exchanging code for token with redirect URI:', LINKEDIN_CONFIG.redirectUri);
     const tokenResponse = await axios.post(
       'https://www.linkedin.com/oauth/v2/accessToken',
       formBody,
@@ -63,13 +90,16 @@ router.post('/callback', async (req, res) => {
         timeout: 15000,
       }
     );
+    console.log('Token exchange response status:', tokenResponse.status);
 
     if (tokenResponse.status !== 200 || !tokenResponse.data?.access_token) {
+      console.error('Token exchange failed:', tokenResponse.data);
       return res.status(400).json({
         error: 'LinkedIn token exchange failed',
         status: tokenResponse.status,
         details: tokenResponse.data,
         redirectUriUsed: LINKEDIN_CONFIG.redirectUri,
+        hint: 'Check if redirect URI matches LinkedIn app configuration'
       });
     }
 
@@ -178,9 +208,11 @@ router.post('/callback', async (req, res) => {
 
   } catch (error) {
     console.error('LinkedIn OAuth error:', error?.response?.data || error.message);
+    console.error('Stack trace:', error.stack);
     res.status(500).json({ 
       error: 'Failed to authenticate with LinkedIn',
-      details: error?.response?.data || error.message 
+      details: error?.response?.data || error.message,
+      redirectUri: LINKEDIN_CONFIG.redirectUri
     });
   }
 });

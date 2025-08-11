@@ -13,9 +13,18 @@ const getDeploymentUrl = () => {
 const getApiOrigin = () => {
   try {
     const api = process.env.REACT_APP_API_URL || '';
+    // If API URL already has /api, extract just the origin
+    if (api.includes('/api')) {
+      return api.replace('/api', '');
+    }
     return new URL(api).origin;
   } catch (e) {
-    return '';
+    console.error('Error parsing API URL:', e);
+    // Fallback to known production URLs
+    if (process.env.REACT_APP_BRAND === 'esystems') {
+      return 'https://esystems-management-hub-api.onrender.com';
+    }
+    return 'https://linkage-va-hub-api.onrender.com';
   }
 };
 
@@ -67,10 +76,15 @@ class LinkedInAuthService {
     // In production, store state in sessionStorage before redirect
 
     try {
-      // Exchange code for access token via our backend (use API origin, not frontend origin)
-      const callbackUrl = process.env.NODE_ENV === 'production'
-        ? `${this.apiOrigin}/api/auth/linkedin/callback`
-        : 'http://localhost:5000/api/auth/linkedin/callback';
+      // Exchange code for access token via our backend
+      const apiBase = process.env.NODE_ENV === 'production'
+        ? this.apiOrigin
+        : 'http://localhost:5000';
+      
+      const callbackUrl = `${apiBase}/api/auth/linkedin/callback`;
+      
+      console.log('LinkedIn callback URL:', callbackUrl);
+      console.log('Sending code to backend for exchange');
 
       const response = await fetch(callbackUrl, {
         method: 'POST',
@@ -78,17 +92,32 @@ class LinkedInAuthService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ code }),
+        credentials: 'include', // Important for CORS
       });
 
       // Parse JSON defensively to surface any HTML/error responses clearly
       let data;
-      try {
-        data = await response.json();
-      } catch (err) {
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch (err) {
+          console.error('Failed to parse JSON response:', err);
+          throw new Error('Invalid JSON response from server');
+        }
+      } else {
         const text = await response.text();
-        throw new Error(text || 'Failed to authenticate with LinkedIn');
+        console.error('Non-JSON response received:', text);
+        throw new Error('Server returned non-JSON response. This might be a CORS or routing issue.');
       }
-      return data; // Should include access_token and user profile
+      
+      if (!response.ok) {
+        console.error('LinkedIn authentication failed:', data);
+        throw new Error(data.error || data.details || 'Failed to authenticate with LinkedIn');
+      }
+      
+      return data; // Should include success, token, and user profile
     } catch (error) {
       console.error('LinkedIn callback error:', error);
       throw error;
