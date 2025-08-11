@@ -66,14 +66,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', response.token);
       setUser(response.user);
       
-      // Redirect based on user type
-      if (response.user.va) {
-        navigate('/dashboard');
-      } else if (response.user.business) {
-        navigate('/vas');
-      } else {
-        navigate('/profile-setup');
-      }
+      // Redirect to home after login
+      navigate('/');
       
       toast.success('Welcome back!');
       return response;

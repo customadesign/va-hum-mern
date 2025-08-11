@@ -24,7 +24,7 @@ export default function LinkedInLoginButton({
       const result = await signIn.authenticateWithRedirect({
         strategy: 'oauth_linkedin_oidc', // Correct strategy name for LinkedIn
         redirectUrl: '/auth/linkedin/callback',
-        redirectUrlComplete: '/business/profile?linkedin=true'
+        redirectUrlComplete: '/'
       });
       
       console.log('LinkedIn OAuth initiated via Clerk:', result);

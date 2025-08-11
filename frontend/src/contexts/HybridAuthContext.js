@@ -148,9 +148,11 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data.user);
       setAuthMethod('clerk');
       
-      // Check if user needs to complete profile
-      if (!response.data.user.role) {
-        navigate('/profile-setup');
+      // Check if user needs to complete profile (only if no role AND no VA/Business profile)
+      if (!response.data.user.role && !response.data.user.va && !response.data.user.business) {
+        if (window.location.pathname !== '/profile-setup') {
+          navigate('/profile-setup');
+        }
       }
     } catch (error) {
       console.error('Error syncing Clerk user data:', error);
@@ -175,14 +177,8 @@ export const AuthProvider = ({ children }) => {
       setUser(response.user);
       setAuthMethod('jwt');
       
-      // Redirect based on user type
-      if (response.user.va) {
-        navigate('/dashboard');
-      } else if (response.user.business) {
-        navigate('/vas');
-      } else {
-        navigate('/profile-setup');
-      }
+      // Redirect to home after login
+      navigate('/');
       
       toast.success('Welcome back!');
       return response;
@@ -217,7 +213,7 @@ export const AuthProvider = ({ children }) => {
         const result = await signIn.authenticateWithRedirect({
           strategy: 'oauth_linkedin_oidc', // Correct strategy name for LinkedIn
           redirectUrl: '/auth/linkedin/callback',
-          redirectUrlComplete: '/business/profile?linkedin=true'
+          redirectUrlComplete: '/'
         });
         
         console.log('LinkedIn OAuth initiated via Clerk:', result);
@@ -228,7 +224,7 @@ export const AuthProvider = ({ children }) => {
         const result = await signIn.authenticateWithRedirect({
           strategy: 'oauth',
           redirectUrl: '/auth/linkedin/callback',
-          redirectUrlComplete: '/business/profile?linkedin=true',
+          redirectUrlComplete: '/',
           additionalParams: {
             provider: 'linkedin'
           }
@@ -341,7 +337,8 @@ export const AuthProvider = ({ children }) => {
     isVA: !!user?.va,
     isBusiness: !!user?.business,
     isAdmin: !!user?.admin,
-    needsProfileSetup: (isSignedIn && !user?.role) || (user && !user.role),
+    // Consider profile complete if role exists OR linked VA/Business profile exists
+    needsProfileSetup: (isSignedIn && !user?.role && !user?.va && !user?.business) || (user && !user.role && !user.va && !user.business),
     
     // Auth methods
     login,

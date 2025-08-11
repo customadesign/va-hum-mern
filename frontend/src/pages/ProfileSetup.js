@@ -23,6 +23,11 @@ export default function ProfileSetup() {
     setProfileType(type);
     
     try {
+      // Persist the user's choice (role) in backend so we don't ask again
+      await api.post('/clerk/complete-profile', {
+        role: type
+      });
+      
       if (type === 'va') {
         // Create VA profile
         const response = await api.post('/vas', {
@@ -31,8 +36,8 @@ export default function ProfileSetup() {
           searchStatus: 'open'
         });
         
-        // Update user context
-        const userResponse = await api.get('/auth/me');
+        // Update user context (Clerk-aware endpoint)
+        const userResponse = await api.get('/clerk/me');
         updateUser(userResponse.data.user);
         
         toast.success('VA profile created! Please complete your profile.');
@@ -45,8 +50,8 @@ export default function ProfileSetup() {
           bio: 'Tell us about your business...'
         });
         
-        // Update user context
-        const userResponse = await api.get('/auth/me');
+        // Update user context (Clerk-aware endpoint)
+        const userResponse = await api.get('/clerk/me');
         updateUser(userResponse.data.user);
         
         toast.success('Business profile created! Please complete your profile.');

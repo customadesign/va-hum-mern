@@ -65,6 +65,7 @@ router.post('/sync-user', async (req, res) => {
         id: user._id,
         email: user.email,
         name: user.name,
+        role: user.role,
         admin: user.admin,
         referralCode: user.referralCode,
         va: user.va,

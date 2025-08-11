@@ -38,8 +38,8 @@ export default function LinkedInCallback() {
               console.log('User synced successfully:', response.data.user);
               toast.success('Successfully authenticated with LinkedIn!');
               
-              // Redirect to profile setup with LinkedIn data
-              navigate('/business/profile?linkedin=true');
+              // Redirect to home after successful auth
+              navigate('/');
             } else {
               throw new Error('Failed to sync user data');
             }

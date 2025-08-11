@@ -9,8 +9,8 @@ const upload = require('../utils/upload');
 
 // @route   GET /api/businesses/me
 // @desc    Get current business profile
-// @access  Private/Business
-router.get('/me', protect, authorize('business'), async (req, res) => {
+// @access  Private (allow users without a business profile to get 404 instead of 403)
+router.get('/me', protect, async (req, res) => {
   try {
     const business = await Business.findOne({ user: req.user._id })
       .populate('user', 'email');
@@ -36,18 +36,11 @@ router.get('/me', protect, authorize('business'), async (req, res) => {
 });
 
 // @route   PUT /api/businesses/me
-// @desc    Update current business profile
-// @access  Private/Business
-router.put('/me', protect, authorize('business'), async (req, res) => {
+// @desc    Upsert current business profile (create if missing)
+// @access  Private
+router.put('/me', protect, async (req, res) => {
   try {
-    const business = await Business.findOne({ user: req.user._id });
-
-    if (!business) {
-      return res.status(404).json({
-        success: false,
-        error: 'Business profile not found'
-      });
-    }
+    let business = await Business.findOne({ user: req.user._id });
 
     // Update fields
     const updateFields = [
@@ -57,13 +50,29 @@ router.put('/me', protect, authorize('business'), async (req, res) => {
       'surveyRequestNotifications'
     ];
 
-    updateFields.forEach(field => {
-      if (req.body[field] !== undefined) {
-        business[field] = req.body[field];
+    if (!business) {
+      // Create if missing (upsert behavior)
+      const doc = { user: req.user._id };
+      updateFields.forEach(field => {
+        if (req.body[field] !== undefined) {
+          doc[field] = req.body[field];
+        }
+      });
+      business = await Business.create(doc);
+      // Link on user for future role checks
+      if (!req.user.business) {
+        req.user.business = business._id;
+        await req.user.save();
       }
-    });
-
-    await business.save();
+    } else {
+      // Update existing
+      updateFields.forEach(field => {
+        if (req.body[field] !== undefined) {
+          business[field] = req.body[field];
+        }
+      });
+      await business.save();
+    }
 
     res.json({
       success: true,
