@@ -10,17 +10,32 @@ const router = express.Router();
 // @route   GET /api/auth/linkedin/config-check
 // @access  Public
 router.get('/config-check', (req, res) => {
-  const redirectUri = getRedirectUri();
+  const redirectUri = LINKEDIN_CONFIG.redirectUri;
+  
+  // Detect potential misconfigurations
+  const issues = [];
+  if (redirectUri.includes('/api/')) {
+    issues.push('Redirect URI contains /api/ - should be frontend URL');
+  }
+  if (redirectUri.includes('-api.onrender.com')) {
+    issues.push('Redirect URI points to API domain - should be frontend domain');
+  }
+  
   const config = {
     configured: !!(process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET),
     clientIdPresent: !!process.env.LINKEDIN_CLIENT_ID,
     clientSecretPresent: !!process.env.LINKEDIN_CLIENT_SECRET,
     redirectUri: redirectUri,
-    redirectUriEnv: process.env.LINKEDIN_REDIRECT_URI || 'not set',
+    redirectUriEnv: process.env.LINKEDIN_REDIRECT_URI || 'not set (using defaults)',
     esystemsMode: process.env.ESYSTEMS_MODE || 'false',
     environment: process.env.NODE_ENV || 'development',
     expectedFrontendCallback: redirectUri,
     apiEndpoint: `${process.env.SERVER_URL || 'http://localhost:5000'}/api/auth/linkedin/callback`,
+    configurationIssues: issues,
+    isConfigurationValid: issues.length === 0,
+    instructions: issues.length > 0 ? 
+      'Remove the API URL from LinkedIn app and keep only the frontend URL' : 
+      'Configuration appears correct',
     timestamp: new Date().toISOString()
   };
   
@@ -29,23 +44,63 @@ router.get('/config-check', (req, res) => {
 });
 
 // LinkedIn OAuth configuration
-// Dynamically determine redirect URI based on deployment
+// IMPORTANT: The redirect URI must match EXACTLY what's configured in LinkedIn app
+// This should be the FRONTEND URL where LinkedIn redirects users after authorization
 const getRedirectUri = () => {
+  // Allow override via environment variable for flexibility
   if (process.env.LINKEDIN_REDIRECT_URI) {
+    console.log('Using LINKEDIN_REDIRECT_URI from environment:', process.env.LINKEDIN_REDIRECT_URI);
     return process.env.LINKEDIN_REDIRECT_URI;
   }
-  // Default based on mode - frontend callback URL
-  if (process.env.ESYSTEMS_MODE === 'true') {
-    return 'https://esystems-management-hub.onrender.com/auth/linkedin/callback';
+  
+  // Production URLs - MUST match LinkedIn app configuration exactly
+  if (process.env.NODE_ENV === 'production') {
+    if (process.env.ESYSTEMS_MODE === 'true') {
+      return 'https://esystems-management-hub.onrender.com/auth/linkedin/callback';
+    }
+    return 'https://linkage-va-hub.onrender.com/auth/linkedin/callback';
   }
-  return 'https://linkage-va-hub.onrender.com/auth/linkedin/callback';
+  
+  // Development URL
+  return 'http://localhost:3000/auth/linkedin/callback';
+};
+
+// Validate redirect URI configuration on startup
+const validateRedirectUri = () => {
+  const redirectUri = getRedirectUri();
+  const warnings = [];
+  
+  // Check for common misconfigurations
+  if (redirectUri.includes('/api/')) {
+    warnings.push('WARNING: Redirect URI contains /api/ - this should be the FRONTEND URL, not the API URL');
+  }
+  
+  if (redirectUri.includes('-api.onrender.com')) {
+    warnings.push('WARNING: Redirect URI points to API domain - this should be the FRONTEND domain');
+  }
+  
+  if (warnings.length > 0) {
+    console.error('\n=== LinkedIn OAuth Configuration Issues ===');
+    warnings.forEach(w => console.error(w));
+    console.error('Current redirect URI:', redirectUri);
+    console.error('This MUST match exactly what is configured in your LinkedIn app');
+    console.error('==========================================\n');
+  }
+  
+  return redirectUri;
 };
 
 const LINKEDIN_CONFIG = {
   clientId: process.env.LINKEDIN_CLIENT_ID,
   clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-  redirectUri: getRedirectUri(),
+  redirectUri: validateRedirectUri(), // Validate on startup
 };
+
+// Log configuration on startup for debugging
+if (LINKEDIN_CONFIG.clientId && LINKEDIN_CONFIG.clientSecret) {
+  console.log('LinkedIn OAuth configured with redirect URI:', LINKEDIN_CONFIG.redirectUri);
+  console.log('Ensure this EXACT URL is added to your LinkedIn app\'s OAuth 2.0 settings');
+}
 
 // @desc    Handle preflight OPTIONS request for LinkedIn OAuth callback
 // @route   OPTIONS /api/auth/linkedin/callback
@@ -164,14 +219,35 @@ router.post('/callback', async (req, res) => {
         }
       }
       
-      // Common error explanations
+      // Common error explanations with detailed instructions
       let hint = 'Check LinkedIn app configuration';
+      let resolution = null;
+      
       if (errorMessage === 'invalid_redirect_uri' || errorDetails?.includes('redirect_uri')) {
-        hint = `Redirect URI mismatch. Expected: ${LINKEDIN_CONFIG.redirectUri}. Ensure this EXACT URL is added to your LinkedIn app's OAuth 2.0 settings.`;
+        hint = `Redirect URI mismatch. The backend is using: ${LINKEDIN_CONFIG.redirectUri}`;
+        resolution = [
+          '1. Go to https://www.linkedin.com/developers/apps',
+          '2. Select your app',
+          '3. Go to Auth tab',
+          '4. Under OAuth 2.0 settings, ensure you have ONLY this redirect URL:',
+          `   ${LINKEDIN_CONFIG.redirectUri}`,
+          '5. Remove any API URLs (containing /api/ or -api.onrender.com)',
+          '6. Save changes and wait 5 minutes for LinkedIn to update'
+        ];
       } else if (errorMessage === 'invalid_client') {
-        hint = 'Invalid client ID or secret. Verify your LinkedIn app credentials.';
+        hint = 'Invalid client ID or secret';
+        resolution = [
+          '1. Verify LINKEDIN_CLIENT_ID and LINKEDIN_CLIENT_SECRET in .env',
+          '2. Ensure no extra spaces or quotes in the values',
+          '3. Check that the app is not in development mode if using production'
+        ];
       } else if (errorMessage === 'invalid_grant') {
-        hint = 'Authorization code is invalid, expired, or already used. Try logging in again.';
+        hint = 'Authorization code is invalid, expired, or already used';
+        resolution = [
+          '1. Try logging in again from the beginning',
+          '2. Clear browser cookies for linkedin.com',
+          '3. Ensure you\'re not double-clicking the login button'
+        ];
       }
       
       return res.status(400).json({
@@ -180,6 +256,8 @@ router.post('/callback', async (req, res) => {
         details: errorDetails,
         redirectUriUsed: LINKEDIN_CONFIG.redirectUri,
         hint: hint,
+        resolution: resolution,
+        linkedinAppUrl: 'https://www.linkedin.com/developers/apps',
         timestamp: new Date().toISOString()
       });
     }

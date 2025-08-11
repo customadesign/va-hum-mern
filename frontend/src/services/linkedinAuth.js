@@ -54,6 +54,34 @@ class LinkedInAuthService {
     if (!this.isAvailable()) {
       throw new Error('LinkedIn integration is not configured');
     }
+    
+    // Validate redirect URI doesn't contain common mistakes
+    const redirectUri = LINKEDIN_CONFIG.redirectUri;
+    const warnings = [];
+    
+    if (redirectUri.includes('/api/')) {
+      warnings.push('WARNING: Redirect URI contains /api/ - this will cause authentication to fail');
+    }
+    
+    if (redirectUri.includes('-api.onrender.com')) {
+      warnings.push('WARNING: Redirect URI points to API domain - this will cause authentication to fail');
+    }
+    
+    if (process.env.NODE_ENV === 'production' && redirectUri.includes('localhost')) {
+      warnings.push('WARNING: Using localhost redirect URI in production');
+    }
+    
+    if (warnings.length > 0) {
+      console.error('=== LinkedIn OAuth Configuration Issues ===');
+      warnings.forEach(warning => console.error(warning));
+      console.error('Current redirect URI:', redirectUri);
+      console.error('This MUST match exactly what is configured in your LinkedIn app');
+      console.error('Expected for production:', 
+        this.isESystemsMode 
+          ? 'https://esystems-management-hub.onrender.com/auth/linkedin/callback'
+          : 'https://linkage-va-hub.onrender.com/auth/linkedin/callback'
+      );
+    }
 
     const params = new URLSearchParams({
       response_type: 'code',
@@ -76,6 +104,12 @@ class LinkedInAuthService {
     });
     console.log('Environment:', process.env.NODE_ENV);
     console.log('Brand:', process.env.REACT_APP_BRAND);
+    
+    // Log critical configuration info
+    if (process.env.NODE_ENV === 'production') {
+      console.log('CRITICAL: Ensure LinkedIn app has this EXACT redirect URL:', redirectUri);
+      console.log('LinkedIn App Settings: https://www.linkedin.com/developers/apps');
+    }
     
     return authUrl;
   }
@@ -148,13 +182,29 @@ class LinkedInAuthService {
           details: data.details,
           hint: data.hint,
           redirectUriUsed: data.redirectUriUsed,
+          resolution: data.resolution,
+          linkedinAppUrl: data.linkedinAppUrl,
           timestamp: data.timestamp
         });
+        
+        // Log resolution steps if provided
+        if (data.resolution && Array.isArray(data.resolution)) {
+          console.error('Resolution steps:');
+          data.resolution.forEach((step, index) => {
+            console.error(step);
+          });
+        }
         
         // Provide user-friendly error messages
         let errorMessage = data.error || 'Failed to authenticate with LinkedIn';
         if (data.hint) {
           errorMessage += `. ${data.hint}`;
+        }
+        
+        // For redirect URI errors, provide clearer instructions
+        if (data.error === 'invalid_redirect_uri' || data.details?.includes('redirect_uri')) {
+          errorMessage = 'LinkedIn configuration error: The redirect URL is not properly configured in the LinkedIn app. Please contact support.';
+          console.error('IMPORTANT: The LinkedIn app must be configured with this EXACT redirect URL:', data.redirectUriUsed);
         }
         
         throw new Error(errorMessage);

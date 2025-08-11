@@ -87,6 +87,7 @@ if (process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET) {
 
 // Import middleware
 const errorHandler = require('./middleware/error');
+const { validateLinkedInConfig, logLinkedInRequest } = require('./middleware/linkedinValidation');
 
 
 
@@ -203,6 +204,10 @@ app.use('/api/', limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// LinkedIn OAuth validation middleware
+app.use(validateLinkedInConfig);
+app.use(logLinkedInRequest);
+
 // Health check route
 app.get('/health', (req, res) => {
   res.json({ 
@@ -265,6 +270,16 @@ if (clerkAuthRoutes) {
 if (linkedinAuthRoutes) {
   app.use('/api/auth/linkedin', linkedinAuthRoutes);
   app.use('/api/linkedin', linkedinAuthRoutes);
+  
+  // Add diagnostics routes for debugging LinkedIn OAuth issues
+  try {
+    const linkedinDiagnostics = require('./routes/linkedinDiagnostics');
+    app.use('/api/auth/linkedin', linkedinDiagnostics);
+    console.log('LinkedIn diagnostics endpoints enabled');
+  } catch (error) {
+    console.log('LinkedIn diagnostics not available:', error.message);
+  }
+  
   const deployment = process.env.ESYSTEMS_MODE === 'true' ? 'E Systems' : 'Linkage';
   console.log(`LinkedIn authentication routes enabled for ${deployment} (DEPRECATED)`);
 }
