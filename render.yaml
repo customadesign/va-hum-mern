@@ -43,3 +43,5 @@ services:
     envVars:
       - key: REACT_APP_API_URL
         value: https://linkage-va-hub-api.onrender.com/api # Update after backend deploys
+      - key: REACT_APP_LINKEDIN_CLIENT_ID
+        value: 862opndk5vhk47 # LinkedIn OAuth Client ID
