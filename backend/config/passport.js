@@ -8,12 +8,12 @@ const { isESystemsMode } = require('../utils/esystems');
 const getLinkedInCredentials = () => {
   if (isESystemsMode()) {
     return {
-      clientID: process.env.LINKEDIN_ESYSTEMS_CLIENT_ID,
+      clientId: process.env.LINKEDIN_ESYSTEMS_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_ESYSTEMS_CLIENT_SECRET
     };
   }
   return {
-    clientID: process.env.LINKEDIN_CLIENT_ID,
+    clientId: process.env.LINKEDIN_CLIENT_ID,
     clientSecret: process.env.LINKEDIN_CLIENT_SECRET
   };
 };
@@ -21,10 +21,10 @@ const getLinkedInCredentials = () => {
 const credentials = getLinkedInCredentials();
 
 // Only register LinkedIn strategy if credentials are available
-if (credentials.clientID && credentials.clientSecret) {
+if (credentials.clientId && credentials.clientSecret) {
   console.log('Initializing LinkedIn OAuth strategy...');
   passport.use(new LinkedInStrategy({
-    clientID: credentials.clientID,
+    clientID: credentials.clientId,
     clientSecret: credentials.clientSecret,
     callbackURL: process.env.NODE_ENV === 'production' 
       ? (isESystemsMode() ? "https://esystems-management-hub.onrender.com/api/auth/linkedin/callback" : "https://linkage-va-hub-api.onrender.com/api/auth/linkedin/callback")
@@ -101,10 +101,10 @@ if (credentials.clientID && credentials.clientSecret) {
 } else {
   console.warn('LinkedIn OAuth credentials not found - LinkedIn login will be disabled');
   console.warn('Available vars:', {
-    LINKEDIN_CLIENT_ID: !!process.env.LINKEDIN_CLIENT_ID,
-    LINKEDIN_CLIENT_SECRET: !!process.env.LINKEDIN_CLIENT_SECRET,
-    LINKEDIN_ESYSTEMS_CLIENT_ID: !!process.env.LINKEDIN_ESYSTEMS_CLIENT_ID,
-    LINKEDIN_ESYSTEMS_CLIENT_SECRET: !!process.env.LINKEDIN_ESYSTEMS_CLIENT_SECRET,
+    LINKEDIN_CLIENT_ID: !!getLinkedInCredentials().clientId,
+    LINKEDIN_CLIENT_SECRET: !!getLinkedInCredentials().clientSecret,
+    LINKEDIN_ESYSTEMS_CLIENT_ID: !!getLinkedInCredentials().clientId,
+    LINKEDIN_ESYSTEMS_CLIENT_SECRET: !!getLinkedInCredentials().clientSecret,
     isESystemsMode: isESystemsMode()
   });
 }

@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import authService from '../services/auth';
-import linkedinAuthService from '../services/linkedinAuth';
+import { useUser, useAuth as useClerkAuth, useSignIn } from '@clerk/clerk-react';
 
 const AuthContext = createContext({});
 
@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { signIn } = useSignIn();
 
   // Check if user is logged in on mount
   useEffect(() => {
@@ -82,18 +83,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const linkedinLogin = () => {
+  // LinkedIn OAuth via Clerk
+  const linkedinLogin = async () => {
     try {
-      // Check if LinkedIn is available
-      if (!linkedinAuthService.isAvailable()) {
-        toast.error('LinkedIn authentication is not configured');
-        return;
-      }
+      // Use Clerk's LinkedIn OAuth instead of separate library
+      const result = await signIn.authenticateWithRedirect({
+        strategy: 'oauth_linkedin_oidc', // Correct strategy name for LinkedIn
+        redirectUrl: '/auth/linkedin/callback',
+        redirectUrlComplete: '/business/profile?linkedin=true'
+      });
       
-      // Get the OAuth URL and redirect
-      const authUrl = linkedinAuthService.getAuthUrl();
-      console.log('Redirecting to LinkedIn OAuth:', authUrl);
-      window.location.href = authUrl;
+      console.log('LinkedIn OAuth initiated via Clerk:', result);
     } catch (error) {
       console.error('LinkedIn login error:', error);
       toast.error('Failed to start LinkedIn authentication');

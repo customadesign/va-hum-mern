@@ -1,21 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import linkedinAuthService from '../services/linkedinAuth';
-import { useAuth } from '../contexts/HybridAuthContext';
+import { useUser } from '@clerk/clerk-react';
+import api from '../services/api';
 
 export default function LinkedInCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { updateUser } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { user: clerkUser, isLoaded } = useUser();
 
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        const code = searchParams.get('code');
-        const state = searchParams.get('state');
+        // Wait for Clerk user to be loaded
+        if (!isLoaded) return;
+        
+        // Clerk handles the OAuth callback automatically
+        console.log('LinkedIn OAuth callback via Clerk completed');
+        
+        // Check if there are any error parameters
         const error = searchParams.get('error');
         const errorDescription = searchParams.get('error_description');
 
@@ -23,77 +26,54 @@ export default function LinkedInCallback() {
           throw new Error(errorDescription || error);
         }
 
-        if (!code) {
-          throw new Error('No authorization code received');
-        }
-
-        // Exchange code for access token and user data
-        const response = await linkedinAuthService.handleCallback(code, state);
-
-        if (response.success && response.token) {
-          // Store token
-          localStorage.setItem('token', response.token);
-          
-          // Update auth context
-          await updateUser(response.user);
-          
-          // Redirect based on user role
-          if (response.user.role === 'business') {
-            navigate('/business/profile');
-            toast.success('Successfully logged in with LinkedIn!');
-          } else if (response.user.role === 'va') {
-            navigate('/profile');
-            toast.success('Successfully logged in with LinkedIn!');
-          } else {
-            navigate('/dashboard');
+        // If we have a Clerk user, sync with backend
+        if (clerkUser) {
+          try {
+            console.log('Syncing Clerk user with backend...');
+            const response = await api.post('/clerk/sync-user', {
+              clerkUserId: clerkUser.id
+            });
+            
+            if (response.data.success) {
+              console.log('User synced successfully:', response.data.user);
+              toast.success('Successfully authenticated with LinkedIn!');
+              
+              // Redirect to profile setup with LinkedIn data
+              navigate('/business/profile?linkedin=true');
+            } else {
+              throw new Error('Failed to sync user data');
+            }
+          } catch (syncError) {
+            console.error('Error syncing user:', syncError);
+            toast.error('Authentication successful but profile sync failed. Please contact support.');
+            navigate('/login');
           }
         } else {
-          throw new Error('Failed to authenticate with LinkedIn');
+          // No Clerk user, redirect to login
+          toast.error('LinkedIn authentication failed. Please try again.');
+          navigate('/login');
         }
+        
       } catch (error) {
         console.error('LinkedIn callback error:', error);
-        setError(error.message);
         toast.error(error.message || 'Failed to authenticate with LinkedIn');
         
         // Redirect to login after error
         setTimeout(() => {
           navigate('/login');
         }, 3000);
-      } finally {
-        setLoading(false);
       }
     };
 
     handleCallback();
-  }, [searchParams, navigate, updateUser]);
+  }, [searchParams, navigate, clerkUser, isLoaded]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Completing LinkedIn authentication...</p>
-        </div>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Completing LinkedIn authentication...</p>
       </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="text-red-600 mb-4">
-            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h2 className="text-lg font-medium text-gray-900 mb-2">Authentication Failed</h2>
-          <p className="text-gray-600">{error}</p>
-          <p className="text-sm text-gray-500 mt-2">Redirecting to login page...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 }

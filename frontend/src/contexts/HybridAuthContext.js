@@ -1,10 +1,9 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
+import { useUser, useAuth as useClerkAuth, useSignIn } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import api, { setTokenGetter } from '../services/api';
 import authService from '../services/auth';
-import linkedinAuthService from '../services/linkedinAuth';
+import api, { setTokenGetter } from '../services/api';
 
 const AuthContext = createContext({});
 
@@ -20,6 +19,7 @@ export const AuthProvider = ({ children }) => {
   // Clerk auth hooks
   const { user: clerkUser, isLoaded: clerkLoaded, isSignedIn } = useUser();
   const { getToken: getClerkToken, signOut: clerkSignOut } = useClerkAuth();
+  const { signIn } = useSignIn();
   
   // Local state
   const [user, setUser] = useState(null);
@@ -208,19 +208,34 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // LinkedIn OAuth
-  const linkedinLogin = () => {
+  // LinkedIn OAuth via Clerk
+  const linkedinLogin = async () => {
     try {
-      // Check if LinkedIn is available
-      if (!linkedinAuthService.isAvailable()) {
-        toast.error('LinkedIn authentication is not configured');
-        return;
+      // Use Clerk's LinkedIn OAuth instead of separate library
+      // Try the specific strategy first, fallback to generic OAuth
+      try {
+        const result = await signIn.authenticateWithRedirect({
+          strategy: 'oauth_linkedin_oidc', // Correct strategy name for LinkedIn
+          redirectUrl: '/auth/linkedin/callback',
+          redirectUrlComplete: '/business/profile?linkedin=true'
+        });
+        
+        console.log('LinkedIn OAuth initiated via Clerk:', result);
+      } catch (strategyError) {
+        // Fallback to generic OAuth method
+        console.log('Specific strategy failed, trying generic OAuth:', strategyError);
+        
+        const result = await signIn.authenticateWithRedirect({
+          strategy: 'oauth',
+          redirectUrl: '/auth/linkedin/callback',
+          redirectUrlComplete: '/business/profile?linkedin=true',
+          additionalParams: {
+            provider: 'linkedin'
+          }
+        });
+        
+        console.log('LinkedIn OAuth initiated via generic method:', result);
       }
-      
-      // Get the OAuth URL and redirect
-      const authUrl = linkedinAuthService.getAuthUrl();
-      console.log('Redirecting to LinkedIn OAuth:', authUrl);
-      window.location.href = authUrl;
     } catch (error) {
       console.error('LinkedIn login error:', error);
       toast.error('Failed to start LinkedIn authentication');

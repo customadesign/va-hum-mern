@@ -6,7 +6,6 @@ import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import { useBranding } from '../../contexts/BrandingContext';
-import linkedinAuth from '../../services/linkedinAuth';
 import { 
   CameraIcon, 
   InformationCircleIcon, 
@@ -186,15 +185,14 @@ export default function BusinessProfile() {
     const isLinkedInFlow = urlParams.get('linkedin') === 'true';
     const linkedinData = sessionStorage.getItem('linkedinProfile');
 
-    if (isLinkedInFlow && linkedinData && linkedinAuth.isAvailable()) {
+    if (isLinkedInFlow && linkedinData) {
       try {
         const profileData = JSON.parse(linkedinData);
-        const mappedData = linkedinAuth.mapLinkedInDataToProfile(profileData);
         
         // Auto-fill the form with LinkedIn data
         formik.setValues({
           ...formik.values,
-          ...mappedData,
+          ...profileData,
         });
 
         // Mark as LinkedIn filled and show success message

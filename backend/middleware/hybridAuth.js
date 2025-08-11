@@ -12,11 +12,16 @@ const { protect: clerkProtect, authorize: clerkAuthorize, legacyProtect: clerkLe
 
 // Hybrid protect middleware - tries Clerk first, then legacy JWT
 exports.protect = (req, res, next) => {
+  console.log('Hybrid auth - checking authentication method...');
+  console.log('Hybrid auth - CLERK_SECRET_KEY present:', !!process.env.CLERK_SECRET_KEY);
+  
   // Check if Clerk is configured
   if (process.env.CLERK_SECRET_KEY) {
-    // Try Clerk authentication first
-    return clerkLegacyProtect(req, res, next);
+    console.log('Hybrid auth - Using Clerk authentication');
+    // Use the main Clerk protect middleware directly
+    return clerkProtect(req, res, next);
   } else {
+    console.log('Hybrid auth - Using legacy JWT authentication');
     // Fall back to legacy JWT authentication
     return legacyProtect(req, res, next);
   }

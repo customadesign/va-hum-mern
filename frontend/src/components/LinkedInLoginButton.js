@@ -1,6 +1,6 @@
 import React from 'react';
 import { useBranding } from '../contexts/BrandingContext';
-import linkedinAuth from '../services/linkedinAuth';
+import { useSignIn } from '@clerk/clerk-react';
 
 export default function LinkedInLoginButton({ 
   onLinkedInData, 
@@ -9,17 +9,25 @@ export default function LinkedInLoginButton({
   disabled = false 
 }) {
   const { branding } = useBranding();
+  const { signIn, isLoaded } = useSignIn();
 
   // Only show on E Systems and when LinkedIn is available
-  if (!branding.isESystemsMode || !linkedinAuth.isAvailable()) {
+  if (!branding.isESystemsMode) {
     return null;
   }
 
-  const handleLinkedInLogin = () => {
-    if (disabled) return;
+  const handleLinkedInLogin = async () => {
+    if (disabled || !isLoaded) return;
     
     try {
-      linkedinAuth.login();
+      // Use Clerk's LinkedIn OAuth instead of separate library
+      const result = await signIn.authenticateWithRedirect({
+        strategy: 'oauth_linkedin_oidc', // Correct strategy name for LinkedIn
+        redirectUrl: '/auth/linkedin/callback',
+        redirectUrlComplete: '/business/profile?linkedin=true'
+      });
+      
+      console.log('LinkedIn OAuth initiated via Clerk:', result);
     } catch (error) {
       console.error('LinkedIn login error:', error);
       alert('LinkedIn login is currently unavailable. Please try again later.');
@@ -30,7 +38,7 @@ export default function LinkedInLoginButton({
     <button
       type="button"
       onClick={handleLinkedInLogin}
-      disabled={disabled}
+      disabled={disabled || !isLoaded}
       className={`
         w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-md shadow-sm 
         text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 
@@ -52,7 +60,7 @@ export default function LinkedInLoginButton({
   );
 }
 
-// LinkedIn callback handler component
+// LinkedIn callback handler component for Clerk OAuth
 export function LinkedInCallback() {
   const { branding } = useBranding();
   
@@ -64,38 +72,12 @@ export function LinkedInCallback() {
         return;
       }
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-      const state = urlParams.get('state');
-      const error = urlParams.get('error');
-
-      if (error) {
-        console.error('LinkedIn OAuth error:', error);
-        alert('LinkedIn authentication failed. Please try again.');
-        window.location.href = '/login';
-        return;
-      }
-
-      if (code && state) {
-        try {
-          const result = await linkedinAuth.handleCallback(code, state);
-          
-          // Store LinkedIn data in session for auto-fill
-          sessionStorage.setItem('linkedinProfile', JSON.stringify(result.linkedinData));
-          
-          // Store auth token
-          localStorage.setItem('token', result.token);
-          
-          // Redirect to profile setup with LinkedIn data
-          window.location.href = '/business/profile?linkedin=true';
-        } catch (error) {
-          console.error('LinkedIn callback error:', error);
-          alert('Failed to complete LinkedIn authentication. Please try again.');
-          window.location.href = '/login';
-        }
-      } else {
-        window.location.href = '/login';
-      }
+      // Clerk handles the OAuth callback automatically
+      // This component is mainly for redirect handling
+      console.log('LinkedIn OAuth callback via Clerk completed');
+      
+      // Redirect to profile setup
+      window.location.href = '/business/profile?linkedin=true';
     };
 
     handleCallback();
@@ -105,13 +87,15 @@ export function LinkedInCallback() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <h2 className="mt-6 text-2xl font-bold text-gray-900">
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
             Completing LinkedIn Authentication...
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Please wait while we set up your account.
+            Please wait while we complete your LinkedIn authentication.
           </p>
+        </div>
+        <div className="flex justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       </div>
     </div>

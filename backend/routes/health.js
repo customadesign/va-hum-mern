@@ -1,5 +1,21 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const { isESystemsMode } = require('../utils/esystems');
+
+// Dynamic LinkedIn credentials based on mode (same logic as passport.js)
+const getLinkedInCredentials = () => {
+  if (isESystemsMode()) {
+    return {
+      clientId: process.env.LINKEDIN_ESYSTEMS_CLIENT_ID,
+      clientSecret: process.env.LINKEDIN_ESYSTEMS_CLIENT_SECRET
+    };
+  }
+  return {
+    clientId: process.env.LINKEDIN_CLIENT_ID,
+    clientSecret: process.env.LINKEDIN_CLIENT_SECRET
+  };
+};
+
 const router = express.Router();
 
 // @route   GET /api/health
@@ -27,7 +43,7 @@ router.get('/', async (req, res) => {
       hybridAuth: true, // Hybrid authentication is implemented
       clerkConfigured: !!(process.env.CLERK_SECRET_KEY && process.env.CLERK_PUBLISHABLE_KEY),
       jwtConfigured: !!process.env.JWT_SECRET,
-      linkedinConfigured: !!(process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET)
+      linkedinConfigured: !!(getLinkedInCredentials().clientId && getLinkedInCredentials().clientSecret)
     };
 
     // Determine overall health
@@ -91,9 +107,9 @@ router.get('/auth', async (req, res) => {
       },
       oauth: {
         linkedin: {
-          configured: !!(process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET),
-          clientIdPresent: !!process.env.LINKEDIN_CLIENT_ID,
-          clientSecretPresent: !!process.env.LINKEDIN_CLIENT_SECRET
+          configured: !!(getLinkedInCredentials().clientId && getLinkedInCredentials().clientSecret),
+          clientIdPresent: !!getLinkedInCredentials().clientId,
+          clientSecretPresent: !!getLinkedInCredentials().clientSecret
         }
       }
     };

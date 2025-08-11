@@ -1,10 +1,12 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/HybridAuthContext';
 import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 
 const PrivateRoute = () => {
   const { loading, isAuthenticated, needsProfileSetup, isClerkUser, authMethod } = useAuth();
+  const location = useLocation();
+  const isAtProfileSetup = location.pathname === '/profile-setup';
 
   if (loading) {
     return (
@@ -19,11 +21,11 @@ const PrivateRoute = () => {
     if (!isAuthenticated) {
       return <Navigate to="/login" />;
     }
-    
-    if (needsProfileSetup) {
+
+    if (needsProfileSetup && !isAtProfileSetup) {
       return <Navigate to="/profile-setup" />;
     }
-    
+
     return <Outlet />;
   }
 
@@ -32,11 +34,7 @@ const PrivateRoute = () => {
     return (
       <>
         <SignedIn>
-          {needsProfileSetup ? (
-            <Navigate to="/profile-setup" />
-          ) : (
-            <Outlet />
-          )}
+          {needsProfileSetup && !isAtProfileSetup ? <Navigate to="/profile-setup" /> : <Outlet />}
         </SignedIn>
         <SignedOut>
           <RedirectToSignIn />

@@ -39,7 +39,9 @@ router.post('/webhooks', async (req, res) => {
 // @access  Private (requires Clerk auth)
 router.post('/sync-user', async (req, res) => {
   try {
-    const { clerkUserId } = req.body;
+    const authUserId = req.auth && req.auth.userId;
+    const { clerkUserId: bodyClerkUserId } = req.body || {};
+    const clerkUserId = authUserId || bodyClerkUserId;
     
     if (!clerkUserId) {
       return res.status(400).json({
@@ -84,17 +86,23 @@ router.post('/sync-user', async (req, res) => {
 // @access  Private (requires Clerk auth)
 router.post('/complete-profile', [
   body('role').isIn(['va', 'business']).withMessage('Role must be va or business'),
-  body('referralCode').optional().isAlphanumeric().withMessage('Invalid referral code')
+  body('referralCode').optional({ checkFalsy: true, nullable: true }).isString()
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log('Complete-profile validation failed:', errors.array());
+    console.log('Complete-profile request body:', req.body);
+    console.log('Complete-profile req.auth:', req.auth);
     return res.status(400).json({ errors: errors.array() });
   }
 
   try {
-    const { clerkUserId, role, referralCode } = req.body;
+    const authUserId = req.auth && req.auth.userId;
+    const { clerkUserId: bodyClerkUserId, role, referralCode } = req.body || {};
+    const clerkUserId = authUserId || bodyClerkUserId;
     
     if (!clerkUserId) {
+      console.log('Complete-profile missing clerkUserId. req.auth:', req.auth, 'body:', req.body);
       return res.status(400).json({
         success: false,
         error: 'Clerk user ID required'
@@ -157,7 +165,9 @@ router.post('/complete-profile', [
 // @access  Private (requires Clerk auth)
 router.get('/me', async (req, res) => {
   try {
-    const { clerkUserId } = req.body;
+    const authUserId = req.auth && req.auth.userId;
+    const { clerkUserId: bodyClerkUserId } = req.body || {};
+    const clerkUserId = authUserId || bodyClerkUserId;
     
     if (!clerkUserId) {
       return res.status(400).json({

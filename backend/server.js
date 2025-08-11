@@ -11,6 +11,7 @@ const socketio = require('socket.io');
 const path = require('path');
 const responseTime = require('response-time');
 const statusMonitor = require('express-status-monitor');
+const { isESystemsMode } = require('./utils/esystems');
 
 // Load env vars
 dotenv.config();
@@ -66,10 +67,25 @@ if (process.env.CLERK_SECRET_KEY) {
   }
 }
 
+// Dynamic LinkedIn credentials based on mode (same logic as passport.js)
+const getLinkedInCredentials = () => {
+  if (isESystemsMode()) {
+    return {
+      clientId: process.env.LINKEDIN_ESYSTEMS_CLIENT_ID,
+      clientSecret: process.env.LINKEDIN_ESYSTEMS_CLIENT_SECRET
+    };
+  }
+  return {
+    clientId: process.env.LINKEDIN_CLIENT_ID,
+    clientSecret: process.env.LINKEDIN_CLIENT_SECRET
+  };
+};
+
 // LinkedIn auth routes (DEPRECATED - available for both deployments if configured)
 // TODO: Remove after Clerk migration is complete
 let linkedinAuthRoutes = null;
-if (process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET) {
+const credentials = getLinkedInCredentials();
+if (credentials.clientId && credentials.clientSecret) {
   try {
     // First try to load from backend/routes
     linkedinAuthRoutes = require('./routes/linkedinAuth');
@@ -178,8 +194,13 @@ app.use(passport.initialize());
 
 // Initialize Clerk (NEW)
 if (process.env.CLERK_SECRET_KEY) {
-  const { ClerkExpressRequireAuth } = require('@clerk/clerk-sdk-node');
+  const { ClerkExpressWithAuth, clerkClient } = require('@clerk/clerk-sdk-node');
+  
+  // Configure Clerk client - the secret key is automatically used from environment
   console.log('Clerk authentication initialized');
+
+  // Global Clerk middleware to populate req.auth for all requests
+  app.use(ClerkExpressWithAuth());
 } else {
   console.log('Clerk not configured - using legacy authentication');
 }
@@ -207,6 +228,13 @@ app.use(express.urlencoded({ extended: true }));
 // LinkedIn OAuth validation middleware
 app.use(validateLinkedInConfig);
 app.use(logLinkedInRequest);
+
+// Test Clerk middleware
+if (process.env.CLERK_SECRET_KEY) {
+  const { testClerk } = require('./middleware/clerkAuth');
+  app.use('/test-clerk', testClerk);
+  console.log('Clerk test middleware added at /test-clerk');
+}
 
 // Health check route
 app.get('/health', (req, res) => {

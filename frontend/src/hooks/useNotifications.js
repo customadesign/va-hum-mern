@@ -19,22 +19,29 @@ export const useNotifications = () => {
       setUnreadCount(count);
     } catch (error) {
       console.error('Failed to fetch unread count:', error);
-      setUnreadCount(0);
+      // Don't set to 0 on error, keep previous value
+      // setUnreadCount(0);
     } finally {
       setLoading(false);
     }
   }, [user]);
 
   useEffect(() => {
-    fetchUnreadCount();
-
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(() => {
+    // Only fetch if we have a user
+    if (user) {
       fetchUnreadCount();
-    }, 30000);
 
-    return () => clearInterval(interval);
-  }, [fetchUnreadCount]);
+      // Poll for new notifications every 30 seconds ONLY when user is authenticated
+      const interval = setInterval(() => {
+        fetchUnreadCount();
+      }, 30000);
+
+      return () => clearInterval(interval);
+    } else {
+      // No user, clear unread count and stop polling
+      setUnreadCount(0);
+    }
+  }, [fetchUnreadCount, user]);
 
   return {
     unreadCount,

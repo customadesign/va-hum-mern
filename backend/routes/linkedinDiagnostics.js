@@ -1,6 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const { isESystemsMode } = require('../utils/esystems');
+
+// Dynamic LinkedIn credentials based on mode (same logic as passport.js)
+const getLinkedInCredentials = () => {
+  if (isESystemsMode()) {
+    return {
+      clientId: process.env.LINKEDIN_ESYSTEMS_CLIENT_ID,
+      clientSecret: process.env.LINKEDIN_ESYSTEMS_CLIENT_SECRET
+    };
+  }
+  return {
+    clientId: process.env.LINKEDIN_CLIENT_ID,
+    clientSecret: process.env.LINKEDIN_CLIENT_SECRET
+  };
+};
 
 // @desc    Comprehensive LinkedIn OAuth diagnostics
 // @route   GET /api/auth/linkedin/diagnostics
@@ -12,10 +27,10 @@ router.get('/diagnostics', async (req, res) => {
     
     // Configuration status
     configuration: {
-      hasClientId: !!process.env.LINKEDIN_CLIENT_ID,
-      hasClientSecret: !!process.env.LINKEDIN_CLIENT_SECRET,
-      clientIdPreview: process.env.LINKEDIN_CLIENT_ID ? 
-        `${process.env.LINKEDIN_CLIENT_ID.substring(0, 10)}...` : 'not set',
+      hasClientId: !!getLinkedInCredentials().clientId,
+      hasClientSecret: !!getLinkedInCredentials().clientSecret,
+      clientIdPreview: getLinkedInCredentials().clientId ? 
+        `${getLinkedInCredentials().clientId.substring(0, 10)}...` : 'not set',
       redirectUriEnvVar: process.env.LINKEDIN_REDIRECT_URI || 'not set (using defaults)',
     },
     
@@ -110,7 +125,7 @@ router.get('/diagnostics', async (req, res) => {
     });
   }
   
-  if (!process.env.LINKEDIN_CLIENT_ID || !process.env.LINKEDIN_CLIENT_SECRET) {
+  if (!getLinkedInCredentials().clientId || !getLinkedInCredentials().clientSecret) {
     diagnostics.commonIssues.push({
       severity: 'critical',
       message: 'LinkedIn credentials not configured',
@@ -120,7 +135,7 @@ router.get('/diagnostics', async (req, res) => {
   }
   
   // Test LinkedIn API connectivity (optional)
-  if (process.env.LINKEDIN_CLIENT_ID) {
+  if (getLinkedInCredentials().clientId) {
     try {
       // This is a simple connectivity test - won't work without valid token
       const testUrl = 'https://www.linkedin.com/oauth/v2/authorization';
@@ -139,7 +154,7 @@ router.get('/diagnostics', async (req, res) => {
   
   // Add summary
   diagnostics.summary = {
-    isConfigured: !!process.env.LINKEDIN_CLIENT_ID && !!process.env.LINKEDIN_CLIENT_SECRET,
+    isConfigured: !!getLinkedInCredentials().clientId && !!getLinkedInCredentials().clientSecret,
     isValidConfiguration: diagnostics.redirectUri.isValid && diagnostics.commonIssues.length === 0,
     readyForProduction: diagnostics.redirectUri.isValid && 
                         diagnostics.commonIssues.length === 0 && 
@@ -170,7 +185,7 @@ router.get('/test-flow', (req, res) => {
       url: 'https://www.linkedin.com/oauth/v2/authorization',
       parameters: {
         response_type: 'code',
-        client_id: process.env.LINKEDIN_CLIENT_ID ? 'configured' : 'missing',
+        client_id: getLinkedInCredentials().clientId ? 'configured' : 'missing',
         redirect_uri: redirectUri,
         state: 'random_state_string',
         scope: 'openid profile email'
@@ -198,8 +213,8 @@ router.get('/test-flow', (req, res) => {
       parameters: {
         grant_type: 'authorization_code',
         code: 'authorization_code_from_linkedin',
-        client_id: process.env.LINKEDIN_CLIENT_ID ? 'configured' : 'missing',
-        client_secret: process.env.LINKEDIN_CLIENT_SECRET ? 'configured' : 'missing',
+        client_id: getLinkedInCredentials().clientId ? 'configured' : 'missing',
+        client_secret: getLinkedInCredentials().clientSecret ? 'configured' : 'missing',
         redirect_uri: redirectUri // MUST match exactly what was used in step 1
       },
       criticalNote: 'The redirect_uri here MUST match EXACTLY what was used in step 1'
@@ -214,7 +229,7 @@ router.get('/test-flow', (req, res) => {
   res.json({
     description: 'LinkedIn OAuth flow test - shows expected flow without actual authentication',
     currentRedirectUri: redirectUri,
-    isConfigured: !!process.env.LINKEDIN_CLIENT_ID && !!process.env.LINKEDIN_CLIENT_SECRET,
+    isConfigured: !!getLinkedInCredentials().clientId && !!getLinkedInCredentials().clientSecret,
     flow: testFlow,
     timestamp: new Date().toISOString()
   });

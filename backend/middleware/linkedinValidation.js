@@ -1,3 +1,19 @@
+const { isESystemsMode } = require('../utils/esystems');
+
+// Dynamic LinkedIn credentials based on mode (same logic as passport.js)
+const getLinkedInCredentials = () => {
+  if (isESystemsMode()) {
+    return {
+      clientId: process.env.LINKEDIN_ESYSTEMS_CLIENT_ID,
+      clientSecret: process.env.LINKEDIN_ESYSTEMS_CLIENT_SECRET
+    };
+  }
+  return {
+    clientId: process.env.LINKEDIN_CLIENT_ID,
+    clientSecret: process.env.LINKEDIN_CLIENT_SECRET
+  };
+};
+
 const validateLinkedInConfig = (req, res, next) => {
   // Only validate on LinkedIn OAuth routes
   if (!req.path.includes('/linkedin')) {
@@ -5,7 +21,8 @@ const validateLinkedInConfig = (req, res, next) => {
   }
 
   // Check if LinkedIn is properly configured
-  if (!process.env.LINKEDIN_CLIENT_ID || !process.env.LINKEDIN_CLIENT_SECRET) {
+  const credentials = getLinkedInCredentials();
+  if (!credentials.clientId || !credentials.clientSecret) {
     return res.status(503).json({
       error: 'LinkedIn authentication is not configured',
       message: 'LinkedIn OAuth is currently disabled. Please contact support.',
@@ -48,8 +65,8 @@ const validateLinkedInConfig = (req, res, next) => {
 
   // Attach config to request for use in routes
   req.linkedinConfig = {
-    clientId: process.env.LINKEDIN_CLIENT_ID,
-    clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
+    clientId: credentials.clientId,
+    clientSecret: credentials.clientSecret,
     redirectUri,
     hasConfigIssues: errors.length > 0,
     configErrors: errors

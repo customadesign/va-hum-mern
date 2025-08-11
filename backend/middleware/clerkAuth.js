@@ -1,68 +1,141 @@
-const { ClerkExpressRequireAuth, ClerkExpressWithAuth } = require('@clerk/clerk-sdk-node');
+const { ClerkExpressWithAuth } = require('@clerk/clerk-sdk-node');
 const User = require('../models/User');
 const { isESystemsMode } = require('../utils/esystems');
 
 // CLERK AUTHENTICATION MIDDLEWARE
 // This replaces the old JWT-based auth middleware
 
+// Check if Clerk is properly configured
+if (!process.env.CLERK_SECRET_KEY) {
+  console.error('ERROR: CLERK_SECRET_KEY is not set in environment variables');
+  console.error('Clerk authentication middleware will not work properly');
+}
+
 /**
- * Protect routes - requires authentication
- * Replaces the old protect() middleware
+ * Fallback middleware to catch Clerk errors
  */
-exports.protect = ClerkExpressRequireAuth((req, res, next) => {
-  // Get Clerk user info from request
-  const { userId: clerkUserId } = req.auth;
+const clerkErrorHandler = (err, req, res, next) => {
+  console.error('=== Clerk middleware error ===');
+  console.error('Error:', err);
+  console.error('Request headers:', req.headers);
+  console.error('Request URL:', req.url);
+  console.error('Request method:', req.method);
   
-  if (!clerkUserId) {
+  if (err.name === 'UnauthorizedError') {
     return res.status(401).json({
       success: false,
-      error: 'Not authorized to access this route'
+      error: 'Clerk authentication failed',
+      details: err.message
     });
   }
+  
+  return res.status(500).json({
+    success: false,
+    error: 'Clerk authentication error',
+    details: err.message
+  });
+};
 
-  // Find our internal user record by Clerk user ID
-  User.findOne({ clerkUserId })
-    .populate(['va', 'business'])
-    .then(user => {
-      if (!user) {
-        // User exists in Clerk but not in our database
-        // This might happen for new users during onboarding
-        return res.status(404).json({
-          success: false,
-          error: 'User profile not found. Please complete your profile setup.',
-          needsOnboarding: true
-        });
-      }
-
-      if (user.suspended) {
-        return res.status(403).json({
-          success: false,
-          error: 'Account suspended'
-        });
-      }
-
-      // Add user to request object
-      req.user = user;
-      req.clerkUserId = clerkUserId;
-      
+/**
+ * Simple test middleware to verify Clerk is working
+ */
+exports.testClerk = (req, res, next) => {
+  console.log('=== Testing Clerk middleware ===');
+  console.log('CLERK_SECRET_KEY present:', !!process.env.CLERK_SECRET_KEY);
+  console.log('CLERK_SECRET_KEY length:', process.env.CLERK_SECRET_KEY ? process.env.CLERK_SECRET_KEY.length : 0);
+  console.log('CLERK_SECRET_KEY starts with:', process.env.CLERK_SECRET_KEY ? process.env.CLERK_SECRET_KEY.substring(0, 10) : 'none');
+  
+  // Test if Clerk can be imported
+  try {
+    const { ClerkExpressRequireAuth } = require('@clerk/clerk-sdk-node');
+    console.log('Clerk SDK imported successfully');
+    
+    // Test if we can create a middleware
+    const testMiddleware = ClerkExpressRequireAuth((req, res, next) => {
+      console.log('Clerk middleware function created successfully');
       next();
-    })
-    .catch(err => {
-      console.error('Error in protect middleware:', err);
-      return res.status(500).json({
-        success: false,
-        error: 'Authentication error'
-      });
     });
-});
+    console.log('Clerk middleware function created successfully');
+    
+  } catch (error) {
+    console.error('Error importing Clerk SDK:', error);
+  }
+  
+  next();
+};
+
+/**
+ * Protect routes - requires authentication
+ * Reads auth from req.auth (populated by global Clerk middleware)
+ */
+exports.protect = async (req, res, next) => {
+  // Debug: Check what's in the request
+  console.log('=== Clerk protect middleware called ===');
+  console.log('Clerk protect middleware - req.auth:', req.auth);
+  console.log('Clerk protect middleware - req.headers:', {
+    authorization: req.headers.authorization ? 'Present' : 'Missing',
+    'user-agent': req.headers['user-agent']
+  });
+  console.log('Clerk protect middleware - Authorization header value:', req.headers.authorization ? req.headers.authorization.substring(0, 20) + '...' : 'None');
+
+  try {
+    const clerkUserId = req.auth && req.auth.userId;
+
+    if (!clerkUserId) {
+      console.log('Clerk protect middleware - No clerkUserId found in req.auth');
+      console.log('Clerk protect middleware - req.auth keys:', req.auth ? Object.keys(req.auth) : 'none');
+      return res.status(401).json({
+        success: false,
+        error: 'Not authorized to access this route',
+        debug: {
+          hasAuth: !!req.auth,
+          authKeys: req.auth ? Object.keys(req.auth) : 'none',
+          authValue: req.auth
+        }
+      });
+    }
+
+    // Find our internal user record by Clerk user ID
+    const user = await User.findOne({ clerkUserId }).populate(['va', 'business']);
+
+    if (!user) {
+      console.log(`Clerk user ${clerkUserId} not found in database - needs onboarding`);
+      return res.status(404).json({
+        success: false,
+        error: 'User profile not found. Please complete your profile setup.',
+        needsOnboarding: true,
+        clerkUserId: clerkUserId,
+        message: 'User authenticated with Clerk but profile not yet created in database'
+      });
+    }
+
+    if (user.suspended) {
+      return res.status(403).json({
+        success: false,
+        error: 'Account suspended'
+      });
+    }
+
+    // Add user to request object
+    req.user = user;
+    req.clerkUserId = clerkUserId;
+    return next();
+  } catch (err) {
+    console.error('Error in protect middleware:', err);
+    return res.status(500).json({
+      success: false,
+      error: 'Authentication error'
+    });
+  }
+};
 
 /**
  * Optional authentication - doesn't fail if no token
  * Replaces the old optionalAuth() middleware
  */
-exports.optionalAuth = ClerkExpressWithAuth((req, res, next) => {
+exports.optionalAuth = (req, res, next) => {
   const { userId: clerkUserId } = req.auth || {};
-  
+
   if (!clerkUserId) {
     return next();
   }
@@ -82,7 +155,7 @@ exports.optionalAuth = ClerkExpressWithAuth((req, res, next) => {
       // Continue without user on error
       next();
     });
-});
+};
 
 /**
  * Grant access to specific roles

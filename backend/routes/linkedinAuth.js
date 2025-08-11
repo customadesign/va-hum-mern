@@ -3,45 +3,23 @@ const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Business = require('../models/Business');
+const { isESystemsMode } = require('../utils/esystems');
 
 const router = express.Router();
 
-// @desc    Health check for LinkedIn OAuth configuration
-// @route   GET /api/auth/linkedin/config-check
-// @access  Public
-router.get('/config-check', (req, res) => {
-  const redirectUri = LINKEDIN_CONFIG.redirectUri;
-  
-  // Detect potential misconfigurations
-  const issues = [];
-  if (redirectUri.includes('/api/')) {
-    issues.push('Redirect URI contains /api/ - should be frontend URL');
+// Dynamic LinkedIn credentials based on mode (same logic as passport.js)
+const getLinkedInCredentials = () => {
+  if (isESystemsMode()) {
+    return {
+      clientId: process.env.LINKEDIN_ESYSTEMS_CLIENT_ID,
+      clientSecret: process.env.LINKEDIN_ESYSTEMS_CLIENT_SECRET
+    };
   }
-  if (redirectUri.includes('-api.onrender.com')) {
-    issues.push('Redirect URI points to API domain - should be frontend domain');
-  }
-  
-  const config = {
-    configured: !!(process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET),
-    clientIdPresent: !!process.env.LINKEDIN_CLIENT_ID,
-    clientSecretPresent: !!process.env.LINKEDIN_CLIENT_SECRET,
-    redirectUri: redirectUri,
-    redirectUriEnv: process.env.LINKEDIN_REDIRECT_URI || 'not set (using defaults)',
-    esystemsMode: process.env.ESYSTEMS_MODE || 'false',
-    environment: process.env.NODE_ENV || 'development',
-    expectedFrontendCallback: redirectUri,
-    apiEndpoint: `${process.env.SERVER_URL || 'http://localhost:5000'}/api/auth/linkedin/callback`,
-    configurationIssues: issues,
-    isConfigurationValid: issues.length === 0,
-    instructions: issues.length > 0 ? 
-      'Remove the API URL from LinkedIn app and keep only the frontend URL' : 
-      'Configuration appears correct',
-    timestamp: new Date().toISOString()
+  return {
+    clientId: process.env.LINKEDIN_CLIENT_ID,
+    clientSecret: process.env.LINKEDIN_CLIENT_SECRET
   };
-  
-  console.log('LinkedIn config check requested:', config);
-  res.json(config);
-});
+};
 
 // LinkedIn OAuth configuration
 // IMPORTANT: The redirect URI must match EXACTLY what's configured in LinkedIn app
@@ -91,9 +69,8 @@ const validateRedirectUri = () => {
 };
 
 const LINKEDIN_CONFIG = {
-  clientId: process.env.LINKEDIN_CLIENT_ID,
-  clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-  redirectUri: validateRedirectUri(), // Validate on startup
+  ...getLinkedInCredentials(),
+  redirectUri: validateRedirectUri() // Validate on startup
 };
 
 // Log configuration on startup for debugging
@@ -101,6 +78,43 @@ if (LINKEDIN_CONFIG.clientId && LINKEDIN_CONFIG.clientSecret) {
   console.log('LinkedIn OAuth configured with redirect URI:', LINKEDIN_CONFIG.redirectUri);
   console.log('Ensure this EXACT URL is added to your LinkedIn app\'s OAuth 2.0 settings');
 }
+
+// @desc    Health check for LinkedIn OAuth configuration
+// @route   GET /api/auth/linkedin/config-check
+// @access  Public
+router.get('/config-check', (req, res) => {
+  const redirectUri = LINKEDIN_CONFIG.redirectUri;
+  
+  // Detect potential misconfigurations
+  const issues = [];
+  if (redirectUri.includes('/api/')) {
+    issues.push('Redirect URI contains /api/ - should be frontend URL');
+  }
+  if (redirectUri.includes('-api.onrender.com')) {
+    issues.push('Redirect URI points to API domain - should be frontend domain');
+  }
+  
+  const config = {
+    configured: !!(getLinkedInCredentials().clientId && getLinkedInCredentials().clientSecret),
+    clientIdPresent: !!getLinkedInCredentials().clientId,
+    clientSecretPresent: !!getLinkedInCredentials().clientSecret,
+    redirectUri: redirectUri,
+    redirectUriEnv: process.env.LINKEDIN_REDIRECT_URI || 'not set (using defaults)',
+    esystemsMode: process.env.ESYSTEMS_MODE || 'false',
+    environment: process.env.NODE_ENV || 'development',
+    expectedFrontendCallback: redirectUri,
+    apiEndpoint: `${process.env.SERVER_URL || 'http://localhost:5000'}/api/auth/linkedin/callback`,
+    configurationIssues: issues,
+    isConfigurationValid: issues.length === 0,
+    instructions: issues.length > 0 ? 
+      'Remove the API URL from LinkedIn app and keep only the frontend URL' : 
+      'Configuration appears correct',
+    timestamp: new Date().toISOString()
+  };
+  
+  console.log('LinkedIn config check requested:', config);
+  res.json(config);
+});
 
 // @desc    Handle preflight OPTIONS request for LinkedIn OAuth callback
 // @route   OPTIONS /api/auth/linkedin/callback
