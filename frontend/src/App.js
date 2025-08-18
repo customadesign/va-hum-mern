@@ -90,8 +90,6 @@ function App() {
                   <Route element={<PublicOnlyRoute />}>
                     <Route path="sign-in/*" element={<ClerkSignIn />} />
                     <Route path="sign-up/*" element={<ClerkSignUp />} />
-                    <Route path="login" element={<Login />} />
-                    <Route path="register" element={<Register />} />
                   </Route>
                   {/* Redirect legacy forgot/reset password paths to Clerk */}
                   <Route path="forgot-password" element={<Navigate to="/sign-in/forgot-password" replace />} />

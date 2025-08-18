@@ -4,10 +4,19 @@ import { useAuth } from '../contexts/HybridAuthContext';
 import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 
 const PrivateRoute = () => {
-  const { loading, isAuthenticated, needsProfileSetup, isClerkUser, authMethod } = useAuth();
+  const { loading, isAuthenticated, needsProfileSetup, isClerkUser, authMethod, user, isVA, isBusiness } = useAuth();
   const location = useLocation();
   const isAtProfileSetup = location.pathname === '/profile-setup';
   const path = location.pathname;
+  const getProfileSetupPath = () => {
+    if (isVA || user?.role === 'VA') {
+      return '/va/profile';
+    } else if (isBusiness || user?.role === 'Business') {
+      return '/business/profile';
+    } else {
+      return '/profile-setup';
+    }
+  };
   const allowIfSetupPending = (
     path === '/dashboard' ||
     path === '/va/profile' ||
@@ -27,11 +36,11 @@ const PrivateRoute = () => {
   // If user is authenticated via JWT, handle normally
   if (authMethod === 'jwt') {
     if (!isAuthenticated) {
-      return <Navigate to="/login" />;
+      return <Navigate to="/sign-in" />;
     }
 
     if (needsProfileSetup && !isAtProfileSetup && !allowIfSetupPending) {
-      return <Navigate to="/profile-setup" />;
+      return <Navigate to={getProfileSetupPath()} />;
     }
 
     return <Outlet />;
@@ -42,7 +51,7 @@ const PrivateRoute = () => {
     return (
       <>
         <SignedIn>
-          {needsProfileSetup && !isAtProfileSetup && !allowIfSetupPending ? <Navigate to="/profile-setup" replace /> : <Outlet />}
+          <Outlet />
         </SignedIn>
         <SignedOut>
           <RedirectToSignIn />
@@ -52,7 +61,7 @@ const PrivateRoute = () => {
   }
 
   // No authentication method detected, redirect to login
-  return <Navigate to="/login" />;
+  return <Navigate to="/sign-in" />;
 };
 
 export default PrivateRoute;

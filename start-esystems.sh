@@ -11,19 +11,19 @@ lsof -ti:5001 | xargs kill -9 2>/dev/null || true
 # Wait a moment for processes to fully terminate
 sleep 2
 
-# Start backend in E-Systems mode (port 5001)
-echo "Starting E-Systems backend on port 5001..."
+# Start E-Systems backend from backend dir (loads .env) on port 5001
+echo "Starting E-Systems backend (backend dir, loads .env) on port 5001..."
 cd backend
-npm run esystems:dev &
+ESYSTEMS_MODE=true PORT=5001 npx nodemon server.js &
 BACKEND_PID=$!
 
 # Wait for backend to start
 sleep 5
 
-# Start frontend in E-Systems mode (port 3001)
-echo "Starting E-Systems frontend on port 3001..."
+# Start E-Systems frontend using main frontend with E-Systems theme (port 3001)
+echo "Starting E-Systems frontend (main frontend with E-Systems theme) on port 3001..."
 cd ../frontend
-npm run esystems &
+REACT_APP_BRAND=esystems REACT_APP_API_URL=http://localhost:5001/api PORT=3001 npm start &
 FRONTEND_PID=$!
 
 echo ""

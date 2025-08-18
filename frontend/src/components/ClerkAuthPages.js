@@ -17,8 +17,8 @@ export const ClerkSignIn = () => {
         <SignIn 
           path="/sign-in" 
           routing="path"
-          afterSignInUrl="/va/profile"
-          afterSignUpUrl="/profile-setup"
+          signInUrl="/sign-in"
+          forceRedirectUrl="/dashboard"
           appearance={{
             elements: {
               formButtonPrimary: 'bg-indigo-600 hover:bg-indigo-700 text-sm normal-case',
@@ -46,13 +46,16 @@ export const ClerkSignUp = () => {
         <SignUp 
           path="/sign-up" 
           routing="path"
-          afterSignUpUrl="/profile-setup"
+          signUpUrl="/sign-up"
+          forceRedirectUrl="/profile-setup"
           appearance={{
             elements: {
               formButtonPrimary: 'bg-indigo-600 hover:bg-indigo-700 text-sm normal-case',
             },
           }}
         />
+        {/* Clerk CAPTCHA container - removes console warning */}
+        <div id="clerk-captcha" style={{ display: 'none' }}></div>
       </div>
     </div>
   );

@@ -178,7 +178,7 @@ export default function Layout() {
                   ) : (
                     <div className="flex items-center space-x-4">
                       <Link
-                        to="/login"
+                        to="/sign-in"
                         className={classNames(
                           branding.isESystemsMode 
                             ? "text-gray-300 hover:text-white" 
@@ -189,7 +189,7 @@ export default function Layout() {
                         Sign in
                       </Link>
                       <Link
-                        to="/register"
+                        to="/sign-up"
                         className={classNames(
                           branding.isESystemsMode 
                             ? "bg-white hover:bg-gray-100 text-gray-700" 
@@ -318,14 +318,14 @@ export default function Layout() {
                   <div className="space-y-1">
                     <Disclosure.Button
                       as={Link}
-                      to="/login"
+                      to="/sign-in"
                       className="block px-4 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-600"
                     >
                       Sign in
                     </Disclosure.Button>
                     <Disclosure.Button
                       as={Link}
-                      to="/register"
+                      to="/sign-up"
                       className="block px-4 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-600"
                     >
                       Get started
