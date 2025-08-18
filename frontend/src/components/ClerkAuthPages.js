@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SignIn, SignUp, UserProfile } from '@clerk/clerk-react';
 
 // Clerk Sign In Page Component
 export const ClerkSignIn = () => {
+  useEffect(() => {
+    console.log('🔐 ClerkSignIn Component Mounted');
+    console.log('📍 Current URL:', window.location.href);
+    console.log('🎯 Will redirect to: /profile-redirect after successful sign-in');
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -18,7 +24,7 @@ export const ClerkSignIn = () => {
           path="/sign-in" 
           routing="path"
           signInUrl="/sign-in"
-          forceRedirectUrl="/dashboard"
+          forceRedirectUrl="/profile-redirect"
           appearance={{
             elements: {
               formButtonPrimary: 'bg-indigo-600 hover:bg-indigo-700 text-sm normal-case',
@@ -47,7 +53,8 @@ export const ClerkSignUp = () => {
           path="/sign-up" 
           routing="path"
           signUpUrl="/sign-up"
-          forceRedirectUrl="/profile-setup"
+          afterSignUpUrl="/profile-redirect"
+          redirectUrl="/profile-redirect"
           appearance={{
             elements: {
               formButtonPrimary: 'bg-indigo-600 hover:bg-indigo-700 text-sm normal-case',

@@ -56,6 +56,8 @@ export const AuthProvider = ({ children }) => {
 
   // Check authentication on mount and handle OAuth responses
   useEffect(() => {
+    console.log('🚀 HybridAuthContext mounted, checking auth...');
+    console.log('📍 Current location:', window.location.pathname);
     checkAuth();
     
     // Check for OAuth success/error parameters in URL
@@ -82,10 +84,20 @@ export const AuthProvider = ({ children }) => {
 
   // Monitor Clerk authentication changes
   useEffect(() => {
+    console.log('🔄 Clerk auth state changed:', {
+      clerkLoaded,
+      isSignedIn,
+      clerkUserId: clerkUser?.id || null,
+      authMethod,
+      currentPath: window.location.pathname
+    });
+    
     if (clerkLoaded) {
       if (isSignedIn && clerkUser) {
+        console.log('✅ Clerk user signed in, syncing...');
         syncClerkUser();
       } else if (authMethod === 'clerk') {
+        console.log('⚠️ Clerk user signed out');
         // User was signed in with Clerk but now isn't
         setUser(null);
         setAuthMethod(null);
@@ -138,6 +150,8 @@ export const AuthProvider = ({ children }) => {
       const token = await getClerkToken();
       
       // Sync user data with our backend
+      console.log('🔄 Syncing Clerk user with backend...', { clerkUserId: clerkUser.id });
+      
       const response = await api.post('/clerk/sync-user', {
         clerkUserId: clerkUser.id
       }, {
@@ -146,18 +160,34 @@ export const AuthProvider = ({ children }) => {
         }
       });
       
+      console.log('✅ User synced successfully:', {
+        userId: response.data.user.id,
+        email: response.data.user.email,
+        role: response.data.user.role,
+        hasVA: !!response.data.user.va,
+        hasBusiness: !!response.data.user.business
+      });
+      
       setUser(response.data.user);
       setAuthMethod('clerk');
       
-      // If user has a profile, ensure they land on the correct profile page from sign-in
-      if (response.data.user.va && window.location.pathname === '/') {
-        navigate('/va/profile', { replace: true });
-      } else if (response.data.user.business && window.location.pathname === '/') {
-        navigate('/business/profile', { replace: true });
-      } else if (!response.data.user.va && !response.data.user.business) {
-        if (window.location.pathname !== '/profile-setup') {
-          navigate('/profile-setup', { replace: true });
+      // Don't auto-redirect from home page - let user navigate naturally
+      // Only redirect if user needs profile setup and is not already on a profile page
+      if (!response.data.user.va && !response.data.user.business) {
+        console.log('⚠️ User needs profile setup');
+        const profilePaths = ['/profile-setup', '/va/profile', '/business/profile', '/profile-redirect'];
+        const isOnProfilePage = profilePaths.some(path => window.location.pathname.startsWith(path));
+        console.log('📍 Current path:', window.location.pathname, '| Is on profile page:', isOnProfilePage);
+        if (!isOnProfilePage) {
+          // User needs profile setup but only redirect if they're trying to access protected content
+          // Don't redirect from public pages like home
+          console.log('ℹ️ Not redirecting - user is not on a profile page');
         }
+      } else {
+        console.log('✅ User has profile:', {
+          va: !!response.data.user.va,
+          business: !!response.data.user.business
+        });
       }
     } catch (error) {
       console.error('Error syncing Clerk user data:', error);
@@ -382,7 +412,7 @@ export const AuthProvider = ({ children }) => {
     // User data
     user,
     clerkUser,
-    loading: loading || (clerkUser && !clerkLoaded),
+    loading: loading || !clerkLoaded,
     authMethod,
     
     // Authentication status

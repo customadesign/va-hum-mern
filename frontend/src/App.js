@@ -32,6 +32,7 @@ import VADetail from './pages/VAs/Detail';
 import VAProfile from './pages/VAs/Profile';
 import BusinessProfile from './pages/Business/Profile';
 import ProfileRouter from './components/ProfileRouter';
+import ProfileRedirect from './components/ProfileRedirect';
 import LinkedInCallback from './pages/LinkedInCallback'; // Legacy LinkedIn OAuth support
 import Conversations from './pages/Conversations';
 import ConversationDetail from './pages/Conversations/Detail';
@@ -101,6 +102,9 @@ function App() {
                   <Route path="vas/:id" element={<VADetail />} />
                   <Route path="terms" element={<Terms />} />
                   <Route path="privacy" element={<Privacy />} />
+                  
+                  {/* Profile Redirect Route */}
+                  <Route path="profile-redirect" element={<ProfileRedirect />} />
                   
                   {/* Protected Routes */}
                   <Route element={<PrivateRoute />}>
