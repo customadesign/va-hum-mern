@@ -78,8 +78,8 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <ClerkProvider publishableKey={clerkPubKey}>
             <Router>
-              <BrandingProvider>
-                <AuthProvider>
+              <AuthProvider>
+                <BrandingProvider>
                 <Suspense fallback={<SuspenseLoader />}>
                   <div className="h-full flex flex-col">
                     <Routes>
@@ -139,8 +139,8 @@ function App() {
                                   />
                   </div>
                 </Suspense>
-                </AuthProvider>
-              </BrandingProvider>
+                </BrandingProvider>
+              </AuthProvider>
             </Router>
           </ClerkProvider>
         </QueryClientProvider>

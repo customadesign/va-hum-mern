@@ -10,12 +10,15 @@ export default function ProfileSetup() {
   const [profileType, setProfileType] = useState('');
   const navigate = useNavigate();
   const { updateUser, clerkUser, user } = useAuth();
-  const { branding } = useBranding();
+  const { branding, setBrandingTheme } = useBranding();
 
   // Note: Do not auto-create any profile to avoid wrong selection
 
   const handleProfileTypeSelect = async (type) => {
     setProfileType(type);
+    
+    // Set theme based on user choice
+    setBrandingTheme(type === 'business');
     
     try {
       // Persist the user's choice (role) in backend so we don't ask again

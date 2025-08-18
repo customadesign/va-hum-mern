@@ -142,6 +142,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Retry utility with exponential backoff
+  const retryWithBackoff = async (fn, maxRetries = 3, baseDelay = 1000) => {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (error.response?.status === 429 && i < maxRetries - 1) {
+          const delay = baseDelay * Math.pow(2, i);
+          console.log(`⏳ Rate limited, retrying in ${delay}ms (attempt ${i + 1}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        throw error;
+      }
+    }
+  };
+
   const syncClerkUser = async () => {
     try {
       setLoading(true);
@@ -152,12 +169,14 @@ export const AuthProvider = ({ children }) => {
       // Sync user data with our backend
       console.log('🔄 Syncing Clerk user with backend...', { clerkUserId: clerkUser.id });
       
-      const response = await api.post('/clerk/sync-user', {
-        clerkUserId: clerkUser.id
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+      const response = await retryWithBackoff(async () => {
+        return await api.post('/clerk/sync-user', {
+          clerkUserId: clerkUser.id
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
       });
       
       console.log('✅ User synced successfully:', {

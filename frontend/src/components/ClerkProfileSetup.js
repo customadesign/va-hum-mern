@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/HybridAuthContext';
+import { useBranding } from '../contexts/BrandingContext';
 import { toast } from 'react-toastify';
 
 const ClerkProfileSetup = () => {
   const { completeProfile, loading, clerkUser, user, authMethod } = useAuth();
+  const { setBrandingTheme } = useBranding();
   const [formData, setFormData] = useState({
     role: '',
     referralCode: ''
@@ -33,10 +35,16 @@ const ClerkProfileSetup = () => {
   };
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+    
+    // Set theme based on user choice when role is selected
+    if (name === 'role') {
+      setBrandingTheme(value === 'business');
+    }
   };
 
   if (loading) {
