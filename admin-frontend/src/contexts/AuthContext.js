@@ -30,17 +30,23 @@ export const AuthProvider = ({ children }) => {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
         // Verify token with backend
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/auth/me`);
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+        console.log('Checking auth status with:', `${apiUrl}/auth/me`);
+        const response = await axios.get(`${apiUrl}/auth/me`);
         
-        if (response.data.success && response.data.user.admin) {
-          setUser(response.data.user);
-          setIsAuthenticated(true);
-        } else {
-          // User is not admin, clear token
-          localStorage.removeItem('authToken');
-          delete axios.defaults.headers.common['Authorization'];
-          setUser(null);
-          setIsAuthenticated(false);
+        console.log('Auth response:', response.data);
+        if (response.data.success) {
+          if (response.data.user.admin) {
+            setUser(response.data.user);
+            setIsAuthenticated(true);
+          } else {
+            // User is not admin, clear token
+            console.warn('User is not admin:', response.data.user.email);
+            localStorage.removeItem('authToken');
+            delete axios.defaults.headers.common['Authorization'];
+            setUser(null);
+            setIsAuthenticated(false);
+          }
         }
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -71,17 +77,23 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
       // Verify token with backend
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/auth/me`);
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+      console.log('Checking auth status with:', `${apiUrl}/auth/me`);
+      const response = await axios.get(`${apiUrl}/auth/me`);
       
-      if (response.data.success && response.data.user.admin) {
-        setUser(response.data.user);
-        setIsAuthenticated(true);
-      } else {
-        // User is not admin, clear token
-        localStorage.removeItem('authToken');
-        delete axios.defaults.headers.common['Authorization'];
-        setUser(null);
-        setIsAuthenticated(false);
+      console.log('Auth response:', response.data);
+      if (response.data.success) {
+        if (response.data.user.admin) {
+          setUser(response.data.user);
+          setIsAuthenticated(true);
+        } else {
+          // User is not admin, clear token
+          console.warn('User is not admin:', response.data.user.email);
+          localStorage.removeItem('authToken');
+          delete axios.defaults.headers.common['Authorization'];
+          setUser(null);
+          setIsAuthenticated(false);
+        }
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -96,7 +108,9 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+      console.log('Logging in to:', `${apiUrl}/auth/login`);
+      const response = await axios.post(`${apiUrl}/auth/login`, {
         email,
         password
       });
