@@ -54,6 +54,7 @@ const systemRoutes = require('./routes/system');
 const adminModerationRoutes = require('./routes/adminModeration');
 const monitoringRoutes = require('./routes/monitoring');
 const adminNotificationRoutes = require('./routes/adminNotifications');
+const adminInvitationRoutes = require('./routes/adminInvitations');
 const healthRoutes = require('./routes/health');
 
 // CLERK authentication routes (replaces LinkedIn OAuth)
@@ -280,6 +281,7 @@ app.use('/api/profile', profileRoutes); // User profile management routes
 app.use('/api/system', systemRoutes); // System status and health
 app.use('/api/admin/moderation', adminModerationRoutes); // Admin moderation tools
 app.use('/api/admin/notifications', adminNotificationRoutes); // Admin notification control
+app.use('/api/admin/invitations', adminInvitationRoutes); // Admin invitation system
 
 // Health and monitoring routes
 app.use('/api/health', healthRoutes); // Health check endpoints
