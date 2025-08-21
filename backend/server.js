@@ -119,10 +119,12 @@ const corsOptions = {
       const allowedOrigins = [
         process.env.CLIENT_URL,
         process.env.ESYSTEMS_CLIENT_URL,
+        process.env.ADMIN_CLIENT_URL,
         'https://linkage-va-hub.onrender.com',
         'https://esystems-management-hub.onrender.com',
         'https://linkage-va-hub-api.onrender.com',
-        'https://esystems-management-hub-api.onrender.com'
+        'https://esystems-management-hub-api.onrender.com',
+        'https://admin-3pxa.onrender.com'  // Admin frontend URL
       ].filter(Boolean); // Remove undefined values
       
       if (allowedOrigins.includes(origin)) {
