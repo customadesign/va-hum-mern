@@ -48,7 +48,7 @@ services:
 
   # Admin Frontend Service
   - type: web
-    name: linkage-va-hub-admin
+    name: admin
     runtime: node
     repo: https://github.com/customadesign/va-hum-mern
     buildCommand: cd admin-frontend && npm install && npm run build
