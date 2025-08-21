@@ -24,8 +24,13 @@ export const AuthProvider = ({ children }) => {
     const checkAuthStatus = async () => {
       try {
         const token = localStorage.getItem('authToken');
+        console.log('Initial auth check - token exists:', !!token);
+        
         if (!token) {
+          console.log('No token found, user not authenticated');
           setIsLoading(false);
+          setIsAuthenticated(false);
+          setUser(null);
           return;
         }
 
@@ -35,11 +40,20 @@ export const AuthProvider = ({ children }) => {
         // Verify token with backend
         const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
         console.log('Checking auth status with:', `${apiUrl}/auth/me`);
-        const response = await axios.get(`${apiUrl}/auth/me`);
+        console.log('Environment:', process.env.NODE_ENV);
+        console.log('API URL from env:', process.env.REACT_APP_API_URL);
+        
+        const response = await axios.get(`${apiUrl}/auth/me`, {
+          withCredentials: true,
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         
         console.log('Auth response:', response.data);
-        if (response.data.success) {
-          if (response.data.user.admin) {
+        if (response.data.success && response.data.user) {
+          if (response.data.user.admin === true) {
+            console.log('User is admin, setting authenticated');
             setUser(response.data.user);
             setIsAuthenticated(true);
           } else {
@@ -50,9 +64,13 @@ export const AuthProvider = ({ children }) => {
             setUser(null);
             setIsAuthenticated(false);
           }
+        } else {
+          console.log('Invalid response structure');
+          throw new Error('Invalid response');
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
+        console.error('Auth check failed:', error.response?.data || error.message);
+        console.error('Full error:', error);
         localStorage.removeItem('authToken');
         delete axios.defaults.headers.common['Authorization'];
         setUser(null);
@@ -69,6 +87,8 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('authToken');
+      console.log('Manual auth check - token exists:', !!token);
+      
       if (!token) {
         setIsLoading(false);
         setIsAuthenticated(false);
@@ -82,11 +102,18 @@ export const AuthProvider = ({ children }) => {
       // Verify token with backend
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
       console.log('Checking auth status with:', `${apiUrl}/auth/me`);
-      const response = await axios.get(`${apiUrl}/auth/me`);
+      
+      const response = await axios.get(`${apiUrl}/auth/me`, {
+        withCredentials: true,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       
       console.log('Auth response:', response.data);
-      if (response.data.success) {
-        if (response.data.user.admin) {
+      if (response.data.success && response.data.user) {
+        if (response.data.user.admin === true) {
+          console.log('User is admin, maintaining authentication');
           setUser(response.data.user);
           setIsAuthenticated(true);
         } else {
@@ -97,9 +124,11 @@ export const AuthProvider = ({ children }) => {
           setUser(null);
           setIsAuthenticated(false);
         }
+      } else {
+        throw new Error('Invalid response structure');
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error('Auth check failed:', error.response?.data || error.message);
       localStorage.removeItem('authToken');
       delete axios.defaults.headers.common['Authorization'];
       setUser(null);
@@ -113,29 +142,42 @@ export const AuthProvider = ({ children }) => {
     try {
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
       console.log('Logging in to:', `${apiUrl}/auth/login`);
+      console.log('Environment:', process.env.NODE_ENV);
+      
       const response = await axios.post(`${apiUrl}/auth/login`, {
         email,
         password
+      }, {
+        withCredentials: true // Important for cookies
       });
+
+      console.log('Login response:', response.data);
 
       if (response.data.success) {
         const { token, user: userData } = response.data;
         
         // Check if user is admin
-        if (!userData.admin) {
+        if (userData.admin !== true) {
+          console.warn('User is not admin:', userData.email);
           throw new Error('Access denied. Admin privileges required.');
         }
 
+        // Store token in localStorage
         localStorage.setItem('authToken', token);
+        
+        // Set axios default header
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
+        console.log('Login successful, setting user:', userData.email);
         setUser(userData);
         setIsAuthenticated(true);
         
         return { success: true };
+      } else {
+        throw new Error(response.data.error || 'Login failed');
       }
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Login failed:', error.response?.data || error.message);
       return { 
         success: false, 
         error: error.response?.data?.error || error.message || 'Login failed' 
