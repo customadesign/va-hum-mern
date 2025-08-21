@@ -52,7 +52,7 @@ services:
     runtime: node
     repo: https://github.com/customadesign/va-hum-mern
     buildCommand: cd admin-frontend && npm install && npm run build
-    startCommand: cd admin-frontend && npx serve -s build -p $PORT
+    startCommand: cd admin-frontend && npx serve -s build -p $PORT --no-clipboard
     envVars:
       - key: NODE_ENV
         value: production
