@@ -29,7 +29,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "serve": "serve -s build -l 10000",
+    "serve": "serve -s build -p 10000",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

@@ -3,9 +3,9 @@ services:
     name: linkage-va-hub-admin
     env: node
     plan: starter
-    rootDir: .
+    rootDir: admin-frontend
     buildCommand: npm install --include=dev && npm run build
-    startCommand: npx serve -s build -p $PORT --no-clipboard
+    startCommand: npx serve -s build -p $PORT --config serve.json --no-clipboard
     envVars:
       - key: NODE_ENV
         value: production
