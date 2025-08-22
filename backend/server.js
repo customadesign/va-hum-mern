@@ -58,16 +58,6 @@ const adminNotificationRoutes = require('./routes/adminNotifications');
 const adminInvitationRoutes = require('./routes/adminInvitations');
 const healthRoutes = require('./routes/health');
 
-// CLERK authentication routes (replaces LinkedIn OAuth)
-let clerkAuthRoutes = null;
-if (process.env.CLERK_SECRET_KEY) {
-  try {
-    clerkAuthRoutes = require('./routes/clerkAuth');
-    console.log('Clerk authentication routes loaded successfully');
-  } catch (error) {
-    console.log('Clerk routes not available yet:', error.message);
-  }
-}
 
 // Dynamic LinkedIn credentials based on mode (same logic as passport.js)
 const getLinkedInCredentials = () => {
@@ -83,8 +73,7 @@ const getLinkedInCredentials = () => {
   };
 };
 
-// LinkedIn auth routes (DEPRECATED - available for both deployments if configured)
-// TODO: Remove after Clerk migration is complete
+// LinkedIn auth routes (available for both deployments if configured)
 let linkedinAuthRoutes = null;
 const credentials = getLinkedInCredentials();
 if (credentials.clientId && credentials.clientSecret) {
@@ -194,22 +183,9 @@ app.use(responseTime());
 // Performance monitoring middleware
 app.use(performanceMiddleware(performanceMetrics));
 
-// Initialize Passport configuration (DEPRECATED - will be removed after Clerk migration)
+// Initialize Passport configuration
 require('./config/passport');
 app.use(passport.initialize());
-
-// Initialize Clerk (NEW)
-if (process.env.CLERK_SECRET_KEY) {
-  const { ClerkExpressWithAuth, clerkClient } = require('@clerk/clerk-sdk-node');
-  
-  // Configure Clerk client - the secret key is automatically used from environment
-  console.log('Clerk authentication initialized');
-
-  // Global Clerk middleware to populate req.auth for all requests
-  app.use(ClerkExpressWithAuth());
-} else {
-  console.log('Clerk not configured - using legacy authentication');
-}
 
 // Security middleware
 app.use(helmet());
@@ -236,12 +212,6 @@ app.use(cookieParser());
 app.use(validateLinkedInConfig);
 app.use(logLinkedInRequest);
 
-// Test Clerk middleware
-if (process.env.CLERK_SECRET_KEY) {
-  const { testClerk } = require('./middleware/clerkAuth');
-  app.use('/test-clerk', testClerk);
-  console.log('Clerk test middleware added at /test-clerk');
-}
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -294,15 +264,7 @@ app.use('/api/health', healthRoutes); // Health check endpoints
 monitoringRoutes.setMetrics(performanceMetrics);
 app.use('/api/monitoring', monitoringRoutes); // Performance monitoring
 
-// Clerk authentication routes (NEW - replaces LinkedIn OAuth)
-if (clerkAuthRoutes) {
-  app.use('/api/clerk', clerkAuthRoutes);
-  const deployment = process.env.ESYSTEMS_MODE === 'true' ? 'E Systems' : 'Linkage';
-  console.log(`Clerk authentication routes enabled for ${deployment}`);
-}
-
-// LinkedIn integration routes (DEPRECATED - available for both deployments if configured)
-// TODO: Remove after Clerk migration is complete
+// LinkedIn integration routes (available for both deployments if configured)
 if (linkedinAuthRoutes) {
   app.use('/api/auth/linkedin', linkedinAuthRoutes);
   app.use('/api/linkedin', linkedinAuthRoutes);
