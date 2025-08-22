@@ -366,7 +366,10 @@ const VAManagement = () => {
                   <td className="admin-table-cell">
                     <div className="flex items-center text-sm text-admin-900">
                       <MapPinIcon className="h-4 w-4 text-admin-400 mr-1" />
-                      {va.location || 'Not specified'}
+                      {va.location ?
+                        (typeof va.location === 'string' ? va.location :
+                         `${va.location.city || ''}${va.location.city && va.location.state ? ', ' : ''}${va.location.state || ''}${(va.location.city || va.location.state) && va.location.country ? ', ' : ''}${va.location.country || ''}`.trim() || 'Not specified'
+                        ) : 'Not specified'}
                     </div>
                   </td>
                   <td className="admin-table-cell">
@@ -512,7 +515,12 @@ const VAManagement = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-admin-700">Location</label>
-                  <p className="text-sm text-admin-900">{selectedVA.location || 'Not specified'}</p>
+                  <p className="text-sm text-admin-900">
+                    {selectedVA.location ?
+                      (typeof selectedVA.location === 'string' ? selectedVA.location :
+                       `${selectedVA.location.city || ''}${selectedVA.location.city && selectedVA.location.state ? ', ' : ''}${selectedVA.location.state || ''}${(selectedVA.location.city || selectedVA.location.state) && selectedVA.location.country ? ', ' : ''}${selectedVA.location.country || ''}`.trim() || 'Not specified'
+                      ) : 'Not specified'}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-admin-700">Hourly Rate</label>
