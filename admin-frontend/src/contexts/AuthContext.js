@@ -44,12 +44,21 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Set the token in API headers for this request
-      const response = await api.get('/auth/admin/me');
+      const response = await api.get('/auth/me');
       
-      if (response.data.success) {
-        console.log('[AuthContext] User authenticated:', response.data.user);
-        setUser(response.data.user);
-        setIsAuthenticated(true);
+      if (response.data.success && response.data.user) {
+        // Check if user is admin
+        if (response.data.user.admin === true) {
+          console.log('[AuthContext] User authenticated (admin):', response.data.user);
+          setUser(response.data.user);
+          setIsAuthenticated(true);
+        } else {
+          console.log('[AuthContext] User is not admin:', response.data.user.email);
+          setUser(null);
+          setIsAuthenticated(false);
+          // Clear invalid token cookie
+          document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        }
       } else {
         console.log('[AuthContext] Authentication failed:', response.data.error);
         setUser(null);
@@ -72,10 +81,16 @@ export const AuthProvider = ({ children }) => {
   const loginWithEmail = async (credentials) => {
     try {
       console.log('[AuthContext] Attempting email login...');
-      const response = await api.post('/auth/admin/login', credentials);
+      const response = await api.post('/auth/login', credentials);
       
       if (response.data.success) {
         const { token, refreshToken, user } = response.data;
+        
+        // Check if user is admin
+        if (user.admin !== true) {
+          console.log('[AuthContext] User is not admin:', user.email);
+          throw new Error('Access denied. Admin privileges required.');
+        }
         
         // Store tokens in cookies (secure, httpOnly)
         const cookieOptions = {
@@ -92,7 +107,7 @@ export const AuthProvider = ({ children }) => {
         setUser(user);
         setIsAuthenticated(true);
         
-        console.log('[AuthContext] Email login successful');
+        console.log('[AuthContext] Email login successful (admin user)');
         return { success: true };
       } else {
         throw new Error(response.data.error || 'Login failed');
@@ -121,7 +136,7 @@ export const AuthProvider = ({ children }) => {
       document.cookie = `refreshToken=${refreshToken}; expires=${cookieOptions.expires.toUTCString()}; path=${cookieOptions.path}`;
       
       // Get user info
-      const response = await api.get('/auth/admin/me');
+      const response = await api.get('/auth/me');
       if (response.data.success) {
         setUser(response.data.user);
         setIsAuthenticated(true);
@@ -151,7 +166,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       // Call logout endpoint to clear server-side cookies
-      await api.post('/auth/admin/logout');
+      await api.post('/auth/logout');
     } catch (error) {
       console.error('[AuthContext] Logout API call failed:', error);
     } finally {
