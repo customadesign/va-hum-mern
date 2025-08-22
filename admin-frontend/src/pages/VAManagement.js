@@ -15,7 +15,7 @@ import {
   ClockIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
-import { vaAPI } from '../services/api';
+import { adminAPI } from '../services/api';
 
 const VAManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,7 +32,7 @@ const VAManagement = () => {
   const { data: vasData, isLoading, error } = useQuery(
     ['vas', { search: searchTerm, status: statusFilter, page: currentPage }],
     async () => {
-      const response = await vaAPI.getAll({
+      const response = await adminAPI.getVAs({
         search: searchTerm,
         status: statusFilter !== 'all' ? statusFilter : undefined,
         page: currentPage,
@@ -52,7 +52,7 @@ const VAManagement = () => {
 
   // Update VA status mutation
   const updateStatusMutation = useMutation(
-    ({ id, status }) => vaAPI.update(id, { status }),
+    ({ id, status }) => adminAPI.updateVAStatus(id, status),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('vas');
@@ -66,7 +66,7 @@ const VAManagement = () => {
 
   // Delete VA mutation
   const deleteVAMutation = useMutation(
-    (id) => vaAPI.delete(id),
+    (id) => adminAPI.deleteVA(id),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('vas');

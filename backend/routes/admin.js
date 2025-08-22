@@ -499,4 +499,250 @@ router.get('/analytics', async (req, res) => {
   }
 });
 
+// @route   GET /api/admin/vas
+// @desc    Get all VAs for admin management
+// @access  Private/Admin
+router.get('/vas', async (req, res) => {
+  try {
+    const {
+      search,
+      status,
+      page = 1,
+      limit = 20,
+      sort = '-createdAt'
+    } = req.query;
+
+    const query = {};
+    
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { bio: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [vas, total] = await Promise.all([
+      VA.find(query)
+        .populate('user', 'email')
+        .sort(sort)
+        .skip(skip)
+        .limit(parseInt(limit)),
+      VA.countDocuments(query)
+    ]);
+
+    res.json({
+      success: true,
+      data: vas,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   PUT /api/admin/vas/:id
+// @desc    Update VA status (admin only)
+// @access  Private/Admin
+router.put('/vas/:id', async (req, res) => {
+  try {
+    const va = await VA.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!va) {
+      return res.status(404).json({
+        success: false,
+        error: 'VA not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: va
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   DELETE /api/admin/vas/:id
+// @desc    Delete VA (admin only)
+// @access  Private/Admin
+router.delete('/vas/:id', async (req, res) => {
+  try {
+    const va = await VA.findById(req.params.id);
+
+    if (!va) {
+      return res.status(404).json({
+        success: false,
+        error: 'VA not found'
+      });
+    }
+
+    await VA.findByIdAndDelete(req.params.id);
+
+    // Update user reference
+    if (va.user) {
+      const User = require('../models/User');
+      await User.findByIdAndUpdate(va.user, { $unset: { va: 1 } });
+    }
+
+    res.json({
+      success: true,
+      data: {}
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   GET /api/admin/businesses
+// @desc    Get all businesses for admin management
+// @access  Private/Admin
+router.get('/businesses', async (req, res) => {
+  try {
+    const {
+      search,
+      status,
+      page = 1,
+      limit = 20,
+      sort = '-createdAt'
+    } = req.query;
+
+    const query = {};
+    
+    if (search) {
+      query.$or = [
+        { company: { $regex: search, $options: 'i' } },
+        { contactName: { $regex: search, $options: 'i' } },
+        { bio: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [businesses, total] = await Promise.all([
+      Business.find(query)
+        .populate('user', 'email')
+        .sort(sort)
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Business.countDocuments(query)
+    ]);
+
+    res.json({
+      success: true,
+      data: businesses,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   PUT /api/admin/businesses/:id
+// @desc    Update business status (admin only)
+// @access  Private/Admin
+router.put('/businesses/:id', async (req, res) => {
+  try {
+    const business = await Business.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!business) {
+      return res.status(404).json({
+        success: false,
+        error: 'Business not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: business
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   DELETE /api/admin/businesses/:id
+// @desc    Delete business (admin only)
+// @access  Private/Admin
+router.delete('/businesses/:id', async (req, res) => {
+  try {
+    const business = await Business.findById(req.params.id);
+
+    if (!business) {
+      return res.status(404).json({
+        success: false,
+        error: 'Business not found'
+      });
+    }
+
+    await Business.findByIdAndDelete(req.params.id);
+
+    // Update user reference
+    if (business.user) {
+      const User = require('../models/User');
+      await User.findByIdAndUpdate(business.user, { $unset: { business: 1 } });
+    }
+
+    res.json({
+      success: true,
+      data: {}
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
 module.exports = router;

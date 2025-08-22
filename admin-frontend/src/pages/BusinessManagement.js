@@ -17,7 +17,7 @@ import {
   BriefcaseIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
-import { businessAPI } from '../services/api';
+import { adminAPI } from '../services/api';
 
 const BusinessManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,7 +34,7 @@ const BusinessManagement = () => {
   const { data: businessesData, isLoading, error } = useQuery(
     ['businesses', { search: searchTerm, status: statusFilter, page: currentPage }],
     async () => {
-      const response = await businessAPI.getAll({
+      const response = await adminAPI.getBusinesses({
         search: searchTerm,
         status: statusFilter !== 'all' ? statusFilter : undefined,
         page: currentPage,
@@ -54,7 +54,7 @@ const BusinessManagement = () => {
 
   // Update business status mutation
   const updateStatusMutation = useMutation(
-    ({ id, status }) => businessAPI.update(id, { status }),
+    ({ id, status }) => adminAPI.updateBusinessStatus(id, status),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('businesses');
@@ -68,7 +68,7 @@ const BusinessManagement = () => {
 
   // Delete business mutation
   const deleteBusinessMutation = useMutation(
-    (id) => businessAPI.delete(id),
+    (id) => adminAPI.deleteBusiness(id),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('businesses');

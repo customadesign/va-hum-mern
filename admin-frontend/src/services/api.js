@@ -71,17 +71,17 @@ export const adminAPI = {
   suspendUser: (userId, suspended) => api.put(`/admin/users/${userId}/suspend`, { suspended }),
   updateUserRole: (userId, admin) => api.put(`/admin/users/${userId}/admin`, { admin }),
 
-  // VA Management
-  getVAs: (params) => api.get('/vas', { params }),
-  getVAById: (id) => api.get(`/vas/${id}`),
-  updateVAStatus: (id, status) => api.put(`/vas/${id}`, { status }),
-  deleteVA: (id) => api.delete(`/vas/${id}`),
+  // VA Management (Admin endpoints)
+  getVAs: (params) => api.get('/admin/vas', { params }),
+  getVAById: (id) => api.get(`/admin/vas/${id}`),
+  updateVAStatus: (id, status) => api.put(`/admin/vas/${id}`, { status }),
+  deleteVA: (id) => api.delete(`/admin/vas/${id}`),
 
-  // Business Management
-  getBusinesses: (params) => api.get('/businesses', { params }),
-  getBusinessById: (id) => api.get(`/businesses/${id}`),
-  updateBusinessStatus: (id, status) => api.put(`/businesses/${id}`, { status }),
-  deleteBusiness: (id) => api.delete(`/businesses/${id}`),
+  // Business Management (Admin endpoints)
+  getBusinesses: (params) => api.get('/admin/businesses', { params }),
+  getBusinessById: (id) => api.get(`/admin/businesses/${id}`),
+  updateBusinessStatus: (id, status) => api.put(`/admin/businesses/${id}`, { status }),
+  deleteBusiness: (id) => api.delete(`/admin/businesses/${id}`),
 
   // Analytics
   getAnalytics: (params) => api.get('/admin/analytics', { params }),
