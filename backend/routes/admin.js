@@ -295,4 +295,208 @@ router.put('/config', async (req, res) => {
   }
 });
 
+// @route   GET /api/admin/analytics
+// @desc    Get comprehensive analytics data
+// @access  Private/Admin
+router.get('/analytics', async (req, res) => {
+  try {
+    const { timeRange = '30' } = req.query;
+    const days = parseInt(timeRange);
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    // Platform Overview Stats
+    const [
+      totalUsers,
+      totalVAs,
+      totalBusinesses,
+      newUsersToday,
+      newVAsToday,
+      newBusinessesToday
+    ] = await Promise.all([
+      User.countDocuments(),
+      VA.countDocuments(),
+      Business.countDocuments(),
+      User.countDocuments({
+        createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }
+      }),
+      VA.countDocuments({
+        createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }
+      }),
+      Business.countDocuments({
+        createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }
+      })
+    ]);
+
+    // Growth Trends (last 30 days)
+    const growthData = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dayStart = new Date(date.setHours(0, 0, 0, 0));
+      const dayEnd = new Date(date.setHours(23, 59, 59, 999));
+
+      const [dailyUsers, dailyVAs, dailyBusinesses] = await Promise.all([
+        User.countDocuments({
+          createdAt: { $gte: dayStart, $lte: dayEnd }
+        }),
+        VA.countDocuments({
+          createdAt: { $gte: dayStart, $lte: dayEnd }
+        }),
+        Business.countDocuments({
+          createdAt: { $gte: dayStart, $lte: dayEnd }
+        })
+      ]);
+
+      growthData.push({
+        date: dayStart.toISOString().split('T')[0],
+        users: dailyUsers,
+        vas: dailyVAs,
+        businesses: dailyBusinesses
+      });
+    }
+
+    // VA Analytics
+    const vaStatusDistribution = await VA.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const vaLocationDistribution = await VA.aggregate([
+      {
+        $group: {
+          _id: '$location',
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+
+    const vaSkillsDistribution = await VA.aggregate([
+      { $unwind: '$skills' },
+      {
+        $group: {
+          _id: '$skills',
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 15 }
+    ]);
+
+    // Business Analytics
+    const businessIndustryDistribution = await Business.aggregate([
+      {
+        $group: {
+          _id: '$industry',
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } }
+    ]);
+
+    const businessSizeDistribution = await Business.aggregate([
+      {
+        $group: {
+          _id: '$companySize',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // User Activity Metrics
+    const activeUsersLast7Days = await User.countDocuments({
+      lastLoginAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
+    });
+
+    const activeUsersLast30Days = await User.countDocuments({
+      lastLoginAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+    });
+
+    // Profile Completion Rates
+    const vaProfileCompletion = await VA.aggregate([
+      {
+        $project: {
+          completionScore: {
+            $add: [
+              { $cond: [{ $ne: ['$name', null] }, 1, 0] },
+              { $cond: [{ $ne: ['$bio', null] }, 1, 0] },
+              { $cond: [{ $ne: ['$location', null] }, 1, 0] },
+              { $cond: [{ $gt: [{ $size: { $ifNull: ['$skills', []] } }, 0] }, 1, 0] },
+              { $cond: [{ $ne: ['$avatar', null] }, 1, 0] }
+            ]
+          }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          avgCompletion: { $avg: { $multiply: ['$completionScore', 20] } }
+        }
+      }
+    ]);
+
+    const businessProfileCompletion = await Business.aggregate([
+      {
+        $project: {
+          completionScore: {
+            $add: [
+              { $cond: [{ $ne: ['$company', null] }, 1, 0] },
+              { $cond: [{ $ne: ['$bio', null] }, 1, 0] },
+              { $cond: [{ $ne: ['$industry', null] }, 1, 0] },
+              { $cond: [{ $ne: ['$companySize', null] }, 1, 0] },
+              { $cond: [{ $ne: ['$website', null] }, 1, 0] }
+            ]
+          }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          avgCompletion: { $avg: { $multiply: ['$completionScore', 20] } }
+        }
+      }
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        overview: {
+          totalUsers,
+          totalVAs,
+          totalBusinesses,
+          newUsersToday,
+          newVAsToday,
+          newBusinessesToday,
+          activeUsersLast7Days,
+          activeUsersLast30Days
+        },
+        growth: growthData,
+        vaAnalytics: {
+          statusDistribution: vaStatusDistribution,
+          locationDistribution: vaLocationDistribution,
+          skillsDistribution: vaSkillsDistribution,
+          profileCompletion: vaProfileCompletion[0]?.avgCompletion || 0
+        },
+        businessAnalytics: {
+          industryDistribution: businessIndustryDistribution,
+          sizeDistribution: businessSizeDistribution,
+          profileCompletion: businessProfileCompletion[0]?.avgCompletion || 0
+        }
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
 module.exports = router;

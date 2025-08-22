@@ -84,7 +84,7 @@ export const adminAPI = {
   deleteBusiness: (id) => api.delete(`/businesses/${id}`),
 
   // Analytics
-  getAnalytics: (params) => api.get('/analytics', { params }),
+  getAnalytics: (params) => api.get('/admin/analytics', { params }),
 
   // Configuration
   getConfig: () => api.get('/admin/config'),
