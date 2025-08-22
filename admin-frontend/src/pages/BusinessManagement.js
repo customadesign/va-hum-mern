@@ -33,12 +33,16 @@ const BusinessManagement = () => {
   // Fetch businesses with filters
   const { data: businessesData, isLoading, error } = useQuery(
     ['businesses', { search: searchTerm, status: statusFilter, page: currentPage }],
-    () => businessAPI.getAll({
-      search: searchTerm,
-      status: statusFilter !== 'all' ? statusFilter : undefined,
-      page: currentPage,
-      limit: 20
-    }),
+    async () => {
+      const response = await businessAPI.getAll({
+        search: searchTerm,
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        page: currentPage,
+        limit: 20
+      });
+      console.log('Businesses API response:', response);
+      return response.data; // Extract the data from axios response
+    },
     {
       keepPreviousData: true,
       onError: (error) => {
@@ -131,9 +135,12 @@ const BusinessManagement = () => {
     return <span className={config.class}>{config.text}</span>;
   };
 
-  // Handle different possible response structures
-  const businesses = businessesData?.data?.data || businessesData?.data || businessesData || [];
-  const pagination = businessesData?.data?.pagination || businessesData?.pagination || { pages: 1, total: 0, limit: 20 };
+  // Handle the API response structure
+  const businesses = Array.isArray(businessesData?.data) ? businessesData.data : [];
+  const pagination = businessesData?.pagination || { pages: 1, total: 0, limit: 20 };
+  
+  console.log('Businesses data:', businesses);
+  console.log('Pagination data:', pagination);
 
   if (isLoading) {
     return (

@@ -25,13 +25,17 @@ const UserManagement = () => {
   // Fetch users with filters
   const { data: usersData, isLoading, error } = useQuery(
     ['admin-users', { search: searchTerm, role: roleFilter, suspended: statusFilter, page: currentPage }],
-    () => adminAPI.getUsers({
-      search: searchTerm,
-      role: roleFilter !== 'all' ? roleFilter : undefined,
-      suspended: statusFilter !== 'all' ? statusFilter : undefined,
-      page: currentPage,
-      limit: 20
-    }),
+    async () => {
+      const response = await adminAPI.getUsers({
+        search: searchTerm,
+        role: roleFilter !== 'all' ? roleFilter : undefined,
+        suspended: statusFilter !== 'all' ? statusFilter : undefined,
+        page: currentPage,
+        limit: 20
+      });
+      console.log('Users API response:', response);
+      return response.data; // Extract the data from axios response
+    },
     {
       keepPreviousData: true,
       onError: (error) => {
@@ -95,9 +99,12 @@ const UserManagement = () => {
       <span className="admin-badge-success">Active</span>;
   };
 
-  // Handle different possible response structures
-  const users = usersData?.data?.data || usersData?.data || usersData || [];
-  const pagination = usersData?.data?.pagination || usersData?.pagination || { pages: 1, total: 0, limit: 20 };
+  // Handle the API response structure
+  const users = Array.isArray(usersData?.data) ? usersData.data : [];
+  const pagination = usersData?.pagination || { pages: 1, total: 0, limit: 20 };
+  
+  console.log('Users data:', users);
+  console.log('Pagination data:', pagination);
 
   if (isLoading) {
     return (
