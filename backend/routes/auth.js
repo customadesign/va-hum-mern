@@ -288,6 +288,58 @@ router.post('/admin/login', authLimiter, [
   }
 });
 
+// @route   GET /api/auth/admin/me
+// @desc    Get current logged in admin user
+// @access  Private
+router.get('/admin/me', protect, async (req, res) => {
+  try {
+    console.log('Auth /admin/me called for user:', req.user?.id);
+    console.log('User admin status:', req.user?.admin);
+    
+    const user = await User.findById(req.user.id)
+      .select('-password');
+
+    if (!user) {
+      console.log('User not found in database:', req.user.id);
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    // Check if user is admin
+    if (!user.admin) {
+      console.log('User is not admin:', user.email);
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied. Admin privileges required.'
+      });
+    }
+
+    console.log('Returning admin user data:', { 
+      email: user.email, 
+      admin: user.admin
+    });
+
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        email: user.email,
+        admin: user.admin,
+        name: user.name || user.email,
+        createdAt: user.createdAt
+      }
+    });
+  } catch (err) {
+    console.error('Error in /auth/admin/me:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
 // @route   GET /api/auth/me
 // @desc    Get current logged in user
 // @access  Private
@@ -647,6 +699,36 @@ router.post('/refresh', async (req, res) => {
     });
   } catch (err) {
     console.error('Refresh token error:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   POST /api/auth/admin/logout
+// @desc    Logout admin user (clear cookies)
+// @access  Private
+router.post('/admin/logout', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    
+    if (user) {
+      user.refreshToken = undefined;
+      user.refreshTokenExpire = undefined;
+      await user.save();
+    }
+
+    // Clear cookies
+    res.clearCookie('authToken');
+    res.clearCookie('refreshToken');
+
+    res.json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  } catch (err) {
+    console.error('Logout error:', err);
     res.status(500).json({
       success: false,
       error: 'Server error'
