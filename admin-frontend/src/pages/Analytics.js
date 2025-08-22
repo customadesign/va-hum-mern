@@ -15,6 +15,8 @@ import {
 import { toast } from 'react-toastify';
 import { adminAPI } from '../services/api';
 
+// Force rebuild - comprehensive analytics dashboard
+
 const Analytics = () => {
   const [timeRange, setTimeRange] = useState('30');
   
