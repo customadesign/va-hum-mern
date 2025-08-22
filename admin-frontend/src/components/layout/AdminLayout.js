@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   HomeIcon,
@@ -22,7 +22,7 @@ const navigation = [
   { name: 'Settings', href: '/settings', icon: CogIcon },
 ];
 
-const AdminLayout = ({ children }) => {
+const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -162,7 +162,7 @@ const AdminLayout = ({ children }) => {
         <main className="flex-1 relative overflow-y-auto focus:outline-none">
           <div className="py-6">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-              {children}
+              <Outlet />
             </div>
           </div>
         </main>
