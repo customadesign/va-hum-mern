@@ -34,6 +34,10 @@ const UserManagement = () => {
     }),
     {
       keepPreviousData: true,
+      onError: (error) => {
+        console.error('Error fetching users:', error);
+        toast.error('Failed to load users');
+      }
     }
   );
 
@@ -91,8 +95,9 @@ const UserManagement = () => {
       <span className="admin-badge-success">Active</span>;
   };
 
-  const users = usersData?.data || [];
-  const pagination = usersData?.pagination || {};
+  // Handle different possible response structures
+  const users = usersData?.data?.data || usersData?.data || usersData || [];
+  const pagination = usersData?.data?.pagination || usersData?.pagination || { pages: 1, total: 0, limit: 20 };
 
   if (isLoading) {
     return (

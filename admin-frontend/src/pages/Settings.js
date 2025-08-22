@@ -15,27 +15,44 @@ const Settings = () => {
     message: ''
   });
 
+  // Helper function to get cookie value
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  };
+
   // Fetch existing invitations
   const fetchInvitations = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/invitations', {
+      setError('');
+      const token = getCookie('authToken');
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+      
+      const response = await fetch(`${API_URL}/admin/invitations`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
       });
 
       if (response.ok) {
         const data = await response.json();
-        setInvitations(data.invitations || []);
+        setInvitations(data.invitations || data.data || []);
+      } else if (response.status === 404) {
+        // API endpoint doesn't exist yet - show placeholder
+        setInvitations([]);
+        setError('Admin invitation feature is not yet implemented on the backend');
       } else {
         throw new Error('Failed to fetch invitations');
       }
     } catch (err) {
-      setError('Failed to load invitations');
+      setError('Admin invitation feature is not yet available');
       console.error('Error fetching invitations:', err);
+      setInvitations([]);
     } finally {
       setLoading(false);
     }
@@ -54,13 +71,16 @@ const Settings = () => {
       setError('');
       setSuccess('');
 
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/invitations', {
+      const token = getCookie('authToken');
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+      
+      const response = await fetch(`${API_URL}/admin/invitations`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(inviteForm)
       });
 
@@ -70,11 +90,13 @@ const Settings = () => {
         setSuccess('Invitation sent successfully!');
         setInviteForm({ email: '', message: '' });
         fetchInvitations(); // Refresh the list
+      } else if (response.status === 404) {
+        setError('Admin invitation feature is not yet implemented on the backend');
       } else {
         throw new Error(data.message || 'Failed to send invitation');
       }
     } catch (err) {
-      setError(err.message);
+      setError('Admin invitation feature is not yet available');
       console.error('Error sending invitation:', err);
     } finally {
       setLoading(false);
@@ -89,23 +111,28 @@ const Settings = () => {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/invitations/${invitationId}`, {
+      const token = getCookie('authToken');
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+      
+      const response = await fetch(`${API_URL}/admin/invitations/${invitationId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
       });
 
       if (response.ok) {
         setSuccess('Invitation cancelled successfully');
         fetchInvitations(); // Refresh the list
+      } else if (response.status === 404) {
+        setError('Admin invitation feature is not yet implemented on the backend');
       } else {
         throw new Error('Failed to cancel invitation');
       }
     } catch (err) {
-      setError(err.message);
+      setError('Admin invitation feature is not yet available');
       console.error('Error cancelling invitation:', err);
     } finally {
       setLoading(false);
@@ -116,23 +143,28 @@ const Settings = () => {
   const handleResendInvitation = async (invitationId) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/invitations/${invitationId}/resend`, {
+      const token = getCookie('authToken');
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+      
+      const response = await fetch(`${API_URL}/admin/invitations/${invitationId}/resend`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
       });
 
       if (response.ok) {
         setSuccess('Invitation resent successfully');
         fetchInvitations(); // Refresh the list
+      } else if (response.status === 404) {
+        setError('Admin invitation feature is not yet implemented on the backend');
       } else {
         throw new Error('Failed to resend invitation');
       }
     } catch (err) {
-      setError(err.message);
+      setError('Admin invitation feature is not yet available');
       console.error('Error resending invitation:', err);
     } finally {
       setLoading(false);

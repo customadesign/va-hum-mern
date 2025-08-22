@@ -41,6 +41,10 @@ const BusinessManagement = () => {
     }),
     {
       keepPreviousData: true,
+      onError: (error) => {
+        console.error('Error fetching businesses:', error);
+        toast.error('Failed to load businesses');
+      }
     }
   );
 
@@ -127,8 +131,9 @@ const BusinessManagement = () => {
     return <span className={config.class}>{config.text}</span>;
   };
 
-  const businesses = businessesData?.data || [];
-  const pagination = businessesData?.pagination || {};
+  // Handle different possible response structures
+  const businesses = businessesData?.data?.data || businessesData?.data || businessesData || [];
+  const pagination = businessesData?.data?.pagination || businessesData?.pagination || { pages: 1, total: 0, limit: 20 };
 
   if (isLoading) {
     return (
