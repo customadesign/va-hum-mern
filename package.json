@@ -12,10 +12,17 @@
     "test-mongodb": "node test-mongodb-connection.js",
     "get-mongodb-uri": "node get-mongodb-uri.js"
   },
-  "keywords": ["virtual-assistant", "marketplace", "mern"],
+  "keywords": [
+    "virtual-assistant",
+    "marketplace",
+    "mern"
+  ],
   "author": "Linkage Web Solutions",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.0"
+  },
+  "dependencies": {
+    "axios": "^1.11.0"
   }
 }

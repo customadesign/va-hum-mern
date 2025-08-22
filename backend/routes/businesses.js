@@ -2,10 +2,75 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const Business = require('../models/Business');
+const User = require('../models/User');
 // HYBRID AUTH: Support both Clerk and legacy JWT during migration
-const { protect, authorize } = require('../middleware/hybridAuth');
+const { protect, authorize, optionalAuth } = require('../middleware/hybridAuth');
 // For now, just use local upload until Supabase is configured
 const upload = require('../utils/upload');
+
+// @route   GET /api/businesses
+// @desc    Get all businesses (with search and filters)
+// @access  Public (admin gets all, others get only visible)
+router.get('/', optionalAuth, async (req, res) => {
+  try {
+    const {
+      search,
+      status,
+      page = 1,
+      limit = 20,
+      sort = '-createdAt'
+    } = req.query;
+
+    const query = {};
+    
+    // Only show visible businesses to non-admins
+    if (!req.user?.admin) {
+      query.invisible = { $ne: true };
+    }
+    
+    if (search) {
+      query.$or = [
+        { company: { $regex: search, $options: 'i' } },
+        { contactName: { $regex: search, $options: 'i' } },
+        { bio: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    if (status === 'active') {
+      query.invisible = { $ne: true };
+    } else if (status === 'suspended' && req.user?.admin) {
+      query.invisible = true;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [businesses, total] = await Promise.all([
+      Business.find(query)
+        .populate('user', 'email suspended')
+        .sort(sort)
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Business.countDocuments(query)
+    ]);
+
+    res.json({
+      success: true,
+      data: businesses,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
 
 // @route   GET /api/businesses/me
 // @desc    Get current business profile
