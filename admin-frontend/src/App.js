@@ -14,7 +14,56 @@ import OAuthCallback from './pages/OAuthCallback';
 import AcceptInvitation from './pages/AcceptInvitation';
 import './App.css';
 
-// Protected Route Component
+// Main App Component
+const App = () => {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
+  );
+};
+
+// App Content Component (inside AuthProvider context)
+const AppContent = () => {
+  return (
+    <div className="App">
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/callback" element={<OAuthCallbackHandler />} />
+        <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
+        
+        {/* Protected Admin Routes */}
+        <Route
+          path="/*"
+          element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/vas" element={<VAManagement />} />
+                  <Route path="/businesses" element={<BusinessManagement />} />
+                  <Route path="/users" element={<UserManagement />} />
+                  <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/settings" element={<Settings />} />
+                </Routes>
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </div>
+  );
+};
+
+// Protected Route Component (inside AuthProvider context)
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
 
@@ -59,7 +108,7 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// OAuth Callback Handler Component
+// OAuth Callback Handler Component (inside AuthProvider context)
 const OAuthCallbackHandler = () => {
   const { login } = useAuth();
   const [isProcessing, setIsProcessing] = useState(true);
@@ -129,61 +178,6 @@ const OAuthCallbackHandler = () => {
   }
 
   return null;
-};
-
-// App Routes Component (wrapped by AuthProvider)
-const AppRoutes = () => {
-  const { isLoading } = useAuth();
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
-
-  return (
-    <div className="App">
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/auth/callback" element={<OAuthCallbackHandler />} />
-        <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
-        
-        {/* Protected Admin Routes */}
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <Routes>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/vas" element={<VAManagement />} />
-                  <Route path="/businesses" element={<BusinessManagement />} />
-                  <Route path="/users" element={<UserManagement />} />
-                  <Route path="/analytics" element={<Analytics />} />
-                  <Route path="/settings" element={<Settings />} />
-                </Routes>
-              </AdminLayout>
-            </ProtectedRoute>
-          }
-        />
-        
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </div>
-  );
-};
-
-// Main App Component
-const App = () => {
-  return (
-    <AuthProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
-    </AuthProvider>
-  );
 };
 
 export default App;
