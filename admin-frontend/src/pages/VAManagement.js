@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { 
   MagnifyingGlassIcon,
@@ -19,6 +19,7 @@ import { adminAPI } from '../services/api';
 
 const VAManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedVAs, setSelectedVAs] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -28,12 +29,22 @@ const VAManagement = () => {
 
   const queryClient = useQueryClient();
 
+  // Debounce search term (reduced to 200ms for more responsive search)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset to first page when searching
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // Fetch VAs with filters
   const { data: vasData, isLoading, error } = useQuery(
-    ['vas', { search: searchTerm, status: statusFilter, page: currentPage }],
+    ['vas', { search: debouncedSearchTerm, status: statusFilter, page: currentPage }],
     async () => {
       const response = await adminAPI.getVAs({
-        search: searchTerm,
+        search: debouncedSearchTerm,
         status: statusFilter !== 'all' ? statusFilter : undefined,
         page: currentPage,
         limit: 20
@@ -170,7 +181,7 @@ const VAManagement = () => {
               <input
                 type="text"
                 className="admin-input pl-10"
-                placeholder="Search VAs by name, skills, location..."
+                placeholder="Search by name, email, phone, skills, location..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

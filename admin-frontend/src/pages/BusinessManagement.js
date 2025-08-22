@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { 
   MagnifyingGlassIcon,
@@ -21,6 +21,7 @@ import { adminAPI } from '../services/api';
 
 const BusinessManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedBusinesses, setSelectedBusinesses] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -30,12 +31,22 @@ const BusinessManagement = () => {
 
   const queryClient = useQueryClient();
 
+  // Debounce search term (reduced to 200ms for more responsive search)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset to first page when searching
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // Fetch businesses with filters
   const { data: businessesData, isLoading, error } = useQuery(
-    ['businesses', { search: searchTerm, status: statusFilter, page: currentPage }],
+    ['businesses', { search: debouncedSearchTerm, status: statusFilter, page: currentPage }],
     async () => {
       const response = await adminAPI.getBusinesses({
-        search: searchTerm,
+        search: debouncedSearchTerm,
         status: statusFilter !== 'all' ? statusFilter : undefined,
         page: currentPage,
         limit: 20
@@ -184,7 +195,7 @@ const BusinessManagement = () => {
               <input
                 type="text"
                 className="admin-input pl-10"
-                placeholder="Search businesses by company name, industry, location..."
+                placeholder="Search by company name, email, phone, industry, location..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

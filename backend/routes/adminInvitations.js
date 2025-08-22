@@ -3,7 +3,7 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const AdminInvitation = require('../models/AdminInvitation');
 const User = require('../models/User');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/hybridAuth');
 const { sendEmail } = require('../utils/email');
 
 // @route   POST /api/admin/invitations

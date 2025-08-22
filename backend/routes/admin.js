@@ -129,7 +129,9 @@ router.get('/users', async (req, res) => {
     const query = {};
     
     if (search) {
-      query.email = { $regex: search, $options: 'i' };
+      query.$or = [
+        { email: { $regex: search, $options: 'i' } }
+      ];
     }
     
     if (role === 'va') {
@@ -146,15 +148,94 @@ router.get('/users', async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    const [users, total] = await Promise.all([
-      User.find(query)
-        .populate('va', 'name')
-        .populate('business', 'company')
-        .sort(sort)
-        .skip(skip)
-        .limit(parseInt(limit)),
-      User.countDocuments(query)
-    ]);
+    let users, total;
+    
+    if (search) {
+      // When searching, we need to use aggregation to search across populated fields
+      const aggregationPipeline = [
+        {
+          $lookup: {
+            from: 'vas',
+            localField: 'va',
+            foreignField: '_id',
+            as: 'va'
+          }
+        },
+        {
+          $lookup: {
+            from: 'businesses',
+            localField: 'business',
+            foreignField: '_id',
+            as: 'business'
+          }
+        },
+        {
+          $unwind: {
+            path: '$va',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $unwind: {
+            path: '$business',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $match: {
+            $and: [
+              // Apply role filter
+              ...(role === 'va' ? [{ va: { $exists: true } }] :
+                  role === 'business' ? [{ business: { $exists: true } }] :
+                  role === 'admin' ? [{ admin: true }] : []),
+              // Apply suspended filter
+              ...(suspended === 'true' ? [{ suspended: true }] : []),
+              // Apply search filter
+              {
+                $or: [
+                  { email: { $regex: search, $options: 'i' } },
+                  { phone: { $regex: search, $options: 'i' } },
+                  { 'va.name': { $regex: search, $options: 'i' } },
+                  { 'va.phone': { $regex: search, $options: 'i' } },
+                  { 'business.company': { $regex: search, $options: 'i' } },
+                  { 'business.contactName': { $regex: search, $options: 'i' } },
+                  { 'business.phone': { $regex: search, $options: 'i' } }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          $sort: sort === '-createdAt' ? { createdAt: -1 } : { createdAt: 1 }
+        }
+      ];
+
+      const [usersResult, totalResult] = await Promise.all([
+        User.aggregate([
+          ...aggregationPipeline,
+          { $skip: skip },
+          { $limit: parseInt(limit) }
+        ]),
+        User.aggregate([
+          ...aggregationPipeline,
+          { $count: 'total' }
+        ])
+      ]);
+
+      users = usersResult;
+      total = totalResult[0]?.total || 0;
+    } else {
+      // When not searching, use the simpler query
+      [users, total] = await Promise.all([
+        User.find(query)
+          .populate('va', 'name')
+          .populate('business', 'company')
+          .sort(sort)
+          .skip(skip)
+          .limit(parseInt(limit)),
+        User.countDocuments(query)
+      ]);
+    }
 
     res.json({
       success: true,

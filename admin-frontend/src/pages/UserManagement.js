@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { 
   MagnifyingGlassIcon,
@@ -16,18 +16,29 @@ import { adminAPI } from '../services/api';
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
 
   const queryClient = useQueryClient();
 
+  // Debounce search term (reduced to 200ms for more responsive search)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset to first page when searching
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // Fetch users with filters
   const { data: usersData, isLoading, error } = useQuery(
-    ['admin-users', { search: searchTerm, role: roleFilter, suspended: statusFilter, page: currentPage }],
+    ['admin-users', { search: debouncedSearchTerm, role: roleFilter, suspended: statusFilter, page: currentPage }],
     async () => {
       const response = await adminAPI.getUsers({
-        search: searchTerm,
+        search: debouncedSearchTerm,
         role: roleFilter !== 'all' ? roleFilter : undefined,
         suspended: statusFilter !== 'all' ? statusFilter : undefined,
         page: currentPage,
@@ -139,7 +150,7 @@ const UserManagement = () => {
               <input
                 type="text"
                 className="admin-input pl-10"
-                placeholder="Search users by email..."
+                placeholder="Search by email, phone, VA name, or business name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
