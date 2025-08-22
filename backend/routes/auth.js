@@ -79,6 +79,9 @@ router.post('/register', authLimiter, [
     const refreshToken = user.getRefreshToken();
     await user.save();
 
+    // Load related data
+    await user.populate(['va', 'business']);
+
     res.status(201).json({
       success: true,
       token,
@@ -86,7 +89,11 @@ router.post('/register', authLimiter, [
       user: {
         id: user._id,
         email: user.email,
-        referralCode: user.referralCode
+        referralCode: user.referralCode,
+        role: user.role,
+        admin: user.admin,
+        va: user.va,
+        business: user.business
       }
     });
   } catch (err) {

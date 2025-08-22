@@ -40,6 +40,11 @@ router.get('/me', protect, async (req, res) => {
 // @access  Private
 router.put('/me', protect, async (req, res) => {
   try {
+    console.log('Received business update request:', req.body);
+    console.log('Specialties received:', req.body.specialties);
+    console.log('Benefits received:', req.body.benefits);
+    console.log('Company Values received:', req.body.companyValues);
+    
     let business = await Business.findOne({ user: req.user._id });
 
   // Update fields (include companySize, industry and other profile fields)
@@ -72,7 +77,15 @@ router.put('/me', protect, async (req, res) => {
       updateFields.forEach(field => {
         if (req.body[field] === undefined) return;
         let value = req.body[field];
-        if (typeof value === 'string' && value.trim() === '') return; // skip empty strings
+        
+        // Handle empty strings (but not arrays)
+        if (typeof value === 'string' && value.trim() === '') return;
+        
+        // For arrays, allow empty arrays to clear the field
+        if (Array.isArray(value)) {
+          doc[field] = value;
+          return;
+        }
 
         // Enum sanitization
         if (field === 'companySize') {
@@ -102,7 +115,15 @@ router.put('/me', protect, async (req, res) => {
       updateFields.forEach(field => {
         if (req.body[field] === undefined) return;
         let value = req.body[field];
-        if (typeof value === 'string' && value.trim() === '') return; // skip empty strings
+        
+        // Handle empty strings (but not arrays)
+        if (typeof value === 'string' && value.trim() === '') return;
+        
+        // For arrays, allow empty arrays to clear the field
+        if (Array.isArray(value)) {
+          business[field] = value;
+          return;
+        }
 
         if (field === 'companySize') {
           if (!allowedCompanySizes.includes(value)) return;
@@ -120,6 +141,10 @@ router.put('/me', protect, async (req, res) => {
       });
       await business.save();
     }
+
+    console.log('Business after save - Specialties:', business.specialties);
+    console.log('Business after save - Benefits:', business.benefits);
+    console.log('Business after save - Company Values:', business.companyValues);
 
     res.json({
       success: true,

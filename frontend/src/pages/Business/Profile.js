@@ -97,6 +97,10 @@ export default function BusinessProfile() {
     'businessProfile',
     async () => {
       const response = await api.get('/businesses/me');
+      console.log('Business Profile Data:', response.data.data);
+      console.log('Specialties:', response.data.data?.specialties);
+      console.log('Benefits:', response.data.data?.benefits);
+      console.log('Company Values:', response.data.data?.companyValues);
       return response.data.data;
     }
   );
@@ -104,6 +108,10 @@ export default function BusinessProfile() {
   // Update profile mutation
   const updateProfileMutation = useMutation(
     async (data) => {
+      console.log('Updating profile with data:', data);
+      console.log('Specialties being sent:', data.specialties);
+      console.log('Benefits being sent:', data.benefits);
+      console.log('Company Values being sent:', data.companyValues);
       const response = await api.put('/businesses/me', data);
       return response.data;
     },

@@ -10,8 +10,18 @@ const { protect } = require('../middleware/hybridAuth');
 router.get('/profile', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
-      .populate('va')
-      .populate('business')
+      .populate({
+        path: 'va',
+        populate: [
+          { path: 'location' },
+          { path: 'specialties' },
+          { path: 'roleLevel' },
+          { path: 'roleType' }
+        ]
+      })
+      .populate({
+        path: 'business'
+      })
       .populate('referredBy', 'email referralCode')
       .populate('referrals', 'email createdAt');
 

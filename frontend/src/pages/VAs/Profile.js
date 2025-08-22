@@ -1373,53 +1373,97 @@ export default function VAProfile() {
   // Calculate profile completion percentage
   const profileCompletion = useMemo(() => {
     const values = formik.values;
+    
+    // Check if name is just the email prefix (default value)
+    const isDefaultName = values.name === values.email?.split('@')[0];
+    
     const requiredFields = [
-      // Essential fields (high weight)
-      { field: "name", weight: 10, check: () => values.name?.trim() },
-      { field: "hero", weight: 10, check: () => values.hero?.trim() },
-      { field: "bio", weight: 15, check: () => values.bio?.length >= 100 },
+      // Essential fields (high weight) - Must have for basic profile
+      { 
+        field: "name", 
+        weight: 10, 
+        check: () => values.name?.trim() && !isDefaultName && values.name.length > 2,
+        label: "Full Name"
+      },
+      { 
+        field: "hero", 
+        weight: 10, 
+        check: () => values.hero?.trim() && values.hero.length > 10,
+        label: "Hero Statement"
+      },
+      { 
+        field: "bio", 
+        weight: 15, 
+        check: () => values.bio?.trim() && values.bio.length >= 100,
+        label: "Bio (100+ chars)"
+      },
       {
         field: "location",
         weight: 10,
         check: () =>
-          values.location?.city &&
-          values.location?.province &&
-          values.location?.barangay,
+          values.location?.city?.trim() &&
+          values.location?.province?.trim() &&
+          values.location?.barangay?.trim(),
+        label: "Complete Location"
       },
-      { field: "email", weight: 10, check: () => values.email?.trim() },
+      { 
+        field: "email", 
+        weight: 10, 
+        check: () => values.email?.trim() && values.email.includes('@'),
+        label: "Email Address"
+      },
       {
         field: "specialties",
         weight: 15,
         check: () => values.specialtyIds?.length > 0,
+        label: "Specialties"
+      },
+      
+      // Professional details (medium weight)
+      {
+        field: "searchStatus",
+        weight: 5,
+        check: () => values.searchStatus && values.searchStatus !== "invisible",
+        label: "Search Status"
       },
       {
         field: "roleType",
         weight: 5,
         check: () => Object.values(values.roleType || {}).some(Boolean),
+        label: "Role Type"
       },
       {
         field: "roleLevel",
         weight: 5,
         check: () => Object.values(values.roleLevel || {}).some(Boolean),
+        label: "Experience Level"
       },
-
-      // Enhanced fields (medium weight)
       {
         field: "hourlyRate",
         weight: 10,
         check: () =>
-          values.preferredMinHourlyRate && values.preferredMaxHourlyRate,
+          Number(values.preferredMinHourlyRate) > 0 && 
+          Number(values.preferredMaxHourlyRate) > 0 &&
+          Number(values.preferredMaxHourlyRate) >= Number(values.preferredMinHourlyRate),
+        label: "Hourly Rate Range"
       },
-      { field: "phone", weight: 5, check: () => values.phone?.trim() },
+      
+      // Contact & Social (lower weight)
+      { 
+        field: "phone", 
+        weight: 5, 
+        check: () => values.phone?.trim() && values.phone.length >= 10,
+        label: "Phone Number"
+      },
       {
         field: "onlinePresence",
         weight: 5,
-        check: () => values.website?.trim() || values.linkedin?.trim(),
-      },
-      {
-        field: "discAssessment",
-        weight: 10,
-        check: () => values.discPrimaryType,
+        check: () => 
+          values.website?.trim() || 
+          values.linkedin?.trim() || 
+          values.twitter?.trim() || 
+          values.instagram?.trim(),
+        label: "Online Presence"
       },
     ];
 
@@ -1605,58 +1649,6 @@ export default function VAProfile() {
               <h1 className="text-3xl font-bold leading-tight text-gray-900">
                 Edit Your VA Profile
               </h1>
-              {!profileCompletion.isComplete && (
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 relative">
-                    <svg
-                      className="w-8 h-8 transform -rotate-90"
-                      viewBox="0 0 32 32"
-                    >
-                      <circle
-                        cx="16"
-                        cy="16"
-                        r="14"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        fill="transparent"
-                        className="text-gray-200"
-                      />
-                      <circle
-                        cx="16"
-                        cy="16"
-                        r="14"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        fill="transparent"
-                        strokeDasharray={`${
-                          profileCompletion.percentage * 0.88
-                        } 88`}
-                        className={
-                          profileCompletion.percentage >= 80
-                            ? "text-green-500"
-                            : profileCompletion.percentage >= 60
-                            ? "text-yellow-500"
-                            : "text-blue-600"
-                        }
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span
-                        className={`text-xs font-bold ${
-                          profileCompletion.percentage >= 80
-                            ? "text-green-600"
-                            : profileCompletion.percentage >= 60
-                            ? "text-yellow-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {profileCompletion.percentage}%
-                      </span>
-                    </div>
-                  </div>
-                  <span className="text-sm text-gray-500">Complete</span>
-                </div>
-              )}
             </div>
             {profile?._id && (
               <div className="mt-4 sm:mt-0">
@@ -2870,6 +2862,70 @@ export default function VAProfile() {
                           </label>
                         </div>
                       </div>
+                    </fieldset>
+
+                    {/* Hourly Rate */}
+                    <fieldset className="mt-6">
+                      <div>
+                        <legend className="text-base font-medium text-gray-900">
+                          Hourly Rate Range
+                        </legend>
+                        <p className="text-sm text-gray-500">
+                          Your preferred hourly rate range (in USD)
+                        </p>
+                      </div>
+                      <div className="mt-4 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                        <div>
+                          <label
+                            htmlFor="preferredMinHourlyRate"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            Minimum Rate ($/hr)
+                          </label>
+                          <div className="mt-1">
+                            <input
+                              type="number"
+                              name="preferredMinHourlyRate"
+                              id="preferredMinHourlyRate"
+                              min="0"
+                              step="1"
+                              value={formik.values.preferredMinHourlyRate}
+                              onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
+                              placeholder="e.g., 25"
+                              className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="preferredMaxHourlyRate"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            Maximum Rate ($/hr)
+                          </label>
+                          <div className="mt-1">
+                            <input
+                              type="number"
+                              name="preferredMaxHourlyRate"
+                              id="preferredMaxHourlyRate"
+                              min="0"
+                              step="1"
+                              value={formik.values.preferredMaxHourlyRate}
+                              onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
+                              placeholder="e.g., 50"
+                              className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      {formik.values.preferredMinHourlyRate && formik.values.preferredMaxHourlyRate && 
+                       Number(formik.values.preferredMaxHourlyRate) < Number(formik.values.preferredMinHourlyRate) && (
+                        <p className="mt-2 text-sm text-red-600">
+                          Maximum rate must be greater than or equal to minimum rate
+                        </p>
+                      )}
                     </fieldset>
                   </div>
                 </div>

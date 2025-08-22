@@ -10,15 +10,20 @@ export default function Dashboard() {
   const { user, isVA, isBusiness } = useAuth();
   const { branding, loading: brandingLoading } = useBranding();
 
-  // Fetch VA profile data for profile completion calculation
-  const { data: profile } = useQuery({
+  // Fetch profile data for profile completion calculation
+  const { data: profileData } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       const response = await api.get('/users/profile');
       return response.data;
     },
-    enabled: !!user && isVA
+    enabled: !!user && (isVA || isBusiness)
   });
+
+  // Extract the appropriate profile from the response
+  const vaProfile = profileData?.data?.va || null;
+  const businessProfile = profileData?.data?.business || null;
+  const profile = isVA ? vaProfile : businessProfile;
 
   // Fetch analytics data
   const { data: analytics } = useQuery({
@@ -38,27 +43,102 @@ export default function Dashboard() {
     }
   });
 
-  // Calculate profile completion percentage using same logic as ProfileCompletion component
+  // Calculate profile completion percentage based on user type
   const profileCompletion = useMemo(() => {
-    if (!isVA || !profile) return { percentage: 0, isComplete: false, missingFields: [] };
+    if (!profile) return { percentage: 0, isComplete: false, missingFields: [] };
 
-    const requiredFields = [
-      // Essential fields (high weight)
-      { field: 'name', weight: 10, check: () => profile.name?.trim() },
-      { field: 'hero', weight: 10, check: () => profile.hero?.trim() },
-      { field: 'bio', weight: 15, check: () => profile.bio?.length >= 100 },
-      { field: 'location', weight: 10, check: () => profile.location?.city && profile.location?.state },
-      { field: 'email', weight: 10, check: () => profile.email?.trim() },
-      { field: 'specialties', weight: 15, check: () => profile.specialtyIds?.length > 0 },
-      { field: 'roleType', weight: 5, check: () => Object.values(profile.roleType || {}).some(Boolean) },
-      { field: 'roleLevel', weight: 5, check: () => Object.values(profile.roleLevel || {}).some(Boolean) },
+    // Debug logging for VA profile
+    if (isVA) {
+      console.log('VA Profile Data:', profile);
+      console.log('Hero:', profile.hero);
+      console.log('Location:', profile.location);
+      console.log('Hourly Rates:', profile.preferredMinHourlyRate, profile.preferredMaxHourlyRate);
+    }
+
+    let requiredFields = [];
+
+    if (isVA) {
+      // Check if name is just the email prefix (default value)
+      const isDefaultName = profile.name === profile.email?.split('@')[0];
+
+      requiredFields = [
+        // Essential fields (high weight)
+        { field: 'name', weight: 10, check: () => profile.name?.trim() && !isDefaultName && profile.name.length > 2 },
+        { field: 'hero', weight: 10, check: () => {
+          // Check if hero exists and has content (more than 10 chars)
+          const heroValue = profile.hero || profile.heroStatement;
+          return heroValue?.trim() && heroValue.length > 10;
+        }},
+        { field: 'bio', weight: 15, check: () => profile.bio?.trim() && profile.bio.length >= 100 },
+        { field: 'location', weight: 10, check: () => {
+          // Check both possible location structures
+          if (profile.location) {
+            // If location exists as an object or ID
+            if (typeof profile.location === 'object' && profile.location !== null) {
+              // Check for populated location with city and some province indicator
+              const hasCity = profile.location.city?.trim();
+              const hasProvince = profile.location.province?.trim() || profile.location.state?.trim();
+              return !!(hasCity && hasProvince);
+            } else if (typeof profile.location === 'string') {
+              // Location exists as an ID reference, consider it complete
+              return true;
+            }
+          }
+          // Fallback to direct fields on profile
+          return !!(profile.city?.trim() && (profile.state?.trim() || profile.province?.trim()));
+        }},
+        { field: 'email', weight: 10, check: () => profile.email?.trim() && profile.email.includes('@') },
+        { field: 'specialties', weight: 15, check: () => profile.specialties?.length > 0 || profile.specialtyIds?.length > 0 },
+        { field: 'roleType', weight: 5, check: () => Object.values(profile.roleType || {}).some(Boolean) },
+        { field: 'roleLevel', weight: 5, check: () => Object.values(profile.roleLevel || {}).some(Boolean) },
+        
+        // Enhanced fields (medium weight)
+        { field: 'hourlyRate', weight: 10, check: () => Number(profile.preferredMinHourlyRate) > 0 && Number(profile.preferredMaxHourlyRate) > 0 && Number(profile.preferredMaxHourlyRate) >= Number(profile.preferredMinHourlyRate) },
+        { field: 'phone', weight: 5, check: () => profile.phone?.trim() && profile.phone.length >= 10 },
+        { field: 'onlinePresence', weight: 5, check: () => profile.website?.trim() || profile.linkedin?.trim() },
+        { field: 'discAssessment', weight: 10, check: () => profile.discAssessment?.primaryType }
+      ];
+    } else if (isBusiness) {
+      // Business profile completion fields - matching the Profile page calculation
+      const requiredFieldsList = ['contactName', 'company', 'bio', 'industry', 'companySize', 'contactRole', 'email'];
+      const professionalFieldsList = ['missionStatement', 'companyCulture', 'workEnvironment', 'headquartersLocation'];
+      const socialFieldsList = ['linkedin', 'facebook', 'twitter', 'instagram'];
+      const arrayFieldsList = ['specialties', 'benefits', 'companyValues'];
       
-      // Enhanced fields (medium weight)
-      { field: 'hourlyRate', weight: 10, check: () => profile.preferredMinHourlyRate && profile.preferredMaxHourlyRate },
-      { field: 'phone', weight: 5, check: () => profile.phone?.trim() },
-      { field: 'onlinePresence', weight: 5, check: () => profile.website?.trim() || profile.linkedin?.trim() },
-      { field: 'discAssessment', weight: 10, check: () => profile.discPrimaryType }
-    ];
+      // Calculate total fields (matching Profile page logic)
+      const totalFields = requiredFieldsList.length + professionalFieldsList.length + arrayFieldsList.length + 1; // +1 for at least one social
+      const fieldWeight = 100 / totalFields;
+      
+      requiredFields = [
+        // Required fields
+        ...requiredFieldsList.map(field => ({
+          field,
+          weight: fieldWeight,
+          check: () => profile[field] && profile[field].toString().length > 0
+        })),
+        
+        // Professional fields
+        ...professionalFieldsList.map(field => ({
+          field,
+          weight: fieldWeight,
+          check: () => profile[field] && profile[field].length > 0
+        })),
+        
+        // Array fields (at least one item each)
+        ...arrayFieldsList.map(field => ({
+          field,
+          weight: fieldWeight,
+          check: () => profile[field] && Array.isArray(profile[field]) && profile[field].length > 0
+        })),
+        
+        // At least one social link
+        {
+          field: 'socialLinks',
+          weight: fieldWeight,
+          check: () => socialFieldsList.some(field => profile[field] && profile[field].length > 0)
+        }
+      ];
+    }
 
     const totalWeight = requiredFields.reduce((sum, field) => sum + field.weight, 0);
     const completedWeight = requiredFields.reduce((sum, field) => {
@@ -113,7 +193,7 @@ export default function Dashboard() {
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Profile Completion</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-blue-900">{isVA ? profileCompletion.percentage : '100'}%</div>
+                      <div className="text-2xl font-semibold text-blue-900">{profileCompletion.percentage}%</div>
                     </dd>
                   </dl>
                 </div>
