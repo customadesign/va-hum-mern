@@ -17,18 +17,24 @@ import AcceptInvitation from './pages/AcceptInvitation';
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
 
+  console.log('[ProtectedRoute] State:', { isAuthenticated, isLoading, userEmail: user?.email, isAdmin: user?.admin });
+
   if (isLoading) {
+    console.log('[ProtectedRoute] Still loading, showing spinner');
     return <LoadingSpinner />;
   }
 
   if (!isAuthenticated) {
+    console.log('[ProtectedRoute] Not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
   // Check if user has admin role
   const isAdmin = user?.admin === true;
+  console.log('[ProtectedRoute] Admin check - user.admin:', user?.admin, 'isAdmin:', isAdmin);
   
   if (!isAdmin) {
+    console.log('[ProtectedRoute] User is not admin, showing access denied');
     return (
       <div className="min-h-screen flex items-center justify-center bg-admin-50">
         <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
@@ -48,6 +54,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
+  console.log('[ProtectedRoute] User is admin, rendering children');
   return children;
 };
 

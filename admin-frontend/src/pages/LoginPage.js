@@ -12,7 +12,9 @@ const LoginPage = () => {
 
   // Use effect to handle navigation after successful login
   useEffect(() => {
+    console.log('[LoginPage] Auth state changed:', { isAuthenticated, authLoading });
     if (isAuthenticated && !authLoading) {
+      console.log('[LoginPage] User authenticated, navigating to dashboard');
       navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate]);
@@ -32,14 +34,19 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('[LoginPage] Submitting login for:', email);
     setIsLoading(true);
     setError('');
 
     const result = await login(email, password);
+    console.log('[LoginPage] Login result:', result);
     
     if (!result.success) {
+      console.log('[LoginPage] Login failed:', result.error);
       setError(result.error);
       setIsLoading(false);
+    } else {
+      console.log('[LoginPage] Login successful, waiting for redirect');
     }
     // Don't set isLoading to false on success to prevent flicker
     // The component will unmount anyway due to redirect
