@@ -45,3 +45,23 @@ services:
         value: https://linkage-va-hub-api.onrender.com/api # Update after backend deploys
       - key: REACT_APP_LINKEDIN_CLIENT_ID
         value: 862opndk5vhk47 # LinkedIn OAuth Client ID
+
+  # Admin Frontend Service
+  - type: web
+    name: admin
+    runtime: node
+    repo: https://github.com/customadesign/va-hum-mern
+    buildCommand: cd admin-frontend && npm install && npm run build
+    startCommand: cd admin-frontend && npx serve -s build -p $PORT --no-clipboard
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REACT_APP_API_URL
+        value: https://linkage-va-hub-api.onrender.com/api
+      - key: REACT_APP_SOCKET_URL
+        value: https://linkage-va-hub-api.onrender.com
+      - key: REACT_APP_BRAND
+        value: admin
+      - key: REACT_APP_NAME
+        value: Linkage VA Hub Admin
+      # Clerk removed: no publishable key needed

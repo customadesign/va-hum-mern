@@ -40,8 +40,8 @@ router.get('/', async (req, res) => {
 
     // Check authentication system
     const authChecks = {
-      hybridAuth: true, // Hybrid authentication is implemented
-      clerkConfigured: !!(process.env.CLERK_SECRET_KEY && process.env.CLERK_PUBLISHABLE_KEY),
+      hybridAuth: false, // Clerk removed
+      clerkConfigured: false,
       jwtConfigured: !!process.env.JWT_SECRET,
       linkedinConfigured: !!(getLinkedInCredentials().clientId && getLinkedInCredentials().clientSecret)
     };
@@ -62,7 +62,7 @@ router.get('/', async (req, res) => {
       environment: envChecks,
       authentication: authChecks,
       features: {
-        hybridAuthentication: true,
+        hybridAuthentication: false,
         dualBrandSupport: true,
         linkedinOAuth: authChecks.linkedinConfigured,
         videoSDK: !!process.env.VIDEOSDK_API_KEY,
@@ -91,14 +91,14 @@ router.get('/auth', async (req, res) => {
   try {
     const authStatus = {
       hybridAuthentication: {
-        enabled: true,
-        description: 'Supports both Clerk and JWT authentication'
+        enabled: false,
+        description: 'Legacy JWT authentication only'
       },
       clerk: {
-        configured: !!(process.env.CLERK_SECRET_KEY && process.env.CLERK_PUBLISHABLE_KEY),
-        secretKeyPresent: !!process.env.CLERK_SECRET_KEY,
-        publishableKeyPresent: !!process.env.CLERK_PUBLISHABLE_KEY,
-        webhookSecretPresent: !!process.env.CLERK_WEBHOOK_SECRET
+        configured: false,
+        secretKeyPresent: false,
+        publishableKeyPresent: false,
+        webhookSecretPresent: false
       },
       jwt: {
         configured: !!process.env.JWT_SECRET,
@@ -133,4 +133,19 @@ router.get('/auth', async (req, res) => {
 });
 
 module.exports = router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

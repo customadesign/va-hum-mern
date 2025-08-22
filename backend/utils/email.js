@@ -52,6 +52,20 @@ exports.sendEmail = async (options) => {
         <a href="${data.conversationUrl}" style="background-color: #4B5563; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">View Conversation</a>
         <p>Best regards,<br>Linkage VA Hub Team</p>
       `
+    }),
+    'admin-invitation': (data) => ({
+      subject: 'Admin Invitation - Linkage VA Hub',
+      html: `
+        <h2>You've been invited to become an admin!</h2>
+        <p>Hello,</p>
+        <p><strong>${data.inviterName}</strong> has invited you to become an administrator for Linkage VA Hub.</p>
+        ${data.message ? `<p><strong>Message:</strong> ${data.message}</p>` : ''}
+        <p>Click the link below to accept this invitation:</p>
+        <a href="${data.acceptUrl}" style="background-color: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">Accept Admin Invitation</a>
+        <p><strong>Important:</strong> This invitation will expire on ${new Date(data.expiresAt).toLocaleDateString()} at ${new Date(data.expiresAt).toLocaleTimeString()}.</p>
+        <p>If you don't want to accept this invitation, you can safely ignore this email.</p>
+        <p>Best regards,<br>Linkage VA Hub Team</p>
+      `
     })
   };
 

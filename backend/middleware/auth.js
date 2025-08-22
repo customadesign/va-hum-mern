@@ -6,14 +6,21 @@ const { isESystemsMode } = require('../utils/esystems');
 exports.protect = async (req, res, next) => {
   let token;
 
+  // Check for token in Authorization header
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
   }
+  
+  // Also check for token in cookies (fallback)
+  if (!token && req.cookies && req.cookies.authToken) {
+    token = req.cookies.authToken;
+  }
 
   if (!token) {
+    console.log('No token found in headers or cookies');
     return res.status(401).json({
       success: false,
       error: 'Not authorized to access this route'
@@ -23,11 +30,13 @@ exports.protect = async (req, res, next) => {
   try {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Token decoded successfully for user:', decoded.id);
 
     // Get user from token
     req.user = await User.findById(decoded.id).select('-password');
 
     if (!req.user) {
+      console.log('User not found in database:', decoded.id);
       return res.status(401).json({
         success: false,
         error: 'User not found'
@@ -35,14 +44,17 @@ exports.protect = async (req, res, next) => {
     }
 
     if (req.user.suspended) {
+      console.log('User suspended:', req.user.email);
       return res.status(403).json({
         success: false,
         error: 'Account suspended'
       });
     }
 
+    console.log('Auth middleware passed for user:', req.user.email, 'Admin:', req.user.admin);
     next();
   } catch (err) {
+    console.error('Token verification failed:', err.message);
     return res.status(401).json({
       success: false,
       error: 'Not authorized to access this route'

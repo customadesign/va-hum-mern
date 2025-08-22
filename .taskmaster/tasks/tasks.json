@@ -747,11 +747,41 @@
         ],
         "priority": "low",
         "subtasks": []
+      },
+      {
+        "id": 46,
+        "title": "Configure LinkedIn OAuth Environment Variables",
+        "description": "Set up and configure LinkedIn OAuth credentials in environment files for production deployment, ensuring secure authentication integration across both frontend and backend services.",
+        "details": "Implementation steps and considerations:\n\n1. LinkedIn Developer Portal Configuration:\n- Access LinkedIn Developer Portal and create/configure OAuth 2.0 application\n- Set authorized redirect URIs for both development and production environments\n- Generate and securely store OAuth credentials\n\n2. Environment Variable Setup:\n- Add LinkedIn OAuth credentials to backend .env:\n  ```\n  LINKEDIN_CLIENT_ID=your_client_id\n  LINKEDIN_CLIENT_SECRET=your_client_secret\n  LINKEDIN_CALLBACK_URL=https://linkage-va-hub-api.onrender.com/api/auth/linkedin/callback\n  LINKEDIN_SCOPE=\"r_emailaddress r_liteprofile r_organization_social\"\n  ```\n- Add LinkedIn configuration to frontend .env:\n  ```\n  NEXT_PUBLIC_LINKEDIN_CLIENT_ID=your_client_id\n  NEXT_PUBLIC_LINKEDIN_REDIRECT_URI=https://linkage-va-hub.onrender.com/auth/linkedin\n  ```\n\n3. Render Deployment Configuration:\n- Add LinkedIn environment variables to Render backend service\n- Add public variables to Render frontend service\n- Ensure variables are properly encrypted and secured\n- Update environment variable documentation\n\n4. Security Considerations:\n- Use separate development and production LinkedIn OAuth credentials\n- Implement proper secret rotation mechanism\n- Configure strict CORS settings for OAuth endpoints\n- Add rate limiting for OAuth-related routes",
+        "testStrategy": "1. Configuration Verification:\n- Verify all LinkedIn OAuth environment variables are properly set in Render\n- Confirm variables are correctly encrypted\n- Check environment-specific credentials are properly separated\n\n2. OAuth Flow Testing:\n- Test LinkedIn OAuth login flow in production environment\n- Verify successful callback handling\n- Confirm proper scope access and permissions\n- Test error handling for invalid credentials\n\n3. Security Testing:\n- Validate CORS settings for OAuth endpoints\n- Test rate limiting functionality\n- Verify secure transmission of OAuth tokens\n- Check proper session handling post-authentication\n\n4. Integration Testing:\n- Verify LinkedIn profile data retrieval\n- Test auto-fill functionality with production credentials\n- Confirm proper error handling for API limits\n- Validate OAuth token refresh mechanism",
+        "status": "pending",
+        "dependencies": [
+          24,
+          41,
+          42
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 47,
+        "title": "Verify LinkedIn OAuth Integration with Admin Panel",
+        "description": "Test the complete LinkedIn OAuth authentication flow using real production credentials and validate admin panel functionality for managing OAuth-authenticated users.",
+        "details": "Implementation steps and considerations:\n\n1. LinkedIn OAuth Flow Testing:\n- Configure test LinkedIn account with appropriate permissions\n- Verify OAuth consent screen and permissions display\n- Test authorization code flow\n- Validate token exchange and refresh mechanisms\n- Verify secure storage of OAuth tokens\n- Test error scenarios (token expiration, revocation)\n\n2. Profile Data Verification:\n- Validate correct mapping of LinkedIn profile fields\n- Test handling of partial/incomplete profile data\n- Verify profile merge functionality with existing user data\n- Check data persistence in database\n- Validate profile update scenarios\n\n3. Admin Panel Integration:\n- Test OAuth user listing in admin dashboard\n- Verify OAuth user management capabilities\n- Test user status toggling (active/inactive)\n- Validate OAuth-specific user filters\n- Test bulk operations on OAuth users\n- Verify audit logging of OAuth-related actions\n\n4. Security Considerations:\n- Validate CSRF protection\n- Test OAuth state parameter handling\n- Verify secure token storage\n- Check proper session management\n- Test rate limiting implementation\n- Validate error logging and monitoring",
+        "testStrategy": "1. OAuth Authentication Testing:\n- Complete end-to-end OAuth flow with real LinkedIn credentials\n- Verify successful authentication and token generation\n- Test invalid credential scenarios\n- Validate token refresh process\n- Check error handling for network issues\n\n2. Profile Management Testing:\n- Verify accurate profile data import\n- Test profile update synchronization\n- Validate conflict resolution\n- Check data persistence accuracy\n\n3. Admin Panel Verification:\n- Login as admin and access OAuth user management\n- Test all CRUD operations on OAuth users\n- Verify filtering and search functionality\n- Validate user status management\n- Test bulk user operations\n- Verify audit log entries\n\n4. Security Testing:\n- Attempt CSRF attacks\n- Test XSS prevention\n- Verify token storage security\n- Check session timeout handling\n- Validate rate limiting effectiveness\n\n5. Integration Testing:\n- Test interaction with other authentication methods\n- Verify API endpoint security\n- Validate webhook functionality\n- Check notification system integration",
+        "status": "pending",
+        "dependencies": [
+          24,
+          32,
+          46
+        ],
+        "priority": "high",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-08-07T08:32:08.998Z",
-      "updated": "2025-08-09T12:47:31.985Z",
+      "updated": "2025-08-21T18:58:06.595Z",
       "description": "Tasks for master context"
     }
   }

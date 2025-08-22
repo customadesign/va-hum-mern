@@ -98,6 +98,62 @@ if (credentials.clientId && credentials.clientSecret) {
     return done(error, null);
   }
   }));
+
+  // Admin OAuth2 Strategy - Only allows admin users
+  console.log('Initializing LinkedIn Admin OAuth strategy...');
+  passport.use('linkedin-admin', new LinkedInStrategy({
+    clientID: credentials.clientId,
+    clientSecret: credentials.clientSecret,
+    callbackURL: process.env.NODE_ENV === 'production' 
+      ? (isESystemsMode() ? "https://esystems-management-hub.onrender.com/api/auth/linkedin/admin/callback" : "https://linkage-va-hub-api.onrender.com/api/auth/linkedin/admin/callback")
+      : "/api/auth/linkedin/admin/callback",
+    scope: ['r_liteprofile', 'r_emailaddress'],
+  }, async (accessToken, refreshToken, profile, done) => {
+  try {
+    console.log('LinkedIn Admin OAuth Profile:', profile);
+
+    // Check if user already exists with LinkedIn ID
+    let existingUser = await User.findOne({ linkedinId: profile.id });
+    
+    if (existingUser) {
+      // Check if user is admin
+      if (!existingUser.admin) {
+        return done(new Error('Access denied. Admin privileges required.'), null);
+      }
+      await existingUser.populate(['va', 'business']);
+      return done(null, existingUser);
+    }
+
+    // Check if user exists with same email
+    const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
+    if (email) {
+      existingUser = await User.findOne({ email: email });
+      if (existingUser) {
+        // Check if user is admin
+        if (!existingUser.admin) {
+          return done(new Error('Access denied. Admin privileges required.'), null);
+        }
+        // Link LinkedIn account to existing admin user
+        existingUser.linkedinId = profile.id;
+        existingUser.linkedinProfile = {
+          firstName: profile.name.givenName,
+          lastName: profile.name.familyName,
+          profileUrl: profile.profileUrl,
+          pictureUrl: profile.photos && profile.photos[0] ? profile.photos[0].value : null
+        };
+        await existingUser.save();
+        await existingUser.populate(['va', 'business']);
+        return done(null, existingUser);
+      }
+    }
+
+    // For admin OAuth, don't create new users - they must exist and be admin
+    return done(new Error('Access denied. Admin account not found. Please contact system administrator.'), null);
+  } catch (error) {
+    console.error('LinkedIn Admin OAuth Error:', error);
+    return done(error, null);
+  }
+  }));
 } else {
   console.warn('LinkedIn OAuth credentials not found - LinkedIn login will be disabled');
   console.warn('Available vars:', {
