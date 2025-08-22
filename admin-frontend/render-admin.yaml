@@ -19,8 +19,7 @@ services:
         value: admin
       - key: REACT_APP_NAME
         value: Linkage VA Hub Admin
-      - key: REACT_APP_CLERK_PUBLISHABLE_KEY
-        sync: false
+      # Clerk removed: no publishable key needed
     domains:
       - admin.linkagevahub.com
     healthCheckPath: /

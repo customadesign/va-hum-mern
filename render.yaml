@@ -64,5 +64,4 @@ services:
         value: admin
       - key: REACT_APP_NAME
         value: Linkage VA Hub Admin
-      - key: REACT_APP_CLERK_PUBLISHABLE_KEY
-        sync: false # Set in Render dashboard if needed
+      # Clerk removed: no publishable key needed
