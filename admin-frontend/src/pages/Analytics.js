@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
-import { 
+import {
   ChartBarIcon,
   UsersIcon,
   BuildingOfficeIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   ClockIcon,
   MapPinIcon,
   BriefcaseIcon,
@@ -230,7 +230,7 @@ const Analytics = () => {
         <StatCard
           title="Active Users (7d)"
           value={overview.activeUsersLast7Days}
-          icon={TrendingUpIcon}
+          icon={ArrowTrendingUpIcon}
           color="orange"
         />
       </div>
