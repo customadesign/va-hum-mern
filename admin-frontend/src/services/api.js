@@ -74,13 +74,15 @@ export const adminAPI = {
   // VA Management (Admin endpoints)
   getVAs: (params) => api.get('/admin/vas', { params }),
   getVAById: (id) => api.get(`/admin/vas/${id}`),
-  updateVAStatus: (id, status) => api.put(`/admin/vas/${id}`, { status }),
+  updateVAStatus: (id, data) => api.put(`/admin/vas/${id}`, typeof data === 'string' ? { status: data } : data),
+  updateVA: (id, data) => api.put(`/admin/vas/${id}`, data),
   deleteVA: (id) => api.delete(`/admin/vas/${id}`),
 
   // Business Management (Admin endpoints)
   getBusinesses: (params) => api.get('/admin/businesses', { params }),
   getBusinessById: (id) => api.get(`/admin/businesses/${id}`),
-  updateBusinessStatus: (id, status) => api.put(`/admin/businesses/${id}`, { status }),
+  updateBusinessStatus: (id, data) => api.put(`/admin/businesses/${id}`, typeof data === 'string' ? { status: data } : data),
+  updateBusiness: (id, data) => api.put(`/admin/businesses/${id}`, data),
   deleteBusiness: (id) => api.delete(`/admin/businesses/${id}`),
 
   // Analytics

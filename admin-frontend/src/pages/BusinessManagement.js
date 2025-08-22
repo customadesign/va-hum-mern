@@ -28,6 +28,8 @@ const BusinessManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingBusiness, setEditingBusiness] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -91,6 +93,22 @@ const BusinessManagement = () => {
     }
   );
 
+  // Update business profile mutation
+  const updateBusinessMutation = useMutation(
+    ({ id, data }) => adminAPI.updateBusiness(id, data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('businesses');
+        toast.success('Business profile updated successfully');
+        setShowEditModal(false);
+        setEditingBusiness(null);
+      },
+      onError: (error) => {
+        toast.error('Failed to update business profile');
+      },
+    }
+  );
+
   const handleStatusUpdate = (businessId, newStatus) => {
     updateStatusMutation.mutate({ id: businessId, status: newStatus });
   };
@@ -119,6 +137,33 @@ const BusinessManagement = () => {
       });
       setSelectedBusinesses([]);
     }
+  };
+
+  const handleEdit = (business) => {
+    setEditingBusiness({ ...business });
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingBusiness) return;
+
+    const updateData = {
+      company: editingBusiness.company,
+      contactName: editingBusiness.contactName,
+      contactEmail: editingBusiness.contactEmail,
+      phone: editingBusiness.phone,
+      website: editingBusiness.website,
+      industry: editingBusiness.industry,
+      companySize: editingBusiness.companySize,
+      location: editingBusiness.location,
+      description: editingBusiness.description,
+      foundedYear: editingBusiness.foundedYear ? parseInt(editingBusiness.foundedYear) : undefined,
+      linkedinProfile: editingBusiness.linkedinProfile,
+      hiringRequirements: editingBusiness.hiringRequirements,
+      budgetRange: editingBusiness.budgetRange
+    };
+
+    updateBusinessMutation.mutate({ id: editingBusiness._id, data: updateData });
   };
 
   const getStatusBadge = (status) => {
@@ -416,6 +461,13 @@ const BusinessManagement = () => {
                         <EyeIcon className="h-5 w-5" />
                       </button>
                       <button
+                        onClick={() => handleEdit(business)}
+                        className="text-warning-600 hover:text-warning-900"
+                        title="Edit Profile"
+                      >
+                        <PencilIcon className="h-5 w-5" />
+                      </button>
+                      <button
                         onClick={() => handleStatusUpdate(business._id, business.status === 'approved' ? 'suspended' : 'approved')}
                         className={business.status === 'approved' ? 'text-danger-600 hover:text-danger-900' : 'text-success-600 hover:text-success-900'}
                         title={business.status === 'approved' ? 'Suspend' : 'Approve'}
@@ -631,6 +683,195 @@ const BusinessManagement = () => {
                   {selectedBusiness.status === 'approved' ? 'Suspend' : 'Approve'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Business Edit Modal */}
+      {showEditModal && editingBusiness && (
+        <div className="admin-modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="admin-modal-content max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-admin-900">Edit Business Profile</h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-admin-400 hover:text-admin-600"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Company Name</label>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    value={editingBusiness.company || ''}
+                    onChange={(e) => setEditingBusiness({ ...editingBusiness, company: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Contact Name</label>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    value={editingBusiness.contactName || ''}
+                    onChange={(e) => setEditingBusiness({ ...editingBusiness, contactName: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Contact Email</label>
+                  <input
+                    type="email"
+                    className="admin-input"
+                    value={editingBusiness.contactEmail || editingBusiness.email || ''}
+                    onChange={(e) => setEditingBusiness({ ...editingBusiness, contactEmail: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Phone</label>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    value={editingBusiness.phone || ''}
+                    onChange={(e) => setEditingBusiness({ ...editingBusiness, phone: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Website</label>
+                  <input
+                    type="url"
+                    className="admin-input"
+                    value={editingBusiness.website || ''}
+                    onChange={(e) => setEditingBusiness({ ...editingBusiness, website: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">LinkedIn Profile</label>
+                  <input
+                    type="url"
+                    className="admin-input"
+                    value={editingBusiness.linkedinProfile || ''}
+                    onChange={(e) => setEditingBusiness({ ...editingBusiness, linkedinProfile: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Industry</label>
+                  <select
+                    className="admin-select"
+                    value={editingBusiness.industry || ''}
+                    onChange={(e) => setEditingBusiness({ ...editingBusiness, industry: e.target.value })}
+                  >
+                    <option value="">Select Industry</option>
+                    <option value="technology">Technology</option>
+                    <option value="healthcare">Healthcare</option>
+                    <option value="finance">Finance</option>
+                    <option value="education">Education</option>
+                    <option value="retail">Retail</option>
+                    <option value="manufacturing">Manufacturing</option>
+                    <option value="consulting">Consulting</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="real-estate">Real Estate</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Company Size</label>
+                  <select
+                    className="admin-select"
+                    value={editingBusiness.companySize || ''}
+                    onChange={(e) => setEditingBusiness({ ...editingBusiness, companySize: e.target.value })}
+                  >
+                    <option value="">Select Size</option>
+                    <option value="startup">Startup (1-10)</option>
+                    <option value="small">Small (11-50)</option>
+                    <option value="medium">Medium (51-200)</option>
+                    <option value="large">Large (201-1000)</option>
+                    <option value="enterprise">Enterprise (1000+)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Founded Year</label>
+                  <input
+                    type="number"
+                    className="admin-input"
+                    value={editingBusiness.foundedYear || ''}
+                    onChange={(e) => setEditingBusiness({ ...editingBusiness, foundedYear: e.target.value })}
+                    min="1800"
+                    max={new Date().getFullYear()}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-admin-700 mb-1">Location</label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={editingBusiness.location || ''}
+                  onChange={(e) => setEditingBusiness({ ...editingBusiness, location: e.target.value })}
+                  placeholder="City, State, Country"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-admin-700 mb-1">Company Description</label>
+                <textarea
+                  className="admin-input"
+                  rows={3}
+                  value={editingBusiness.description || ''}
+                  onChange={(e) => setEditingBusiness({ ...editingBusiness, description: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-admin-700 mb-1">Hiring Requirements</label>
+                <textarea
+                  className="admin-input"
+                  rows={2}
+                  value={editingBusiness.hiringRequirements || ''}
+                  onChange={(e) => setEditingBusiness({ ...editingBusiness, hiringRequirements: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-admin-700 mb-1">Budget Range</label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={editingBusiness.budgetRange || ''}
+                  onChange={(e) => setEditingBusiness({ ...editingBusiness, budgetRange: e.target.value })}
+                  placeholder="e.g., $5,000 - $10,000 per month"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4 border-t border-admin-200 mt-6">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="admin-button-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                disabled={updateBusinessMutation.isLoading}
+                className="admin-button-primary"
+              >
+                {updateBusinessMutation.isLoading ? 'Saving...' : 'Save Changes'}
+              </button>
             </div>
           </div>
         </div>

@@ -26,6 +26,8 @@ const VAManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedVA, setSelectedVA] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingVA, setEditingVA] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -89,6 +91,22 @@ const VAManagement = () => {
     }
   );
 
+  // Update VA profile mutation
+  const updateVAMutation = useMutation(
+    ({ id, data }) => adminAPI.updateVA(id, data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('vas');
+        toast.success('VA profile updated successfully');
+        setShowEditModal(false);
+        setEditingVA(null);
+      },
+      onError: (error) => {
+        toast.error('Failed to update VA profile');
+      },
+    }
+  );
+
   const handleStatusUpdate = (vaId, newStatus) => {
     updateStatusMutation.mutate({ id: vaId, status: newStatus });
   };
@@ -117,6 +135,31 @@ const VAManagement = () => {
       });
       setSelectedVAs([]);
     }
+  };
+
+  const handleEdit = (va) => {
+    setEditingVA({
+      ...va,
+      skills: va.skills?.join(', ') || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingVA) return;
+
+    const updateData = {
+      name: editingVA.name,
+      bio: editingVA.bio,
+      location: editingVA.location,
+      hourlyRate: editingVA.hourlyRate ? parseFloat(editingVA.hourlyRate) : undefined,
+      skills: editingVA.skills ? editingVA.skills.split(',').map(s => s.trim()).filter(s => s) : [],
+      phone: editingVA.phone,
+      experience: editingVA.experience,
+      availability: editingVA.availability
+    };
+
+    updateVAMutation.mutate({ id: editingVA._id, data: updateData });
   };
 
   const getStatusBadge = (status) => {
@@ -411,6 +454,13 @@ const VAManagement = () => {
                         <EyeIcon className="h-5 w-5" />
                       </button>
                       <button
+                        onClick={() => handleEdit(va)}
+                        className="text-warning-600 hover:text-warning-900"
+                        title="Edit Profile"
+                      >
+                        <PencilIcon className="h-5 w-5" />
+                      </button>
+                      <button
                         onClick={() => handleStatusUpdate(va._id, va.status === 'approved' ? 'suspended' : 'approved')}
                         className={va.status === 'approved' ? 'text-danger-600 hover:text-danger-900' : 'text-success-600 hover:text-success-900'}
                         title={va.status === 'approved' ? 'Suspend' : 'Approve'}
@@ -570,6 +620,135 @@ const VAManagement = () => {
                   className={selectedVA.status === 'approved' ? 'admin-button-danger' : 'admin-button-success'}
                 >
                   {selectedVA.status === 'approved' ? 'Suspend' : 'Approve'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* VA Edit Modal */}
+      {showEditModal && editingVA && (
+        <div className="admin-modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="admin-modal-content max-w-3xl w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-admin-900">Edit VA Profile</h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-admin-400 hover:text-admin-600"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Name</label>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    value={editingVA.name || ''}
+                    onChange={(e) => setEditingVA({ ...editingVA, name: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Phone</label>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    value={editingVA.phone || ''}
+                    onChange={(e) => setEditingVA({ ...editingVA, phone: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Location</label>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    value={typeof editingVA.location === 'string' ? editingVA.location :
+                           `${editingVA.location?.city || ''}${editingVA.location?.city && editingVA.location?.state ? ', ' : ''}${editingVA.location?.state || ''}${(editingVA.location?.city || editingVA.location?.state) && editingVA.location?.country ? ', ' : ''}${editingVA.location?.country || ''}`.trim() || ''}
+                    onChange={(e) => setEditingVA({ ...editingVA, location: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Hourly Rate ($)</label>
+                  <input
+                    type="number"
+                    className="admin-input"
+                    value={editingVA.hourlyRate || ''}
+                    onChange={(e) => setEditingVA({ ...editingVA, hourlyRate: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-admin-700 mb-1">Skills (comma-separated)</label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={editingVA.skills || ''}
+                  onChange={(e) => setEditingVA({ ...editingVA, skills: e.target.value })}
+                  placeholder="e.g., JavaScript, React, Node.js"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-admin-700 mb-1">Bio</label>
+                <textarea
+                  className="admin-input"
+                  rows={4}
+                  value={editingVA.bio || ''}
+                  onChange={(e) => setEditingVA({ ...editingVA, bio: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Experience Level</label>
+                  <select
+                    className="admin-select"
+                    value={editingVA.experience || ''}
+                    onChange={(e) => setEditingVA({ ...editingVA, experience: e.target.value })}
+                  >
+                    <option value="">Select Experience</option>
+                    <option value="entry">Entry Level</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="expert">Expert</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-admin-700 mb-1">Availability</label>
+                  <select
+                    className="admin-select"
+                    value={editingVA.availability || ''}
+                    onChange={(e) => setEditingVA({ ...editingVA, availability: e.target.value })}
+                  >
+                    <option value="">Select Availability</option>
+                    <option value="full-time">Full Time</option>
+                    <option value="part-time">Part Time</option>
+                    <option value="contract">Contract</option>
+                    <option value="freelance">Freelance</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t border-admin-200">
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="admin-button-secondary"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={updateVAMutation.isLoading}
+                  className="admin-button-primary"
+                >
+                  {updateVAMutation.isLoading ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </div>
