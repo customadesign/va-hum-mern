@@ -131,8 +131,8 @@ const OAuthCallbackHandler = () => {
   return null;
 };
 
-// Main App Component
-const App = () => {
+// App Routes Component (wrapped by AuthProvider)
+const AppRoutes = () => {
   const { isLoading } = useAuth();
 
   if (isLoading) {
@@ -140,40 +140,47 @@ const App = () => {
   }
 
   return (
+    <div className="App">
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/callback" element={<OAuthCallbackHandler />} />
+        <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
+        
+        {/* Protected Admin Routes */}
+        <Route
+          path="/*"
+          element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/vas" element={<VAManagement />} />
+                  <Route path="/businesses" element={<BusinessManagement />} />
+                  <Route path="/users" element={<UserManagement />} />
+                  <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/settings" element={<Settings />} />
+                </Routes>
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </div>
+  );
+};
+
+// Main App Component
+const App = () => {
+  return (
     <AuthProvider>
       <Router>
-        <div className="App">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/auth/callback" element={<OAuthCallbackHandler />} />
-            <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
-            
-            {/* Protected Admin Routes */}
-            <Route
-              path="/*"
-              element={
-                <ProtectedRoute>
-                  <AdminLayout>
-                    <Routes>
-                      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                      <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/vas" element={<VAManagement />} />
-                      <Route path="/businesses" element={<BusinessManagement />} />
-                      <Route path="/users" element={<UserManagement />} />
-                      <Route path="/analytics" element={<Analytics />} />
-                      <Route path="/settings" element={<Settings />} />
-                    </Routes>
-                  </AdminLayout>
-                </ProtectedRoute>
-              }
-            />
-            
-            {/* Default redirect */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </div>
+        <AppRoutes />
       </Router>
     </AuthProvider>
   );

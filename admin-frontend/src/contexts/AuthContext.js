@@ -21,34 +21,48 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus();
   }, []);
 
+  // Helper function to get cookie value
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  };
+
   // Check authentication status
   const checkAuthStatus = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      console.log('[AuthContext] Checking authentication status...');
+      const token = getCookie('authToken');
+      
       if (!token) {
+        console.log('[AuthContext] No auth token found');
+        setIsAuthenticated(false);
+        setUser(null);
         setIsLoading(false);
         return;
       }
 
-      // Set the token in API headers
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-      const response = await api.get('/auth/me');
+      // Set the token in API headers for this request
+      const response = await api.get('/auth/admin/me');
+      
       if (response.data.success) {
+        console.log('[AuthContext] User authenticated:', response.data.user);
         setUser(response.data.user);
         setIsAuthenticated(true);
       } else {
-        // Clear invalid token
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('refreshToken');
-        delete api.defaults.headers.common['Authorization'];
+        console.log('[AuthContext] Authentication failed:', response.data.error);
+        setUser(null);
+        setIsAuthenticated(false);
+        // Clear invalid token cookie
+        document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       }
     } catch (error) {
-      console.error('Auth status check failed:', error);
-      // Clear invalid tokens
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('refreshToken');
-      delete api.defaults.headers.common['Authorization'];
+      console.error('[AuthContext] Auth check error:', error);
+      setUser(null);
+      setIsAuthenticated(false);
+      // Clear invalid token cookie
+      document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     } finally {
       setIsLoading(false);
     }
@@ -57,28 +71,34 @@ export const AuthProvider = ({ children }) => {
   // Login with email and password
   const loginWithEmail = async (credentials) => {
     try {
+      console.log('[AuthContext] Attempting email login...');
       const response = await api.post('/auth/admin/login', credentials);
       
       if (response.data.success) {
         const { token, refreshToken, user } = response.data;
         
-        // Store tokens
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('refreshToken', refreshToken);
+        // Store tokens in cookies (secure, httpOnly)
+        const cookieOptions = {
+          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+          path: '/',
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+        };
         
-        // Set token in API headers
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        document.cookie = `authToken=${token}; expires=${cookieOptions.expires.toUTCString()}; path=${cookieOptions.path}`;
+        document.cookie = `refreshToken=${refreshToken}; expires=${cookieOptions.expires.toUTCString()}; path=${cookieOptions.path}`;
         
         // Update state
         setUser(user);
         setIsAuthenticated(true);
         
+        console.log('[AuthContext] Email login successful');
         return { success: true };
       } else {
         throw new Error(response.data.error || 'Login failed');
       }
     } catch (error) {
-      console.error('Email login failed:', error);
+      console.error('[AuthContext] Email login failed:', error);
       throw error;
     }
   };
@@ -86,26 +106,32 @@ export const AuthProvider = ({ children }) => {
   // Login with OAuth tokens (from OAuth callback)
   const loginWithOAuth = async (tokens) => {
     try {
+      console.log('[AuthContext] Processing OAuth login...');
       const { token, refreshToken } = tokens;
       
-      // Store tokens
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('refreshToken', refreshToken);
+      // Store tokens in cookies
+      const cookieOptions = {
+        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+      };
       
-      // Set token in API headers
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      document.cookie = `authToken=${token}; expires=${cookieOptions.expires.toUTCString()}; path=${cookieOptions.path}`;
+      document.cookie = `refreshToken=${refreshToken}; expires=${cookieOptions.expires.toUTCString()}; path=${cookieOptions.path}`;
       
       // Get user info
-      const response = await api.get('/auth/me');
+      const response = await api.get('/auth/admin/me');
       if (response.data.success) {
         setUser(response.data.user);
         setIsAuthenticated(true);
+        console.log('[AuthContext] OAuth login successful');
         return { success: true };
       } else {
         throw new Error('Failed to get user info');
       }
     } catch (error) {
-      console.error('OAuth login failed:', error);
+      console.error('[AuthContext] OAuth login failed:', error);
       throw error;
     }
   };
@@ -122,23 +148,29 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Logout
-  const logout = () => {
-    // Clear tokens
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    
-    // Clear API headers
-    delete api.defaults.headers.common['Authorization'];
-    
-    // Clear state
-    setUser(null);
-    setIsAuthenticated(false);
+  const logout = async () => {
+    try {
+      // Call logout endpoint to clear server-side cookies
+      await api.post('/auth/admin/logout');
+    } catch (error) {
+      console.error('[AuthContext] Logout API call failed:', error);
+    } finally {
+      // Clear client-side cookies
+      document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      
+      // Clear state
+      setUser(null);
+      setIsAuthenticated(false);
+      
+      console.log('[AuthContext] User logged out');
+    }
   };
 
   // Refresh token
   const refreshAuth = async () => {
     try {
-      const refreshToken = localStorage.getItem('refreshToken');
+      const refreshToken = getCookie('refreshToken');
       if (!refreshToken) {
         throw new Error('No refresh token available');
       }
@@ -147,19 +179,23 @@ export const AuthProvider = ({ children }) => {
       if (response.data.success) {
         const { token, refreshToken: newRefreshToken } = response.data;
         
-        // Update tokens
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('refreshToken', newRefreshToken);
+        // Update cookies
+        const cookieOptions = {
+          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+          path: '/',
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+        };
         
-        // Update API headers
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        document.cookie = `authToken=${token}; expires=${cookieOptions.expires.toUTCString()}; path=${cookieOptions.path}`;
+        document.cookie = `refreshToken=${newRefreshToken}; expires=${cookieOptions.expires.toUTCString()}; path=${cookieOptions.path}`;
         
         return { success: true };
       } else {
         throw new Error('Token refresh failed');
       }
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      console.error('[AuthContext] Token refresh failed:', error);
       logout();
       throw error;
     }

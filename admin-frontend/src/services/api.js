@@ -3,6 +3,14 @@ import { toast } from 'react-toastify';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
+// Helper function to get cookie value
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+};
+
 // Create axios instance
 const api = axios.create({
   baseURL: API_URL,
@@ -10,11 +18,11 @@ const api = axios.create({
   withCredentials: true // Enable cookies for CORS requests
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token from cookies
 api.interceptors.request.use(
   (config) => {
-    // Get token from localStorage - using authToken as set in AuthContext
-    const token = localStorage.getItem('authToken');
+    // Get token from cookies instead of localStorage
+    const token = getCookie('authToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -34,7 +42,9 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Only redirect to login if we're not already on the login page
       if (!window.location.pathname.includes('/login')) {
-        localStorage.removeItem('authToken');
+        // Clear auth cookies instead of localStorage
+        document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         delete axios.defaults.headers.common['Authorization'];
         window.location.href = '/login';
       }
