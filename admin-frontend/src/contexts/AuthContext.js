@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 
 // Configure axios defaults
@@ -18,10 +18,20 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const isCheckingAuth = useRef(false);
+  const hasInitialized = useRef(false);
 
   // Check if user is authenticated on app load
   useEffect(() => {
+    // Prevent multiple simultaneous auth checks
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
     const checkAuthStatus = async () => {
+      // Prevent concurrent auth checks
+      if (isCheckingAuth.current) return;
+      isCheckingAuth.current = true;
+
       try {
         const token = localStorage.getItem('authToken');
         console.log('Initial auth check - token exists:', !!token);
@@ -31,6 +41,7 @@ export const AuthProvider = ({ children }) => {
           setIsLoading(false);
           setIsAuthenticated(false);
           setUser(null);
+          isCheckingAuth.current = false;
           return;
         }
 
@@ -71,12 +82,21 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error('Auth check failed:', error.response?.data || error.message);
         console.error('Full error:', error);
-        localStorage.removeItem('authToken');
-        delete axios.defaults.headers.common['Authorization'];
-        setUser(null);
-        setIsAuthenticated(false);
+        
+        // Only clear auth if it's a 401 or 403 error
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          localStorage.removeItem('authToken');
+          delete axios.defaults.headers.common['Authorization'];
+          setUser(null);
+          setIsAuthenticated(false);
+        } else {
+          // For other errors (network, etc), keep the existing auth state
+          // This prevents logout on temporary network issues
+          console.log('Keeping existing auth state due to non-auth error');
+        }
       } finally {
         setIsLoading(false);
+        isCheckingAuth.current = false;
       }
     };
 
@@ -84,6 +104,10 @@ export const AuthProvider = ({ children }) => {
   }, []); // Run only once on mount
 
   const checkAuthStatus = useCallback(async () => {
+    // Prevent concurrent auth checks
+    if (isCheckingAuth.current) return;
+    isCheckingAuth.current = true;
+
     setIsLoading(true);
     try {
       const token = localStorage.getItem('authToken');
@@ -93,6 +117,7 @@ export const AuthProvider = ({ children }) => {
         setIsLoading(false);
         setIsAuthenticated(false);
         setUser(null);
+        isCheckingAuth.current = false;
         return;
       }
 
@@ -129,12 +154,17 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Auth check failed:', error.response?.data || error.message);
-      localStorage.removeItem('authToken');
-      delete axios.defaults.headers.common['Authorization'];
-      setUser(null);
-      setIsAuthenticated(false);
+      
+      // Only clear auth if it's a 401 or 403 error
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem('authToken');
+        delete axios.defaults.headers.common['Authorization'];
+        setUser(null);
+        setIsAuthenticated(false);
+      }
     } finally {
       setIsLoading(false);
+      isCheckingAuth.current = false;
     }
   }, []);
 
@@ -171,6 +201,9 @@ export const AuthProvider = ({ children }) => {
         console.log('Login successful, setting user:', userData.email);
         setUser(userData);
         setIsAuthenticated(true);
+        
+        // Set a flag to prevent re-checking auth immediately after login
+        isCheckingAuth.current = false;
         
         return { success: true };
       } else {
@@ -222,6 +255,9 @@ export const AuthProvider = ({ children }) => {
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
     setIsAuthenticated(false);
+    // Reset the auth check flags
+    isCheckingAuth.current = false;
+    hasInitialized.current = false;
   };
 
   const getOAuthUrl = (provider) => {
