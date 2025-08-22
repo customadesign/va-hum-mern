@@ -1,8 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import axios from 'axios';
-
-// Configure axios defaults
-axios.defaults.withCredentials = true;
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext();
 
@@ -16,222 +13,156 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const isCheckingAuth = useRef(false);
-  const skipNextCheck = useRef(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Single auth check function used everywhere
-  const checkAuthStatus = useCallback(async (skipCheck = false) => {
-    console.log('[AuthContext] checkAuthStatus called, skipCheck:', skipCheck, 'skipNextCheck:', skipNextCheck.current);
-    
-    // Skip if explicitly told to (after login)
-    if (skipCheck || skipNextCheck.current) {
-      console.log('[AuthContext] Skipping auth check');
-      skipNextCheck.current = false;
-      return;
-    }
+  // Check if user is authenticated on mount
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
 
-    // Prevent concurrent auth checks
-    if (isCheckingAuth.current) {
-      console.log('[AuthContext] Auth check already in progress, skipping');
-      return;
-    }
-    isCheckingAuth.current = true;
-
+  // Check authentication status
+  const checkAuthStatus = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      console.log('[AuthContext] Auth check - token exists:', !!token);
-      console.log('[AuthContext] Token value:', token ? token.substring(0, 20) + '...' : 'null');
-      
       if (!token) {
-        console.log('[AuthContext] No token found, clearing auth state');
         setIsLoading(false);
-        setIsAuthenticated(false);
-        setUser(null);
-        isCheckingAuth.current = false;
         return;
       }
 
-      // Set axios default header
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // Set the token in API headers
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-      // Verify token with backend
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-      console.log('[AuthContext] Checking auth status with:', `${apiUrl}/auth/me`);
-      console.log('[AuthContext] Environment:', process.env.NODE_ENV);
-      console.log('[AuthContext] API URL from env:', process.env.REACT_APP_API_URL);
-      
-      const response = await axios.get(`${apiUrl}/auth/me`, {
-        withCredentials: true,
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      console.log('[AuthContext] Auth response:', response.data);
-      console.log('[AuthContext] User admin status:', response.data?.user?.admin);
-      if (response.data.success && response.data.user) {
-        if (response.data.user.admin === true) {
-          console.log('[AuthContext] ✅ User is admin, setting authenticated');
-          console.log('[AuthContext] Setting user:', response.data.user.email);
-          setUser(response.data.user);
-          setIsAuthenticated(true);
-          console.log('[AuthContext] Auth state updated - isAuthenticated: true');
-        } else {
-          // User is not admin, clear token
-          console.warn('[AuthContext] ❌ User is not admin:', response.data.user.email);
-          localStorage.removeItem('authToken');
-          delete axios.defaults.headers.common['Authorization'];
-          setUser(null);
-          setIsAuthenticated(false);
-        }
+      const response = await api.get('/auth/me');
+      if (response.data.success) {
+        setUser(response.data.user);
+        setIsAuthenticated(true);
       } else {
-        console.log('[AuthContext] Invalid response structure:', response.data);
-        throw new Error('Invalid response');
+        // Clear invalid token
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+        delete api.defaults.headers.common['Authorization'];
       }
     } catch (error) {
-      console.error('[AuthContext] Auth check failed:', error.response?.data || error.message);
-      console.error('[AuthContext] Error status:', error.response?.status);
-      console.error('[AuthContext] Full error:', error);
-      
-      // Only clear auth if it's a 401 or 403 error
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        console.log('[AuthContext] Auth error (401/403), clearing auth state');
-        localStorage.removeItem('authToken');
-        delete axios.defaults.headers.common['Authorization'];
-        setUser(null);
-        setIsAuthenticated(false);
-      } else {
-        // For other errors (network, etc), keep the existing auth state
-        // This prevents logout on temporary network issues
-        console.log('[AuthContext] Non-auth error, keeping existing auth state');
-        console.log('[AuthContext] Current auth state - isAuthenticated:', isAuthenticated, 'user:', user?.email);
-      }
+      console.error('Auth status check failed:', error);
+      // Clear invalid tokens
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
+      delete api.defaults.headers.common['Authorization'];
     } finally {
-      console.log('[AuthContext] Auth check complete, setting isLoading to false');
       setIsLoading(false);
-      isCheckingAuth.current = false;
     }
-  }, []);
+  };
 
-  // Check if user is authenticated on app load
-  useEffect(() => {
-    console.log('[AuthContext] Initial mount, calling checkAuthStatus');
-    checkAuthStatus();
-  }, []); // Run only once on mount
-
-  const login = async (email, password) => {
+  // Login with email and password
+  const loginWithEmail = async (credentials) => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-      console.log('Logging in to:', `${apiUrl}/auth/login`);
-      console.log('Environment:', process.env.NODE_ENV);
+      const response = await api.post('/auth/admin/login', credentials);
       
-      const response = await axios.post(`${apiUrl}/auth/login`, {
-        email,
-        password
-      }, {
-        withCredentials: true // Important for cookies
-      });
-
-      console.log('[Login] Response:', response.data);
-      console.log('[Login] User admin status:', response.data?.user?.admin);
-
       if (response.data.success) {
-        const { token, user: userData } = response.data;
+        const { token, refreshToken, user } = response.data;
         
-        // Check if user is admin
-        if (userData.admin !== true) {
-          console.warn('[Login] ❌ User is not admin:', userData.email);
-          throw new Error('Access denied. Admin privileges required.');
-        }
-
-        console.log('[Login] ✅ User is admin, storing token');
-        // Store token in localStorage
+        // Store tokens
         localStorage.setItem('authToken', token);
+        localStorage.setItem('refreshToken', refreshToken);
         
-        // Set axios default header
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        // Set token in API headers
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
-        console.log('[Login] Setting auth state for user:', userData.email);
-        
-        // Skip the next auth check to prevent race condition
-        skipNextCheck.current = true;
-        isCheckingAuth.current = false;
-        
-        // Set state directly without triggering another auth check
-        setUser(userData);
+        // Update state
+        setUser(user);
         setIsAuthenticated(true);
-        setIsLoading(false);
-        
-        console.log('[Login] Auth state set - isAuthenticated: true, skipNextCheck: true');
         
         return { success: true };
       } else {
         throw new Error(response.data.error || 'Login failed');
       }
     } catch (error) {
-      console.error('Login failed:', error.response?.data || error.message);
-      return { 
-        success: false, 
-        error: error.response?.data?.error || error.message || 'Login failed' 
-      };
+      console.error('Email login failed:', error);
+      throw error;
     }
   };
 
-  const loginWithOAuth = async (provider, code, state) => {
+  // Login with OAuth tokens (from OAuth callback)
+  const loginWithOAuth = async (tokens) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/${provider}/callback`, {
-        code,
-        state
-      });
-
+      const { token, refreshToken } = tokens;
+      
+      // Store tokens
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('refreshToken', refreshToken);
+      
+      // Set token in API headers
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // Get user info
+      const response = await api.get('/auth/me');
       if (response.data.success) {
-        const { token, user: userData } = response.data;
-        
-        // Check if user is admin
-        if (!userData.admin) {
-          throw new Error('Access denied. Admin privileges required.');
-        }
-
-        localStorage.setItem('authToken', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        
-        // Skip the next auth check to prevent race condition
-        skipNextCheck.current = true;
-        isCheckingAuth.current = false;
-        
-        // Set state directly without triggering another auth check
-        setUser(userData);
+        setUser(response.data.user);
         setIsAuthenticated(true);
-        setIsLoading(false);
-        
         return { success: true };
+      } else {
+        throw new Error('Failed to get user info');
       }
     } catch (error) {
       console.error('OAuth login failed:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.error || error.message || 'OAuth login failed' 
-      };
+      throw error;
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('authToken');
-    delete axios.defaults.headers.common['Authorization'];
-    setUser(null);
-    setIsAuthenticated(false);
-    setIsLoading(false);
-    // Reset the auth check flags
-    isCheckingAuth.current = false;
-    skipNextCheck.current = false;
+  // Unified login method that handles both types
+  const login = async (credentials) => {
+    // If credentials has token and refreshToken, it's OAuth login
+    if (credentials.token && credentials.refreshToken) {
+      return await loginWithOAuth(credentials);
+    }
+    
+    // Otherwise, it's email/password login
+    return await loginWithEmail(credentials);
   };
 
-  const getOAuthUrl = (provider) => {
-    const baseUrl = process.env.REACT_APP_API_URL;
-    const redirectUri = `${window.location.origin}/auth/callback`;
-    return `${baseUrl}/auth/${provider}?redirect_uri=${encodeURIComponent(redirectUri)}`;
+  // Logout
+  const logout = () => {
+    // Clear tokens
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
+    
+    // Clear API headers
+    delete api.defaults.headers.common['Authorization'];
+    
+    // Clear state
+    setUser(null);
+    setIsAuthenticated(false);
+  };
+
+  // Refresh token
+  const refreshAuth = async () => {
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      const response = await api.post('/auth/refresh', { refreshToken });
+      if (response.data.success) {
+        const { token, refreshToken: newRefreshToken } = response.data;
+        
+        // Update tokens
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('refreshToken', newRefreshToken);
+        
+        // Update API headers
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        
+        return { success: true };
+      } else {
+        throw new Error('Token refresh failed');
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      logout();
+      throw error;
+    }
   };
 
   const value = {
@@ -239,9 +170,8 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     isLoading,
     login,
-    loginWithOAuth,
     logout,
-    getOAuthUrl,
+    refreshAuth,
     checkAuthStatus
   };
 
@@ -251,5 +181,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-export default AuthContext;

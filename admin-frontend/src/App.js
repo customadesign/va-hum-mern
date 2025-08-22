@@ -1,9 +1,9 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
-import AdminLayout from './components/layout/AdminLayout';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
+import AdminLayout from './components/layout/AdminLayout';
 import VAManagement from './pages/VAManagement';
 import BusinessManagement from './pages/BusinessManagement';
 import UserManagement from './pages/UserManagement';
@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import OAuthCallback from './pages/OAuthCallback';
 import AcceptInvitation from './pages/AcceptInvitation';
+import './App.css';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -58,7 +59,80 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-function App() {
+// OAuth Callback Handler Component
+const OAuthCallbackHandler = () => {
+  const { login } = useAuth();
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const processCallback = async () => {
+      try {
+        // Check for OAuth tokens in URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const refreshToken = urlParams.get('refreshToken');
+        
+        if (token && refreshToken) {
+          console.log('[OAuthCallback] OAuth tokens detected, processing login...');
+          await login({ token, refreshToken });
+          // Redirect to dashboard
+          window.location.href = '/dashboard';
+        } else {
+          // Check for error parameters
+          const errorParam = urlParams.get('error');
+          if (errorParam) {
+            setError(errorParam);
+          } else {
+            setError('Invalid OAuth callback - missing tokens');
+          }
+        }
+      } catch (error) {
+        console.error('[OAuthCallback] Error processing callback:', error);
+        setError('Failed to process OAuth authentication');
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    processCallback();
+  }, [login]);
+
+  if (isProcessing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-admin-50">
+        <div className="text-center">
+          <div className="admin-loading mb-4"></div>
+          <p className="text-admin-600">Processing authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-admin-50">
+        <div className="text-center">
+          <div className="bg-danger-50 border border-danger-200 text-danger-700 px-6 py-4 rounded-lg mb-4">
+            <h3 className="text-lg font-medium mb-2">Authentication Error</h3>
+            <p>{error}</p>
+          </div>
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="admin-button-primary"
+          >
+            Return to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+// Main App Component
+const App = () => {
   const { isLoading } = useAuth();
 
   if (isLoading) {
@@ -66,32 +140,43 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/auth/callback" element={<OAuthCallback />} />
-        <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <Routes>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/vas" element={<VAManagement />} />
-                  <Route path="/businesses" element={<BusinessManagement />} />
-                  <Route path="/users" element={<UserManagement />} />
-                  <Route path="/analytics" element={<Analytics />} />
-                  <Route path="/settings" element={<Settings />} />
-                </Routes>
-              </AdminLayout>
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </div>
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<OAuthCallbackHandler />} />
+            <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
+            
+            {/* Protected Admin Routes */}
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <Routes>
+                      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/vas" element={<VAManagement />} />
+                      <Route path="/businesses" element={<BusinessManagement />} />
+                      <Route path="/users" element={<UserManagement />} />
+                      <Route path="/analytics" element={<Analytics />} />
+                      <Route path="/settings" element={<Settings />} />
+                    </Routes>
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Default redirect */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
-}
+};
 
 export default App;

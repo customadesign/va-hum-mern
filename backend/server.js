@@ -242,6 +242,7 @@ app.get('/', (req, res) => {
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', authOAuthRoutes);
+app.use('/api/auth', require('./routes/adminAuth')); // Admin OAuth routes
 app.use('/api/users', userRoutes);
 app.use('/api/vas', vaRoutes);
 app.use('/api/system', require('./routes/system'));

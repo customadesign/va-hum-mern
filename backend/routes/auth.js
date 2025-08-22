@@ -188,6 +188,99 @@ router.post('/login', authLimiter, [
   }
 });
 
+// @route   POST /api/auth/admin/login
+// @desc    Admin login with email/password
+// @access  Public
+router.post('/admin/login', authLimiter, [
+  body('email').isEmail().normalizeEmail(),
+  body('password').exists()
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const { email, password } = req.body;
+
+    // Check for user
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid credentials'
+      });
+    }
+
+    // Check password
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid credentials'
+      });
+    }
+
+    // Check if user is admin
+    if (!user.admin) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied. Admin privileges required.'
+      });
+    }
+
+    // Check if suspended
+    if (user.suspended) {
+      return res.status(403).json({
+        success: false,
+        error: 'Account suspended'
+      });
+    }
+
+    // Update sign in info
+    user.lastSignInAt = user.currentSignInAt;
+    user.currentSignInAt = new Date();
+    user.signInCount += 1;
+    await user.save();
+
+    // Create tokens
+    const token = user.getSignedJwtToken();
+    const refreshToken = user.getRefreshToken();
+    await user.save();
+
+    // Set secure cookie options for production
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      path: '/'
+    };
+
+    // Set tokens in cookies for better security
+    res.cookie('authToken', token, cookieOptions);
+    res.cookie('refreshToken', refreshToken, { ...cookieOptions, httpOnly: true });
+
+    res.json({
+      success: true,
+      token,
+      refreshToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        admin: user.admin,
+        name: user.name || user.email
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
 // @route   GET /api/auth/me
 // @desc    Get current logged in user
 // @access  Private
