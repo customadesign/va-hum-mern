@@ -77,9 +77,18 @@ export const BrandingProvider = ({ children }) => {
   }, [user?.role, isESystemsEnv]);
 
   const setBrandingTheme = (isESystemsMode) => {
-    // Theme is now automatically determined by user role
-    // This function is kept for backward compatibility but doesn't do anything
-    console.log('Theme is now automatically determined by user role');
+    console.log('🎨 Manual theme switching to E-Systems mode:', isESystemsMode);
+    
+    // Allow manual theme switching during profile setup
+    setBranding(prev => ({
+      ...prev,
+      name: isESystemsMode ? 'E-Systems Management' : 'Linkage VA Hub',
+      logo: isESystemsMode ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/688ab56f0299a1fefc1986e5.png',
+      logoUrl: isESystemsMode ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/688ab56f0299a1fefc1986e5.png',
+      allowVARegistration: !isESystemsMode,
+      userType: isESystemsMode ? 'business' : 'va',
+      isESystemsMode
+    }));
   };
 
   return (

@@ -12,6 +12,14 @@ export default function ProfileSetup() {
   const { updateUser, user, checkAuth } = useAuth();
   const { branding, setBrandingTheme } = useBranding();
 
+  // Check email verification before allowing profile setup
+  React.useEffect(() => {
+    if (user && !user.isVerified) {
+      toast.error('Please verify your email before setting up your profile.');
+      navigate('/verify-email-sent');
+    }
+  }, [user, navigate]);
+
   // Note: Do not auto-create any profile to avoid wrong selection
 
   const handleProfileTypeSelect = async (type) => {

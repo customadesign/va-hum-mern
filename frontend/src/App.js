@@ -25,6 +25,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import EmailVerification from './pages/EmailVerification';
+import VerifyEmailSent from './pages/VerifyEmailSent';
 import VAList from './pages/VAs/List';
 import VADetail from './pages/VAs/Detail';
 import VAProfile from './pages/VAs/Profile';
@@ -91,6 +92,7 @@ function App() {
                         
                         {/* Email Verification */}
                         <Route path="verify-email/:token" element={<EmailVerification />} />
+                        <Route path="verify-email-sent" element={<VerifyEmailSent />} />
                         
                         {/* OAuth Callbacks */}
                         <Route path="auth/linkedin/callback" element={<LinkedInCallback />} />

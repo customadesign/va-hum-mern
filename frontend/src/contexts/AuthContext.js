@@ -115,8 +115,8 @@ export const AuthProvider = ({ children }) => {
       // Show verification message
       toast.success('Registration successful! Please check your email to verify your account.');
       
-      // Redirect to profile setup
-      navigate('/profile-setup');
+      // Redirect to email verification page instead of profile setup
+      navigate('/verify-email-sent');
       
       return response;
     } catch (error) {
