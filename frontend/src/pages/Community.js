@@ -2,7 +2,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { useBranding } from '../contexts/BrandingContext';
-import { useAuth } from '../contexts/HybridAuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import LessonViewer from '../components/LessonViewer';
 import QuickSkillModal from '../components/QuickSkillModal';
 import VideoSDKMeeting from '../components/VideoSDKMeeting';

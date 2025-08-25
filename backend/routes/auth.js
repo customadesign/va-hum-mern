@@ -55,23 +55,25 @@ router.post('/register', authLimiter, [
       }
     }
 
-    // Generate confirmation token
-    const confirmToken = user.getConfirmationToken();
+    // Generate email verification token
+    const verificationToken = user.getEmailVerificationToken();
     await user.save();
 
-    // Send confirmation email
-    // TODO: Configure email settings in production
+    // Send verification email
     try {
-      const confirmUrl = `${process.env.CLIENT_URL}/confirm-email/${confirmToken}`;
+      const verifyUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
       await sendEmail({
         email: user.email,
-        subject: 'Welcome to Linkage VA Hub - Please confirm your email',
         template: 'welcome',
-        data: { confirmUrl }
+        data: { verifyUrl }
       });
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
       // Continue with registration even if email fails
+      // In development, return the token for testing
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Verification token:', verificationToken);
+      }
     }
 
     // Create tokens
@@ -380,46 +382,114 @@ router.get('/me', protect, async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/confirm-email/:token
-// @desc    Confirm email
+// @route   POST /api/auth/verify-email/:token
+// @desc    Verify email address
 // @access  Public
-router.post('/confirm-email/:token', async (req, res) => {
+router.post('/verify-email/:token', async (req, res) => {
   try {
     const { token } = req.params;
 
     const user = await User.findOne({
-      confirmationToken: { $exists: true },
-      confirmationTokenExpire: { $gt: Date.now() }
+      emailVerificationToken: { $exists: true },
+      emailVerificationExpire: { $gt: Date.now() }
     });
 
     if (!user) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid or expired token'
+        error: 'Invalid or expired verification token'
       });
     }
 
     // Verify token
     const bcrypt = require('bcryptjs');
-    const isValid = await bcrypt.compare(token, user.confirmationToken);
+    const isValid = await bcrypt.compare(token, user.emailVerificationToken);
     
     if (!isValid) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid token'
+        error: 'Invalid verification token'
       });
     }
 
-    // Confirm email
-    user.confirmedAt = new Date();
-    user.confirmationToken = undefined;
-    user.confirmationTokenExpire = undefined;
+    // Verify email
+    user.isVerified = true;
+    user.verifiedAt = new Date();
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpire = undefined;
+    await user.save();
+
+    // Generate tokens for auto-login
+    const authToken = user.getSignedJwtToken();
+    const refreshToken = user.getRefreshToken();
     await user.save();
 
     res.json({
       success: true,
-      message: 'Email confirmed successfully'
+      message: 'Email verified successfully',
+      token: authToken,
+      refreshToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        isVerified: true,
+        admin: user.admin
+      }
     });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+// @route   POST /api/auth/resend-verification
+// @desc    Resend email verification
+// @access  Private
+router.post('/resend-verification', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email already verified'
+      });
+    }
+
+    // Generate new verification token
+    const verificationToken = user.getEmailVerificationToken();
+    await user.save();
+
+    // Send verification email
+    try {
+      const verifyUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
+      await sendEmail({
+        email: user.email,
+        template: 'email-verification',
+        data: { verifyUrl }
+      });
+      
+      res.json({
+        success: true,
+        message: 'Verification email sent'
+      });
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to send verification email'
+      });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({

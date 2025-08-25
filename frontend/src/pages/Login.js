@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useAuth } from '../contexts/HybridAuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useBranding } from '../contexts/BrandingContext';
 import LinkedInLoginButton from '../components/LinkedInLoginButton';
 

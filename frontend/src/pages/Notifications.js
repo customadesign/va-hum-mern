@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BellIcon, ChatBubbleLeftIcon, UserPlusIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { format, parseISO } from 'date-fns';
 import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from '../services/notificationService';
-import { useAuth } from '../contexts/HybridAuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');

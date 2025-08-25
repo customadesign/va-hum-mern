@@ -5,7 +5,7 @@ import { useQuery } from 'react-query';
 import api from '../../services/api';
 import { formatDistanceToNow } from 'date-fns';
 import { useBranding } from '../../contexts/BrandingContext';
-import { useAuth } from '../../contexts/HybridAuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   ChatBubbleLeftRightIcon,
   InboxIcon,

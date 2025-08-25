@@ -127,7 +127,7 @@ export default function BusinessProfile() {
   );
 
   // If bio/contactName are still defaults from setup, show as placeholders
-  const { user } = require('../../contexts/HybridAuthContext').useAuth();
+  const { user } = require('../../contexts/AuthContext').useAuth();
   const emailUsername = user?.email ? user.email.split('@')[0] : '';
   const isDefaultBio = profile?.bio === 'Tell us about your business...';
   const isDefaultCompany = !profile?.company || profile?.company === 'Your Company';

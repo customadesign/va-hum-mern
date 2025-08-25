@@ -96,6 +96,11 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true // Allows multiple null values during migration
   },
+  // Email verification fields
+  emailVerificationToken: String,
+  emailVerificationExpire: Date,
+  verifiedAt: Date,
+  // Legacy confirmation fields (kept for backward compatibility)
   confirmationToken: String,
   confirmationTokenExpire: Date,
   confirmedAt: Date,
@@ -450,7 +455,7 @@ userSchema.methods.getResetPasswordToken = function() {
   return resetToken;
 };
 
-// Generate confirmation token
+// Generate confirmation token (legacy - kept for backward compatibility)
 userSchema.methods.getConfirmationToken = function() {
   const confirmToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   
@@ -458,6 +463,16 @@ userSchema.methods.getConfirmationToken = function() {
   this.confirmationTokenExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
   
   return confirmToken;
+};
+
+// Generate email verification token
+userSchema.methods.getEmailVerificationToken = function() {
+  const verificationToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  
+  this.emailVerificationToken = bcrypt.hashSync(verificationToken, 10);
+  this.emailVerificationExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  
+  return verificationToken;
 };
 
 module.exports = mongoose.model('User', userSchema);

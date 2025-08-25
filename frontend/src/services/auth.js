@@ -15,13 +15,39 @@ const authService = {
     return response.data;
   },
 
+  logout: async () => {
+    const response = await api.post('/auth/logout');
+    return response.data;
+  },
+
   getMe: async () => {
     const response = await api.get('/auth/me');
     return response.data;
   },
 
+  updateProfile: async (updates) => {
+    const response = await api.put('/users/profile', updates);
+    return response.data;
+  },
+
+  deleteAccount: async () => {
+    const response = await api.delete('/users/account');
+    return response.data;
+  },
+
+  verifyEmail: async (token) => {
+    const response = await api.post(`/auth/verify-email/${token}`);
+    return response.data;
+  },
+
+  resendVerificationEmail: async () => {
+    const response = await api.post('/auth/resend-verification');
+    return response.data;
+  },
+
   confirmEmail: async (token) => {
-    const response = await api.post(`/auth/confirm-email/${token}`);
+    // Legacy support - redirect to new verify endpoint
+    const response = await api.post(`/auth/verify-email/${token}`);
     return response.data;
   },
 
@@ -32,6 +58,32 @@ const authService = {
 
   resetPassword: async (token, password) => {
     const response = await api.put(`/auth/reset-password/${token}`, { password });
+    return response.data;
+  },
+
+  refreshToken: async (refreshToken) => {
+    const response = await api.post('/auth/refresh', { refreshToken });
+    return response.data;
+  },
+
+  completeProfile: async (role, referralCode) => {
+    const response = await api.post('/auth/complete-profile', { role, referralCode });
+    return response.data;
+  },
+
+  // Admin specific methods
+  adminLogin: async (email, password) => {
+    const response = await api.post('/auth/admin/login', { email, password });
+    return response.data;
+  },
+
+  adminLogout: async () => {
+    const response = await api.post('/auth/admin/logout');
+    return response.data;
+  },
+
+  getAdminMe: async () => {
+    const response = await api.get('/auth/admin/me');
     return response.data;
   },
 };

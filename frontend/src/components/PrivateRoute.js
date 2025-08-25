@@ -1,30 +1,27 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/HybridAuthContext';
-import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const PrivateRoute = () => {
-  const { loading, isAuthenticated, needsProfileSetup, isClerkUser, authMethod, user, isVA, isBusiness } = useAuth();
+  const { loading, isAuthenticated, user } = useAuth();
   const location = useLocation();
+  
+  // Check if user needs to complete profile setup
+  const needsProfileSetup = user && !user.va && !user.business && !user.admin;
   const isAtProfileSetup = location.pathname === '/profile-setup';
   const path = location.pathname;
-  const getProfileSetupPath = () => {
-    if (isVA || user?.role === 'VA') {
-      return '/va/profile';
-    } else if (isBusiness || user?.role === 'Business') {
-      return '/business/profile';
-    } else {
-      return '/profile-setup';
-    }
-  };
+  
+  // Paths that are allowed even if profile setup is pending
   const allowIfSetupPending = (
     path === '/dashboard' ||
     path === '/va/profile' ||
     path === '/business/profile' ||
     path === '/conversations' ||
-    path.startsWith('/conversations/')
+    path.startsWith('/conversations/') ||
+    path === '/profile-setup'
   );
 
+  // Show loading spinner while checking authentication
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -33,35 +30,18 @@ const PrivateRoute = () => {
     );
   }
 
-  // If user is authenticated via JWT, handle normally
-  if (authMethod === 'jwt') {
-    if (!isAuthenticated) {
-      return <Navigate to="/sign-in" />;
-    }
-
-    if (needsProfileSetup && !isAtProfileSetup && !allowIfSetupPending) {
-      return <Navigate to={getProfileSetupPath()} />;
-    }
-
-    return <Outlet />;
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/sign-in" state={{ from: location }} replace />;
   }
 
-  // If user is authenticated via Clerk, use Clerk components
-  if (authMethod === 'clerk' || isClerkUser) {
-    return (
-      <>
-        <SignedIn>
-          <Outlet />
-        </SignedIn>
-        <SignedOut>
-          <RedirectToSignIn />
-        </SignedOut>
-      </>
-    );
+  // Redirect to profile setup if needed (except for allowed paths)
+  if (needsProfileSetup && !isAtProfileSetup && !allowIfSetupPending) {
+    return <Navigate to="/profile-setup" />;
   }
 
-  // No authentication method detected, redirect to login
-  return <Navigate to="/sign-in" />;
+  // Render the protected route
+  return <Outlet />;
 };
 
 export default PrivateRoute;

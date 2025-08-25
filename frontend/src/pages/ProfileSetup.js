@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { useAuth } from '../contexts/HybridAuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useBranding } from '../contexts/BrandingContext';
 import api from '../services/api';
 import { toast } from 'react-toastify';
@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 export default function ProfileSetup() {
   const [profileType, setProfileType] = useState('');
   const navigate = useNavigate();
-  const { updateUser, clerkUser, user } = useAuth();
+  const { updateUser, user, checkAuth } = useAuth();
   const { branding, setBrandingTheme } = useBranding();
 
   // Note: Do not auto-create any profile to avoid wrong selection
@@ -22,14 +22,12 @@ export default function ProfileSetup() {
     
     try {
       // Persist the user's choice (role) in backend so we don't ask again
-      await api.post('/clerk/complete-profile', {
+      await api.post('/auth/complete-profile', {
         role: type
       });
       
       if (type === 'va') {
-        const fullName = (clerkUser?.firstName || clerkUser?.lastName)
-          ? `${clerkUser?.firstName || ''} ${clerkUser?.lastName || ''}`.trim()
-          : (user?.name || (user?.email ? user.email.split('@')[0] : 'New Professional'));
+        const fullName = user?.name || (user?.email ? user.email.split('@')[0] : 'New Professional');
         // Create VA profile
         const response = await api.post('/vas', {
           name: fullName,
@@ -41,15 +39,12 @@ export default function ProfileSetup() {
         toast.success('VA profile created! Please complete your profile.');
         navigate('/va/profile', { replace: true });
         try {
-          const userResponse = await api.get('/clerk/me');
-          updateUser(userResponse.data.user);
+          await checkAuth(); // Refresh user context
         } catch (e) {
           // non-blocking
         }
       } else if (type === 'business') {
-        const contactName = (clerkUser?.firstName || clerkUser?.lastName)
-          ? `${clerkUser?.firstName || ''} ${clerkUser?.lastName || ''}`.trim()
-          : (user?.name || (user?.email ? user.email.split('@')[0] : 'Primary Contact'));
+        const contactName = user?.name || (user?.email ? user.email.split('@')[0] : 'Primary Contact');
         // Create Business profile
         const response = await api.post('/businesses', {
           contactName,
@@ -61,8 +56,7 @@ export default function ProfileSetup() {
         toast.success('Business profile created! Please complete your profile.');
         navigate('/business/profile', { replace: true });
         try {
-          const userResponse = await api.get('/clerk/me');
-          updateUser(userResponse.data.user);
+          await checkAuth(); // Refresh user context
         } catch (e) {
           // non-blocking
         }

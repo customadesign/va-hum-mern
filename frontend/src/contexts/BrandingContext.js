@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
-import { useAuth } from './HybridAuthContext';
+import { useAuth } from './AuthContext';
 
 const BrandingContext = createContext();
 

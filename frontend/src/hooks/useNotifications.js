@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getUnreadCount } from '../services/notificationService';
-import { useAuth } from '../contexts/HybridAuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export const useNotifications = () => {
   const [unreadCount, setUnreadCount] = useState(0);

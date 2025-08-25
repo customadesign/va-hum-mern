@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { useAuth } from '../contexts/HybridAuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from 'react-query';
 import api from '../services/api';
 

@@ -1255,7 +1255,7 @@ export default function VAProfile() {
   );
 
   // Determine placeholders vs stored defaults
-  const { user } = require('../../contexts/HybridAuthContext').useAuth();
+  const { user } = require('../../contexts/AuthContext').useAuth();
   const emailUsername = user?.email ? user.email.split('@')[0] : '';
   const isDefaultBio = profile?.bio === 'Tell us about yourself...';
   const isDefaultName =

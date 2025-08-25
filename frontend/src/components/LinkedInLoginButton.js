@@ -1,6 +1,5 @@
 import React from 'react';
 import { useBranding } from '../contexts/BrandingContext';
-import { useSignIn } from '@clerk/clerk-react';
 
 export default function LinkedInLoginButton({ 
   onLinkedInData, 
@@ -9,25 +8,31 @@ export default function LinkedInLoginButton({
   disabled = false 
 }) {
   const { branding } = useBranding();
-  const { signIn, isLoaded } = useSignIn();
 
-  // Only show on E Systems and when LinkedIn is available
+  // Only show on E Systems mode
   if (!branding.isESystemsMode) {
     return null;
   }
 
   const handleLinkedInLogin = async () => {
-    if (disabled || !isLoaded) return;
+    if (disabled) return;
     
     try {
-      // Use Clerk's LinkedIn OAuth instead of separate library
-      const result = await signIn.authenticateWithRedirect({
-        strategy: 'oauth_linkedin_oidc', // Correct strategy name for LinkedIn
-        redirectUrl: '/auth/linkedin/callback',
-        redirectUrlComplete: '/auth/linkedin/callback'
-      });
+      // Redirect to backend LinkedIn OAuth endpoint
+      const clientId = process.env.REACT_APP_LINKEDIN_CLIENT_ID;
+      if (!clientId) {
+        throw new Error('LinkedIn client ID not configured');
+      }
+
+      const redirectUri = encodeURIComponent(`${window.location.origin}/auth/linkedin/callback`);
+      const state = Math.random().toString(36).substring(2, 15);
       
-      console.log('LinkedIn OAuth initiated via Clerk:', result);
+      // Store state in sessionStorage for verification
+      sessionStorage.setItem('linkedin_oauth_state', state);
+      
+      const linkedinAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=r_liteprofile%20r_emailaddress`;
+      
+      window.location.href = linkedinAuthUrl;
     } catch (error) {
       console.error('LinkedIn login error:', error);
       alert('LinkedIn login is currently unavailable. Please try again later.');
@@ -38,7 +43,7 @@ export default function LinkedInLoginButton({
     <button
       type="button"
       onClick={handleLinkedInLogin}
-      disabled={disabled || !isLoaded}
+      disabled={disabled}
       className={`
         w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-md shadow-sm 
         text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 
@@ -59,5 +64,3 @@ export default function LinkedInLoginButton({
     </button>
   );
 }
-
-// Note: LinkedInCallback moved to pages/LinkedInCallback.js and decides target based on user state

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/HybridAuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import VAProfile from '../pages/VAs/Profile';
 import BusinessProfile from '../pages/Business/Profile';
 

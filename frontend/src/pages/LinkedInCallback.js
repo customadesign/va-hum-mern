@@ -1,24 +1,20 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
 export default function LinkedInCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user: clerkUser, isLoaded } = useUser();
+  const { login } = useAuth();
 
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Wait for Clerk user to be loaded
-        if (!isLoaded) return;
-        
-        // Clerk handles the OAuth callback automatically
-        console.log('LinkedIn OAuth callback via Clerk completed');
-        
-        // Check if there are any error parameters
+        // Get parameters from URL
+        const code = searchParams.get('code');
+        const state = searchParams.get('state');
         const error = searchParams.get('error');
         const errorDescription = searchParams.get('error_description');
 
@@ -26,37 +22,48 @@ export default function LinkedInCallback() {
           throw new Error(errorDescription || error);
         }
 
-        // If we have a Clerk user, sync with backend
-        if (clerkUser) {
-          try {
-            console.log('Syncing Clerk user with backend...');
-            const response = await api.post('/clerk/sync-user', {
-              clerkUserId: clerkUser.id
-            });
-            
-            if (response.data.success) {
-              console.log('User synced successfully:', response.data.user);
-              toast.success('Successfully authenticated with LinkedIn!');
-              
-              // If new user (no role and no profiles), go to setup once; else home
-              const u = response.data.user;
-              if (!u.role && !u.va && !u.business) {
-                navigate('/profile-setup');
-              } else {
-                navigate('/');
-              }
-            } else {
-              throw new Error('Failed to sync user data');
-            }
-          } catch (syncError) {
-            console.error('Error syncing user:', syncError);
-            toast.error('Authentication successful but profile sync failed. Please contact support.');
-            navigate('/login');
+        if (!code) {
+          throw new Error('No authorization code received');
+        }
+
+        // Verify state to prevent CSRF attacks
+        const storedState = sessionStorage.getItem('linkedin_oauth_state');
+        if (state !== storedState) {
+          throw new Error('Invalid state parameter');
+        }
+
+        // Clear stored state
+        sessionStorage.removeItem('linkedin_oauth_state');
+
+        console.log('Processing LinkedIn OAuth callback...');
+        
+        // Send authorization code to backend for token exchange
+        const response = await api.post('/auth/linkedin/callback', {
+          code,
+          redirectUri: `${window.location.origin}/auth/linkedin/callback`
+        });
+
+        if (response.data.success) {
+          // Store tokens and user data
+          localStorage.setItem('token', response.data.token);
+          if (response.data.refreshToken) {
+            localStorage.setItem('refreshToken', response.data.refreshToken);
+          }
+
+          toast.success('Successfully authenticated with LinkedIn!');
+          
+          const user = response.data.user;
+          
+          // Redirect based on user profile completeness
+          if (!user.va && !user.business && !user.admin) {
+            navigate('/profile-setup');
+          } else if (user.admin) {
+            navigate('/admin');
+          } else {
+            navigate('/dashboard');
           }
         } else {
-          // No Clerk user, redirect to login
-          toast.error('LinkedIn authentication failed. Please try again.');
-          navigate('/login');
+          throw new Error('Failed to authenticate with LinkedIn');
         }
         
       } catch (error) {
@@ -65,13 +72,13 @@ export default function LinkedInCallback() {
         
         // Redirect to login after error
         setTimeout(() => {
-          navigate('/login');
+          navigate('/sign-in');
         }, 3000);
       }
     };
 
     handleCallback();
-  }, [searchParams, navigate, clerkUser, isLoaded]);
+  }, [searchParams, navigate, login]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
