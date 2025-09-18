@@ -51,3 +51,9 @@ dev-debug.log
 # Task files
 # tasks.json
 # tasks/ 
+dist/
+build/
+coverage/
+.env.*
+*.local
+tmp/
