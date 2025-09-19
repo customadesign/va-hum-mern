@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 import { useBranding } from '../contexts/BrandingContext';
 
 export default function About() {
@@ -118,6 +119,23 @@ export default function About() {
                 </p>
               </>
             )}
+
+            {/* Get Started Button */}
+            <div className="mt-12 text-center">
+              <Link
+                to="/sign-up"
+                className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-semibold rounded-lg text-white transform transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                style={{ backgroundColor: '#2663eb' }}
+              >
+                Get Started
+                <svg className="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Link>
+              <p className="mt-4 text-sm text-gray-600">
+                Join hundreds of businesses and professionals already using our platform
+              </p>
+            </div>
           </div>
         </div>
       </div>

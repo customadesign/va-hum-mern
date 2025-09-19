@@ -1,1657 +1,1839 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { useBranding } from '../contexts/BrandingContext';
-import { useAuth } from '../contexts/HybridAuthContext';
-import LessonViewer from '../components/LessonViewer';
-import QuickSkillModal from '../components/QuickSkillModal';
-import VideoSDKMeeting from '../components/VideoSDKMeeting';
-import { useVideoSDK } from '../hooks/useVideoSDK';
-import {
-  AcademicCapIcon,
-  CodeBracketIcon,
-  PaintBrushIcon,
-  ChatBubbleLeftRightIcon,
-  EnvelopeIcon,
-  SparklesIcon,
-  UserGroupIcon,
-  ArrowRightIcon,
-  BookOpenIcon,
-  VideoCameraIcon,
-  DocumentTextIcon,
-  CheckCircleIcon,
-  PlayIcon,
-  ClockIcon,
-  CalendarDaysIcon,
-  FireIcon,
-  TrophyIcon,
-  StarIcon,
-  BoltIcon,
-  RocketLaunchIcon
-} from '@heroicons/react/24/outline';
-import { CheckCircleIcon as CheckCircleIconSolid, FireIcon as FireIconSolid } from '@heroicons/react/24/solid';
 
-const learningPaths = [
-  {
-    id: 'web-development',
-    title: 'Web Development',
-    description: 'Master modern web technologies including HTML, CSS, JavaScript, React, and more.',
-    icon: CodeBracketIcon,
-    color: 'bg-blue-500',
-    skills: ['HTML & CSS', 'JavaScript', 'React/Vue', 'WordPress', 'Web Design', 'Responsive Design'],
-    resources: 'videos',
-    level: 'Beginner to Advanced'
-  },
-  {
-    id: 'graphic-design',
-    title: 'Graphic Design',
-    description: 'Create stunning visuals, logos, and marketing materials using industry-standard tools.',
-    icon: PaintBrushIcon,
-    color: 'bg-purple-500',
-    skills: ['Adobe Photoshop', 'Canva', 'Figma', 'Logo Design', 'Brand Identity', 'Social Media Graphics'],
-    resources: 'tutorials',
-    level: 'All Levels'
-  },
-  {
-    id: 'social-media',
-    title: 'Social Media Management',
-    description: 'Learn to grow brands on social media, create engaging content, and analyze performance.',
-    icon: ChatBubbleLeftRightIcon,
-    color: 'bg-pink-500',
-    skills: ['Content Strategy', 'Community Management', 'Analytics', 'Paid Advertising', 'Content Creation', 'Scheduling Tools'],
-    resources: 'guides',
-    level: 'Beginner Friendly'
-  },
-  {
-    id: 'email-marketing',
-    title: 'Email Marketing',
-    description: 'Build email campaigns that convert, from design to automation and analytics.',
-    icon: EnvelopeIcon,
-    color: 'bg-green-500',
-    skills: ['Email Design', 'Copywriting', 'Automation', 'A/B Testing', 'List Building', 'Campaign Analytics'],
-    resources: 'templates',
-    level: 'Intermediate'
-  },
-  {
-    id: 'ai-tools',
-    title: 'AI & Automation',
-    description: 'Leverage AI tools to enhance productivity and deliver better results for clients.',
-    icon: SparklesIcon,
-    color: 'bg-indigo-500',
-    skills: ['ChatGPT', 'AI Writing', 'Image Generation', 'Automation Tools', 'AI Analytics', 'Prompt Engineering'],
-    resources: 'workshops',
-    level: 'Trending'
-  },
-  {
-    id: 'client-relations',
-    title: 'Client Relations',
-    description: 'Build lasting client relationships, manage projects effectively, and grow your VA business.',
-    icon: UserGroupIcon,
-    color: 'bg-yellow-500',
-    skills: ['Communication', 'Project Management', 'Time Tracking', 'Invoicing', 'Client Onboarding', 'Retention Strategies'],
-    resources: 'courses',
-    level: 'Essential Skills'
-  }
-];
+// Configuration constants
+const CONFIG = {
+  BRAND_NAME: "Linkage VA Hub",
+  HOST_TIMEZONE: "Asia/Manila",
+  HOST_START_HOUR_LOCAL: 19, // 7PM Manila
+  HOST_START_MINUTE_LOCAL: 0,
+  SESSION_DURATION_MINUTES: 90,
+  WEBINAR_DAY: 30, // 30th of each month
+};
 
-const features = [
-  {
-    title: 'Free Forever',
-    description: 'Access all learning resources without any cost. We believe in empowering VAs worldwide.',
-    icon: CheckCircleIcon
-  },
-  {
-    title: 'Expert-Led Content',
-    description: 'Learn from experienced VAs and industry professionals who share real-world insights.',
-    icon: AcademicCapIcon
-  },
-  {
-    title: 'Community Support',
-    description: 'Connect with fellow VAs, ask questions, and share your journey with our supportive community.',
-    icon: UserGroupIcon
-  },
-  {
-    title: 'Practical Skills',
-    description: 'Focus on skills that clients actually need, with hands-on projects and real examples.',
-    icon: BookOpenIcon
-  }
-];
+// Video loading states
+const VIDEO_STATES = {
+  IDLE: 'idle',
+  LOADING: 'loading',
+  READY: 'ready',
+  ERROR: 'error'
+};
 
-const resourceTypes = [
-  { icon: VideoCameraIcon, label: 'Video Tutorials', count: '500+' },
-  { icon: DocumentTextIcon, label: 'Written Guides', count: '200+' },
-  { icon: BookOpenIcon, label: 'Case Studies', count: '50+' },
-  { icon: UserGroupIcon, label: 'Community Members', count: '10k+' }
-];
+// Custom hook for webinar countdown
+const useWebinarCountdown = () => {
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [nextWebinarDate, setNextWebinarDate] = useState(null);
+  const [timeLabel, setTimeLabel] = useState('');
+  const [mobileTimeShort, setMobileTimeShort] = useState('');
 
-// Course Categories for filtering
-const courseCategories = [
-  { id: 'all', name: 'All Courses', count: 24 },
-  { id: 'web-development', name: 'Web Development', count: 8 },
-  { id: 'design', name: 'Design & Graphics', count: 6 },
-  { id: 'marketing', name: 'Digital Marketing', count: 7 },
-  { id: 'business', name: 'Business Skills', count: 5 },
-  { id: 'ai-tools', name: 'AI & Automation', count: 4 },
-  { id: 'communication', name: 'Communication', count: 3 }
-];
+  const computeNextWebinar = useCallback(() => {
+    const now = new Date();
+    const utcHour = CONFIG.HOST_START_HOUR_LOCAL - 8; // Manila UTC+8
 
-// Expanded Course Library (24+ courses across categories)
-const currentTutorials = [
-  // WEB DEVELOPMENT COURSES
-  {
-    id: 1,
-    title: 'Complete HTML & CSS Fundamentals',
-    instructor: { name: 'Mike Johnson', title: 'Web Developer', avatar: null, rating: 4.9, students: 5420 },
-    duration: '2h 15m',
-    difficulty: 'Beginner',
-    category: 'Web Development',
-    courseType: 'Series',
-    seriesInfo: { currentLesson: 1, totalLessons: 8 },
-    thumbnail: null,
-    progress: 0,
-    isNew: true,
-    description: 'Master the fundamentals of web development with HTML and CSS. Build responsive websites from scratch.',
-    tags: ['HTML', 'CSS', 'Responsive Design'],
-    chapters: [
-      { id: 1, title: 'HTML Basics & Structure', time: '0:00', duration: '18:30', completed: false },
-      { id: 2, title: 'CSS Styling & Layout', time: '18:30', duration: '22:45', completed: false },
-      { id: 3, title: 'Responsive Design Principles', time: '41:15', duration: '25:15', completed: false },
-      { id: 4, title: 'Flexbox & Grid Systems', time: '66:30', duration: '28:00', completed: false },
-      { id: 5, title: 'Building Your First Website', time: '94:30', duration: '40:30', completed: false }
-    ],
-    resources: [
-      { id: 1, title: 'HTML Reference Sheet', type: 'pdf', size: '1.2 MB' },
-      { id: 2, title: 'CSS Cheat Sheet', type: 'pdf', size: '800 KB' },
-      { id: 3, title: 'Project Starter Files', type: 'zip', size: '5.1 MB' }
-    ],
-    transcript: [{ time: '0:00', text: 'Welcome to Complete HTML & CSS Fundamentals...' }],
-    relatedLessons: [{ id: 2, title: 'JavaScript for Beginners', duration: '1h 45m' }],
-    quiz: { questions: [{ id: 1, question: 'What does HTML stand for?', options: ['HyperText Markup Language', 'High Tech Modern Language', 'Home Tool Markup Language', 'Hyperlink Text Management Language'], correct: 0 }] }
-  },
-  {
-    id: 2,
-    title: 'JavaScript for Beginners',
-    instructor: { name: 'Sarah Kim', title: 'Frontend Developer', avatar: null, rating: 4.8, students: 4230 },
-    duration: '1h 45m',
-    difficulty: 'Beginner',
-    category: 'Web Development',
-    courseType: 'Single',
-    thumbnail: null,
-    progress: 25,
-    isNew: false,
-    description: 'Learn JavaScript fundamentals and add interactivity to your websites.',
-    tags: ['JavaScript', 'Programming', 'DOM'],
-    chapters: [
-      { id: 1, title: 'JavaScript Basics', time: '0:00', duration: '25:00', completed: true },
-      { id: 2, title: 'Variables & Functions', time: '25:00', duration: '30:00', completed: false },
-      { id: 3, title: 'DOM Manipulation', time: '55:00', duration: '35:00', completed: false },
-      { id: 4, title: 'Event Handling', time: '90:00', duration: '15:00', completed: false }
-    ],
-    resources: [{ id: 1, title: 'JavaScript Examples', type: 'zip', size: '2.3 MB' }],
-    transcript: [{ time: '0:00', text: 'Welcome to JavaScript for Beginners...' }],
-    relatedLessons: [],
-    quiz: { questions: [] }
-  },
-  {
-    id: 3,
-    title: 'WordPress Speed Optimization',
-    instructor: { name: 'Emma Rodriguez', title: 'WordPress Developer', avatar: null, rating: 4.9, students: 3200 },
-    duration: '60 min',
-    difficulty: 'Advanced',
-    category: 'Web Development',
-    courseType: 'Single',
-    thumbnail: null,
-    progress: 30,
-    isNew: false,
-    description: 'Technical deep-dive into optimizing WordPress sites for maximum performance.',
-    tags: ['WordPress', 'Performance', 'Technical'],
-    chapters: [
-      { id: 1, title: 'Performance Fundamentals', time: '0:00', duration: '15:00', completed: true },
-      { id: 2, title: 'Caching Strategies', time: '15:00', duration: '20:00', completed: false },
-      { id: 3, title: 'Database Optimization', time: '35:00', duration: '25:00', completed: false }
-    ],
-    resources: [{ id: 1, title: 'Performance Checklist', type: 'pdf', size: '800 KB' }],
-    transcript: [{ time: '0:00', text: 'Welcome to WordPress Speed Optimization...' }],
-    relatedLessons: [],
-    quiz: { questions: [] }
-  },
-  {
-    id: 4,
-    title: 'React.js Fundamentals for VAs',
-    instructor: { name: 'Alex Chen', title: 'React Developer', avatar: null, rating: 4.7, students: 2150 },
-    duration: '3h 20m',
-    difficulty: 'Intermediate',
-    category: 'Web Development',
-    courseType: 'Series',
-    seriesInfo: { currentLesson: 1, totalLessons: 12 },
-    thumbnail: null,
-    progress: 0,
-    isNew: true,
-    description: 'Learn React.js to build dynamic web applications and increase your value as a technical VA.',
-    tags: ['React', 'JavaScript', 'Components'],
-    chapters: [
-      { id: 1, title: 'React Introduction', time: '0:00', duration: '20:00', completed: false },
-      { id: 2, title: 'Components & JSX', time: '20:00', duration: '25:00', completed: false },
-      { id: 3, title: 'State & Props', time: '45:00', duration: '30:00', completed: false }
-    ],
-    resources: [{ id: 1, title: 'React Starter Kit', type: 'zip', size: '15.2 MB' }],
-    transcript: [{ time: '0:00', text: 'Welcome to React.js Fundamentals...' }],
-    relatedLessons: [],
-    quiz: { questions: [] }
-  },
+    let year = now.getUTCFullYear();
+    let month = now.getUTCMonth();
+    const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+    const day = Math.min(CONFIG.WEBINAR_DAY, lastDay);
 
-  // DESIGN & GRAPHICS COURSES
-  {
-    id: 5,
-    title: 'Canva Mastery for VAs',
-    instructor: { name: 'Lisa Park', title: 'Graphic Designer', avatar: null, rating: 4.8, students: 6340 },
-    duration: '1h 30m',
-    difficulty: 'Beginner',
-    category: 'Design & Graphics',
-    courseType: 'Single',
-    thumbnail: null,
-    progress: 0,
-    isNew: true,
-    description: 'Master Canva to create stunning graphics, social media posts, and marketing materials for clients.',
-    tags: ['Canva', 'Design', 'Social Media'],
-    chapters: [
-      { id: 1, title: 'Canva Interface & Tools', time: '0:00', duration: '15:00', completed: false },
-      { id: 2, title: 'Brand Identity Design', time: '15:00', duration: '25:00', completed: false },
-      { id: 3, title: 'Social Media Templates', time: '40:00', duration: '30:00', completed: false },
-      { id: 4, title: 'Advanced Design Techniques', time: '70:00', duration: '20:00', completed: false }
-    ],
-    resources: [
-      { id: 1, title: 'Canva Template Pack', type: 'zip', size: '45.6 MB' },
-      { id: 2, title: 'Design Guidelines', type: 'pdf', size: '3.2 MB' }
-    ],
-    transcript: [{ time: '0:00', text: 'Welcome to Canva Mastery...' }],
-    relatedLessons: [],
-    quiz: { questions: [] }
-  },
-  {
-    id: 6,
-    title: 'Adobe Photoshop Basics',
-    instructor: { name: 'James Wilson', title: 'Adobe Certified Expert', avatar: null, rating: 4.9, students: 3450 },
-    duration: '2h 45m',
-    difficulty: 'Intermediate',
-    category: 'Design & Graphics',
-    courseType: 'Series',
-    seriesInfo: { currentLesson: 1, totalLessons: 6 },
-    thumbnail: null,
-    progress: 0,
-    isNew: false,
-    description: 'Learn professional photo editing and graphic design with Adobe Photoshop.',
-    tags: ['Photoshop', 'Photo Editing', 'Graphics'],
-    chapters: [
-      { id: 1, title: 'Photoshop Interface', time: '0:00', duration: '20:00', completed: false },
-      { id: 2, title: 'Layers & Selections', time: '20:00', duration: '35:00', completed: false },
-      { id: 3, title: 'Photo Retouching', time: '55:00', duration: '40:00', completed: false }
-    ],
-    resources: [{ id: 1, title: 'Practice Images', type: 'zip', size: '125.4 MB' }],
-    transcript: [{ time: '0:00', text: 'Welcome to Adobe Photoshop Basics...' }],
-    relatedLessons: [],
-    quiz: { questions: [] }
-  },
+    const candidate = new Date(Date.UTC(year, month, day, utcHour, CONFIG.HOST_START_MINUTE_LOCAL, 0));
+    const nowManilaMs = now.getTime() + 8 * 3600_000;
+    const candidateManilaMs = candidate.getTime() + 8 * 3600_000;
 
-  // DIGITAL MARKETING COURSES  
-  {
-    id: 7,
-    title: 'Advanced Social Media Analytics with AI',
-    instructor: { name: 'Sarah Martinez', title: 'Social Media Expert', avatar: null, rating: 4.8, students: 2340 },
-    duration: '45 min',
-    difficulty: 'Intermediate',
-    category: 'Digital Marketing',
-    courseType: 'Single',
-    thumbnail: null,
-    progress: 0,
-    isNew: true,
-    description: 'Learn how to use AI tools to analyze social media performance and create data-driven strategies.',
-    tags: ['Analytics', 'AI', 'Strategy'],
-    chapters: [
-      { id: 1, title: 'Introduction to AI Analytics', time: '0:00', duration: '5:42', completed: true },
-      { id: 2, title: 'Setting Up Your Analytics Dashboard', time: '5:42', duration: '8:15', completed: true },
-      { id: 3, title: 'Understanding Key Metrics', time: '13:57', duration: '10:30', completed: false },
-      { id: 4, title: 'AI-Powered Insights', time: '24:27', duration: '12:18', completed: false },
-      { id: 5, title: 'Creating Reports & Action Plans', time: '36:45', duration: '8:15', completed: false }
-    ],
-    resources: [
-      { id: 1, title: 'Analytics Dashboard Template', type: 'xlsx', size: '2.3 MB' },
-      { id: 2, title: 'AI Tools Comparison Guide', type: 'pdf', size: '1.5 MB' }
-    ],
-    transcript: [
-      { time: '0:00', text: 'Welcome to this comprehensive guide on using AI for social media analytics...' },
-      { time: '0:30', text: 'By the end of this lesson, you\'ll be able to leverage AI tools to provide deeper insights...' }
-    ],
-    relatedLessons: [
-      { id: 2, title: 'Content Strategy with ChatGPT', duration: '32 min' },
-      { id: 3, title: 'Automated Social Media Scheduling', duration: '28 min' }
-    ],
-    quiz: {
-      questions: [
-        {
-          id: 1,
-          question: 'What is the primary benefit of AI in social media analytics?',
-          options: ['Faster data processing', 'Pattern recognition', 'Predictive insights', 'All of the above'],
-          correct: 3
-        }
-      ]
-    }
-  },
-  {
-    id: 8,
-    title: 'Email Marketing Mastery',
-    instructor: { name: 'Rachel Green', title: 'Email Marketing Specialist', avatar: null, rating: 4.7, students: 4120 },
-    duration: '1h 15m',
-    difficulty: 'Beginner',
-    category: 'Digital Marketing',
-    courseType: 'Single',
-    thumbnail: null,
-    progress: 0,
-    isNew: false,
-    description: 'Build effective email campaigns that convert subscribers into customers.',
-    tags: ['Email Marketing', 'Campaigns', 'Conversion'],
-    chapters: [
-      { id: 1, title: 'Email Marketing Fundamentals', time: '0:00', duration: '20:00', completed: false },
-      { id: 2, title: 'List Building Strategies', time: '20:00', duration: '25:00', completed: false },
-      { id: 3, title: 'Campaign Creation & Automation', time: '45:00', duration: '30:00', completed: false }
-    ],
-    resources: [{ id: 1, title: 'Email Templates Pack', type: 'zip', size: '8.7 MB' }],
-    transcript: [{ time: '0:00', text: 'Welcome to Email Marketing Mastery...' }],
-    relatedLessons: [],
-    quiz: { questions: [] }
-  },
-
-  // BUSINESS SKILLS COURSES
-  {
-    id: 9,
-    title: 'Client Communication Mastery',
-    instructor: { name: 'David Chen', title: 'Communication Expert', avatar: null, rating: 4.7, students: 1850 },
-    duration: '35 min',
-    difficulty: 'Beginner',
-    category: 'Business Skills',
-    courseType: 'Single',
-    thumbnail: null,
-    progress: 65,
-    isNew: false,
-    description: 'Master the art of professional communication with clients to build stronger relationships.',
-    tags: ['Communication', 'Clients', 'Professional'],
-    chapters: [
-      { id: 1, title: 'Communication Fundamentals', time: '0:00', duration: '8:00', completed: true },
-      { id: 2, title: 'Active Listening Techniques', time: '8:00', duration: '12:00', completed: true },
-      { id: 3, title: 'Managing Difficult Conversations', time: '20:00', duration: '15:00', completed: false }
-    ],
-    resources: [{ id: 1, title: 'Communication Templates', type: 'pdf', size: '1.1 MB' }],
-    transcript: [{ time: '0:00', text: 'Welcome to Client Communication Mastery...' }],
-    relatedLessons: [],
-    quiz: { questions: [] }
-  },
-  {
-    id: 10,
-    title: 'VA Business Setup & Legal',
-    instructor: { name: 'Maria Santos', title: 'Business Consultant', avatar: null, rating: 4.9, students: 3840 },
-    duration: '1h 40m',
-    difficulty: 'Beginner',
-    category: 'Business Skills',
-    courseType: 'Series',
-    seriesInfo: { currentLesson: 1, totalLessons: 5 },
-    thumbnail: null,
-    progress: 0,
-    isNew: true,
-    description: 'Everything you need to know about starting and running a successful VA business.',
-    tags: ['Business Setup', 'Legal', 'Contracts'],
-    chapters: [
-      { id: 1, title: 'Business Structure & Registration', time: '0:00', duration: '25:00', completed: false },
-      { id: 2, title: 'Contracts & Legal Protection', time: '25:00', duration: '30:00', completed: false },
-      { id: 3, title: 'Pricing & Invoicing', time: '55:00', duration: '25:00', completed: false },
-      { id: 4, title: 'Tax Considerations', time: '80:00', duration: '20:00', completed: false }
-    ],
-    resources: [
-      { id: 1, title: 'Contract Templates', type: 'zip', size: '2.1 MB' },
-      { id: 2, title: 'Business Checklist', type: 'pdf', size: '850 KB' }
-    ],
-    transcript: [{ time: '0:00', text: 'Welcome to VA Business Setup...' }],
-    relatedLessons: [],
-    quiz: { questions: [] }
-  },
-
-  // AI & AUTOMATION COURSES
-  {
-    id: 11,
-    title: 'ChatGPT for Virtual Assistants',
-    instructor: { name: 'Dr. Kevin Liu', title: 'AI Specialist', avatar: null, rating: 4.8, students: 5230 },
-    duration: '1h 25m',
-    difficulty: 'Beginner',
-    category: 'AI & Automation',
-    courseType: 'Single',
-    thumbnail: null,
-    progress: 0,
-    isNew: true,
-    description: 'Leverage ChatGPT and AI tools to enhance your productivity and service offerings.',
-    tags: ['ChatGPT', 'AI Tools', 'Productivity'],
-    chapters: [
-      { id: 1, title: 'AI Fundamentals for VAs', time: '0:00', duration: '20:00', completed: false },
-      { id: 2, title: 'ChatGPT Prompting Strategies', time: '20:00', duration: '25:00', completed: false },
-      { id: 3, title: 'AI Workflow Integration', time: '45:00', duration: '30:00', completed: false },
-      { id: 4, title: 'Ethics & Best Practices', time: '75:00', duration: '10:00', completed: false }
-    ],
-    resources: [{ id: 1, title: 'AI Prompt Library', type: 'pdf', size: '1.8 MB' }],
-    transcript: [{ time: '0:00', text: 'Welcome to ChatGPT for Virtual Assistants...' }],
-    relatedLessons: [],
-    quiz: { questions: [] }
-  },
-
-  // Additional courses to reach 24 total...
-  {
-    id: 12,
-    title: 'Zapier Automation Mastery',
-    instructor: { name: 'Tom Anderson', title: 'Automation Expert', avatar: null, rating: 4.6, students: 2890 },
-    duration: '55 min',
-    difficulty: 'Intermediate',
-    category: 'AI & Automation',
-    courseType: 'Single',
-    thumbnail: null,
-    progress: 0,
-    isNew: false,
-    description: 'Create powerful automations to streamline workflows for yourself and clients.',
-    tags: ['Zapier', 'Automation', 'Workflows'],
-    chapters: [
-      { id: 1, title: 'Zapier Basics', time: '0:00', duration: '15:00', completed: false },
-      { id: 2, title: 'Building Your First Zap', time: '15:00', duration: '20:00', completed: false },
-      { id: 3, title: 'Advanced Automation', time: '35:00', duration: '20:00', completed: false }
-    ],
-    resources: [{ id: 1, title: 'Automation Templates', type: 'pdf', size: '1.2 MB' }],
-    transcript: [{ time: '0:00', text: 'Welcome to Zapier Automation Mastery...' }],
-    relatedLessons: [],
-    quiz: { questions: [] }
-  }
-
-  // ... Continue adding more courses to reach the full catalog
-];
-
-const upcomingTrainings = [
-  {
-    id: 1,
-    title: 'Live Q&A: Building Your VA Business',
-    instructor: 'Maria Santos',
-    date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-    time: '2:00 PM EST',
-    attendees: 247,
-    description: 'Join our expert panel for a live discussion on scaling your virtual assistant business.'
-  },
-  {
-    id: 2,
-    title: 'Hands-on Workshop: Canva Design Mastery',
-    instructor: 'Alex Thompson',
-    date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-    time: '11:00 AM EST',
-    attendees: 189,
-    description: 'Interactive workshop covering advanced Canva techniques for professional designs.'
-  }
-];
-
-const achievements = [
-  { id: 1, title: 'First Tutorial Complete', icon: CheckCircleIconSolid, unlocked: true },
-  { id: 2, title: 'Week Streak', icon: FireIconSolid, unlocked: true },
-  { id: 3, title: 'Course Graduate', icon: TrophyIcon, unlocked: false },
-  { id: 4, title: 'Community Helper', icon: StarIcon, unlocked: false }
-];
-
-export default function Community() {
-  const { branding, loading: brandingLoading } = useBranding();
-  const { user, loading: authLoading } = useAuth();
-  const { lessonId } = useParams();
-  const { createAndJoinMeeting, isLoading: videosdkLoading, error: videosdkError } = useVideoSDK();
-  const navigate = useNavigate();
-  const [timeToNext, setTimeToNext] = useState('');
-  const [selectedLesson, setSelectedLesson] = useState(null);
-  const [showLessonViewer, setShowLessonViewer] = useState(false);
-  const [selectedQuickSkill, setSelectedQuickSkill] = useState(null);
-  const [showQuickSkillModal, setShowQuickSkillModal] = useState(false);
-  
-  // Course filtering and search state
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('newest');
-  
-  // VideoSDK meeting state
-  const [showVideoSDKMeeting, setShowVideoSDKMeeting] = useState(false);
-  const [videosdkConfig, setVideosdkConfig] = useState(null);
-
-  // ALL HOOKS MUST BE CALLED FIRST - Check if accessing a specific lesson via URL
-  useEffect(() => {
-    if (lessonId) {
-      // Find the lesson by ID or create a default one with complete structure
-      const lesson = currentTutorials.find(t => t.id === parseInt(lessonId)) || {
-        id: parseInt(lessonId),
-        title: `Lesson ${lessonId}`,
-        instructor: {
-          name: 'System',
-          title: 'Learning Platform',
-          avatar: null,
-          rating: 4.5,
-          students: 1000
-        },
-        duration: '30 min',
-        difficulty: 'Intermediate',
-        category: 'General',
-        thumbnail: null,
-        progress: 0,
-        isNew: false,
-        description: 'Interactive lesson content',
-        tags: ['Learning'],
-        chapters: [
-          { id: 1, title: 'Introduction', time: '0:00', duration: '5:00', completed: false },
-          { id: 2, title: 'Main Content', time: '5:00', duration: '20:00', completed: false },
-          { id: 3, title: 'Summary', time: '25:00', duration: '5:00', completed: false }
-        ],
-        resources: [
-          { id: 1, title: 'Lesson Materials', type: 'pdf', size: '1.2 MB' }
-        ],
-        transcript: [
-          { time: '0:00', text: 'Welcome to this lesson...' }
-        ],
-        relatedLessons: [],
-        quiz: {
-          questions: []
-        }
-      };
-      setSelectedLesson(lesson);
-      setShowLessonViewer(true);
-    }
-  }, [lessonId]);
-
-  // Countdown timer for next live training
-  useEffect(() => {
-    if (!user || upcomingTrainings.length === 0) {
-      return;
-    }
-
-    const updateCountdown = () => {
-      const nextTraining = upcomingTrainings[0];
-      const now = new Date();
-      const trainingDate = new Date(nextTraining.date);
-      const difference = trainingDate.getTime() - now.getTime();
-
-      if (difference > 0) {
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-        
-        if (days > 0) {
-          setTimeToNext(`${days}d ${hours}h ${minutes}m`);
-        } else if (hours > 0) {
-          setTimeToNext(`${hours}h ${minutes}m`);
-        } else {
-          setTimeToNext(`${minutes}m`);
-        }
+    if (nowManilaMs >= candidateManilaMs) {
+      // Move to next month
+      if (month === 11) {
+        year += 1;
+        month = 0;
       } else {
-        setTimeToNext('Live Now!');
+        month += 1;
+      }
+      const nextMonthLastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+      const nextDay = Math.min(CONFIG.WEBINAR_DAY, nextMonthLastDay);
+      return new Date(Date.UTC(year, month, nextDay, utcHour, CONFIG.HOST_START_MINUTE_LOCAL, 0));
+    }
+
+    return candidate;
+  }, []);
+
+  useEffect(() => {
+    const startUtc = computeNextWebinar();
+    setNextWebinarDate(startUtc);
+
+    // Format date/time labels
+    const formatLocal = (dt) => {
+      try {
+        return new Intl.DateTimeFormat(undefined, {
+          dateStyle: 'full',
+          timeStyle: 'short'
+        }).format(dt);
+      } catch (e) {
+        return dt.toLocaleString();
       }
     };
 
+    setTimeLabel(`Next live webinar: ${formatLocal(startUtc)} (hosted in ${CONFIG.HOST_TIMEZONE}).`);
+
+    try {
+      const shortFormat = new Intl.DateTimeFormat(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      }).format(startUtc);
+      setMobileTimeShort(shortFormat);
+    } catch (e) {
+      setMobileTimeShort(startUtc.toLocaleString());
+    }
+
+    // Update countdown every second
+    const updateCountdown = () => {
+      const now = new Date();
+      const diff = Math.max(0, startUtc.getTime() - now.getTime());
+
+      if (diff <= 0) {
+        setTimeLabel('Registration for this session has closed. Secure your seat for the next webinar.');
+        setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setCountdown({ days, hours, minutes, seconds });
+    };
+
     updateCountdown();
-    const interval = setInterval(updateCountdown, 60000); // Update every minute
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [computeNextWebinar]);
+
+  return {
+    countdown,
+    nextWebinarDate,
+    timeLabel,
+    mobileTimeShort
+  };
+};
+
+// Enhanced VideoPlayer component with CORS and error handling
+function VideoPlayer({ src, poster, fallbackPoster, onPlay, className = '' }) {
+  const [videoState, setVideoState] = useState(VIDEO_STATES.IDLE);
+  const [thumbnail, setThumbnail] = useState(null);
+  const [posterError, setPosterError] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  // Generate thumbnail from video frame
+  const generateThumbnail = useCallback(() => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    try {
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      setThumbnail(dataUrl);
+    } catch (e) {
+      console.warn('Failed to generate thumbnail:', e);
+    }
+  }, []);
+
+  // Handle video metadata loaded
+  const handleLoadedMetadata = useCallback(() => {
+    setVideoState(VIDEO_STATES.LOADING);
+
+    // Try to generate thumbnail at 0.1 seconds
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0.1;
+    }
+  }, []);
+
+  // Handle video data loaded
+  const handleLoadedData = useCallback(() => {
+    setVideoState(VIDEO_STATES.READY);
+    generateThumbnail();
+
+    // Reset to beginning after thumbnail
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+    }
+  }, [generateThumbnail]);
+
+  // Handle video errors with detailed logging
+  const handleVideoError = useCallback((e) => {
+    const video = videoRef.current;
+    const error = video?.error;
+
+    console.error('Video error:', {
+      code: error?.code,
+      message: error?.message,
+      networkState: video?.networkState,
+      readyState: video?.readyState,
+      src: video?.src,
+      currentSrc: video?.currentSrc
+    });
+
+    setVideoState(VIDEO_STATES.ERROR);
+  }, []);
+
+  // Handle poster image error
+  const handlePosterError = useCallback(() => {
+    setPosterError(true);
+  }, []);
+
+  // Trigger manual load on mount
+  useEffect(() => {
+    if (videoRef.current && videoState === VIDEO_STATES.IDLE) {
+      setVideoState(VIDEO_STATES.LOADING);
+      videoRef.current.load();
+    }
+  }, [videoState]);
+
+  const currentPoster = posterError ? fallbackPoster : (thumbnail || poster);
+
+  return (
+    <div className="relative">
+      {/* Hidden canvas for thumbnail generation */}
+      <canvas ref={canvasRef} className="hidden" />
+
+      {/* Loading indicator */}
+      {videoState === VIDEO_STATES.LOADING && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-xl z-10">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderBottomColor: '#2663eb' }}></div>
+            <p className="mt-2 text-sm text-gray-600">Loading video...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error state */}
+      {videoState === VIDEO_STATES.ERROR ? (
+        <div className="w-full aspect-video bg-gray-100 rounded-xl flex items-center justify-center">
+          <div className="text-center p-4">
+            <div className="text-4xl mb-2">⚠️</div>
+            <p className="text-gray-600">Video unavailable</p>
+            <p className="text-sm text-gray-500 mt-1">Please try refreshing the page</p>
+          </div>
+        </div>
+      ) : (
+        <video
+          ref={videoRef}
+          className={`w-full h-auto aspect-video object-cover ${className}`}
+          src={src}
+          poster={currentPoster}
+          controls
+          playsInline
+          preload="metadata"
+          onLoadedMetadata={handleLoadedMetadata}
+          onLoadedData={handleLoadedData}
+          onError={handleVideoError}
+          onPlay={onPlay}
+        >
+          Your browser does not support the video tag.
+        </video>
+      )}
+      {poster && !posterError && (
+        <img
+          src={poster}
+          alt=""
+          className="hidden"
+          onError={handlePosterError}
+          onLoad={() => setPosterError(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+export default function Community() {
+  const { loading: brandingLoading } = useBranding();
+  const { countdown, nextWebinarDate, timeLabel, mobileTimeShort } = useWebinarCountdown();
+  const [showForm, setShowForm] = useState(true);
+  const [formData, setFormData] = useState({
+    firstName: '', lastName: '', email: '', country: '', experience: '', messenger: '', consent: false
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Rotating banner messages
+  const bannerMessages = useRef([
+    "🚀 Fastest Path to Landing a $4–$5/Hour VA Job in the Philippines",
+    "Join Hundreds of VAs Who've Already Joined and Unlocked Your Success Today!",
+    "Linkage VA Hub: Your Go-To Source for Elite VA Training & Top-Dollar Gigs in the Philippines."
+  ]).current;
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // FAQ accordion state
+  const [openFAQIndex, setOpenFAQIndex] = useState(null);
+
+  // Benefit cards expansion state
+  const [expandedBenefit, setExpandedBenefit] = useState(null);
+
+  // Interactive rate calculator state
+  const [selectedRate, setSelectedRate] = useState(5); // Default to $5/hour
+  const [showBonusExample, setShowBonusExample] = useState(false);
+
+  // Calculate earnings in pesos
+  const calculateEarnings = (hourlyRateUSD) => {
+    const exchangeRate = 56; // PHP per USD
+    const hoursPerWeek = 40;
+    const weeksPerMonth = 4.3;
+
+    const hourlyPHP = hourlyRateUSD * exchangeRate;
+    const dailyPHP = hourlyPHP * 8;
+    const weeklyPHP = hourlyPHP * hoursPerWeek;
+    const monthlyPHP = hourlyPHP * hoursPerWeek * weeksPerMonth;
+
+    return {
+      hourly: Math.round(hourlyPHP),
+      daily: Math.round(dailyPHP),
+      weekly: Math.round(weeklyPHP),
+      monthly: Math.round(monthlyPHP)
+    };
+  };
+
+  const earnings = calculateEarnings(selectedRate);
+
+  // Add glowing animation styles and Lottie script
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes glowPulse {
+        0% {
+          box-shadow: 0 0 5px #2663eb, 0 0 10px #2663eb, 0 0 15px #2663eb;
+          transform: scale(1);
+        }
+        50% {
+          box-shadow: 0 0 10px #2663eb, 0 0 20px #2663eb, 0 0 30px #2663eb, 0 0 40px #2663eb;
+          transform: scale(1.02);
+        }
+        100% {
+          box-shadow: 0 0 5px #2663eb, 0 0 10px #2663eb, 0 0 15px #2663eb;
+          transform: scale(1);
+        }
+      }
+      .priority-glow {
+        animation: glowPulse 2s ease-in-out infinite;
+        position: relative;
+      }
+      .priority-glow:hover {
+        animation: none;
+        transform: scale(1.05);
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Load Lottie animation script
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.1/dist/dotlottie-wc.js';
+    script.type = 'module';
+    document.head.appendChild(script);
+
+    // Add Lottie animation element after script loads
+    script.onload = () => {
+      const animationContainer = document.getElementById('global-reach-animation');
+      if (animationContainer && !animationContainer.querySelector('dotlottie-wc')) {
+        animationContainer.innerHTML = `
+          <dotlottie-wc
+            src="https://lottie.host/2f9f739f-eb10-423b-917c-acfc8995d4dc/Vyhsm3XW3Q.lottie"
+            style="width: 100%; height: 100%;"
+            autoplay
+            loop>
+          </dotlottie-wc>
+        `;
+      }
+    };
+
+    return () => {
+      document.head.removeChild(style);
+      // Clean up Lottie script if needed
+      const lottieScript = document.querySelector('script[src*="dotlottie-wc"]');
+      if (lottieScript) {
+        document.head.removeChild(lottieScript);
+      }
+    };
+  }, []);
+
+  // Rotate banner messages every 6 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentMessageIndex((prevIndex) => (prevIndex + 1) % bannerMessages.length);
+        setIsTransitioning(false);
+      }, 300); // Half of transition duration for smooth fade
+    }, 6000);
 
     return () => clearInterval(interval);
-  }, [user]);
+  }, [bannerMessages]);
 
-  // CONDITIONAL RETURNS AFTER ALL HOOKS - Show loading spinner while contexts are loading
-  if (brandingLoading || authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  // Ensure branding is loaded before checking properties
-  if (!branding) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  // Handler for opening lesson viewer
-  const handleOpenLesson = (tutorial) => {
-    setSelectedLesson(tutorial);
-    setShowLessonViewer(true);
-    // Update URL to reflect the lesson being viewed
-    navigate(`/community/lesson/${tutorial.id}`, { replace: true });
-  };
-
-  // Handler for closing lesson viewer
-  const handleCloseLesson = () => {
-    setShowLessonViewer(false);
-    setSelectedLesson(null);
-    // Return to community page
-    navigate('/community', { replace: true });
-  };
-
-  // Handler for opening quick skill modal
-  const handleOpenQuickSkill = (skill) => {
-    setSelectedQuickSkill(skill);
-    setShowQuickSkillModal(true);
-  };
-
-  // Handler for closing quick skill modal
-  const handleCloseQuickSkill = () => {
-    setShowQuickSkillModal(false);
-    setSelectedQuickSkill(null);
-  };
-
-  // Handler for joining training (creating and joining VideoSDK meeting)
-  const handleJoinTraining = async (training) => {
+  // Track events
+  const track = (name, props) => {
     try {
-      const trainingData = {
-        title: training.title,
-        description: training.description,
-        duration: 60, // 1 hour default
-        userName: user?.profile?.name || user?.name || 'Participant',
-        participantName: user?.profile?.name || user?.name || 'Participant'
+      if (window.gtag) window.gtag('event', name, props || {});
+      if (window.analytics?.track) window.analytics.track(name, props || {});
+    } catch (e) {}
+  };
+
+  // Form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validation
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.country || !formData.experience || !formData.consent) {
+      alert('Please complete all required fields with valid information.');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    // Duplicate check
+    const key = `va_webinar_email_${formData.email}`;
+    if (localStorage.getItem(key)) {
+      setShowForm(false);
+      return;
+    }
+
+    setIsSubmitting(true);
+    track('webinar_register_attempt', { source: 'community_page' });
+
+    try {
+      const data = {
+        ...formData,
+        email: formData.email.toLowerCase().trim(),
+        webinarStartISO: nextWebinarDate?.toISOString(),
+        submittedAt: new Date().toISOString(),
+        tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        utm: {}
       };
 
-      const result = await createAndJoinMeeting(trainingData);
-      setVideosdkConfig(result.meetingConfig);
-      setShowVideoSDKMeeting(true);
-    } catch (error) {
-      console.error('Failed to join training:', error);
-      // You could add a toast notification here
-    }
-  };
-
-  // Handler for leaving meeting
-  const handleLeaveMeeting = () => {
-    setShowVideoSDKMeeting(false);
-    setVideosdkConfig(null);
-  };
-
-  // Filter and search courses
-  const getFilteredCourses = () => {
-    let filtered = currentTutorials;
-
-    // Filter by category
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(course => 
-        course.category.toLowerCase().replace('&', '').replace(' ', '-') === selectedCategory ||
-        course.category.toLowerCase().replace(' ', '-') === selectedCategory
-      );
-    }
-
-    // Filter by search query
-    if (searchQuery) {
-      filtered = filtered.filter(course =>
-        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        course.instructor.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Sort courses
-    switch (sortBy) {
-      case 'newest':
-        return filtered.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-      case 'popular':
-        return filtered.sort((a, b) => b.instructor.students - a.instructor.students);
-      case 'rating':
-        return filtered.sort((a, b) => b.instructor.rating - a.instructor.rating);
-      case 'duration':
-        return filtered.sort((a, b) => {
-          const getDuration = (duration) => {
-            const hours = duration.includes('h') ? parseInt(duration.split('h')[0]) * 60 : 0;
-            const minutes = duration.includes('min') ? parseInt(duration.split('min')[0].split(' ').pop()) : 0;
-            return hours + minutes;
-          };
-          return getDuration(a.duration) - getDuration(b.duration);
+      // Try to submit to backend
+      try {
+        await fetch('/api/webinar/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
         });
-      default:
-        return filtered;
+      } catch (err) {
+        console.log('Backend not available, showing success anyway');
+      }
+
+      localStorage.setItem(key, '1');
+      localStorage.setItem('va_webinar_last_submit', String(Date.now()));
+      setShowForm(false);
+      track('webinar_register_success', { source: 'community_page' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Redirect to home if in E-systems mode
-  if (branding.isESystemsMode) {
-    return <Navigate to="/" replace />;
+  // Generate calendar links
+  const generateCalendarLinks = () => {
+    if (!nextWebinarDate) return { google: '', ics: '' };
+
+    const end = new Date(nextWebinarDate.getTime() + CONFIG.SESSION_DURATION_MINUTES * 60_000);
+    const title = 'Virtual Assistant Jobs Webinar';
+    const desc = 'Live webinar: Remote VA roles starting at $4–$5/hr with bonuses and respectful raises within your first year.';
+
+    const formatForGoogle = (dt) => dt.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z/, 'Z');
+
+    const googleParams = new URLSearchParams({
+      action: 'TEMPLATE',
+      text: title,
+      dates: `${formatForGoogle(nextWebinarDate)}/${formatForGoogle(end)}`,
+      details: desc
+    });
+
+    const icsContent = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Linkage//VA Webinar//EN",
+      "BEGIN:VEVENT",
+      `UID:${Date.now()}@linkage.ph`,
+      `DTSTAMP:${formatForGoogle(new Date())}`,
+      `DTSTART:${formatForGoogle(nextWebinarDate)}`,
+      `DTEND:${formatForGoogle(end)}`,
+      `SUMMARY:${title}`,
+      `DESCRIPTION:${desc}`,
+      "END:VEVENT",
+      "END:VCALENDAR"
+    ].join('\r\n');
+
+    const icsBlob = new Blob([icsContent], { type: 'text/calendar' });
+    const icsUrl = URL.createObjectURL(icsBlob);
+
+    return {
+      google: `https://calendar.google.com/calendar/render?${googleParams.toString()}`,
+      ics: icsUrl
+    };
+  };
+
+  const { google: googleCalUrl, ics: icsUrl } = generateCalendarLinks();
+
+  // Loading state
+  if (brandingLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
-  // Show interactive learning center for logged in users
-  if (user) {
-    return (
-      <>
-        <Helmet>
-          <title>Learning Center - {branding.name}</title>
-        </Helmet>
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: "Virtual Assistant Jobs Webinar",
+    description: "Live webinar teaching how to qualify for remote VA roles starting at $4–$5 per hour, including bonuses and respectful raises within your first year.",
+    startDate: nextWebinarDate?.toISOString(),
+    endDate: nextWebinarDate ? new Date(nextWebinarDate.getTime() + CONFIG.SESSION_DURATION_MINUTES * 60_000).toISOString() : null,
+    eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
+    eventStatus: "https://schema.org/EventScheduled",
+    location: {
+      "@type": "VirtualLocation",
+      url: "https://linkage.ph/community"
+    },
+    organizer: {
+      "@type": "Organization",
+      name: CONFIG.BRAND_NAME,
+      url: "https://linkage.ph"
+    }
+  };
 
-        <div className="bg-gray-50 min-h-screen">
-          {/* Header */}
-          <div className="bg-white shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user.profile?.name || 'VA'}!</h1>
-                  <p className="text-gray-600">Continue your learning journey</p>
+  return (
+    <>
+      <Helmet>
+        <title>Virtual Assistant Jobs Webinar ₱999 | Get Hired Remotely</title>
+        <meta name="description" content="Join our PAID webinar (₱999) on the 30th of every month to learn how to qualify for remote VA roles starting at $4–$5 per hour, including bonuses and respectful raises within your first year. Register now." />
+        <meta property="og:title" content="Virtual Assistant Jobs Webinar ₱999 | Get Hired Remotely" />
+        <meta property="og:description" content="Join our PAID webinar (₱999) on the 30th of every month to learn how to qualify for remote VA roles starting at $4–$5 per hour with bonuses and respectful raises in your first year. Register now." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="/community" />
+        <meta property="og:image" content="/images/community-invite-poster.svg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Virtual Assistant Jobs Webinar invitation" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Virtual Assistant Jobs Webinar | Get Hired Remotely" />
+        <meta name="twitter:description" content="Join our live webinar on the 30th of every month to learn how to qualify for remote VA roles starting at $4–$5 per hour with bonuses and respectful raises in your first year. Register now." />
+        <meta name="twitter:image" content="/images/community-invite-poster.svg" />
+        <link rel="canonical" href="/community" />
+        <script type="application/ld+json">
+          {JSON.stringify(jsonLd)}
+        </script>
+      </Helmet>
+
+      <main className="min-h-screen bg-white text-gray-900">
+        {/* Value Proposition Message - Rotating Banner */}
+        <div className="w-full bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-100">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
+            <div className="relative h-6 sm:h-7 overflow-hidden">
+              <p
+                className={`text-center text-sm sm:text-base font-semibold text-gray-900 absolute inset-0 flex items-center justify-center transition-opacity duration-600 ${
+                  isTransitioning ? 'opacity-0' : 'opacity-100'
+                }`}
+                style={{ transitionDuration: '600ms' }}
+              >
+                {bannerMessages[currentMessageIndex]}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Paid Webinar Notice */}
+        <div className="w-full py-2" style={{ backgroundColor: '#ea2727' }}>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <p className="text-center text-white font-bold animate-pulse">
+              ⚡ PAID WEBINAR: ₱999 Investment Required ⚡
+            </p>
+          </div>
+        </div>
+
+        {/* Hero */}
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
+          <div className="grid gap-10 lg:grid-cols-2 lg:gap-16 items-start">
+            <div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
+                Get hired as a Virtual Assistant
+              </h1>
+              <p className="mt-4 text-base sm:text-lg text-gray-700">
+                Remote VA roles starting at <strong>$4–$5 per hour</strong>, with bonuses and respectful raises in your first year. Attend our <span className="px-1 font-bold" style={{ backgroundColor: '#e0e7ff', color: '#4338ca' }}>paid webinar (₱999)</span> to learn how to qualify and get hired fast.
+              </p>
+
+              {/* Video invite - positioned after the main value proposition */}
+              <div className="mt-6 relative">
+                <div className="absolute -top-2 right-2 z-10 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg" style={{ backgroundColor: '#4338ca' }}>
+                  ₱999 WEBINAR FEE
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <div className="text-sm text-gray-500">Learning Streak</div>
-                    <div className="flex items-center text-orange-600">
-                      <FireIconSolid className="h-5 w-5 mr-1" />
-                      <span className="font-bold">7 days</span>
+                <VideoPlayer
+                  src="https://storage.googleapis.com/msgsndr/QcArhd5EeedJmTdRxDXY/media/68cd5682aeb2f019c79c0673.mp4"
+                  poster="/images/community-invite-poster.svg"
+                  fallbackPoster="/images/community-invite-poster.svg"
+                  onPlay={() => track('video_invite_play', { source: 'community_page' })}
+                  className="rounded-xl shadow-lg"
+                />
+                <p className="mt-3 text-sm text-gray-700 text-center">
+                  Start earning sooner with professional training, fair pay, and opportunities to grow.
+                </p>
+              </div>
+
+              {/* Countdown */}
+              <div className="mt-6 rounded-xl border-2 border-gray-300 bg-gradient-to-br from-blue-50 to-indigo-50 p-4 relative">
+                <div className="absolute -top-3 left-4 text-white px-3 py-1 rounded text-sm font-bold" style={{ backgroundColor: '#3b82f6' }}>
+                  ₱999 Investment
+                </div>
+                <p className="text-sm sm:text-base text-gray-800">
+                  {timeLabel}
+                </p>
+                <div className="mt-3 grid grid-cols-4 gap-2 text-center" aria-label="Countdown to next webinar" role="group">
+                  {[
+                    { label: 'Days', value: countdown.days },
+                    { label: 'Hours', value: countdown.hours },
+                    { label: 'Minutes', value: countdown.minutes },
+                    { label: 'Seconds', value: countdown.seconds }
+                  ].map(({ label, value }) => (
+                    <div key={label} className="rounded-lg bg-white p-3 shadow-sm border border-gray-200">
+                      <div className="text-2xl font-bold tabular-nums">
+                        {String(value).padStart(2, '0')}
+                      </div>
+                      <div className="text-xs text-gray-600">{label}</div>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 text-xs font-medium" style={{ color: '#4338ca' }}>
+                  Seats are limited and fill fast each month. Investment: ₱999
+                </p>
+              </div>
+
+              {/* Primary CTA */}
+              <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
+                <a
+                  href="#register"
+                  className="inline-flex justify-center items-center rounded-md text-white px-6 py-3 text-base font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 relative hover:opacity-90"
+                  style={{ backgroundColor: '#2663eb', '--tw-ring-color': '#2663eb' }}
+                  aria-label="Register for the ₱999 webinar"
+                  onClick={() => track('webinar_register_cta_click', { source: 'community_page_hero' })}
+                >
+                  Register for ₱999 Webinar
+                  <span className="absolute -top-2 -right-2 text-white text-xs px-2 py-1 rounded-full animate-bounce" style={{ backgroundColor: '#4338ca' }}>
+                    PAID
+                  </span>
+                </a>
+                <span className="text-sm text-gray-700">
+                  Limited seats. Registration closes when the timer hits zero.
+                </span>
+              </div>
+
+              <p className="mt-4 text-xs text-gray-600">
+                ₱999 is for training only. No placement fees. We never charge VAs to get hired.
+              </p>
+            </div>
+
+            {/* Registration Form - moved from below to hero grid */}
+            <div id="register" className="rounded-xl border border-gray-200 p-6 sm:p-8 shadow-sm bg-white relative">
+              {/* Pricing Banner */}
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white px-6 py-2 rounded-full shadow-lg">
+                <span className="font-bold text-sm">WEBINAR FEE: ₱999</span>
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl font-bold mt-2">
+                Reserve your seat for ₱999
+              </h2>
+              <p className="mt-1 text-sm text-gray-700">
+                We'll send payment instructions and reminders ahead of the session.
+              </p>
+
+              {/* Payment Notice */}
+              <div className="mt-4 p-3 rounded-lg border" style={{ backgroundColor: '#e0e7ff', borderColor: '#4338ca' }}>
+                <p className="text-sm text-indigo-900 font-medium">
+                  💳 Payment Required: ₱999 webinar fee
+                </p>
+                <p className="text-xs text-indigo-800 mt-1">
+                  This covers professional training materials and live instruction. Job placement remains free.
+                </p>
+              </div>
+
+              {showForm ? (
+                <form onSubmit={handleSubmit} className="mt-6 grid grid-cols-1 gap-4" noValidate>
+                  {/* Honeypot */}
+                  <input type="text" name="company" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="firstName" className="text-sm font-medium">First name</label>
+                    <input
+                      id="firstName"
+                      value={formData.firstName}
+                      onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                      required
+                      className="rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="lastName" className="text-sm font-medium">Last name</label>
+                    <input
+                      id="lastName"
+                      value={formData.lastName}
+                      onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                      required
+                      className="rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="email" className="text-sm font-medium">Email</label>
+                    <input
+                      id="email"
+                      type="email"
+                      inputMode="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      required
+                      className="rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="country" className="text-sm font-medium">Country/Region</label>
+                    <input
+                      id="country"
+                      value={formData.country}
+                      onChange={(e) => setFormData({...formData, country: e.target.value})}
+                      required
+                      className="rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="experience" className="text-sm font-medium">Years of VA or admin experience</label>
+                    <select
+                      id="experience"
+                      value={formData.experience}
+                      onChange={(e) => setFormData({...formData, experience: e.target.value})}
+                      required
+                      className="rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select...</option>
+                      <option>None</option>
+                      <option>&lt;1 year</option>
+                      <option>1–2 years</option>
+                      <option>3+ years</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="messenger" className="text-sm font-medium">Philippine phone number (optional)</label>
+                    <input
+                      id="messenger"
+                      value={formData.messenger}
+                      onChange={(e) => setFormData({...formData, messenger: e.target.value})}
+                      placeholder="+63 9XX XXX XXXX"
+                      className="rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="mt-2 flex items-start gap-2">
+                    <input
+                      id="consent"
+                      type="checkbox"
+                      checked={formData.consent}
+                      onChange={(e) => setFormData({...formData, consent: e.target.checked})}
+                      required
+                      className="mt-0.5 h-4 w-4 rounded border-gray-300 focus:ring-2"
+                      style={{ accentColor: '#2663eb' }}
+                    />
+                    <label htmlFor="consent" className="text-sm text-gray-800">
+                      I agree to receive webinar information and job-related updates and accept the Privacy Policy.
+                    </label>
+                  </div>
+
+                  <div className="mt-2 flex flex-col gap-3">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className={`inline-flex justify-center items-center rounded-md text-white px-6 py-3 text-base font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-90 ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      style={{ backgroundColor: '#2663eb' }}
+                    >
+                      {isSubmitting ? 'Registering...' : 'Proceed to Payment (₱999)'}
+                    </button>
+                    <span className="text-xs text-gray-700 text-center">We'll confirm your seat instantly.</span>
+                  </div>
+
+                  <p className="mt-2 text-xs text-gray-600 text-center">
+                    ₱999 training fee required. No placement fees - we never charge VAs to get hired.
+                  </p>
+                </form>
+              ) : (
+                /* Success state */
+                <div className="mt-6 rounded-lg border p-4" style={{ backgroundColor: '#e4effe', borderColor: '#2663eb' }}>
+                  <p className="font-semibold" style={{ color: '#2663eb' }}>Registration received! Check your email for payment instructions (₱999) and joining details.</p>
+                  <p className="mt-1 text-sm" style={{ color: '#2663eb' }}>
+                    Next session: {nextWebinarDate ? nextWebinarDate.toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' }) : ''}
+                  </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <a
+                      href={googleCalUrl}
+                      className="inline-flex items-center rounded-md text-white px-4 py-2 text-sm font-semibold hover:opacity-90"
+                      style={{ backgroundColor: '#3b82f6' }}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Add to Google Calendar
+                    </a>
+                    <a
+                      href={icsUrl}
+                      className="inline-flex items-center rounded-md bg-white text-gray-900 px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50"
+                      download="va-webinar.ics"
+                    >
+                      Download ICS
+                    </a>
+                  </div>
+                  <p className="mt-2 text-xs text-gray-700">Tip: Join 10 minutes early to test your audio and avoid delays.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Section Title */}
+          <div className="mt-12 text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: '#1f2937' }}>
+              Here's Exactly What Your ₱999 Gets You
+            </h2>
+            <p className="text-base text-gray-700 mb-8">
+              Everything you need to launch your <span className="font-semibold" style={{ color: '#3b82f6' }}>$4-$5/hour VA career</span> in just 20 days
+            </p>
+          </div>
+
+          {/* Benefits & Training Details Section - Full Width */}
+          <div className="space-y-6">
+            {/* Main Benefits Cards - Expandable */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Priority Access Card */}
+              <div
+                className={`rounded-xl border transform transition-all cursor-pointer ${
+                  expandedBenefit === 'priority' ? 'sm:col-span-3' : 'priority-glow'
+                }`}
+                style={{ backgroundColor: '#e4effe', borderColor: '#2663eb' }}
+                onClick={() => setExpandedBenefit(expandedBenefit === 'priority' ? null : 'priority')}
+              >
+                <div className="p-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 text-white rounded-full p-2" style={{ backgroundColor: '#2663eb' }}>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-bold text-gray-900 text-sm">Priority Access</h3>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold text-white animate-pulse" style={{ backgroundColor: '#4338ca' }}>
+                          ⭐ VIP
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-700 mt-1">First in line for Linkage's job opportunities</p>
+                      {expandedBenefit === 'priority' && (
+                        <div className="mt-4 space-y-3 animate-fadeIn">
+                          <div className="rounded-lg p-3" style={{ backgroundColor: '#f8f9fa' }}>
+                            <h4 className="font-semibold text-sm mb-2" style={{ color: '#2663eb' }}>What Priority Access Means for You:</h4>
+                            <ul className="space-y-2 text-xs text-gray-700">
+                              <li className="flex items-start">
+                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2663eb" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                Your profile appears AHEAD of regular accounts when clients search for VAs
+                              </li>
+                              <li className="flex items-start">
+                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2663eb" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                First notification when new high-paying clients post jobs
+                              </li>
+                              <li className="flex items-start">
+                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2663eb" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                Exclusive access to premium client accounts paying $5+/hour
+                              </li>
+                              <li className="flex items-start">
+                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2663eb" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                Priority support from our team when you need help
+                              </li>
+                            </ul>
+                          </div>
+                          <p className="text-xs italic font-medium" style={{ color: '#2663eb' }}>
+                            "Our trained VAs get hired 3x faster than regular applicants!"
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* $4+/Hour Card */}
+              <div
+                className={`rounded-xl border transform transition-all cursor-pointer ${
+                  expandedBenefit === 'earnings' ? 'sm:col-span-3' : 'hover:scale-105'
+                } ${expandedBenefit === 'priority' ? 'hidden' : ''}`}
+                style={{ backgroundColor: '#f3f4f6', borderColor: '#6b7280' }}
+                onClick={() => setExpandedBenefit(expandedBenefit === 'earnings' ? null : 'earnings')}
+              >
+                <div className="p-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 text-white rounded-full p-2" style={{ backgroundColor: '#1f2937' }}>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-900 text-sm">$4+/Hour</h3>
+                      <p className="text-xs text-gray-700 mt-1">Minimum rate with potential for higher pay</p>
+                      {expandedBenefit === 'earnings' && (
+                        <div className="mt-4 space-y-3 animate-fadeIn">
+                          <div className="rounded-lg p-3" style={{ backgroundColor: '#f8f9fa' }}>
+                            <h4 className="font-semibold text-sm mb-2" style={{ color: '#1f2937' }}>Your Earning Potential:</h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="text-gray-600">Starting Rate (Month 1-3)</span>
+                                <span className="font-bold" style={{ color: '#3b82f6' }}>$4-5/hour</span>
+                              </div>
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="text-gray-600">With Experience (Month 4-6)</span>
+                                <span className="font-bold" style={{ color: '#3b82f6' }}>$6-8/hour</span>
+                              </div>
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="text-gray-600">Specialist VAs (6+ months)</span>
+                                <span className="font-bold" style={{ color: '#3b82f6' }}>$10+/hour</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="rounded-lg p-2" style={{ backgroundColor: '#e0e7ff' }}>
+                            <p className="text-xs" style={{ color: '#4338ca' }}>
+                              <strong>Monthly Income Example:</strong> At $4/hour × 40 hours/week =
+                              <span className="font-bold"> ₱35,000+ per month</span>
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ₱999 Investment Card */}
+              <div
+                className={`rounded-xl border transform transition-all cursor-pointer ${
+                  expandedBenefit === 'investment' ? 'sm:col-span-3' : 'hover:scale-105'
+                } ${expandedBenefit === 'priority' || expandedBenefit === 'earnings' ? 'hidden' : ''}`}
+                style={{ backgroundColor: '#e4effe', borderColor: '#2663eb' }}
+                onClick={() => setExpandedBenefit(expandedBenefit === 'investment' ? null : 'investment')}
+              >
+                <div className="p-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 text-white rounded-full p-2" style={{ backgroundColor: '#2663eb' }}>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-900 text-sm">₱999 Investment</h3>
+                      <p className="text-xs text-gray-700 mt-1">3-week professional training program</p>
+                      {expandedBenefit === 'investment' && (
+                        <div className="mt-4 space-y-3 animate-fadeIn">
+                          <div className="rounded-lg p-3" style={{ backgroundColor: '#f8f9fa' }}>
+                            <h4 className="font-semibold text-sm mb-2" style={{ color: '#2663eb' }}>Your ₱999 Investment Includes:</h4>
+                            <ul className="space-y-2 text-xs text-gray-700">
+                              <li className="flex items-start">
+                                <span className="font-bold mr-2" style={{ color: '#2663eb' }}>✓</span>
+                                40 hours of live training (20 days × 2 hours)
+                              </li>
+                              <li className="flex items-start">
+                                <span className="font-bold mr-2" style={{ color: '#2663eb' }}>✓</span>
+                                Free GoHighLevel account (₱5,500/month value)
+                              </li>
+                              <li className="flex items-start">
+                                <span className="font-bold mr-2" style={{ color: '#2663eb' }}>✓</span>
+                                AI tools training for content creation
+                              </li>
+                              <li className="flex items-start">
+                                <span className="font-bold mr-2" style={{ color: '#2663eb' }}>✓</span>
+                                Lifetime access to our VA community
+                              </li>
+                              <li className="flex items-start">
+                                <span className="font-bold mr-2" style={{ color: '#2663eb' }}>✓</span>
+                                Job placement assistance after graduation
+                              </li>
+                            </ul>
+                          </div>
+                          <div className="rounded-lg p-2 text-center" style={{ backgroundColor: '#e4effe' }}>
+                            <p className="text-xs font-bold" style={{ color: '#2663eb' }}>
+                              ROI: Earn back your investment in just 6-8 hours of VA work!
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Main Content */}
-              <div className="lg:col-span-2 space-y-8">
-                {/* Course Library Header */}
-                <div className="bg-white rounded-lg shadow-sm">
-                  <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-                        <BookOpenIcon className="h-6 w-6 mr-3 text-blue-600" />
-                        Course Library
-                        <span className="ml-3 text-sm font-normal text-gray-500">
-                          ({getFilteredCourses().length} courses)
-                        </span>
-                      </h2>
-                    </div>
-                    
-                    {/* Search and Filters */}
-                    <div className="space-y-4">
-                      {/* Search Bar */}
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="Search courses, instructors, or topics..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                        <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                      </div>
-
-                      {/* Category Filter Tabs */}
-                      <div className="flex flex-wrap gap-2">
-                        {courseCategories.map((category) => (
-                          <button
-                            key={category.id}
-                            onClick={() => setSelectedCategory(category.id)}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                              selectedCategory === category.id
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            {category.name} ({category.count})
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Sort Options */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <label className="text-sm font-medium text-gray-700">Sort by:</label>
-                          <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          >
-                            <option value="newest">Newest First</option>
-                            <option value="popular">Most Popular</option>
-                            <option value="rating">Highest Rated</option>
-                            <option value="duration">Shortest First</option>
-                          </select>
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          Showing {getFilteredCourses().length} of {currentTutorials.length} courses
-                        </div>
-                      </div>
+            {/* Interactive Earning Calculator & Bonus Benefits Section - ENHANCED */}
+            <div className="rounded-xl p-6 border-2" style={{
+              background: 'linear-gradient(135deg, #f3f4f6 0%, #e0e7ff 100%)',
+              borderColor: '#3b82f6'
+            }}>
+              {/* 100% Bonus & Raise Benefits Banner */}
+              <div className="mb-8 relative overflow-hidden rounded-2xl p-6 text-center" style={{
+                background: 'linear-gradient(135deg, #2663eb 0%, #4338ca 50%, #3b82f6 100%)',
+                boxShadow: '0 20px 40px rgba(38, 99, 235, 0.3)'
+              }}>
+                <div className="absolute inset-0 bg-white bg-opacity-10 backdrop-blur-sm"></div>
+                <div className="relative z-10">
+                  <div className="flex justify-center mb-4">
+                    <div className="animate-bounce">
+                      <span className="text-6xl">💰</span>
                     </div>
                   </div>
-
-                  {/* Course Grid */}
-                  <div className="p-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      {getFilteredCourses().map((tutorial) => (
-                        <div 
-                          key={tutorial.id} 
-                          onClick={() => handleOpenLesson(tutorial)}
-                          className="border border-gray-200 rounded-lg hover:shadow-lg transition-shadow cursor-pointer group">
-                          <div className="p-6">
-                            {/* Course Header */}
-                            <div className="flex items-start justify-between mb-4">
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-3 mb-2">
-                                  <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
-                                    {tutorial.title}
-                                  </h3>
-                                  {tutorial.isNew && (
-                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                      New
-                                    </span>
-                                  )}
-                                  {tutorial.courseType === 'Series' && (
-                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                      Series
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{tutorial.description}</p>
-                              </div>
-                            </div>
-
-                            {/* Course Meta */}
-                            <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-                              <div className="flex items-center">
-                                <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                <span>{tutorial.instructor.name}</span>
-                              </div>
-                              <div className="flex items-center">
-                                <ClockIcon className="h-4 w-4 mr-1" />
-                                <span>{tutorial.duration}</span>
-                              </div>
-                              <div className="flex items-center">
-                                <svg className="h-4 w-4 mr-1 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <span>{tutorial.instructor.rating}</span>
-                              </div>
-                            </div>
-
-                            {/* Difficulty & Category */}
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center space-x-2">
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  tutorial.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
-                                  tutorial.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                                  'bg-red-100 text-red-800'
-                                }`}>
-                                  {tutorial.difficulty}
-                                </span>
-                                <span className="text-xs text-gray-500">{tutorial.category}</span>
-                              </div>
-                            </div>
-
-                            {/* Tags */}
-                            <div className="flex flex-wrap gap-1 mb-4">
-                              {tutorial.tags.slice(0, 3).map((tag) => (
-                                <span key={tag} className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                  {tag}
-                                </span>
-                              ))}
-                              {tutorial.tags.length > 3 && (
-                                <span className="text-xs text-gray-500">+{tutorial.tags.length - 3} more</span>
-                              )}
-                            </div>
-
-                            {/* Progress Bar (if in progress) */}
-                            {tutorial.progress > 0 && (
-                              <div className="mb-4">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-xs text-gray-600">Progress</span>
-                                  <span className="text-xs text-gray-600">{tutorial.progress}%</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                  <div 
-                                    className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                                    style={{ width: `${tutorial.progress}%` }}
-                                  ></div>
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Action Button */}
-                            <button
-                              className={`w-full px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center justify-center ${
-                                tutorial.progress > 0
-                                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                  : 'bg-gray-900 text-white hover:bg-gray-800'
-                              }`}
-                            >
-                              <PlayIcon className="h-4 w-4 mr-2" />
-                              {tutorial.progress > 0 ? 'Continue Learning' : 'Start Course'}
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                  <h2 className="text-2xl sm:text-4xl font-extrabold text-white mb-3 leading-tight">
+                    🚀 GAME CHANGER: You Keep 100% of Everything!
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div className="bg-white bg-opacity-20 rounded-xl p-4 backdrop-blur-sm">
+                      <div className="text-3xl mb-2">🎁</div>
+                      <h3 className="font-bold text-white text-lg mb-1">100% of All Bonuses</h3>
+                      <p className="text-white text-sm opacity-90">Every bonus your client pays goes directly to YOU</p>
                     </div>
-
-                    {/* No Results Message */}
-                    {getFilteredCourses().length === 0 && (
-                      <div className="text-center py-12">
-                        <BookOpenIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
-                        <p className="text-gray-500 mb-4">
-                          Try adjusting your search or filters to find what you're looking for.
-                        </p>
-                        <button
-                          onClick={() => {
-                            setSelectedCategory('all');
-                            setSearchQuery('');
-                          }}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          Clear Filters
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-
-
-
-                      
-                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                        <p className="text-gray-700 mb-3">
-                          <strong>What you'll learn:</strong> Create engaging Instagram stories that boost engagement and drive sales for clients.
-                        </p>
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <h4 className="font-medium text-gray-900">✅ Templates Included:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                              <li>• Product showcase templates</li>
-                              <li>• Behind-the-scenes layouts</li>
-                              <li>• Call-to-action designs</li>
-                              <li>• Q&A and poll templates</li>
-                            </ul>
-                          </div>
-                          <div className="space-y-2">
-                            <h4 className="font-medium text-gray-900">🎯 Key Techniques:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                              <li>• Color psychology in design</li>
-                              <li>• Typography best practices</li>
-                              <li>• Brand consistency tips</li>
-                              <li>• Engagement optimization</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-blue-50 rounded-lg p-4 mb-4">
-                        <h4 className="font-medium text-gray-900 mb-2 flex items-center">
-                          <VideoCameraIcon className="h-4 w-4 mr-2 text-blue-600" />
-                          Video Tutorial Preview
-                        </h4>
-                        <div className="bg-gray-200 rounded-lg h-32 flex items-center justify-center text-gray-500 mb-2">
-                          <div className="text-center">
-                            <PlayIcon className="h-8 w-8 mx-auto mb-2" />
-                            <span className="text-sm">Watch: "Creating Your First Story Template"</span>
-                          </div>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          See how to create professional Instagram story templates using free tools and boost client engagement by 300%.
-                        </p>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <button 
-                          onClick={() => handleOpenQuickSkill({title: 'Instagram Story Templates', time: '8 min', category: 'Design'})}
-                          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center">
-                          <PlayIcon className="h-4 w-4 mr-2" />
-                          Start Guide
-                        </button>
-                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                          Download Templates
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Skill 2: Email Subject Line Tips */}
-                    <div className="border-l-4 border-blue-400 pl-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-semibold text-gray-900 flex items-center">
-                          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                            <EnvelopeIcon className="h-5 w-5 text-blue-600" />
-                          </div>
-                          Email Subject Line Mastery
-                        </h3>
-                        <div className="flex items-center space-x-2">
-                          <ClockIcon className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-500">5 min</span>
-                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Marketing</span>
-                        </div>
-                      </div>
-
-                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                        <p className="text-gray-700 mb-3">
-                          <strong>What you'll learn:</strong> Write subject lines that increase open rates by 40% and drive more conversions.
-                        </p>
-                        <div className="grid md:grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <h4 className="font-medium text-gray-900">📧 Proven Formulas:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                              <li>• Curiosity-driven headlines</li>
-                              <li>• Urgency and scarcity tactics</li>
-                              <li>• Personalization techniques</li>
-                            </ul>
-                          </div>
-                          <div className="space-y-2">
-                            <h4 className="font-medium text-gray-900">✉️ Examples:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                              <li>• "John, your exclusive invite..."</li>
-                              <li>• "Last chance: 50% off ends tonight"</li>
-                              <li>• "The secret that changed everything"</li>
-                            </ul>
-                          </div>
-                          <div className="space-y-2">
-                            <h4 className="font-medium text-gray-900">📊 A/B Testing:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                              <li>• Testing strategies</li>
-                              <li>• Metrics to track</li>
-                              <li>• Optimization tips</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-green-50 rounded-lg p-4 mb-4">
-                        <h4 className="font-medium text-gray-900 mb-2">💡 Quick Reference Cheat Sheet</h4>
-                        <div className="bg-white rounded border p-3">
-                          <div className="text-sm space-y-1">
-                            <div><strong>Power Words:</strong> Free, Exclusive, Limited, Secret, Proven, Instant</div>
-                            <div><strong>Optimal Length:</strong> 30-50 characters (mobile-friendly)</div>
-                            <div><strong>Avoid:</strong> ALL CAPS, excessive punctuation (!!!), spam words</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <button 
-                          onClick={() => handleOpenQuickSkill({title: 'Email Subject Line Tips', time: '5 min', category: 'Marketing'})}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
-                          <PlayIcon className="h-4 w-4 mr-2" />
-                          Start Guide
-                        </button>
-                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                          Get Cheat Sheet
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Skill 3: Client Onboarding Checklist */}
-                    <div className="border-l-4 border-green-400 pl-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-semibold text-gray-900 flex items-center">
-                          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                            <UserGroupIcon className="h-5 w-5 text-green-600" />
-                          </div>
-                          Client Onboarding Checklist
-                        </h3>
-                        <div className="flex items-center space-x-2">
-                          <ClockIcon className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-500">12 min</span>
-                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Business</span>
-                        </div>
-                      </div>
-
-                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                        <p className="text-gray-700 mb-3">
-                          <strong>What you'll learn:</strong> Create a seamless onboarding process that impresses clients and sets clear expectations.
-                        </p>
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <h4 className="font-medium text-gray-900">📋 Complete Checklist:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                              <li>• Welcome packet template</li>
-                              <li>• Project scope document</li>
-                              <li>• Communication preferences</li>
-                              <li>• Access credentials form</li>
-                              <li>• Timeline and milestones</li>
-                            </ul>
-                          </div>
-                          <div className="space-y-2">
-                            <h4 className="font-medium text-gray-900">🎯 Key Benefits:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                              <li>• Reduced project confusion</li>
-                              <li>• Professional first impression</li>
-                              <li>• Clear expectations set</li>
-                              <li>• Improved client retention</li>
-                              <li>• Streamlined workflow</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-yellow-50 rounded-lg p-4 mb-4">
-                        <h4 className="font-medium text-gray-900 mb-2">⚠️ Common Onboarding Mistakes to Avoid</h4>
-                        <div className="grid md:grid-cols-2 gap-3 text-sm">
-                          <div className="bg-white rounded p-3 border-l-4 border-red-400">
-                            <strong className="text-red-600">Don't:</strong> Assume client knowledge
-                          </div>
-                          <div className="bg-white rounded p-3 border-l-4 border-red-400">
-                            <strong className="text-red-600">Don't:</strong> Skip contract details
-                          </div>
-                          <div className="bg-white rounded p-3 border-l-4 border-green-400">
-                            <strong className="text-green-600">Do:</strong> Explain every step clearly
-                          </div>
-                          <div className="bg-white rounded p-3 border-l-4 border-green-400">
-                            <strong className="text-green-600">Do:</strong> Set communication boundaries
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <button 
-                          onClick={() => handleOpenQuickSkill({title: 'Client Onboarding Checklist', time: '12 min', category: 'Business'})}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center">
-                          <PlayIcon className="h-4 w-4 mr-2" />
-                          Start Guide
-                        </button>
-                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                          Download Checklist
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Skill 4: Keyword Research Basics */}
-                    <div className="border-l-4 border-orange-400 pl-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-semibold text-gray-900 flex items-center">
-                          <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
-                            <svg className="h-5 w-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                          </div>
-                          Keyword Research Mastery
-                        </h3>
-                        <div className="flex items-center space-x-2">
-                          <ClockIcon className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-500">15 min</span>
-                          <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">SEO</span>
-                        </div>
-                      </div>
-
-                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                        <p className="text-gray-700 mb-3">
-                          <strong>What you'll learn:</strong> Find profitable keywords that drive traffic and help clients rank higher in search results.
-                        </p>
-                        <div className="grid md:grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <h4 className="font-medium text-gray-900">🔍 Research Tools:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                              <li>• Google Keyword Planner</li>
-                              <li>• Ubersuggest (Free)</li>
-                              <li>• AnswerThePublic</li>
-                              <li>• Google Trends</li>
-                            </ul>
-                          </div>
-                          <div className="space-y-2">
-                            <h4 className="font-medium text-gray-900">📊 Key Metrics:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                              <li>• Search volume</li>
-                              <li>• Keyword difficulty</li>
-                              <li>• Cost per click (CPC)</li>
-                              <li>• Search intent</li>
-                            </ul>
-                          </div>
-                          <div className="space-y-2">
-                            <h4 className="font-medium text-gray-900">🎯 Strategies:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                              <li>• Long-tail keywords</li>
-                              <li>• Competitor analysis</li>
-                              <li>• Local SEO keywords</li>
-                              <li>• Content optimization</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-blue-50 rounded-lg p-4 mb-4">
-                        <h4 className="font-medium text-gray-900 mb-2 flex items-center">
-                          <DocumentTextIcon className="h-4 w-4 mr-2 text-blue-600" />
-                          Step-by-Step Process
-                        </h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-start">
-                            <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5">1</span>
-                            <span>Brainstorm seed keywords related to the business</span>
-                          </div>
-                          <div className="flex items-start">
-                            <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5">2</span>
-                            <span>Use tools to expand keyword list and check metrics</span>
-                          </div>
-                          <div className="flex items-start">
-                            <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5">3</span>
-                            <span>Analyze competitor keywords and identify gaps</span>
-                          </div>
-                          <div className="flex items-start">
-                            <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5">4</span>
-                            <span>Prioritize keywords by difficulty vs. opportunity</span>
-                          </div>
-                          <div className="flex items-start">
-                            <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3 mt-0.5">5</span>
-                            <span>Create content strategy around selected keywords</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <button 
-                          onClick={() => handleOpenQuickSkill({title: 'Keyword Research Basics', time: '15 min', category: 'SEO'})}
-                          className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center">
-                          <PlayIcon className="h-4 w-4 mr-2" />
-                          Start Guide
-                        </button>
-                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                          Get Toolkit
-                        </button>
-                      </div>
+                    <div className="bg-white bg-opacity-20 rounded-xl p-4 backdrop-blur-sm">
+                      <div className="text-3xl mb-2">📈</div>
+                      <h3 className="font-bold text-white text-lg mb-1">100% of All Raises</h3>
+                      <p className="text-white text-sm opacity-90">When clients increase your rate, you keep every peso</p>
                     </div>
                   </div>
-
-                  {/* Call-to-Action Footer */}
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-b-lg">
-                    <div className="text-center">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        Ready to Master All 4 Skills?
-                      </h3>
-                      <p className="text-gray-600 mb-4">
-                        Join our community to access the complete guides, templates, and video tutorials.
-                      </p>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                          Get Full Access
-                        </button>
-                        <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                          Download All Templates
-                        </button>
-                      </div>
-                    </div>
+                  <div className="inline-flex items-center bg-yellow-400 text-black px-4 py-2 rounded-full font-bold text-sm animate-pulse">
+                    ⚡ No agency fees • No commissions • All yours! ⚡
                   </div>
                 </div>
               </div>
 
-              {/* Sidebar */}
-              <div className="space-y-8">
-                {/* Next Live Training Countdown */}
-                <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-lg shadow-sm text-white">
-                  <div className="p-6">
-                    <div className="flex items-center mb-4">
-                      <CalendarDaysIcon className="h-6 w-6 mr-2" />
-                      <h3 className="text-lg font-semibold">Next Live Training</h3>
-                    </div>
-                    {upcomingTrainings.length > 0 && (
-                      <div>
-                        <h4 className="font-medium mb-2">{upcomingTrainings[0].title}</h4>
-                        <p className="text-blue-100 text-sm mb-4">{upcomingTrainings[0].description}</p>
-                        <div className="bg-white bg-opacity-20 rounded-lg p-4 text-center">
-                          <div className="flex items-center justify-center mb-2">
-                            <ClockIcon className="h-5 w-5 mr-2" />
-                            <span className="font-semibold">Starts in</span>
-                          </div>
-                          <div className="text-2xl font-bold">{timeToNext}</div>
-                          <div className="text-sm text-blue-100 mt-1">
-                            {upcomingTrainings[0].date.toLocaleDateString()} at {upcomingTrainings[0].time}
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between mt-4 text-sm">
-                          <span>{upcomingTrainings[0].attendees} registered</span>
-                          <button 
-                            onClick={() => handleJoinTraining(upcomingTrainings[0])}
-                            disabled={videosdkLoading}
-                            className={`bg-white text-blue-600 px-4 py-2 rounded-md font-medium transition-colors ${
-                              videosdkLoading 
-                                ? 'opacity-50 cursor-not-allowed' 
-                                : 'hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-                            }`}
-                          >
-                            {videosdkLoading ? (
-                              <div className="flex items-center">
-                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-2"></div>
-                                Creating...
-                              </div>
-                            ) : (
-                              'Join Training'
-                            )}
-                          </button>
-                        </div>
+              <div className="text-center mb-6">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2">
+                  Interactive Earning Calculator
+                </h2>
+                <p className="text-sm text-gray-700">
+                  Move the slider to see your earning potential + bonuses in Philippine Pesos!
+                </p>
+              </div>
+
+              {/* Interactive Rate Calculator */}
+              <div className="bg-white rounded-2xl p-6 shadow-xl border-2 mb-6" style={{ borderColor: '#2663eb' }}>
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    Your Hourly Rate Calculator
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Drag the slider to see your earning potential at different rates
+                  </p>
+                </div>
+
+                {/* Rate Slider */}
+                <div className="mb-8">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-sm font-medium text-gray-700">$4/hour</span>
+                    <div className="text-center">
+                      <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-1 transform transition-all duration-300 hover:scale-110" style={{
+                        backgroundColor: '#2663eb',
+                        boxShadow: `0 0 30px rgba(38, 99, 235, 0.4)`
+                      }}>
+                        <span className="text-2xl font-bold text-white">${selectedRate}</span>
                       </div>
-                    )}
+                      <p className="text-xs text-gray-600">per hour</p>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">$15/hour</span>
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="range"
+                      min="4"
+                      max="15"
+                      step="0.5"
+                      value={selectedRate}
+                      onChange={(e) => setSelectedRate(parseFloat(e.target.value))}
+                      className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                      style={{
+                        background: `linear-gradient(to right, #2663eb 0%, #2663eb ${((selectedRate - 4) / 11) * 100}%, #e5e7eb ${((selectedRate - 4) / 11) * 100}%, #e5e7eb 100%)`
+                      }}
+                    />
+                    <style jsx>{`
+                      .slider::-webkit-slider-thumb {
+                        appearance: none;
+                        height: 24px;
+                        width: 24px;
+                        border-radius: 50%;
+                        background: #2663eb;
+                        cursor: pointer;
+                        box-shadow: 0 4px 8px rgba(38, 99, 235, 0.3);
+                        transition: all 0.15s ease-in-out;
+                      }
+                      .slider::-webkit-slider-thumb:hover {
+                        transform: scale(1.2);
+                        box-shadow: 0 6px 12px rgba(38, 99, 235, 0.4);
+                      }
+                      .slider::-moz-range-thumb {
+                        height: 24px;
+                        width: 24px;
+                        border-radius: 50%;
+                        background: #2663eb;
+                        cursor: pointer;
+                        border: none;
+                        box-shadow: 0 4px 8px rgba(38, 99, 235, 0.3);
+                      }
+                    `}</style>
                   </div>
                 </div>
 
-                {/* Achievements */}
-                <div className="bg-white rounded-lg shadow-sm">
-                  <div className="p-6 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <TrophyIcon className="h-5 w-5 mr-2 text-yellow-600" />
-                      Achievements
-                    </h3>
+                {/* Dynamic Earnings Display */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="text-center p-4 rounded-xl transition-all duration-300 hover:scale-105" style={{ backgroundColor: '#f8f9fa' }}>
+                    <div className="text-lg font-bold" style={{ color: '#2663eb' }}>₱{earnings.hourly.toLocaleString()}</div>
+                    <div className="text-xs text-gray-600">per hour</div>
                   </div>
-                  <div className="p-6 space-y-3">
-                    {achievements.map((achievement) => (
-                      <div key={achievement.id} className={`flex items-center space-x-3 ${
-                        achievement.unlocked ? 'text-gray-900' : 'text-gray-400'
-                      }`}>
-                        <achievement.icon className={`h-5 w-5 ${
-                          achievement.unlocked ? 'text-yellow-500' : 'text-gray-300'
-                        }`} />
-                        <span className={achievement.unlocked ? 'font-medium' : ''}>{achievement.title}</span>
+                  <div className="text-center p-4 rounded-xl transition-all duration-300 hover:scale-105" style={{ backgroundColor: '#f8f9fa' }}>
+                    <div className="text-lg font-bold" style={{ color: '#2663eb' }}>₱{earnings.daily.toLocaleString()}</div>
+                    <div className="text-xs text-gray-600">per day</div>
+                  </div>
+                  <div className="text-center p-4 rounded-xl transition-all duration-300 hover:scale-105" style={{ backgroundColor: '#f8f9fa' }}>
+                    <div className="text-lg font-bold" style={{ color: '#2663eb' }}>₱{earnings.weekly.toLocaleString()}</div>
+                    <div className="text-xs text-gray-600">per week</div>
+                  </div>
+                  <div className="text-center p-4 rounded-xl transition-all duration-300 hover:scale-105 animate-pulse" style={{
+                    backgroundColor: '#e4effe',
+                    border: '2px solid #2663eb'
+                  }}>
+                    <div className="text-xl font-extrabold" style={{ color: '#2663eb' }}>₱{earnings.monthly.toLocaleString()}</div>
+                    <div className="text-xs font-semibold text-gray-900">per month</div>
+                  </div>
+                </div>
+
+                {/* 100% Bonus & Raise Highlight */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gradient-to-r from-green-400 to-green-500 rounded-xl p-4 text-white text-center transform transition-all hover:scale-105">
+                    <div className="text-2xl mb-2">🎁</div>
+                    <h4 className="font-bold text-lg mb-1">+ 100% of Bonuses</h4>
+                    <p className="text-sm opacity-90">Clients often give ₱2,000-₱10,000+ bonuses</p>
+                  </div>
+                  <div className="bg-gradient-to-r from-blue-400 to-blue-500 rounded-xl p-4 text-white text-center transform transition-all hover:scale-105">
+                    <div className="text-2xl mb-2">📈</div>
+                    <h4 className="font-bold text-lg mb-1">+ 100% of Raises</h4>
+                    <p className="text-sm opacity-90">Rate increases to ${selectedRate + 2}-${selectedRate + 5}/hour common</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Salary Comparison Bar Chart */}
+              <div className="bg-white rounded-xl p-5 shadow-lg mb-6">
+                <h3 className="font-bold text-gray-900 mb-4 text-center text-xl">
+                  How Your VA Income Compares to Other Jobs In The Philippines
+                </h3>
+
+                <div className="space-y-4">
+                  {/* Minimum Wage */}
+                  <div className="relative">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm font-medium text-gray-700">Minimum Wage (NCR)</span>
+                      <span className="text-sm font-bold text-gray-900">₱610/day</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
+                      <div className="h-full rounded-full flex items-center justify-end pr-2"
+                           style={{
+                             width: '30%',
+                             backgroundColor: '#94a3b8'
+                           }}>
+                        <span className="text-xs text-white font-semibold">₱13,420/mo</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Call Center Agent */}
+                  <div className="relative">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm font-medium text-gray-700">Call Center Agent</span>
+                      <span className="text-sm font-bold text-gray-900">₱18,000-25,000/mo</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
+                      <div className="h-full rounded-full flex items-center justify-end pr-2"
+                           style={{
+                             width: '50%',
+                             backgroundColor: '#64748b'
+                           }}>
+                        <span className="text-xs text-white font-semibold">₱22,000 avg</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Office Admin */}
+                  <div className="relative">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm font-medium text-gray-700">Office Admin</span>
+                      <span className="text-sm font-bold text-gray-900">₱15,000-20,000/mo</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
+                      <div className="h-full rounded-full flex items-center justify-end pr-2"
+                           style={{
+                             width: '40%',
+                             backgroundColor: '#475569'
+                           }}>
+                        <span className="text-xs text-white font-semibold">₱17,500 avg</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* VA at Current Selected Rate */}
+                  <div className="relative">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm font-bold" style={{ color: '#2663eb' }}>VA at ${selectedRate}/hour (YOU!)</span>
+                      <span className="text-sm font-bold" style={{ color: '#2663eb' }}>₱{earnings.monthly.toLocaleString()}/mo</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
+                      <div className="h-full rounded-full flex items-center justify-end pr-2"
+                           style={{
+                             width: `${Math.min(100, (earnings.monthly / 44800) * 100)}%`,
+                             background: 'linear-gradient(90deg, #2663eb 0%, #3b82f6 100%)'
+                           }}>
+                        <span className="text-xs text-white font-extrabold">
+                          {Math.round((earnings.monthly / 13420) * 100)}% of minimum wage!
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 text-center p-6 rounded-lg" style={{ backgroundColor: '#e0e7ff' }}>
+                  <p className="text-lg font-bold" style={{ color: '#4338ca' }}>
+                    🎯 That's ₱{earnings.monthly.toLocaleString()} per month working from home!
+                  </p>
+                  <p className="text-sm text-gray-600 mt-2">
+                    No commute, no office politics, flexible schedule
+                  </p>
+                </div>
+              </div>
+
+              {/* Real Bonus & Raise Scenarios */}
+              <div className="bg-white rounded-xl p-6 shadow-lg mb-6 border-2" style={{ borderColor: '#10b981' }}>
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    🎁 Real Bonus & Raise Examples from Our VAs
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    These are actual bonus and raise amounts our VAs have received - and you keep 100% of it!
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  {/* Bonus Examples */}
+                  <div className="space-y-4">
+                    <h4 className="font-bold text-lg text-center" style={{ color: '#10b981' }}>
+                      💰 Bonus Examples (100% Yours!)
+                    </h4>
+                    {[
+                      { occasion: "Holiday Bonus", amount: "₱5,600", description: "Christmas gift from grateful client" },
+                      { occasion: "Project Completion", amount: "₱8,400", description: "After successful campaign launch" },
+                      { occasion: "Birthday Bonus", amount: "₱2,800", description: "Personal touch from caring client" },
+                      { occasion: "Performance Bonus", amount: "₱11,200", description: "Exceeded monthly targets" },
+                      { occasion: "Anniversary Bonus", amount: "₱14,000", description: "One year of excellent service" }
+                    ].map((bonus, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 rounded-lg border transition-all hover:scale-105" style={{ backgroundColor: '#f0fdf4', borderColor: '#10b981' }}>
+                        <div>
+                          <p className="font-semibold text-sm text-gray-900">{bonus.occasion}</p>
+                          <p className="text-xs text-gray-600">{bonus.description}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-lg" style={{ color: '#10b981' }}>{bonus.amount}</p>
+                          <p className="text-xs text-gray-500">100% yours</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Raise Examples */}
+                  <div className="space-y-4">
+                    <h4 className="font-bold text-lg text-center" style={{ color: '#3b82f6' }}>
+                      📈 Raise Examples (100% Yours!)
+                    </h4>
+                    {[
+                      { timeline: "Month 6", from: "$5", to: "$6", reason: "Proved reliability" },
+                      { timeline: "Year 1", from: "$6", to: "$7", reason: "Learned new skills" },
+                      { timeline: "Year 2", from: "$7", to: "$8", reason: "Took on more tasks" },
+                      { timeline: "Year 3", from: "$8", to: "$10", reason: "Became indispensable" },
+                      { timeline: "Year 4+", from: "$10", to: "$12", reason: "Expert level achieved" }
+                    ].map((raise, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 rounded-lg border transition-all hover:scale-105" style={{ backgroundColor: '#eff6ff', borderColor: '#3b82f6' }}>
+                        <div>
+                          <p className="font-semibold text-sm text-gray-900">{raise.timeline}</p>
+                          <p className="text-xs text-gray-600">{raise.reason}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-sm" style={{ color: '#3b82f6' }}>
+                            {raise.from} → {raise.to}/hr
+                          </p>
+                          <p className="text-xs" style={{ color: '#10b981' }}>
+                            +₱{Math.round((parseFloat(raise.to.slice(1)) - parseFloat(raise.from.slice(1))) * 56 * 40 * 4.3).toLocaleString()}/mo
+                          </p>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Learning Stats */}
-                <div className="bg-white rounded-lg shadow-sm">
-                  <div className="p-6 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900">Your Progress</h3>
-                  </div>
-                  <div className="p-6 space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Tutorials Completed</span>
-                      <span className="font-semibold">23</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Hours Learned</span>
-                      <span className="font-semibold">12.5</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Current Level</span>
-                      <span className="font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">Intermediate</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-        {/* Lesson Viewer Modal */}
-        {showLessonViewer && selectedLesson && (
-          <Suspense fallback={<div>Loading lesson...</div>}>
-            <LessonViewer
-              lesson={selectedLesson}
-              onClose={handleCloseLesson}
-            />
-          </Suspense>
-        )}
-
-        {/* Quick Skill Modal */}
-        {showQuickSkillModal && selectedQuickSkill && (
-          <Suspense fallback={<div>Loading skill...</div>}>
-            <QuickSkillModal
-              skill={selectedQuickSkill}
-              isOpen={showQuickSkillModal}
-              onClose={handleCloseQuickSkill}
-            />
-          </Suspense>
-        )}
-
-        {/* VideoSDK Meeting Modal */}
-        {showVideoSDKMeeting && videosdkConfig && (
-          <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-              <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={handleLeaveMeeting}></div>
-              
-              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      Live Training Session
-                    </h3>
-                    <button
-                      onClick={handleLeaveMeeting}
-                      className="bg-gray-200 rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-                    >
-                      <span className="sr-only">Close</span>
-                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                  
-                  {videosdkError && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                      <p className="font-bold">Error joining meeting:</p>
-                      <p>{videosdkError}</p>
-                    </div>
-                  )}
-                  
-                  <VideoSDKMeeting
-                    meetingConfig={videosdkConfig}
-                    onLeave={handleLeaveMeeting}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </>
-    );
-  }
-
-  // Return non-logged-in view
-  return (
-    <>
-      <Helmet>
-        <title>Community - Free VA Learning Hub | {branding.name}</title>
-        <meta name="description" content="Join our free community to learn web development, graphic design, social media, email marketing, AI tools, and client relations skills for Virtual Assistants." />
-      </Helmet>
-
-      <div className="bg-white">
-        {/* Hero Section */}
-        <div className="relative bg-gradient-to-b from-gray-50 to-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center">
-            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-              Free VA Learning Community
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-              Join thousands of Virtual Assistants learning in-demand skills to grow their careers. 
-              Access free resources on web development, design, marketing, AI, and more.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4 mb-12">
-              <Link
-                to="/register"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gray-900 hover:bg-gray-700"
-              >
-                Join Community Free
-                <ArrowRightIcon className="ml-2 h-5 w-5" />
-              </Link>
-              <a
-                href="#learning-paths"
-                className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-              >
-                Explore Learning Paths
-              </a>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-              {resourceTypes.map((type) => (
-                <div key={type.label} className="text-center">
-                  <type.icon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-gray-900">{type.count}</div>
-                  <div className="text-sm text-gray-500">{type.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Features */}
-        <div className="py-16 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {features.map((feature) => (
-                <div key={feature.title} className="text-center">
-                  <feature.icon className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-sm text-gray-500">{feature.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Skills Preview */}
-        <div className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center">
-                <BoltIcon className="h-8 w-8 mr-3 text-yellow-600" />
-                Quick Skills (5-15 min)
-              </h2>
-              <p className="text-lg text-gray-600">
-                Master essential VA skills with our bite-sized tutorials. Perfect for busy schedules.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-              {[
-                { title: 'Instagram Story Templates', time: '8 min', category: 'Design', color: 'bg-purple-100 text-purple-800' },
-                { title: 'Email Subject Line Tips', time: '5 min', category: 'Marketing', color: 'bg-blue-100 text-blue-800' },
-                { title: 'Client Onboarding Checklist', time: '12 min', category: 'Business', color: 'bg-green-100 text-green-800' },
-                { title: 'Keyword Research Basics', time: '15 min', category: 'SEO', color: 'bg-orange-100 text-orange-800' }
-              ].map((skill, index) => (
-                <div 
-                  key={index}
-                  className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer group">
-                  <div className="flex items-center justify-between mb-4">
-                    <PlayIcon className="h-8 w-8 text-gray-400 group-hover:text-blue-600 transition-colors" />
-                    <ClockIcon className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                    {skill.title}
+                {/* Combined Impact Example */}
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-center">
+                  <h4 className="font-bold text-xl text-white mb-3">
+                    🚀 Real Example: Sara's First Year Journey
                   </h4>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">{skill.time}</span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${skill.color}`}>
-                      {skill.category}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-white">
+                    <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                      <p className="font-bold text-lg">Started at $5/hour</p>
+                      <p className="text-sm">₱{Math.round(5 * 56 * 40 * 4.3).toLocaleString()}/month</p>
+                    </div>
+                    <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                      <p className="font-bold text-lg">Got raises to $9/hour</p>
+                      <p className="text-sm">₱{Math.round(9 * 56 * 40 * 4.3).toLocaleString()}/month</p>
+                    </div>
+                    <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                      <p className="font-bold text-lg">Plus ₱25,000 in bonuses</p>
+                      <p className="text-sm">Throughout the year</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 bg-white bg-opacity-30 rounded-lg p-4">
+                    <p className="font-bold text-2xl text-white">
+                      Total First Year Earnings: ₱{Math.round(9 * 56 * 40 * 4.3 * 12 + 25000).toLocaleString()}
+                    </p>
+                    <p className="text-sm text-white opacity-90">
+                      That's ₱{Math.round((9 * 56 * 40 * 4.3 * 12 + 25000) / 12).toLocaleString()} per month average!
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6 text-center p-4 rounded-lg" style={{ backgroundColor: '#ecfdf5', border: '2px solid #10b981' }}>
+                  <p className="text-lg font-bold text-gray-900 mb-2">
+                    💡 The Secret: Other agencies keep 20-50% of your bonuses and raises
+                  </p>
+                  <p className="text-sm text-gray-700 mb-2">
+                    With Linkage VA Hub, every peso of bonus and every rate increase goes directly to YOU
+                  </p>
+                  <div className="inline-flex items-center bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm">
+                    🎯 That's thousands more in your pocket every year!
+                  </div>
+                </div>
+              </div>
+
+              {/* What This Income Can Buy */}
+              <div className="bg-white rounded-xl p-5 shadow-lg">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 text-center">
+                  What ₱{earnings.monthly.toLocaleString()}/Month Can Do For You
+                </h3>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#e4effe' }}>
+                    <div className="text-2xl mb-1">🏠</div>
+                    <p className="text-sm font-semibold text-gray-900">Rent a Nice Condo</p>
+                    <p className="text-sm text-gray-600">₱15,000-20,000/mo</p>
+                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>✓ Covered!</p>
+                  </div>
+
+                  <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
+                    <div className="text-2xl mb-1">🛒</div>
+                    <p className="text-sm font-semibold text-gray-900">Groceries</p>
+                    <p className="text-sm text-gray-600">₱8,000-10,000/mo</p>
+                    <p className="text-sm font-bold" style={{ color: '#1f2937' }}>✓ Easy!</p>
+                  </div>
+
+                  <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#e4effe' }}>
+                    <div className="text-2xl mb-1">📱</div>
+                    <p className="text-sm font-semibold text-gray-900">Internet & Phone</p>
+                    <p className="text-sm text-gray-600">₱2,000-3,000/mo</p>
+                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>✓ No problem!</p>
+                  </div>
+
+                  <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
+                    <div className="text-2xl mb-1">💰</div>
+                    <p className="text-sm font-semibold text-gray-900">Savings</p>
+                    <p className="text-sm text-gray-600">₱5,000-10,000/mo</p>
+                    <p className="text-sm font-bold" style={{ color: '#1f2937' }}>✓ Build wealth!</p>
+                  </div>
+
+                  <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#e4effe' }}>
+                    <div className="text-2xl mb-1">👨‍👩‍👧‍👦</div>
+                    <p className="text-sm font-semibold text-gray-900">Family Support</p>
+                    <p className="text-sm text-gray-600">Help parents/siblings</p>
+                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>✓ Be the hero!</p>
+                  </div>
+
+                  <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
+                    <div className="text-2xl mb-1">🎯</div>
+                    <p className="text-sm font-semibold text-gray-900">Future Goals</p>
+                    <p className="text-sm text-gray-600">House, car, business</p>
+                    <p className="text-sm font-bold" style={{ color: '#1f2937' }}>✓ Achievable!</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 border-2 rounded-lg p-4 text-center" style={{
+                  backgroundColor: '#e0e7ff',
+                  borderColor: '#3b82f6'
+                }}>
+                  <p className="text-lg font-extrabold text-gray-900 mb-2">
+                    Your ₱999 Investment Returns in Just {Math.ceil(999 / earnings.hourly)} Hours of Work!
+                  </p>
+                  <p className="text-sm text-gray-700 mb-3">
+                    After that, every peso you earn is pure profit
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-2">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold" style={{ color: '#4338ca' }}>₱999</p>
+                      <p className="text-xs text-gray-600">Your Investment</p>
+                    </div>
+                    <svg className="w-8 h-8" fill="#3b82f6" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold" style={{ color: '#2663eb' }}>₱{earnings.monthly.toLocaleString()}+</p>
+                      <p className="text-xs text-gray-600">Monthly Income</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 animate-bounce">
+                    <span className="inline-block px-4 py-2 rounded-full text-white font-bold text-sm" style={{ backgroundColor: '#3b82f6' }}>
+                      That's a {Math.round((earnings.monthly / 999) * 100).toLocaleString()}% Return Every Month!
                     </span>
                   </div>
-                  <div className="mt-4 text-center">
-                    <Link
-                      to="/register"
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Join to Access →
-                    </Link>
-                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+              </div>
 
-        {/* Learning Paths */}
-        <div id="learning-paths" className="py-20 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Choose Your Learning Path
-              </h2>
-              <p className="text-lg text-gray-600">
-                Develop skills that clients are actively looking for. Each path includes free resources to get you started.
-              </p>
+              {/* Motivational Message */}
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-700 mb-2">
+                  While your friends spend ₱999 on a night out or new clothes...
+                </p>
+                <p className="text-lg font-bold text-gray-900">
+                  You're investing in a career that pays <span style={{ color: '#3b82f6' }}>₱{earnings.monthly.toLocaleString()}+ every month!</span>
+                </p>
+                <p className="text-sm text-gray-700 mt-2">
+                  This isn't just a webinar. It's your ticket to financial freedom.
+                </p>
+              </div>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {learningPaths.map((path) => (
-                <div
-                  key={path.id}
-                  className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+            {/* Global Reach Section */}
+            <div className="rounded-xl p-6 border-2" style={{
+              background: 'linear-gradient(135deg, #1a365d 0%, #2663eb 50%, #1a365d 100%)',
+              borderColor: '#2663eb'
+            }}>
+              <div className="text-center mb-6">
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">
+                  Your Profile Reaches a Global Audience
+                </h2>
+                <p className="text-lg text-blue-100 max-w-3xl mx-auto">
+                  We connect Filipino VAs with businesses across the United States and worldwide.
+                  Join our network of <span className="text-yellow-300 font-bold">10,000+ businesses</span> actively
+                  looking to hire talented VAs every single month.
+                </p>
+              </div>
+
+              {/* Lottie Animation Container */}
+              <div className="flex justify-center items-center my-8">
+                <div id="global-reach-animation" style={{ width: '100%', maxWidth: '500px', height: '400px' }}>
+                  {/* Lottie animation will be inserted here */}
+                </div>
+              </div>
+
+              {/* Statistics Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
+                  <div className="text-2xl sm:text-3xl font-bold text-yellow-300">10,000+</div>
+                  <div className="text-sm text-white/90">Active Businesses</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
+                  <div className="text-2xl sm:text-3xl font-bold text-yellow-300">50+</div>
+                  <div className="text-sm text-white/90">Countries</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
+                  <div className="text-2xl sm:text-3xl font-bold text-yellow-300">USA</div>
+                  <div className="text-sm text-white/90">Primary Market</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
+                  <div className="text-2xl sm:text-3xl font-bold text-yellow-300">24/7</div>
+                  <div className="text-sm text-white/90">Global Hiring</div>
+                </div>
+              </div>
+
+              {/* Countries List */}
+              <div className="mt-6 text-center">
+                <p className="text-sm text-blue-100 mb-3">Businesses from these locations are actively hiring:</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {['🇺🇸 USA', '🇨🇦 Canada', '🇬🇧 UK', '🇦🇺 Australia', '🇳🇿 New Zealand', '🇸🇬 Singapore', '🇩🇪 Germany', '🇫🇷 France', '🇳🇱 Netherlands', '🇦🇪 UAE'].map((country) => (
+                    <span key={country} className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs text-white border border-white/30">
+                      {country}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Call to Action */}
+              <div className="mt-8 text-center">
+                <p className="text-white/90 mb-4 text-lg">
+                  Join thousands of successful VAs connecting with international clients daily
+                </p>
+                <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-bold rounded-full shadow-lg animate-pulse">
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                  </svg>
+                  Your Global Career Starts in 20 Days
+                </div>
+              </div>
+            </div>
+
+            {/* Audio Testimonial Section */}
+            <div className="rounded-xl p-5 border" style={{ backgroundColor: '#e4effe', borderColor: '#2663eb' }}>
+              <div className="flex items-center mb-3">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="#2663eb" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+                <h3 className="font-bold text-gray-900">Hear From Our Founder</h3>
+                <span className="ml-auto text-white text-xs px-2 py-1 rounded-full font-semibold animate-pulse" style={{ backgroundColor: '#4338ca' }}>
+                  MUST LISTEN
+                </span>
+              </div>
+
+              <div className="rounded-lg p-4 shadow-inner" style={{ backgroundColor: '#f8f9fa' }}>
+                <audio
+                  id="founder-message"
+                  className="w-full"
+                  controls
+                  controlsList="nodownload"
+                  preload="metadata"
                 >
-                  <div className={`h-2 ${path.color}`}></div>
-                  <div className="p-6">
-                    <div className="flex items-center mb-4">
-                      <div className={`p-3 rounded-lg ${path.color} bg-opacity-10`}>
-                        <path.icon className={`h-6 w-6 ${path.color.replace('bg-', 'text-')}`} />
-                      </div>
-                      <span className="ml-3 text-sm font-medium text-gray-500 uppercase">
-                        {path.level}
-                      </span>
-                    </div>
-                    
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {path.title}
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      {path.description}
-                    </p>
+                  <source
+                    src="https://storage.googleapis.com/msgsndr/QcArhd5EeedJmTdRxDXY/media/68cd3e99253906c81a140a98.mpeg"
+                    type="audio/mpeg"
+                  />
+                  Your browser does not support the audio element.
+                </audio>
 
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-gray-900 mb-2">Skills you'll learn:</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {path.skills.map((skill) => (
-                          <span
-                            key={skill}
-                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <button className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                      Start Learning
-                      <ArrowRightIcon className="ml-2 h-4 w-4" />
+                <div className="mt-3 flex items-center justify-between text-xs text-gray-600">
+                  <div className="flex items-center space-x-4">
+                    <button
+                      onClick={() => {
+                        const audio = document.getElementById('founder-message');
+                        audio.playbackRate = 1.0;
+                      }}
+                      className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                    >
+                      1x
+                    </button>
+                    <button
+                      onClick={() => {
+                        const audio = document.getElementById('founder-message');
+                        audio.playbackRate = 1.5;
+                      }}
+                      className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                    >
+                      1.5x
+                    </button>
+                    <button
+                      onClick={() => {
+                        const audio = document.getElementById('founder-message');
+                        audio.playbackRate = 2.0;
+                      }}
+                      className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                    >
+                      2x
                     </button>
                   </div>
+                  <span className="text-gray-500">
+                    Pat Murphy's personal message about this opportunity
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: '#e0e7ff' }}>
+                <p className="text-xs text-center font-medium" style={{ color: '#4338ca' }}>
+                  🎧 Listen to why this training can change your life as a VA in the Philippines
+                </p>
+              </div>
+            </div>
+
+            {/* Training Schedule Timeline */}
+            <div className="rounded-xl p-5 border" style={{ backgroundColor: '#f8f9fa', borderColor: '#2663eb' }}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-gray-900 flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="#2663eb" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Live Training Schedule
+                </h3>
+                <span className="text-white text-xs px-3 py-1 rounded-full font-semibold" style={{ backgroundColor: '#2663eb' }}>20 DAYS</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex items-center space-x-3">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2" style={{ borderColor: '#2663eb' }}>
+                      <svg className="w-5 h-5" fill="none" stroke="#2663eb" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">10 PM - 12 AM Daily</p>
+                    <p className="text-xs text-gray-600">Live Zoom sessions</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2" style={{ borderColor: '#2663eb' }}>
+                      <svg className="w-5 h-5" fill="none" stroke="#2663eb" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">Expert Training Team</p>
+                    <p className="text-xs text-gray-600">Led by Pat Murphy & Team</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-lg p-3 backdrop-blur-sm" style={{ backgroundColor: '#f8f9fa' }}>
+                <p className="text-center text-sm italic text-gray-800 font-medium">
+                  "Learn skills that will pay you more than you've ever dreamt of"
+                </p>
+              </div>
+
+              {/* Meet Your Training Team */}
+              <div className="mt-4 rounded-lg p-4 border" style={{ backgroundColor: '#e4effe', borderColor: '#2663eb' }}>
+                <h4 className="font-semibold text-gray-900 mb-3 text-center">Meet Your Training Team</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white rounded-lg p-2 text-center">
+                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>Pat Murphy</p>
+                    <p className="text-xs text-gray-600">Lead Trainer & Owner</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-2 text-center">
+                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>Kristina Mauri</p>
+                    <p className="text-xs text-gray-600">VA Trainer</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-2 text-center">
+                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>Shey Tiglao</p>
+                    <p className="text-xs text-gray-600">VA Onboarding</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-2 text-center">
+                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>Rhoda Guevarra</p>
+                    <p className="text-xs text-gray-600">Human Resources</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-2 text-center col-span-2">
+                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>Brian Murphy</p>
+                    <p className="text-xs text-gray-600">Chief of Operations</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* What's Included Feature List */}
+            <div className="rounded-xl p-5 border" style={{ backgroundColor: '#f8f9fa', borderColor: '#2663eb' }}>
+              <h3 className="font-bold text-gray-900 mb-4 flex items-center justify-between">
+                <span className="flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  What's Included in Your Training
+                </span>
+                <span className="text-sm text-white px-2 py-1 rounded-full font-bold" style={{ backgroundColor: '#4338ca' }}>
+                  Total Value: ₱15,000+
+                </span>
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { icon: "🎯", title: "Free GoHighLevel Account", desc: "Primary training focus", value: "₱5,500/month value" },
+                  { icon: "🤖", title: "AI Tools Training", desc: "ChatGPT, Claude, & more", value: "₱3,000 value" },
+                  { icon: "🎬", title: "Video Creation Training", desc: "Professional video skills", value: "₱2,500 value" },
+                  { icon: "💼", title: "Lead Generation Mastery", desc: "Client acquisition techniques", value: "₱2,000 value" },
+                  { icon: "📊", title: "CRM Management Skills", desc: "Customer relationship tools", value: "₱1,500 value" },
+                  { icon: "📚", title: "LinkedIn Optimization", desc: "Profile & networking strategies", value: "₱1,000 value" }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start space-x-3 bg-white rounded-lg p-3 relative overflow-hidden">
+                    <span className="text-2xl flex-shrink-0">{item.icon}</span>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-gray-900">{item.title}</p>
+                      <p className="text-xs text-gray-600">{item.desc}</p>
+                      <p className="text-sm font-bold mt-1" style={{ color: '#2663eb' }}>{item.value}</p>
+                    </div>
+                    {index === 0 && (
+                      <div className="absolute top-0 right-0 text-white text-xs px-2 py-0.5 rounded-bl-lg font-bold" style={{ backgroundColor: '#4338ca' }}>
+                        HOT
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 border rounded-lg p-6" style={{ backgroundColor: '#e0e7ff', borderColor: '#3b82f6' }}>
+                <p className="text-2xl text-center font-bold" style={{ color: '#4338ca' }}>
+                  💰 All This for Only ₱999 - Save Over ₱14,000!
+                </p>
+                <p className="text-sm text-center text-gray-600 mt-2">
+                  Complete training package designed to make you job-ready in 3 weeks
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 pb-16">
+          <div className="rounded-2xl p-6 sm:p-8 border" style={{ backgroundColor: '#f8f9fa', borderColor: '#2663eb' }}>
+            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 text-gray-900">
+              Frequently Asked Questions
+            </h2>
+
+            <div className="space-y-4">
+              {[
+                {
+                  question: "What is the ₱999 webinar about?",
+                  answer: "This webinar introduces you to the essentials of becoming a successful virtual assistant (VA), including mastering skills like calendar management, travel booking, client automation, and brand building. It's designed for beginners and includes real-world tips to start earning quickly."
+                },
+                {
+                  question: "Who is this webinar for?",
+                  answer: "It's ideal for aspiring VAs, freelancers, or anyone interested in remote work opportunities. No prior experience is needed—just a passion for organization, client service, and flexible earning."
+                },
+                {
+                  question: "How long is the webinar, and what is the schedule?",
+                  answer: "The webinar runs daily from 10 PM to 12 AM (2 hours per session) for 20 days, totaling 40 hours of intensive training. Sessions are hosted live via Zoom, with recordings available for replay if you miss any."
+                },
+                {
+                  question: "Who is on the training team, and what are their roles?",
+                  answer: "The sessions are led by our expert team: Pat Murphy (Lead Trainer in Onboarding) guides the core training; Kristine Mae (Branding Coach) focuses on building your professional presence; and Brian Murphy (Chief of Operations and Human Resources) oversees operations and provides insights on career growth and client management."
+                },
+                {
+                  question: "What will I learn in the webinar?",
+                  answer: "You'll learn high-earning VA skills that can pay more than you've ever dreamed, including calendar management, appointment scheduling, travel booking, client journey automation, brand shaping, and advanced AI tools for content creation, video production, lead generation, and more. The training emphasizes practical, hands-on application."
+                },
+                {
+                  question: "What format is the training, and do I need special equipment?",
+                  answer: "It's interactive live sessions via Zoom, with real-time Q&A, projects, and feedback. You'll need a stable internet connection, computer or mobile device, and a webcam/mic (optional for participation). No advanced software required—we'll guide you through everything."
+                },
+                {
+                  question: "What if I can't attend all live sessions? Will there be recordings?",
+                  answer: "Yes! All sessions are recorded, and registrants get access within 24 hours, plus any materials, so you can catch up or review at your own pace."
+                },
+                {
+                  question: "How does this webinar help me start earning as a VA?",
+                  answer: "It provides actionable steps to build your skills, create a professional profile, and land clients—focusing on high-value abilities that can lead to soaring hourly rates. Many participants report starting freelance gigs within weeks, with ongoing community support."
+                },
+                {
+                  question: "Am I able to start at a higher rate?",
+                  answer: "Absolutely you can, depending on the type of VA you are—different jobs and specialties pay different rates, and your experience also matters. Our training helps you identify and leverage high-paying niches to maximize your earning potential from the start."
+                },
+                {
+                  question: "What is the minimum earning rate I can expect?",
+                  answer: "The $4 per hour rate is guaranteed 100%—that is our bare minimum when we advertise opportunities to our worldwide network of clients. This ensures you have a solid starting point, with potential to earn much more as you gain skills and experience."
+                },
+                {
+                  question: "What is included in the ₱999 fee?",
+                  answer: "The one-time fee covers all 20 sessions, a free GoHighLevel account (prioritized in training), access to AI tools for content/video creation and lead generation, downloadable resources, and entry to our VA community network. No hidden costs!"
+                },
+                {
+                  question: "What is the refund policy?",
+                  answer: "There are absolutely no refunds for this webinar, as we stand behind its value—we feel that even your first day of training is well worth the 999 pesos you pay for this comprehensive 20-day program. We're confident you'll see immediate benefits from the skills and resources provided."
+                }
+              ].map((faq, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  <button
+                    onClick={() => setOpenFAQIndex(openFAQIndex === index ? null : index)}
+                    className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="font-semibold text-gray-900 pr-4">{faq.question}</span>
+                    <svg
+                      className={`w-5 h-5 text-gray-500 flex-shrink-0 transition-transform duration-200 ${
+                        openFAQIndex === index ? 'transform rotate-180' : ''
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {openFAQIndex === index && (
+                    <div className="px-6 pb-4 text-gray-700">
+                      <p className="text-sm leading-relaxed">{faq.answer}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
-          </div>
-        </div>
 
-        {/* CTA Section */}
-        <div className="bg-gray-900">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-white mb-4">
-                Ready to Level Up Your VA Skills?
-              </h2>
-              <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
-                Join our community today and get instant access to all learning resources. 
-                No credit card required, free forever.
+            <div className="mt-8 border rounded-lg p-4 text-center" style={{ backgroundColor: '#e0e7ff', borderColor: '#3b82f6' }}>
+              <p className="text-sm font-semibold mb-2" style={{ color: '#2663eb' }}>
+                Still have questions?
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  to="/register"
-                  className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-gray-900 bg-white hover:bg-gray-100"
-                >
-                  Create Free Account
-                  <ArrowRightIcon className="ml-2 h-5 w-5" />
-                </Link>
-                <Link
-                  to="/login"
-                  className="inline-flex items-center justify-center px-6 py-3 border border-gray-600 text-base font-medium rounded-md text-white hover:border-gray-500"
-                >
-                  Sign In
-                </Link>
-              </div>
+              <p className="text-sm text-gray-700">
+                Contact us at <a href="mailto:support@linkagevahub.com" className="hover:underline" style={{ color: '#2663eb' }}>support@linkagevahub.com</a> or join our community to connect with other VAs.
+              </p>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Testimonial */}
-        <div className="py-16 bg-gray-50">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <blockquote className="text-xl text-gray-600 italic mb-4">
-              "This community transformed my VA career. I learned web development skills 
-              that helped me triple my rates and work with amazing clients worldwide."
-            </blockquote>
-            <div className="flex items-center justify-center">
-              <div className="h-12 w-12 rounded-full bg-gray-300 mr-4"></div>
-              <div className="text-left">
-                <div className="font-medium text-gray-900">Maria Santos</div>
-                <div className="text-sm text-gray-500">Full-Stack VA, Philippines</div>
+        {/* Final CTA Section */}
+        <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 pb-16">
+          <div className="text-center">
+            <a
+              href="#register"
+              className="inline-flex justify-center items-center rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-12 py-4 text-lg font-bold shadow-lg transform transition hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-indigo-500"
+              aria-label="Register for the webinar"
+              onClick={() => track('webinar_register_cta_click', { source: 'community_page_final_cta' })}
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              </svg>
+              Reserve Your Seat Now
+            </a>
+            <p className="mt-4 text-sm text-gray-600">
+              Limited spots available • ₱999 investment in your future
+            </p>
+          </div>
+        </section>
+
+        {/* Mobile sticky CTA */}
+        <div className="fixed inset-x-0 bottom-0 z-40 sm:hidden" role="region" aria-label="Mobile register bar">
+          <div className="mx-3 mb-3 rounded-lg border-2 border-gray-400 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-lg">
+            <div className="flex items-center justify-between gap-3 px-4 py-3">
+              <div className="text-sm">
+                <span className="block font-semibold text-gray-900">Live VA Jobs Webinar</span>
+                <span className="block text-gray-600">{mobileTimeShort}</span>
+                <span className="block font-bold" style={{ color: '#4338ca' }}>₱999 Fee</span>
               </div>
+              <a href="#register" className="inline-flex justify-center items-center rounded-md text-white px-4 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-90" style={{ backgroundColor: '#2663eb' }}>
+                <span>₱999</span>
+              </a>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </>
   );
 }
