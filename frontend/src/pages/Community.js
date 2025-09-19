@@ -732,14 +732,25 @@ export default function Community() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label htmlFor="messenger" className="text-sm font-medium">Philippine phone number (optional)</label>
-                    <input
-                      id="messenger"
-                      value={formData.messenger}
-                      onChange={(e) => setFormData({...formData, messenger: e.target.value})}
-                      placeholder="+63 9XX XXX XXXX"
-                      className="rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <label htmlFor="messenger" className="text-sm font-medium">Philippine phone number</label>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                        +63
+                      </span>
+                      <input
+                        id="messenger"
+                        type="tel"
+                        required
+                        value={formData.messenger}
+                        onChange={(e) => {
+                          // Only allow numbers and basic formatting
+                          const value = e.target.value.replace(/[^\d\s]/g, '');
+                          setFormData({...formData, messenger: value});
+                        }}
+                        placeholder="9XX XXX XXXX"
+                        className="flex-1 rounded-r border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
                   </div>
 
                   <div className="mt-2 flex items-start gap-2">
@@ -1214,7 +1225,7 @@ export default function Community() {
                              background: 'linear-gradient(90deg, #2663eb 0%, #3b82f6 100%)'
                            }}>
                         <span className="text-xs text-white font-extrabold">
-                          {Math.round((earnings.monthly / 13420) * 100)}% of minimum wage!
+                          above minimum wage!
                         </span>
                       </div>
                     </div>
@@ -1798,7 +1809,7 @@ export default function Community() {
           </div>
         </section>
 
-        {/* Final CTA Section */}
+{/* Final CTA Section */}
         <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 pb-16">
           <div className="text-center">
             <a
