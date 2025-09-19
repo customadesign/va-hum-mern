@@ -1,13 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery } from 'react-query';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
-  ChartBarIcon,
   UsersIcon,
   BuildingOfficeIcon,
   ArrowTrendingUpIcon,
-  ClockIcon,
-  MapPinIcon,
-  BriefcaseIcon,
   StarIcon,
   ArrowUpIcon,
   ArrowDownIcon
@@ -21,21 +17,27 @@ const Analytics = () => {
   const [timeRange, setTimeRange] = useState('30');
   
   // Fetch analytics data
-  const { data: analyticsData, isLoading, error, refetch } = useQuery(
-    ['analytics', timeRange],
-    async () => {
-      const response = await adminAPI.getAnalytics({ timeRange });
-      console.log('Analytics API response:', response);
-      return response.data;
+  const { data: analyticsData, isLoading, error, refetch } = useQuery({
+    queryKey: ['analytics', timeRange],
+    queryFn: async () => {
+      try {
+        const response = await adminAPI.getAnalytics({ timeRange });
+        console.log('Analytics API response:', response);
+        return response.data;
+      } catch (error) {
+        console.error('Error in Analytics queryFn:', error);
+        throw error;
+      }
     },
-    {
-      refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
-      onError: (error) => {
-        console.error('Error fetching analytics:', error);
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    retry: 1,
+    onError: (error) => {
+      console.error('Error fetching analytics:', error);
+      if (error.response?.status !== 401) {
         toast.error('Failed to load analytics data');
       }
     }
-  );
+  });
 
   const analytics = analyticsData?.data || {};
   const { overview = {}, growth = [], vaAnalytics = {}, businessAnalytics = {} } = analytics;
@@ -159,10 +161,11 @@ const Analytics = () => {
     );
   }
 
-  if (error) {
+  if (error && !isLoading) {
     return (
       <div className="text-center py-12">
         <div className="text-red-600 mb-4">Failed to load analytics data</div>
+        <div className="text-sm text-gray-600 mb-4">{error.message}</div>
         <button 
           onClick={() => refetch()}
           className="admin-button-primary"

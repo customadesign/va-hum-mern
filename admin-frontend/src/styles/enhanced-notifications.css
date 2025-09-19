@@ -1,0 +1,727 @@
+/* Enhanced Notification System Styles - Professional & Modern */
+
+/* ========================================
+   NOTIFICATION BELL & BADGE
+   ======================================== */
+
+/* Main notification button in header */
+.ant-badge-count {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%) !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.4) !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  line-height: 16px !important;
+  border-radius: 10px !important;
+  padding: 0 6px !important;
+  animation: badgePulse 2s infinite !important;
+}
+
+@keyframes badgePulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 3px 12px rgba(255, 77, 79, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.4);
+  }
+}
+
+/* Notification bell icon button */
+.ant-btn-text.ant-btn-icon-only {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ant-btn-text.ant-btn-icon-only:hover {
+  background: rgba(24, 144, 255, 0.08) !important;
+  transform: translateY(-1px);
+}
+
+.ant-btn-text.ant-btn-icon-only:active {
+  transform: translateY(0);
+}
+
+/* ========================================
+   NOTIFICATION DRAWER
+   ======================================== */
+
+/* Drawer container */
+.ant-drawer-content-wrapper {
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+.ant-drawer-content {
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%) !important;
+}
+
+/* Enhanced drawer header */
+.ant-drawer-header {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+  border-bottom: 2px solid #e8ecf1 !important;
+  padding: 20px 24px !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.ant-drawer-header::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #1890ff 0%, #40a9ff 50%, #1890ff 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite;
+  opacity: 0.6;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Notification drawer header content */
+.notification-drawer-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  gap: 12px !important;
+}
+
+.notification-drawer-header > div:first-child {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex: 1 !important;
+}
+
+.notification-drawer-header .anticon-bell {
+  font-size: 20px !important;
+  color: #1890ff !important;
+  animation: bellRing 4s infinite !important;
+}
+
+@keyframes bellRing {
+  0%, 100% { transform: rotate(0deg); }
+  5%, 15% { transform: rotate(-10deg); }
+  10%, 20% { transform: rotate(10deg); }
+  25% { transform: rotate(0deg); }
+}
+
+.notification-drawer-header > div:first-child > span:nth-child(2) {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  letter-spacing: -0.02em !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
+}
+
+/* Header badge in drawer */
+.notification-drawer-header .ant-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.notification-drawer-header .ant-badge-count {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  transform: none !important;
+  margin-left: 8px !important;
+  animation: none !important;
+}
+
+/* Mark all read button */
+.notification-drawer-header > button {
+  background: linear-gradient(135deg, #f0f5ff 0%, #e6f0ff 100%) !important;
+  border: 1px solid #d4e2ff !important;
+  color: #1890ff !important;
+  font-weight: 500 !important;
+  padding: 6px 12px !important;
+  height: 32px !important;
+  border-radius: 6px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-size: 13px !important;
+  white-space: nowrap !important;
+}
+
+.notification-drawer-header > button:hover {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
+}
+
+.notification-drawer-header > button:active {
+  transform: translateY(0) !important;
+}
+
+/* ========================================
+   NOTIFICATION LIST
+   ======================================== */
+
+/* Drawer body content */
+.notification-drawer-content {
+  padding: 12px !important;
+  background: transparent !important;
+  max-height: calc(100vh - 140px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Custom scrollbar */
+.notification-drawer-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-drawer-content::-webkit-scrollbar-track {
+  background: #f0f2f5;
+  border-radius: 3px;
+}
+
+.notification-drawer-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #bfbfbf 0%, #8c8c8c 100%);
+  border-radius: 3px;
+  transition: background 0.3s;
+}
+
+.notification-drawer-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #8c8c8c 0%, #595959 100%);
+}
+
+/* Notification list container */
+.modern-notification-list {
+  padding: 0 !important;
+}
+
+.modern-notification-list .ant-list {
+  background: transparent !important;
+}
+
+.modern-notification-list .ant-list-items {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+/* ========================================
+   NOTIFICATION ITEMS
+   ======================================== */
+
+/* Individual notification items */
+.modern-notification-item {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  border: 1px solid #e8ecf1 !important;
+  padding: 16px !important;
+  margin: 0 !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+.modern-notification-item:hover {
+  transform: translateX(-4px) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+  border-color: #d4e2ff !important;
+}
+
+/* Unread notification styling */
+.modern-notification-item.unread {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%) !important;
+  border-left: 4px solid #1890ff !important;
+  box-shadow: 0 2px 12px rgba(24, 144, 255, 0.08) !important;
+}
+
+.modern-notification-item.unread::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, #1890ff 0%, transparent 100%);
+  opacity: 0.6;
+}
+
+/* Read notification styling */
+.modern-notification-item.read {
+  background: #ffffff !important;
+  border-left: 4px solid #f0f2f5 !important;
+  opacity: 0.85 !important;
+}
+
+/* Notification item layout */
+.modern-notification-item .ant-list-item-meta {
+  align-items: flex-start !important;
+  margin: 0 !important;
+}
+
+/* ========================================
+   NOTIFICATION AVATAR/ICON
+   ======================================== */
+
+.notification-avatar {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-right: 14px !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+/* Icon backgrounds by type */
+.notification-avatar:has(.anticon-check-circle) {
+  background: linear-gradient(135deg, #f6ffed 0%, #e6ffe6 100%) !important;
+  border: 1.5px solid #b7eb8f !important;
+}
+
+.notification-avatar:has(.anticon-exclamation-circle:not([style*="faad14"])) {
+  background: linear-gradient(135deg, #fff2f0 0%, #ffebe6 100%) !important;
+  border: 1.5px solid #ffb8b0 !important;
+}
+
+.notification-avatar:has(.anticon-exclamation-circle[style*="faad14"]) {
+  background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%) !important;
+  border: 1.5px solid #ffd591 !important;
+}
+
+.notification-avatar:has(.anticon-info-circle) {
+  background: linear-gradient(135deg, #f0f5ff 0%, #e6f0ff 100%) !important;
+  border: 1.5px solid #91caff !important;
+}
+
+.notification-avatar .anticon {
+  font-size: 20px !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.modern-notification-item:hover .notification-avatar .anticon {
+  transform: scale(1.1) !important;
+}
+
+/* ========================================
+   NOTIFICATION CONTENT
+   ======================================== */
+
+/* Title section */
+.notification-title {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.notification-title > span:first-child {
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  color: #1a1a1a !important;
+  line-height: 1.4 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.modern-notification-item.unread .notification-title > span:first-child {
+  font-weight: 600 !important;
+  color: #000000 !important;
+}
+
+/* Meta information row */
+.notification-meta {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+}
+
+/* Type tags */
+.notification-meta .ant-tag {
+  margin: 0 !important;
+  padding: 2px 8px !important;
+  height: 22px !important;
+  line-height: 18px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  border-radius: 4px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  border: none !important;
+}
+
+.notification-meta .ant-tag-green {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(82, 196, 26, 0.2) !important;
+}
+
+.notification-meta .ant-tag-red {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(255, 77, 79, 0.2) !important;
+}
+
+.notification-meta .ant-tag-orange {
+  background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(250, 173, 20, 0.2) !important;
+}
+
+.notification-meta .ant-tag-blue {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Unread indicator dot */
+.unread-indicator {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+  animation: unreadPulse 2s infinite !important;
+}
+
+@keyframes unreadPulse {
+  0% {
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(24, 144, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
+}
+
+/* Message content */
+.notification-content {
+  margin-top: 10px !important;
+}
+
+.notification-content > span:first-child {
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  color: #595959 !important;
+  display: block !important;
+  margin-bottom: 10px !important;
+}
+
+.modern-notification-item.unread .notification-content > span:first-child {
+  color: #434343 !important;
+}
+
+/* Timestamp */
+.notification-content > span:last-child {
+  font-size: 12px !important;
+  color: #8c8c8c !important;
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.notification-content > span:last-child::before {
+  content: '🕐';
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* ========================================
+   NOTIFICATION ACTIONS
+   ======================================== */
+
+.notification-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 6px !important;
+  margin-left: auto !important;
+  padding-left: 12px !important;
+}
+
+/* Mark as read button */
+.notification-actions button:first-child:not(.anticon-close) {
+  background: linear-gradient(135deg, #f0f5ff 0%, #e6f0ff 100%) !important;
+  border: 1px solid #d4e2ff !important;
+  color: #1890ff !important;
+  font-weight: 500 !important;
+  padding: 4px 10px !important;
+  height: 28px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.notification-actions button:first-child:not(.anticon-close):hover {
+  background: #1890ff !important;
+  color: #ffffff !important;
+  border-color: #1890ff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3) !important;
+}
+
+/* Close/dismiss button */
+.notification-actions button:has(.anticon-close) {
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: #bfbfbf !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.notification-actions button:has(.anticon-close):hover {
+  background: #fff2f0 !important;
+  border-color: #ffb8b0 !important;
+  color: #ff4d4f !important;
+  transform: rotate(90deg) !important;
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+
+.modern-notification-list .ant-empty {
+  padding: 60px 20px !important;
+  margin: 40px 0 !important;
+}
+
+.modern-notification-list .ant-empty-image {
+  height: 80px !important;
+  margin-bottom: 16px !important;
+}
+
+.modern-notification-list .ant-empty-description {
+  color: #8c8c8c !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  margin-top: 12px !important;
+}
+
+/* Add a nice animation to empty state */
+.modern-notification-list .ant-empty-image svg {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .notification-drawer-header {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  
+  .notification-drawer-header > div:first-child > span:nth-child(2) {
+    font-size: 16px !important;
+  }
+  
+  .notification-drawer-header > button {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+    height: 28px !important;
+  }
+  
+  .modern-notification-item {
+    padding: 12px !important;
+    border-radius: 10px !important;
+  }
+  
+  .notification-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    margin-right: 12px !important;
+  }
+  
+  .notification-avatar .anticon {
+    font-size: 16px !important;
+  }
+  
+  .notification-title > span:first-child {
+    font-size: 14px !important;
+  }
+  
+  .notification-content > span:first-child {
+    font-size: 13px !important;
+  }
+  
+  .notification-content > span:last-child {
+    font-size: 11px !important;
+  }
+  
+  .notification-actions {
+    flex-direction: row !important;
+    gap: 8px !important;
+  }
+  
+  .notification-drawer-content {
+    padding: 8px !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .ant-drawer-content-wrapper {
+    width: 380px !important;
+  }
+}
+
+/* Desktop adjustments */
+@media (min-width: 1025px) {
+  .ant-drawer-content-wrapper {
+    width: 440px !important;
+  }
+  
+  .notification-drawer-content {
+    padding: 16px !important;
+  }
+  
+  .modern-notification-list .ant-list-items {
+    gap: 12px !important;
+  }
+}
+
+/* ========================================
+   ANIMATIONS & TRANSITIONS
+   ======================================== */
+
+/* Smooth entry animation for new notifications */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.modern-notification-item {
+  animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading state */
+.notification-drawer-content.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.notification-drawer-content.loading::after {
+  content: '';
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f0f2f5;
+  border-top-color: #1890ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+
+/* Focus states */
+.notification-actions button:focus-visible,
+.notification-drawer-header > button:focus-visible {
+  outline: 2px solid #1890ff !important;
+  outline-offset: 2px !important;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .modern-notification-item {
+    border-width: 2px !important;
+  }
+  
+  .notification-meta .ant-tag {
+    font-weight: 700 !important;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .modern-notification-item,
+  .notification-actions button,
+  .notification-drawer-header > button,
+  .notification-avatar .anticon {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .ant-badge-count,
+  .unread-indicator,
+  .notification-drawer-header .anticon-bell {
+    animation: none !important;
+  }
+}
+
+/* ========================================
+   DARK MODE SUPPORT (Optional)
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  /* Uncomment this section if you want to support dark mode
+  .ant-drawer-content {
+    background: linear-gradient(180deg, #1f1f1f 0%, #141414 100%) !important;
+  }
+  
+  .ant-drawer-header {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%) !important;
+    border-bottom-color: #303030 !important;
+  }
+  
+  .modern-notification-item {
+    background: #2a2a2a !important;
+    border-color: #3a3a3a !important;
+  }
+  
+  .modern-notification-item.unread {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a2332 100%) !important;
+  }
+  */
+}

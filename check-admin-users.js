@@ -2,12 +2,11 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://marketing:TaNN6bttM920rEjL@cadtools.dvvdsg1.mongodb.net/linkage-va-hub?retryWrites=true&w=majority', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+const mongoUri = 'mongodb+srv://marketing:TaNN6bttM920rEjL@linkagevahub.0g6dji.mongodb.net/linkagevahub';
+console.log('Connecting to MongoDB...');
+mongoose.connect(mongoUri);
 
-const User = require('./models/User');
+const User = require('./backend/models/User');
 
 async function checkAdminUsers() {
   try {
@@ -21,15 +20,18 @@ async function checkAdminUsers() {
       console.log(`- Email: ${user.email}, Admin: ${user.admin}, Created: ${user.createdAt}`);
     });
     
-    // Check if our specific user exists
-    const specificUser = await User.findOne({ email: 'pat@linkage.ph' }).select('email admin password');
+    // Check if our specific users exist
+    const emails = ['admin@linkageva.com', 'pat@linkage.ph', 'pat@esystemsmanagement.com'];
     
-    if (specificUser) {
-      console.log('\n✅ User pat@linkage.ph exists:');
-      console.log(`- Admin: ${specificUser.admin}`);
-      console.log(`- Has password: ${!!specificUser.password}`);
-    } else {
-      console.log('\n❌ User pat@linkage.ph does not exist');
+    for (const email of emails) {
+      const user = await User.findOne({ email }).select('email admin password');
+      if (user) {
+        console.log(`\n✅ User ${email} exists:`);
+        console.log(`- Admin: ${user.admin}`);
+        console.log(`- Has password: ${!!user.password}`);
+      } else {
+        console.log(`\n❌ User ${email} does not exist`);
+      }
     }
     
     mongoose.connection.close();

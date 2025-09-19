@@ -12,13 +12,16 @@ const { protect, authorize, optionalAuth } = require('../middleware/hybridAuth')
 const { checkESystemsVAAccess } = require('../middleware/auth');
 // Use Supabase storage in production, local storage in development
 const isProduction = process.env.NODE_ENV === 'production';
-const useSupabase = isProduction && process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY;
+// Force local storage for development to avoid CORS issues
+const useSupabase = false; // Temporarily disabled for development
 
 // Import both upload utilities
 const localUpload = require('../utils/upload');
 const { handleSupabaseUpload, uploadToSupabase, deleteFromSupabase } = require('../utils/supabaseStorage');
 const supabase = require('../config/supabase');
 
+// Import unified storage handler
+const { handleUnifiedUpload, deleteWithFallback } = require('../utils/unifiedStorage');
 // Use appropriate upload handler
 const upload = useSupabase ? require('../utils/supabaseStorage').uploadSupabase : localUpload;
 
@@ -449,6 +452,7 @@ router.get('/me', protect, async (req, res) => {
 router.get('/:identifier', optionalAuth, async (req, res) => {
   try {
     const { identifier } = req.params;
+    const { via } = req.query; // Check if coming from shortlink
     
     // Try to find by ID first, then by public key
     let va = await VA.findById(identifier)
@@ -485,6 +489,53 @@ router.get('/:identifier', optionalAuth, async (req, res) => {
       }
     }
 
+    // Check business profile completion if user is authenticated and has a business profile
+    let businessProfileCompletion = 0;
+    let canMessage = false;
+    let isBusinessUser = false;
+    
+    if (req.user) {
+      // Check if user has a business profile
+      if (req.user.business) {
+        isBusinessUser = true;
+        const Business = require('../models/Business');
+        const business = await Business.findById(req.user.business);
+        
+        if (business) {
+          // Calculate profile completion (the Business model has a virtual for this)
+          businessProfileCompletion = business.completionPercentage || 0;
+          
+          // Business can message if profile is 80% or more complete
+          canMessage = businessProfileCompletion >= 80;
+        }
+      } else if (req.user.va) {
+        // VA users can always message other VAs
+        canMessage = true;
+      }
+    }
+
+    // Determine what action button to show
+    let actionButton = {
+      type: 'register', // 'register' or 'message'
+      text: 'Register Your Business To Chat',
+      url: process.env.ESYSTEMS_FRONTEND_URL || 'http://localhost:3002/register'
+    };
+
+    if (canMessage) {
+      actionButton = {
+        type: 'message',
+        text: 'Message',
+        url: null // Frontend will handle the message action
+      };
+    } else if (isBusinessUser && businessProfileCompletion < 80) {
+      // Business user but incomplete profile
+      actionButton = {
+        type: 'complete_profile',
+        text: 'Complete Your Profile To Chat (Currently ' + businessProfileCompletion + '% complete)',
+        url: process.env.ESYSTEMS_FRONTEND_URL ? `${process.env.ESYSTEMS_FRONTEND_URL}/profile` : 'http://localhost:3002/profile'
+      };
+    }
+
     // Transform the data structure to match frontend expectations
     const transformedVA = {
       ...va.toObject(),
@@ -512,10 +563,20 @@ router.get('/:identifier', optionalAuth, async (req, res) => {
       }
     };
 
-    res.json({
+    // Include messaging capability info in response
+    const response = {
       success: true,
-      data: transformedVA
-    });
+      data: transformedVA,
+      messaging: {
+        canMessage,
+        isBusinessUser,
+        businessProfileCompletion,
+        actionButton,
+        viaShortlink: via === 'shortlink'
+      }
+    };
+
+    res.json(response);
   } catch (err) {
     console.error(err);
     res.status(500).json({
@@ -564,6 +625,26 @@ router.post('/', protect, checkESystemsVAAccess, [
     // Update user
     req.user.va = va._id;
     await req.user.save();
+
+    // Emit Socket.io event for real-time dashboard updates
+    const io = req.app.get('io');
+    if (io) {
+      io.to('admin-notifications').emit('new_va_registered', {
+        vaId: va._id,
+        name: va.name,
+        email: va.email,
+        createdAt: va.createdAt
+      });
+      
+      // Emit general dashboard update event
+      io.to('admin-notifications').emit('dashboard_update', {
+        type: 'new_va',
+        data: {
+          vaId: va._id,
+          name: va.name
+        }
+      });
+    }
 
     // Create role level and type and link them to VA
     const roleLevel = await RoleLevel.create({ va: va._id });
@@ -762,6 +843,26 @@ router.put('/me', protect, async (req, res) => {
       if (!req.user.va) {
         req.user.va = va._id;
         await req.user.save();
+      }
+      
+      // Emit Socket.io event for real-time dashboard updates
+      const io = req.app.get('io');
+      if (io) {
+        io.to('admin-notifications').emit('new_va_registered', {
+          vaId: va._id,
+          name: va.name,
+          email: va.email,
+          createdAt: va.createdAt
+        });
+        
+        // Emit general dashboard update event
+        io.to('admin-notifications').emit('dashboard_update', {
+          type: 'new_va',
+          data: {
+            vaId: va._id,
+            name: va.name
+          }
+        });
       }
     }
 
@@ -1009,118 +1110,101 @@ router.put('/:id', protect, authorize('va'), async (req, res) => {
 // @route   POST /api/vas/:id/avatar
 // @desc    Upload VA avatar
 // @access  Private (VA owner only)
-router.post('/:id/avatar', protect, authorize('va'), async (req, res) => {
-  // Handle upload based on environment
-  if (useSupabase) {
-    handleSupabaseUpload('avatar', 'avatars')(req, res, async (err) => {
-      if (err) return; // Error already handled by middleware
-      
-      try {
-        console.log('Avatar update attempt:', {
-          vaId: req.params.id,
-          userId: req.user._id,
-          fileUrl: req.file.path
-        });
+router.post('/:id/avatar', protect, authorize('va'), handleUnifiedUpload('avatar', 'avatars'), async (req, res) => {
+  try {
+    const va = await VA.findById(req.params.id);
+    const User = require('../models/User');
+    const File = require('../models/File');
+    
+    if (!va) {
+      return res.status(404).json({
+        success: false,
+        error: 'VA not found'
+      });
+    }
 
-        const va = await VA.findById(req.params.id);
-        if (!va) {
-          console.error('VA not found with ID:', req.params.id);
-          return res.status(404).json({
-            success: false,
-            error: 'VA not found'
+    // Check ownership
+    if (va.user.toString() !== req.user._id.toString() && !req.user.admin) {
+      return res.status(403).json({
+        success: false,
+        error: 'Not authorized'
+      });
+    }
+
+    // Delete old avatar if exists
+    if (va.avatar && (va.avatar.includes('/uploads/') || va.avatar.includes('supabase'))) {
+      await deleteWithFallback({
+        provider: req.file.storageProvider,
+        url: va.avatar,
+        bucket: req.file.bucket
+      });
+    }
+
+    // Update VA avatar
+    va.avatar = req.file.path;
+    await va.save();
+
+    // Also update the User model avatar
+    const user = await User.findById(va.user);
+    if (user) {
+      // Create or update file record
+      const file = await File.create({
+        filename: req.file.filename || req.file.originalname,
+        originalName: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        url: req.file.path,
+        bucket: req.file.bucket,
+        path: req.file.path,
+        storageProvider: req.file.storageProvider,
+        s3Key: req.file.s3Key,
+        uploadedBy: user._id,
+        category: 'profile',
+        fileType: 'image',
+        isPublic: true
+      });
+
+      // Delete old avatar file if exists
+      if (user.avatarFileId) {
+        const oldFile = await File.findById(user.avatarFileId);
+        if (oldFile) {
+          await deleteWithFallback({
+            provider: oldFile.storageProvider || 'supabase',
+            url: oldFile.url,
+            bucket: oldFile.bucket,
+            key: oldFile.s3Key
           });
+          await oldFile.softDelete();
         }
+      }
 
-        // Check ownership
-        if (va.user.toString() !== req.user._id.toString() && !req.user.admin) {
-          console.error('Authorization failed:', {
-            vaOwner: va.user.toString(),
-            requestUser: req.user._id.toString(),
-            isAdmin: req.user.admin
-          });
-          return res.status(403).json({
-            success: false,
-            error: 'Not authorized'
-          });
-        }
+      user.avatar = req.file.path;
+      user.avatarFileId = file._id;
+      await user.save();
+    }
 
-        // Update avatar URL (req.file.path contains the Supabase URL)
-        va.avatar = req.file.path;
-        console.log('Saving VA with new avatar:', va.avatar);
-        
-        await va.save();
-        console.log('VA saved successfully');
-
-        res.json({
-          success: true,
-          data: {
-            avatar: va.avatar
-          }
-        });
-      } catch (error) {
-        console.error('Avatar update error - Full details:', {
-          message: error.message,
-          stack: error.stack,
-          vaId: req.params.id,
-          userId: req.user?._id
-        });
-        res.status(500).json({
-          success: false,
-          error: 'Failed to update avatar: ' + error.message
-        });
+    res.json({
+      success: true,
+      data: {
+        avatar: va.avatar
       }
     });
-  } else {
-    // Local upload
-    upload.single('avatar')(req, res, async (err) => {
-      if (err) {
-        return res.status(400).json({
-          success: false,
-          error: err.message
-        });
-      }
-
-      try {
-        if (!req.file) {
-          return res.status(400).json({
-            success: false,
-            error: 'Please upload a file'
-          });
-        }
-
-        const va = await VA.findById(req.params.id);
-        if (!va) {
-          return res.status(404).json({
-            success: false,
-            error: 'VA not found'
-          });
-        }
-
-        // Check ownership
-        if (va.user.toString() !== req.user._id.toString() && !req.user.admin) {
-          return res.status(403).json({
-            success: false,
-            error: 'Not authorized'
-          });
-        }
-
-        // Update avatar URL
-        va.avatar = `/uploads/${req.file.filename}`;
-        await va.save();
-
-        res.json({
-          success: true,
-          data: {
-            avatar: va.avatar
-          }
-        });
-      } catch (error) {
-        console.error('Avatar update error:', error);
-        res.status(500).json({
-          success: false,
-          error: 'Failed to update avatar'
-        });
-      }
+  } catch (error) {
+    console.error('Avatar update error:', error);
+    
+    // Try to delete uploaded file if database save failed
+    if (req.file && req.file.path) {
+      await deleteWithFallback({
+        provider: req.file.storageProvider,
+        url: req.file.path,
+        bucket: req.file.bucket,
+        key: req.file.s3Key
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update avatar'
     });
   }
 });
@@ -1128,7 +1212,7 @@ router.post('/:id/avatar', protect, authorize('va'), async (req, res) => {
 // @route   POST /api/vas/:id/cover-image
 // @desc    Upload VA cover image
 // @access  Private (VA owner only)
-router.post('/:id/cover-image', protect, authorize('va'), upload.single('coverImage'), async (req, res) => {
+router.post('/:id/cover-image', protect, upload.single('coverImage'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -1336,10 +1420,10 @@ router.get('/test-upload', async (req, res) => {
 // @route   POST /api/vas/me/upload
 // @desc    Upload image for VA profile (avatar or cover)
 // @access  Private (VA only)
-router.post('/me/upload', protect, authorize('va'), async (req, res, next) => {
+router.post('/me/upload', protect, async (req, res, next) => {
   // Use Supabase if configured and either in production or forced
   const forceSupabase = process.env.FORCE_SUPABASE === 'true';
-  if ((process.env.NODE_ENV === 'production' || forceSupabase) && supabase) {
+  if (useSupabase && supabase) {
     console.log('Attempting Supabase upload...');
     
     // First try with Supabase
@@ -1364,7 +1448,7 @@ router.post('/me/upload', protect, authorize('va'), async (req, res, next) => {
             });
           }
 
-          const baseUrl = process.env.SERVER_URL || `https://${req.get('host')}`;
+          const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
           const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
           console.log('Fallback: Image uploaded locally:', imageUrl);
@@ -1433,10 +1517,10 @@ router.post('/me/upload', protect, authorize('va'), async (req, res, next) => {
 // @route   POST /api/vas/me/upload-video
 // @desc    Upload video for VA profile
 // @access  Private (VA only)
-router.post('/me/upload-video', protect, authorize('va'), async (req, res, next) => {
+router.post('/me/upload-video', protect, async (req, res, next) => {
   // Use Supabase if configured and either in production or forced
   const forceSupabase = process.env.FORCE_SUPABASE === 'true';
-  if ((process.env.NODE_ENV === 'production' || forceSupabase) && supabase) {
+  if (useSupabase && supabase) {
     console.log('Attempting Supabase video upload...');
     
     handleSupabaseUpload('video', 'videos')(req, res, async (err) => {
@@ -1460,7 +1544,7 @@ router.post('/me/upload-video', protect, authorize('va'), async (req, res, next)
             });
           }
 
-          const baseUrl = process.env.SERVER_URL || `https://${req.get('host')}`;
+          const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
           const videoUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
           console.log('Fallback: Video uploaded locally:', videoUrl);
@@ -1682,6 +1766,70 @@ router.put('/me/disc-assessment', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Server error'
+    });
+  }
+});
+
+// @route   POST /api/vas/me/disc-ocr
+// @desc    Process DISC assessment screenshot with OCR
+// @access  Private
+router.post('/me/disc-ocr', protect, upload.single('screenshot'), async (req, res) => {
+  const discOcrController = require('../controllers/discOcrController');
+  await discOcrController.processDiscScreenshot(req, res);
+});
+
+
+// @route   GET /api/vas/proxy/:filename
+// @desc    Proxy Supabase files to avoid CORS issues
+// @access  Public
+router.get('/proxy/:filename', async (req, res) => {
+  try {
+    const { filename } = req.params;
+    
+    // Construct the Supabase URL
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const bucketName = process.env.SUPABASE_BUCKET || 'linkage-va-hub';
+    
+    if (!supabaseUrl) {
+      return res.status(404).json({
+        success: false,
+        error: 'File not found'
+      });
+    }
+    
+    // Build the full Supabase storage URL
+    const fileUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/${filename}`;
+    
+    // Fetch the file from Supabase
+    const response = await fetch(fileUrl);
+    
+    if (!response.ok) {
+      return res.status(404).json({
+        success: false,
+        error: 'File not found'
+      });
+    }
+    
+    // Set appropriate headers
+    const contentType = response.headers.get('content-type');
+    if (contentType) {
+      res.set('Content-Type', contentType);
+    }
+    
+    // Set CORS headers
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+    
+    // Stream the file
+    const buffer = await response.arrayBuffer();
+    res.send(Buffer.from(buffer));
+    
+  } catch (error) {
+    console.error('Proxy error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to proxy file'
     });
   }
 });

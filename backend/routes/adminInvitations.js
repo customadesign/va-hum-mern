@@ -58,18 +58,18 @@ router.post('/', protect, authorize('admin'), [
     const invitationToken = invitation.generateInvitationToken();
     await invitation.save();
 
-    // Send invitation email
+    // Send invitation email using domain-based sender
     try {
-      const inviteUrl = `${process.env.CLIENT_URL || 'http://localhost:3001'}/admin/accept-invitation/${invitationToken}`;
+      const inviteUrl = `${process.env.ADMIN_CLIENT_URL || 'http://localhost:4000'}/accept-invitation/${invitationToken}`;
       const inviterUser = await User.findById(invitedBy);
       
       await sendEmail({
         email: email,
-        subject: 'Admin Invitation - Linkage VA Hub',
         template: 'admin-invitation',
+        recipientType: 'admin', // Explicitly set recipient type for admin invitations
         data: {
           inviteUrl,
-          inviterName: inviterUser.email,
+          inviterName: inviterUser.name || inviterUser.email,
           message: message || '',
           expiresAt: invitation.expiresAt.toLocaleDateString()
         }

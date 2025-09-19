@@ -4,45 +4,46 @@ const { ProfilingIntegration } = require('@sentry/profiling-node');
 // Initialize Sentry for error and performance monitoring
 const initSentry = (app) => {
   if (process.env.SENTRY_DSN) {
-    Sentry.init({
-      dsn: process.env.SENTRY_DSN,
-      integrations: [
-        // Enable HTTP calls tracing
-        new Sentry.Integrations.Http({ tracing: true }),
-        // Enable Express.js middleware tracing
-        new Sentry.Integrations.Express({ app }),
-        // Enable profiling
-        new ProfilingIntegration(),
-        // MongoDB integration
-        new Sentry.Integrations.Mongo({
-          useMongoose: true
-        })
-      ],
-      // Performance Monitoring
-      tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-      // Profiling
-      profilesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-      environment: process.env.NODE_ENV || 'development',
-      beforeSend(event, hint) {
-        // Filter out sensitive data
-        if (event.request) {
-          // Remove sensitive headers
-          if (event.request.headers) {
-            delete event.request.headers.authorization;
-            delete event.request.headers.cookie;
+    try {
+      // Initialize with basic configuration to avoid integration issues
+      Sentry.init({
+        dsn: process.env.SENTRY_DSN,
+        integrations: [
+          // Only include available integrations
+          ...(Sentry.Integrations?.Http ? [new Sentry.Integrations.Http({ tracing: true })] : []),
+          ...(Sentry.Integrations?.Express ? [new Sentry.Integrations.Express({ app })] : []),
+          ...(ProfilingIntegration ? [new ProfilingIntegration()] : []),
+          ...(Sentry.Integrations?.Mongo ? [new Sentry.Integrations.Mongo({ useMongoose: true })] : [])
+        ],
+        // Performance Monitoring
+        tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+        // Profiling
+        profilesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+        environment: process.env.NODE_ENV || 'development',
+        beforeSend(event, hint) {
+          // Filter out sensitive data
+          if (event.request) {
+            // Remove sensitive headers
+            if (event.request.headers) {
+              delete event.request.headers.authorization;
+              delete event.request.headers.cookie;
+            }
+            // Remove sensitive body data
+            if (event.request.data) {
+              delete event.request.data.password;
+              delete event.request.data.confirmPassword;
+              delete event.request.data.token;
+            }
           }
-          // Remove sensitive body data
-          if (event.request.data) {
-            delete event.request.data.password;
-            delete event.request.data.confirmPassword;
-            delete event.request.data.token;
-          }
+          return event;
         }
-        return event;
-      }
-    });
-    
-    console.log('Sentry APM initialized');
+      });
+      
+      console.log('Sentry APM initialized');
+    } catch (error) {
+      console.log('Sentry initialization failed:', error.message);
+      console.log('Continuing without Sentry monitoring');
+    }
   } else {
     console.log('Sentry DSN not configured, APM disabled');
   }

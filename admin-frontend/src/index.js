@@ -1,9 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './index.css';
-import App from './App';
+// Initialize i18n system
+import './i18n';
+// Removed Ant Design CSS - using custom components
+import App from './AppNoAntd';
 import { AuthProvider } from './contexts/AuthContext';
 
 // Log environment on startup

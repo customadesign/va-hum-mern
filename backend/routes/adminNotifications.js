@@ -151,4 +151,75 @@ router.put('/user-settings',
   adminNotificationController.updateUserNotificationSettings
 );
 
+// @route   GET /api/admin/notifications/archived/stats
+// @desc    Get archived notifications statistics
+// @access  Private/Admin
+router.get('/archived/stats',
+  [
+    query('startDate').optional().isISO8601(),
+    query('endDate').optional().isISO8601(),
+    query('userId').optional().isMongoId()
+  ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  },
+  adminNotificationController.getArchivedStats
+);
+
+// @route   POST /api/admin/notifications/bulk-archive
+// @desc    Bulk archive notifications based on criteria
+// @access  Private/Admin
+router.post('/bulk-archive',
+  [
+    body('criteria').isObject().withMessage('Archive criteria must be provided'),
+    body('criteria.olderThan').optional().isISO8601(),
+    body('criteria.type').optional().isString(),
+    body('criteria.read').optional().isBoolean(),
+    body('criteria.userId').optional().isMongoId()
+  ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  },
+  adminNotificationController.bulkArchiveNotifications
+);
+
+// @route   POST /api/admin/notifications/restore-archived
+// @desc    Restore archived notifications
+// @access  Private/Admin
+router.post('/restore-archived',
+  [
+    body('notificationIds').optional().isArray(),
+    body('notificationIds.*').optional().isMongoId(),
+    body('criteria').optional().isObject(),
+    body('criteria.archivedAfter').optional().isISO8601(),
+    body('criteria.type').optional().isString(),
+    body('criteria.userId').optional().isMongoId()
+  ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    
+    // Ensure at least one restoration criteria is provided
+    const { notificationIds, criteria } = req.body;
+    if (!notificationIds && !criteria) {
+      return res.status(400).json({
+        error: 'Either notification IDs or restoration criteria must be specified'
+      });
+    }
+    
+    next();
+  },
+  adminNotificationController.restoreArchivedNotifications
+);
+
 module.exports = router;

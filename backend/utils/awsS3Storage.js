@@ -1,4 +1,5 @@
-const AWS = require('aws-sdk');
+const { S3Client, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsV2Command, CopyObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl: getSignedUrlV3 } = require('@aws-sdk/s3-request-presigner');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
@@ -10,14 +11,16 @@ const initializeS3 = () => {
     return null;
   }
 
-  return new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION || 'us-east-1'
+  return new S3Client({
+    region: process.env.AWS_REGION || 'us-east-1',
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    }
   });
 };
 
-const s3 = initializeS3();
+const s3Client = initializeS3();
 
 // Multer memory storage for S3
 const storage = multer.memoryStorage();
@@ -53,7 +56,7 @@ const uploadS3 = multer({
 
 // Upload to AWS S3
 const uploadToS3 = async (file, folder) => {
-  if (!s3) {
+  if (!s3Client) {
     throw new Error('AWS S3 not configured');
   }
 
@@ -62,17 +65,16 @@ const uploadToS3 = async (file, folder) => {
     const fileExt = path.extname(file.originalname);
     const fileName = `${folder}/${uuidv4()}${fileExt}`;
 
-    const params = {
+    const command = new PutObjectCommand({
       Bucket: process.env.AWS_S3_BUCKET,
       Key: fileName,
       Body: file.buffer,
       ContentType: file.mimetype,
-      ACL: 'public-read', // Make file publicly accessible
       Metadata: {
         originalName: file.originalname,
         uploadedBy: 'linkage-va-hub'
       }
-    };
+    });
 
     console.log('Attempting to upload to AWS S3:', {
       bucket: process.env.AWS_S3_BUCKET,
@@ -82,14 +84,15 @@ const uploadToS3 = async (file, folder) => {
     });
 
     // Upload file to S3
-    const data = await s3.upload(params).promise();
+    const data = await s3Client.send(command);
 
-    console.log('S3 upload successful:', data.Location);
+    const fileUrl = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${fileName}`;
+    console.log('S3 upload successful:', fileUrl);
 
     return {
-      url: data.Location,
-      key: data.Key,
-      bucket: data.Bucket,
+      url: fileUrl,
+      key: fileName,
+      bucket: process.env.AWS_S3_BUCKET,
       etag: data.ETag
     };
   } catch (error) {
@@ -100,15 +103,15 @@ const uploadToS3 = async (file, folder) => {
 
 // Delete from AWS S3
 const deleteFromS3 = async (fileKey) => {
-  if (!s3 || !fileKey) return;
+  if (!s3Client || !fileKey) return;
 
   try {
-    const params = {
+    const command = new DeleteObjectCommand({
       Bucket: process.env.AWS_S3_BUCKET,
       Key: fileKey
-    };
+    });
 
-    await s3.deleteObject(params).promise();
+    await s3Client.send(command);
     console.log('S3 file deleted:', fileKey);
   } catch (error) {
     console.error('Delete from S3 error:', error);
@@ -116,19 +119,18 @@ const deleteFromS3 = async (fileKey) => {
 };
 
 // Get signed URL for private files
-const getSignedUrl = async (fileKey, expiresIn = 3600) => {
-  if (!s3 || !fileKey) {
+const getS3SignedUrl = async (fileKey, expiresIn = 3600) => {
+  if (!s3Client || !fileKey) {
     throw new Error('Cannot generate signed URL: S3 not configured or missing file key');
   }
 
   try {
-    const params = {
+    const command = new HeadObjectCommand({
       Bucket: process.env.AWS_S3_BUCKET,
-      Key: fileKey,
-      Expires: expiresIn // URL expiration time in seconds
-    };
+      Key: fileKey
+    });
 
-    const signedUrl = await s3.getSignedUrlPromise('getObject', params);
+    const signedUrl = await getSignedUrlV3(s3Client, command, { expiresIn });
     return signedUrl;
   } catch (error) {
     console.error('Get signed URL error:', error);
@@ -138,23 +140,23 @@ const getSignedUrl = async (fileKey, expiresIn = 3600) => {
 
 // Check if S3 is available
 const isS3Available = () => {
-  return s3 !== null;
+  return s3Client !== null;
 };
 
 // List files in S3 bucket
 const listS3Files = async (prefix = '', maxKeys = 1000) => {
-  if (!s3) {
+  if (!s3Client) {
     throw new Error('AWS S3 not configured');
   }
 
   try {
-    const params = {
+    const command = new ListObjectsV2Command({
       Bucket: process.env.AWS_S3_BUCKET,
       Prefix: prefix,
       MaxKeys: maxKeys
-    };
+    });
 
-    const data = await s3.listObjectsV2(params).promise();
+    const data = await s3Client.send(command);
     return data.Contents || [];
   } catch (error) {
     console.error('List S3 files error:', error);
@@ -164,20 +166,20 @@ const listS3Files = async (prefix = '', maxKeys = 1000) => {
 
 // Check if file exists in S3
 const checkS3FileExists = async (fileKey) => {
-  if (!s3) {
+  if (!s3Client) {
     return false;
   }
 
   try {
-    const params = {
+    const command = new HeadObjectCommand({
       Bucket: process.env.AWS_S3_BUCKET,
       Key: fileKey
-    };
+    });
 
-    await s3.headObject(params).promise();
+    await s3Client.send(command);
     return true;
   } catch (error) {
-    if (error.code === 'NotFound') {
+    if (error.name === 'NotFound') {
       return false;
     }
     throw error;
@@ -186,18 +188,18 @@ const checkS3FileExists = async (fileKey) => {
 
 // Copy file within S3
 const copyS3File = async (sourceKey, destinationKey) => {
-  if (!s3) {
+  if (!s3Client) {
     throw new Error('AWS S3 not configured');
   }
 
   try {
-    const params = {
+    const command = new CopyObjectCommand({
       Bucket: process.env.AWS_S3_BUCKET,
       CopySource: `${process.env.AWS_S3_BUCKET}/${sourceKey}`,
       Key: destinationKey
-    };
+    });
 
-    const data = await s3.copyObject(params).promise();
+    const data = await s3Client.send(command);
     console.log('S3 file copied:', { from: sourceKey, to: destinationKey });
     return data;
   } catch (error) {
@@ -208,17 +210,17 @@ const copyS3File = async (sourceKey, destinationKey) => {
 
 // Get file metadata from S3
 const getS3FileMetadata = async (fileKey) => {
-  if (!s3) {
+  if (!s3Client) {
     throw new Error('AWS S3 not configured');
   }
 
   try {
-    const params = {
+    const command = new HeadObjectCommand({
       Bucket: process.env.AWS_S3_BUCKET,
       Key: fileKey
-    };
+    });
 
-    const data = await s3.headObject(params).promise();
+    const data = await s3Client.send(command);
     return {
       contentType: data.ContentType,
       contentLength: data.ContentLength,
@@ -236,7 +238,7 @@ module.exports = {
   uploadS3,
   uploadToS3,
   deleteFromS3,
-  getSignedUrl,
+  getSignedUrl: getS3SignedUrl,
   isS3Available,
   listS3Files,
   checkS3FileExists,

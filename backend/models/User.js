@@ -244,7 +244,33 @@ const userSchema = new mongoose.Schema({
     totalConnections: { type: Number, default: 0 },
     profileViews: { type: Number, default: 0 },
     lastActive: Date
-  }
+  },
+  // Two-Factor Authentication
+  twoFactorEnabled: {
+    type: Boolean,
+    default: false
+  },
+  twoFactorSecret: {
+    type: String,
+    select: false // Don't include in queries by default
+  },
+  backupCodes: [{
+    code: String,
+    used: { type: Boolean, default: false },
+    usedAt: Date
+  }],
+  // Login Sessions for tracking recent activity
+  loginSessions: [{
+    id: String,
+    device: String,
+    browser: String,
+    os: String,
+    location: String,
+    ipAddress: String,
+    timestamp: { type: Date, default: Date.now },
+    current: { type: Boolean, default: false },
+    userAgent: String
+  }]
 }, {
   timestamps: true
 });
@@ -282,7 +308,7 @@ userSchema.pre('save', async function(next) {
 // Sign JWT and return
 userSchema.methods.getSignedJwtToken = function() {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE || '15m' // Short-lived access token
+    expiresIn: process.env.JWT_EXPIRE || '60m' // 60 minutes access token
   });
 };
 

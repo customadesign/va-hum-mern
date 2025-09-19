@@ -20,11 +20,7 @@ const vaSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide a bio']
   },
-  coverImage: {
-    type: String,
-    trim: true,
-    default: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&h=300&fit=crop'
-  },
+  // Removed duplicate coverImage - using the one at line 161-163
   website: {
     type: String,
     trim: true
@@ -86,6 +82,11 @@ const vaSchema = new mongoose.Schema({
     type: String,
     enum: ['actively_looking', 'open', 'not_interested', 'invisible'],
     default: 'open'
+  },
+  status: {
+    type: String,
+    enum: ['approved', 'rejected', 'suspended'],
+    default: 'approved'
   },
   preferredMinHourlyRate: {
     type: Number,

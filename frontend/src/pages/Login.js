@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useAuth } from '../contexts/HybridAuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useBranding } from '../contexts/BrandingContext';
 import LinkedInLoginButton from '../components/LinkedInLoginButton';
+import { toast } from 'react-toastify';
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -20,6 +21,45 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login, linkedinLogin } = useAuth();
   const { branding, loading: brandingLoading } = useBranding();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  // Check for impersonation on component mount
+  useEffect(() => {
+    const handleImpersonation = async () => {
+      if (searchParams.get('impersonate') === 'true') {
+        // Check for impersonation token in sessionStorage
+        const impersonationToken = sessionStorage.getItem('impersonationToken');
+        const impersonationData = sessionStorage.getItem('impersonationData');
+        
+        if (impersonationToken && impersonationData) {
+          try {
+            // Store the token in localStorage for auth context
+            localStorage.setItem('token', impersonationToken);
+            localStorage.setItem('user', impersonationData);
+            
+            // Clear the session storage
+            sessionStorage.removeItem('impersonationToken');
+            sessionStorage.removeItem('impersonationData');
+            
+            // Parse the user data
+            const userData = JSON.parse(impersonationData);
+            
+            // Show success message
+            toast.success(`Successfully impersonating user: ${userData.email}`);
+            
+            // Force a page reload to trigger auth context update
+            window.location.href = '/dashboard';
+          } catch (error) {
+            console.error('Failed to process impersonation:', error);
+            toast.error('Failed to impersonate user');
+          }
+        }
+      }
+    };
+
+    handleImpersonation();
+  }, [searchParams, navigate]);
 
   // ALL HOOKS MUST BE CALLED FIRST - Form handling
   const formik = useFormik({
@@ -29,13 +69,18 @@ export default function Login() {
     },
     validationSchema,
     onSubmit: async (values) => {
+      console.log('🚀 Form submitted with values:', values);
       setLoading(true);
       try {
+        console.log('📞 Calling login function...');
         await login(values.email, values.password);
+        console.log('✅ Login function completed successfully');
       } catch (error) {
+        console.log('❌ Login function threw error:', error);
         // Error is handled in AuthContext
       } finally {
         setLoading(false);
+        console.log('🏁 Login form processing complete');
       }
     },
   });

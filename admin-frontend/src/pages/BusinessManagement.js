@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -9,17 +10,21 @@ import {
   CheckIcon,
   XMarkIcon,
   BuildingOfficeIcon,
-  StarIcon,
   MapPinIcon,
-  CurrencyDollarIcon,
   ClockIcon,
-  UserGroupIcon,
-  BriefcaseIcon
+  BriefcaseIcon,
+  ArrowRightOnRectangleIcon,
+  ArrowLeftIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 import { adminAPI } from '../services/api';
+import BusinessEditModal from '../components/BusinessEditModal';
+import BusinessBillingModal from '../components/BusinessBillingModal';
 
 const BusinessManagement = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -30,84 +35,159 @@ const BusinessManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingBusiness, setEditingBusiness] = useState(null);
+  const [showBillingModal, setShowBillingModal] = useState(false);
+  const [selectedBusinessForBilling, setSelectedBusinessForBilling] = useState(null);
+  // Initialize from cached settings to apply on first render (no reload needed)
+  const getInitialPageSize = () => {
+    try {
+      const cached = sessionStorage.getItem('admin_settings_cache');
+      if (cached) {
+        const { data } = JSON.parse(cached);
+        const d = data?.settings?.performance?.pagination?.defaultLimit;
+        if (d) return Number(d);
+      }
+      const last = localStorage.getItem('defaultPageSize');
+      if (last) return Number(last);
+    } catch {}
+    return 25;
+  };
+  const [itemsPerPage, setItemsPerPage] = useState(getInitialPageSize()); // respect saved default on first render
 
   const queryClient = useQueryClient();
+  const highlightId = searchParams.get('highlight');
+  const searchParam = searchParams.get('search');
 
-  // Debounce search term (reduced to 200ms for more responsive search)
+  // Auto-populate search when we have search parameter
+  useEffect(() => {
+    if (searchParam && !searchTerm) {
+      console.log('🎯 Business search parameter detected:', searchParam);
+      setSearchTerm(searchParam);
+      setDebouncedSearchTerm(searchParam);
+      setStatusFilter('all');
+      setCurrentPage(1);
+      // Clear the search param from URL after setting
+      navigate('/business-management', { replace: true });
+    }
+  }, [searchParam, searchTerm, navigate]);
+
+  // Debounce search term (800ms to allow comfortable typing)
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
       setCurrentPage(1); // Reset to first page when searching
-    }, 200);
+    }, 800);
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Fetch businesses with filters
-  const { data: businessesData, isLoading, error } = useQuery(
-    ['businesses', { search: debouncedSearchTerm, status: statusFilter, page: currentPage }],
-    async () => {
-      const response = await adminAPI.getBusinesses({
-        search: debouncedSearchTerm,
-        status: statusFilter !== 'all' ? statusFilter : undefined,
-        page: currentPage,
-        limit: 20
-      });
-      console.log('Businesses API response:', response);
-      return response.data; // Extract the data from axios response
+  // Fetch pagination settings
+  const { data: settingsData } = useQuery({
+    queryKey: ['settings'],
+    queryFn: async () => {
+      try {
+        const response = await adminAPI.getConfig();
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+        return null;
+      }
     },
-    {
-      keepPreviousData: true,
-      onError: (error) => {
-        console.error('Error fetching businesses:', error);
+    staleTime: 0,
+    cacheTime: 0,
+    refetchOnWindowFocus: true
+  });
+
+  // Update itemsPerPage when settings are loaded
+  useEffect(() => {
+    if (settingsData?.performance?.pagination?.defaultLimit) {
+      const newLimit = Number(settingsData.performance.pagination.defaultLimit);
+      console.log('Updating businesses itemsPerPage from settings:', newLimit);
+      setItemsPerPage(newLimit);
+      // Invalidate the businesses query to refetch with new limit
+      queryClient.invalidateQueries(['businesses']);
+      // Mirror latest for fast-start in new tabs
+      localStorage.setItem('defaultPageSize', String(newLimit));
+    }
+  }, [settingsData, queryClient]);
+
+  // Fetch businesses with filters
+  const { data: businessesData, isLoading, error, refetch } = useQuery({
+    queryKey: ['businesses', { search: debouncedSearchTerm, status: statusFilter, page: currentPage, limit: itemsPerPage }],
+    queryFn: async () => {
+      try {
+        const response = await adminAPI.getBusinesses({
+          search: debouncedSearchTerm,
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          page: currentPage,
+          limit: itemsPerPage
+        });
+        console.log('Businesses API response:', response);
+        return response.data; // Extract the data from axios response
+      } catch (error) {
+        console.error('Error in Businesses queryFn:', error);
+        throw error;
+      }
+    },
+    keepPreviousData: true,
+    retry: 1,
+    onError: (error) => {
+      console.error('Error fetching businesses:', error);
+      if (error.response?.status !== 401) {
         toast.error('Failed to load businesses');
       }
     }
-  );
+  });
 
   // Update business status mutation
-  const updateStatusMutation = useMutation(
-    ({ id, status }) => adminAPI.updateBusinessStatus(id, status),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('businesses');
-        toast.success('Business status updated successfully');
-      },
-      onError: (error) => {
-        toast.error('Failed to update business status');
-      },
-    }
-  );
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }) => adminAPI.updateBusinessStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['businesses']);
+      toast.success('Business status updated successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to update business status');
+    },
+  });
 
   // Delete business mutation
-  const deleteBusinessMutation = useMutation(
-    (id) => adminAPI.deleteBusiness(id),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('businesses');
-        toast.success('Business deleted successfully');
-      },
-      onError: (error) => {
-        toast.error('Failed to delete business');
-      },
-    }
-  );
+  const deleteBusinessMutation = useMutation({
+    mutationFn: (id) => adminAPI.deleteBusiness(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['businesses']);
+      toast.success('Business deleted successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to delete business');
+    },
+  });
 
   // Update business profile mutation
-  const updateBusinessMutation = useMutation(
-    ({ id, data }) => adminAPI.updateBusiness(id, data),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('businesses');
-        toast.success('Business profile updated successfully');
-        setShowEditModal(false);
-        setEditingBusiness(null);
-      },
-      onError: (error) => {
-        toast.error('Failed to update business profile');
-      },
+  const updateBusinessMutation = useMutation({
+    mutationFn: ({ id, data }) => adminAPI.updateBusiness(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['businesses']);
+      toast.success('Business profile updated successfully');
+      setShowEditModal(false);
+      setEditingBusiness(null);
+    },
+    onError: (error) => {
+      toast.error('Failed to update business profile');
+    },
+  });
+
+  // Handle highlighted business from query params (moved after query definition)
+  useEffect(() => {
+    if (highlightId && businessesData?.data) {
+      const businessToHighlight = businessesData.data.find(business => business._id === highlightId);
+      if (businessToHighlight) {
+        setSelectedBusiness(businessToHighlight);
+        setShowModal(true);
+        // Clear the highlight param after showing
+        navigate('/business-management', { replace: true });
+      }
     }
-  );
+  }, [highlightId, businessesData, navigate]);
 
   const handleStatusUpdate = (businessId, newStatus) => {
     updateStatusMutation.mutate({ id: businessId, status: newStatus });
@@ -140,7 +220,7 @@ const BusinessManagement = () => {
   };
 
   const handleEdit = (business) => {
-    setEditingBusiness({ ...business });
+    setEditingBusiness(business);
     setShowEditModal(true);
   };
 
@@ -164,6 +244,52 @@ const BusinessManagement = () => {
     };
 
     updateBusinessMutation.mutate({ id: editingBusiness._id, data: updateData });
+  };
+
+  const handleImpersonate = async (business) => {
+    try {
+      // Check if business exists
+      if (!business) {
+        toast.error('Business data not available');
+        return;
+      }
+
+      // Get the user ID associated with this business
+      let userId = null;
+      if (business.user) {
+        // User could be an object with _id or just a string ID
+        userId = typeof business.user === 'object' ? business.user._id : business.user;
+      }
+      
+      if (!userId) {
+        toast.error('Cannot impersonate: Business has no associated user account');
+        return;
+      }
+
+      const response = await adminAPI.impersonateUser(userId);
+      if (response.data.success) {
+        // Store the impersonation token
+        const impersonationToken = response.data.data.token;
+        
+        // Store the token in localStorage for the main app to pick up
+        localStorage.setItem('token', impersonationToken);
+        localStorage.setItem('user', JSON.stringify(response.data.data.user));
+        
+        // Navigate to the main Linkage VA Hub app with the impersonation token
+        const linkageUrl = process.env.REACT_APP_LINKAGE_URL || 'http://localhost:3000';
+        window.location.href = `${linkageUrl}/conversations`;
+        
+        toast.success(`Impersonating ${business.company || 'business'}`);
+      }
+    } catch (error) {
+      console.error('Impersonation error:', error);
+      toast.error(error.response?.data?.error || 'Failed to impersonate user');
+    }
+  };
+
+  const handleViewBilling = (business) => {
+    setSelectedBusinessForBilling(business);
+    setShowBillingModal(true);
   };
 
   const getStatusBadge = (status) => {
@@ -193,7 +319,7 @@ const BusinessManagement = () => {
 
   // Handle the API response structure
   const businesses = Array.isArray(businessesData?.data) ? businessesData.data : [];
-  const pagination = businessesData?.pagination || { pages: 1, total: 0, limit: 20 };
+  const pagination = businessesData?.pagination || { pages: 1, total: 0, limit: itemsPerPage };
   
   console.log('Businesses data:', businesses);
   console.log('Pagination data:', pagination);
@@ -206,8 +332,34 @@ const BusinessManagement = () => {
     );
   }
 
+  if (error && !isLoading) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-red-600 mb-4">Failed to load Businesses</div>
+        <div className="text-sm text-gray-600 mb-4">{error.message}</div>
+        <button 
+          onClick={() => refetch()}
+          className="admin-button-primary"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div>
+      {/* Back button */}
+      <div className="mb-4">
+        <button
+          onClick={() => navigate('/admin')}
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200"
+        >
+          <ArrowLeftIcon className="h-4 w-4 mr-2" />
+          Back to Dashboard
+        </button>
+      </div>
+
       {/* Page header */}
       <div className="mb-8">
         <div className="flex justify-between items-center">
@@ -235,11 +387,11 @@ const BusinessManagement = () => {
           <div className="flex-1">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-admin-400" />
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 type="text"
-                className="admin-input pl-10"
+                className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="Search by company name, email, phone, industry, location..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -253,7 +405,6 @@ const BusinessManagement = () => {
               onChange={(e) => setStatusFilter(e.target.value)}
             >
               <option value="all">All Status</option>
-              <option value="pending">Pending</option>
               <option value="approved">Approved</option>
               <option value="suspended">Suspended</option>
               <option value="rejected">Rejected</option>
@@ -262,10 +413,10 @@ const BusinessManagement = () => {
         </div>
 
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-admin-200">
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-admin-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Company Size
                 </label>
                 <select className="admin-select">
@@ -278,7 +429,7 @@ const BusinessManagement = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-admin-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Industry
                 </label>
                 <select className="admin-select">
@@ -292,7 +443,7 @@ const BusinessManagement = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-admin-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Platform Source
                 </label>
                 <select className="admin-select">
@@ -348,6 +499,7 @@ const BusinessManagement = () => {
               <tr>
                 <th className="admin-table-header-cell">
                   <input
+                    data-test="table-select-all"
                     type="checkbox"
                     className="rounded border-admin-300"
                     checked={selectedBusinesses.length === businesses.length && businesses.length > 0}
@@ -372,9 +524,10 @@ const BusinessManagement = () => {
             </thead>
             <tbody className="admin-table-body">
               {businesses.map((business) => (
-                <tr key={business._id} className="hover:bg-admin-50">
+                <tr key={business._id} data-test="table-row" className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150">
                   <td className="admin-table-cell">
                     <input
+                      data-test="table-row-select"
                       type="checkbox"
                       className="rounded border-admin-300"
                       checked={selectedBusinesses.includes(business._id)}
@@ -410,8 +563,8 @@ const BusinessManagement = () => {
                           {business.contactEmail || business.email}
                         </div>
                         {business.website && (
-                          <div className="text-sm text-primary-600">
-                            <a href={business.website} target="_blank" rel="noopener noreferrer">
+                          <div className="text-sm">
+                            <a href={business.website} target="_blank" rel="noopener noreferrer" className="admin-link-website">
                               {business.website}
                             </a>
                           </div>
@@ -420,22 +573,34 @@ const BusinessManagement = () => {
                     </div>
                   </td>
                   <td className="admin-table-cell">
-                    <div className="flex items-center text-sm text-admin-900">
-                      <BriefcaseIcon className="h-4 w-4 text-admin-400 mr-1" />
-                      {business.industry || 'Not specified'}
+                    <div className="flex items-center text-sm">
+                      <BriefcaseIcon className="h-4 w-4 text-blue-500 dark:text-blue-400 mr-2 flex-shrink-0" />
+                      {business.industry ? (
+                        <span className="text-gray-700 dark:text-gray-300 font-medium capitalize">
+                          {business.industry}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 dark:text-gray-500 italic">Not specified</span>
+                      )}
                     </div>
                   </td>
                   <td className="admin-table-cell">
                     {getCompanySizeBadge(business.companySize)}
                   </td>
                   <td className="admin-table-cell">
-                    <div className="flex items-center text-sm text-admin-900">
-                      <MapPinIcon className="h-4 w-4 text-admin-400 mr-1" />
-                      {business.location || 'Not specified'}
+                    <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                      <MapPinIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2 flex-shrink-0" />
+                      <span className="truncate">
+                        {business.location || <span className="text-gray-400 dark:text-gray-500 italic">Not specified</span>}
+                      </span>
                     </div>
                   </td>
                   <td className="admin-table-cell">
-                    <span className={`admin-badge ${business.platform === 'esystems' ? 'admin-badge-warning' : 'admin-badge-info'}`}>
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
+                      business.platform === 'esystems'
+                        ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-800'
+                        : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                    }`}>
                       {business.platform === 'esystems' ? 'E-Systems' : 'Linkage VA Hub'}
                     </span>
                   </td>
@@ -443,43 +608,84 @@ const BusinessManagement = () => {
                     {getStatusBadge(business.status)}
                   </td>
                   <td className="admin-table-cell">
-                    <div className="flex items-center text-sm text-admin-500">
-                      <ClockIcon className="h-4 w-4 mr-1" />
-                      {new Date(business.createdAt).toLocaleDateString()}
+                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <ClockIcon className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="font-medium">
+                        {new Date(business.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
                     </div>
                   </td>
                   <td className="admin-table-cell">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center justify-end space-x-1">
+                      {/* View Details - Primary */}
                       <button
                         onClick={() => {
                           setSelectedBusiness(business);
                           setShowModal(true);
                         }}
-                        className="text-primary-600 hover:text-primary-900"
+                        className="p-2 rounded-lg text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all duration-200 group"
                         title="View Details"
                       >
-                        <EyeIcon className="h-5 w-5" />
+                        <EyeIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
                       </button>
+                      
+                      {/* Edit Profile - Warning */}
                       <button
                         onClick={() => handleEdit(business)}
-                        className="text-warning-600 hover:text-warning-900"
+                        className="p-2 rounded-lg text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all duration-200 group"
                         title="Edit Profile"
                       >
-                        <PencilIcon className="h-5 w-5" />
+                        <PencilIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
                       </button>
+                      
+                      {/* View Billing - Info */}
+                      <button
+                        onClick={() => handleViewBilling(business)}
+                        className="p-2 rounded-lg text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-all duration-200 group"
+                        title="View Billing"
+                      >
+                        <CreditCardIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                      </button>
+                      
+                      {/* Status Toggle - Success/Danger */}
                       <button
                         onClick={() => handleStatusUpdate(business._id, business.status === 'approved' ? 'suspended' : 'approved')}
-                        className={business.status === 'approved' ? 'text-danger-600 hover:text-danger-900' : 'text-success-600 hover:text-success-900'}
+                        className={business.status === 'approved'
+                          ? 'p-2 rounded-lg text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 transition-all duration-200 group'
+                          : 'p-2 rounded-lg text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50 transition-all duration-200 group'
+                        }
                         title={business.status === 'approved' ? 'Suspend' : 'Approve'}
                       >
-                        {business.status === 'approved' ? <XMarkIcon className="h-5 w-5" /> : <CheckIcon className="h-5 w-5" />}
+                        {business.status === 'approved'
+                          ? <XMarkIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                          : <CheckIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                        }
                       </button>
+                      
+                      {/* Delete - Danger */}
                       <button
                         onClick={() => handleDelete(business._id)}
-                        className="text-danger-600 hover:text-danger-900"
+                        className="p-2 rounded-lg text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 transition-all duration-200 group"
                         title="Delete"
                       >
-                        <TrashIcon className="h-5 w-5" />
+                        <TrashIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                      </button>
+                      
+                      {/* Impersonate - Special */}
+                      <button
+                        onClick={() => handleImpersonate(business)}
+                        className={business.user
+                          ? "p-2 rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all duration-200 group"
+                          : "p-2 rounded-lg text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-50"
+                        }
+                        title={business.user ? "Impersonate Business" : "No user account linked"}
+                        disabled={!business.user}
+                      >
+                        <ArrowRightOnRectangleIcon className={business.user ? "h-4 w-4 group-hover:scale-110 transition-transform" : "h-4 w-4"} />
                       </button>
                     </div>
                   </td>
@@ -490,8 +696,8 @@ const BusinessManagement = () => {
         </div>
 
         {/* Pagination */}
-        {pagination.pages > 1 && (
-          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-admin-200 sm:px-6">
+        {businesses.length > 0 && (
+          <div data-test="pagination" className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-admin-200 dark:border-gray-700 sm:px-6">
             <div className="flex-1 flex justify-between sm:hidden">
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
@@ -510,7 +716,7 @@ const BusinessManagement = () => {
             </div>
             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm text-admin-700">
+                <p className="text-sm text-admin-700 dark:text-gray-300">
                   Showing{' '}
                   <span className="font-medium">
                     {(currentPage - 1) * pagination.limit + 1}
@@ -522,25 +728,30 @@ const BusinessManagement = () => {
                   of{' '}
                   <span className="font-medium">{pagination.total}</span> results
                 </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <span data-test="page-size">{pagination.limit}</span> per page
+                </p>
               </div>
-              <div>
-                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                  <button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className="admin-button-secondary rounded-l-md"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => setCurrentPage(Math.min(pagination.pages, currentPage + 1))}
-                    disabled={currentPage === pagination.pages}
-                    className="admin-button-secondary rounded-r-md"
-                  >
-                    Next
-                  </button>
-                </nav>
-              </div>
+              {pagination.pages > 1 && (
+                <div>
+                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                    <button
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className="admin-button-secondary rounded-l-md"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(Math.min(pagination.pages, currentPage + 1))}
+                      disabled={currentPage === pagination.pages}
+                      className="admin-button-secondary rounded-r-md"
+                    >
+                      Next
+                    </button>
+                  </nav>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -613,7 +824,7 @@ const BusinessManagement = () => {
                         href={selectedBusiness.website} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-sm text-primary-600 hover:text-primary-800"
+                        className="text-sm admin-link-website"
                       >
                         {selectedBusiness.website}
                       </a>
@@ -628,7 +839,7 @@ const BusinessManagement = () => {
                         href={selectedBusiness.linkedinProfile} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-sm text-primary-600 hover:text-primary-800"
+                        className="text-sm admin-link"
                       >
                         View LinkedIn Profile
                       </a>
@@ -675,6 +886,16 @@ const BusinessManagement = () => {
                 </button>
                 <button
                   onClick={() => {
+                    setShowModal(false);
+                    handleViewBilling(selectedBusiness);
+                  }}
+                  className="admin-button-primary flex items-center"
+                >
+                  <CreditCardIcon className="h-4 w-4 mr-2" />
+                  View Billing
+                </button>
+                <button
+                  onClick={() => {
                     handleStatusUpdate(selectedBusiness._id, selectedBusiness.status === 'approved' ? 'suspended' : 'approved');
                     setShowModal(false);
                   }}
@@ -689,7 +910,22 @@ const BusinessManagement = () => {
       )}
 
       {/* Business Edit Modal */}
-      {showEditModal && editingBusiness && (
+      <BusinessEditModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingBusiness(null);
+        }}
+        businessId={editingBusiness?._id}
+        onSuccess={() => {
+          refetch();
+          setShowEditModal(false);
+          setEditingBusiness(null);
+        }}
+      />
+      
+      {/* OLD MODAL - REMOVE AFTER TESTING */}
+      {false && showEditModal && editingBusiness && (
         <div className="admin-modal-overlay" onClick={() => setShowEditModal(false)}>
           <div className="admin-modal-content max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
@@ -876,6 +1112,17 @@ const BusinessManagement = () => {
           </div>
         </div>
       )}
+
+      {/* Business Billing Modal */}
+      <BusinessBillingModal
+        isOpen={showBillingModal}
+        onClose={() => {
+          setShowBillingModal(false);
+          setSelectedBusinessForBilling(null);
+        }}
+        businessId={selectedBusinessForBilling?._id}
+        businessName={selectedBusinessForBilling?.company}
+      />
     </div>
   );
 };

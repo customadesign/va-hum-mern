@@ -51,6 +51,14 @@ const notificationSchema = new mongoose.Schema({
   referral: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  },
+  // Archive fields
+  archived: {
+    type: Boolean,
+    default: false
+  },
+  archivedAt: {
+    type: Date
   }
 }, {
   timestamps: true
@@ -60,6 +68,10 @@ const notificationSchema = new mongoose.Schema({
 notificationSchema.index({ recipient: 1, createdAt: -1 });
 notificationSchema.index({ recipient: 1, readAt: 1 });
 notificationSchema.index({ type: 1 });
+// Indexes for archive functionality
+notificationSchema.index({ recipient: 1, archived: 1, createdAt: -1 });
+notificationSchema.index({ recipient: 1, archived: 1, archivedAt: -1 });
+notificationSchema.index({ recipient: 1, readAt: 1, createdAt: 1 }); // For auto-archiving old read notifications
 
 // Virtual to check if notification is read
 notificationSchema.virtual('isRead').get(function() {
@@ -111,7 +123,90 @@ notificationSchema.statics.markManyAsRead = function(notificationIds, userId) {
 notificationSchema.statics.getUnreadCount = function(userId) {
   return this.countDocuments({
     recipient: userId,
-    readAt: null
+    readAt: null,
+    archived: false
+  });
+};
+
+// Archive methods
+notificationSchema.methods.archive = function() {
+  if (!this.archived) {
+    this.archived = true;
+    this.archivedAt = new Date();
+    return this.save();
+  }
+  return Promise.resolve(this);
+};
+
+notificationSchema.methods.unarchive = function() {
+  if (this.archived) {
+    this.archived = false;
+    this.archivedAt = undefined;
+    return this.save();
+  }
+  return Promise.resolve(this);
+};
+
+// Static method to archive multiple notifications
+notificationSchema.statics.archiveMany = function(notificationIds, userId) {
+  return this.updateMany(
+    {
+      _id: { $in: notificationIds },
+      recipient: userId,
+      archived: false
+    },
+    {
+      archived: true,
+      archivedAt: new Date()
+    }
+  );
+};
+
+// Static method to unarchive multiple notifications
+notificationSchema.statics.unarchiveMany = function(notificationIds, userId) {
+  return this.updateMany(
+    {
+      _id: { $in: notificationIds },
+      recipient: userId,
+      archived: true
+    },
+    {
+      archived: false,
+      $unset: { archivedAt: 1 }
+    }
+  );
+};
+
+// Static method to auto-archive old read notifications
+notificationSchema.statics.autoArchiveOldNotifications = async function(daysOld = 30) {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+  
+  return this.updateMany(
+    {
+      readAt: { $ne: null, $lt: cutoffDate },
+      archived: false
+    },
+    {
+      archived: true,
+      archivedAt: new Date()
+    }
+  );
+};
+
+// Static method to get archived count
+notificationSchema.statics.getArchivedCount = function(userId) {
+  return this.countDocuments({
+    recipient: userId,
+    archived: true
+  });
+};
+
+// Static method to clear all archived notifications for a user
+notificationSchema.statics.clearArchivedForUser = function(userId) {
+  return this.deleteMany({
+    recipient: userId,
+    archived: true
   });
 };
 

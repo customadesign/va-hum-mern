@@ -76,7 +76,7 @@ const coverImageIds = [
 const vaProfiles = [
   {
     name: "Maria Clara Santos",
-    email: "maria.santos@example.com",
+    email: "va@murphyconsulting.us",
     hero: "Expert E-commerce VA specializing in Shopify and Amazon FBA",
     bio: "I'm a dedicated virtual assistant with 5+ years of experience helping e-commerce businesses scale their operations. I specialize in Shopify store management, Amazon FBA operations, inventory tracking, and customer service. I've helped over 50+ businesses increase their sales by 30% through efficient store management and customer support.",
     specialties: ["E-commerce Management", "Customer Service", "Inventory Management", "Product Listing"],
@@ -415,7 +415,6 @@ async function seedVAs() {
     
     // Create VAs
     console.log(`👥 Creating ${vaProfiles.length} test VAs...`);
-    const hashedPassword = await bcrypt.hash('password123', 10);
     
     for (let i = 0; i < vaProfiles.length; i++) {
       const profile = vaProfiles[i];
@@ -431,9 +430,10 @@ async function seedVAs() {
         }
         
         // Create user
+        const plainPassword = profile.email === 'va@murphyconsulting.us' ? 'va123456' : 'password123';
         const user = await User.create({
           email: profile.email,
-          password: hashedPassword,
+          password: plainPassword,
           role: 'va',
           isEmailVerified: true
         });

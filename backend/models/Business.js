@@ -67,9 +67,93 @@ const businessSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  status: {
+    type: String,
+    enum: ['approved', 'rejected', 'suspended'],
+    default: 'approved'
+  },
   surveyRequestNotifications: {
     type: Boolean,
     default: true
+  },
+  // Email notification preferences
+  emailNotifications: {
+    newMessages: {
+      type: Boolean,
+      default: true
+    },
+    vaApplications: {
+      type: Boolean,
+      default: true
+    },
+    vaMatches: {
+      type: Boolean,
+      default: true
+    },
+    platformUpdates: {
+      type: Boolean,
+      default: false
+    },
+    marketingEmails: {
+      type: Boolean,
+      default: false
+    },
+    weeklyDigest: {
+      type: Boolean,
+      default: true
+    }
+  },
+  // Communication preferences
+  communicationPreferences: {
+    preferredContactMethod: {
+      type: String,
+      enum: ['email', 'phone', 'platform', 'any'],
+      default: 'email'
+    },
+    responseTime: {
+      type: String,
+      enum: ['immediate', 'within-24h', 'within-48h', 'within-week'],
+      default: 'within-24h'
+    },
+    availableForInterviews: {
+      type: Boolean,
+      default: true
+    },
+    allowDirectMessages: {
+      type: Boolean,
+      default: true
+    },
+    autoReplyEnabled: {
+      type: Boolean,
+      default: false
+    },
+    autoReplyMessage: {
+      type: String,
+      trim: true
+    }
+  },
+  // Privacy preferences
+  privacySettings: {
+    showEmail: {
+      type: Boolean,
+      default: false
+    },
+    showPhone: {
+      type: Boolean,
+      default: false
+    },
+    showLocation: {
+      type: Boolean,
+      default: true
+    },
+    showCompanySize: {
+      type: Boolean,
+      default: true
+    },
+    allowAnalytics: {
+      type: Boolean,
+      default: true
+    }
   },
   avatar: {
     type: String // URL to avatar image
@@ -167,6 +251,151 @@ const businessSchema = new mongoose.Schema({
   vaRequirements: {
     type: String,
     trim: true
+  },
+  // Billing Information
+  billing: {
+    // Stripe customer ID for payment processing
+    stripeCustomerId: {
+      type: String,
+      trim: true
+    },
+    // Payment method details
+    paymentMethod: {
+      type: {
+        type: String,
+        enum: ['card', 'bank_account', 'paypal', 'other'],
+        default: 'card'
+      },
+      last4: String,
+      brand: String, // For cards: visa, mastercard, amex, etc.
+      expiryMonth: Number,
+      expiryYear: Number,
+      isDefault: {
+        type: Boolean,
+        default: true
+      },
+      addedAt: {
+        type: Date,
+        default: Date.now
+      }
+    },
+    // Billing address
+    billingAddress: {
+      line1: String,
+      line2: String,
+      city: String,
+      state: String,
+      postalCode: String,
+      country: String
+    },
+    // Subscription details
+    subscription: {
+      planId: String,
+      planName: String,
+      status: {
+        type: String,
+        enum: ['active', 'inactive', 'past_due', 'canceled', 'trialing'],
+        default: 'inactive'
+      },
+      currentPeriodStart: Date,
+      currentPeriodEnd: Date,
+      cancelAtPeriodEnd: {
+        type: Boolean,
+        default: false
+      },
+      trialEndDate: Date,
+      monthlyAmount: Number,
+      currency: {
+        type: String,
+        default: 'USD'
+      }
+    },
+    // Billing settings
+    settings: {
+      autoCharge: {
+        type: Boolean,
+        default: true
+      },
+      invoiceEmail: String,
+      taxExempt: {
+        type: Boolean,
+        default: false
+      },
+      taxId: String,
+      preferredPaymentDay: {
+        type: Number,
+        min: 1,
+        max: 28
+      }
+    },
+    // Current balance and credits
+    balance: {
+      type: Number,
+      default: 0
+    },
+    credits: {
+      type: Number,
+      default: 0
+    },
+    // Last payment info
+    lastPayment: {
+      amount: Number,
+      date: Date,
+      status: String,
+      invoiceId: String
+    }
+  },
+  // Billing history (references to BillingHistory model)
+  billingHistory: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'BillingHistory'
+  }],
+  // API Keys for business account
+  apiKeys: [{
+    id: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    key: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    lastUsed: {
+      type: Date,
+      default: null
+    },
+    active: {
+      type: Boolean,
+      default: true
+    }
+  }],
+  // Email and phone verification status
+  emailVerified: {
+    type: Boolean,
+    default: false
+  },
+  phoneVerified: {
+    type: Boolean,
+    default: false
+  },
+  // System timezone and language preferences
+  timezone: {
+    type: String,
+    default: 'America/New_York'
+  },
+  language: {
+    type: String,
+    default: 'en'
   }
 }, {
   timestamps: true

@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { 
+import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import {
   MagnifyingGlassIcon,
   FunnelIcon,
   EyeIcon,
@@ -12,12 +14,16 @@ import {
   StarIcon,
   MapPinIcon,
   CurrencyDollarIcon,
-  ClockIcon
+  ClockIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 import { adminAPI } from '../services/api';
+import VAEditModal from '../components/VAEditModal';
 
 const VAManagement = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -27,85 +33,185 @@ const VAManagement = () => {
   const [selectedVA, setSelectedVA] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingVA, setEditingVA] = useState(null);
+  const [editingVAId, setEditingVAId] = useState(null);
+  // Initialize from cached settings to apply on first render (no reload needed)
+  const getInitialPageSize = () => {
+    try {
+      const cached = sessionStorage.getItem('admin_settings_cache');
+      if (cached) {
+        const { data } = JSON.parse(cached);
+        const d = data?.settings?.performance?.pagination?.defaultLimit;
+        if (d) return Number(d);
+      }
+      const last = localStorage.getItem('defaultPageSize');
+      if (last) return Number(last);
+    } catch {}
+    return 25;
+  };
+  const [maxVAsPerPage, setMaxVAsPerPage] = useState(getInitialPageSize());
 
   const queryClient = useQueryClient();
+  const highlightId = searchParams.get('highlight');
+  const searchParam = searchParams.get('search');
+  const { t } = useTranslation();
 
-  // Debounce search term (reduced to 200ms for more responsive search)
+  // Listen for settings changes across tabs/components
+  useEffect(() => {
+    const handleSettingsUpdate = (e) => {
+      if (e.key === 'settingsUpdated') {
+        console.log('Settings updated, refreshing VAs and settings...');
+        // Invalidate both settings and VAs queries to refetch with new limits
+        queryClient.invalidateQueries(['settings']);
+        queryClient.invalidateQueries(['vas']);
+      }
+    };
+
+    // Listen for storage events (cross-tab communication)
+    window.addEventListener('storage', handleSettingsUpdate);
+    
+    // Also listen for custom events (same-tab communication)
+    window.addEventListener('settingsUpdated', handleSettingsUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleSettingsUpdate);
+      window.removeEventListener('settingsUpdated', handleSettingsUpdate);
+    };
+  }, [queryClient]);
+
+  // Auto-populate search when we have search parameter
+  useEffect(() => {
+    if (searchParam && !searchTerm) {
+      console.log('🎯 Search parameter detected:', searchParam);
+      setSearchTerm(searchParam);
+      setDebouncedSearchTerm(searchParam);
+      setStatusFilter('all');
+      setCurrentPage(1);
+      // Clear the search param from URL after setting
+      navigate('/vas', { replace: true });
+    }
+  }, [searchParam, searchTerm, navigate]);
+
+  // Debounce search term (800ms to allow comfortable typing)
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
       setCurrentPage(1); // Reset to first page when searching
-    }, 200);
+    }, 800);
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Fetch VAs with filters
-  const { data: vasData, isLoading, error } = useQuery(
-    ['vas', { search: debouncedSearchTerm, status: statusFilter, page: currentPage }],
-    async () => {
-      const response = await adminAPI.getVAs({
-        search: debouncedSearchTerm,
-        status: statusFilter !== 'all' ? statusFilter : undefined,
-        page: currentPage,
-        limit: 20
-      });
-      // Handle axios response structure
-      return response?.data || response;
+  // Fetch max VAs per page setting
+  const { data: settingsData, isLoading: settingsLoading } = useQuery({
+    queryKey: ['settings'],
+    queryFn: async () => {
+      try {
+        const response = await adminAPI.getConfig();
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+        return null;
+      }
     },
-    {
-      keepPreviousData: true,
-      onError: (error) => {
-        console.error('Error fetching VAs:', error);
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0, // Don't cache the settings
+    refetchOnWindowFocus: true // Refetch when window regains focus
+  });
+
+  // Update maxVAsPerPage when settings are loaded
+  useEffect(() => {
+    if (settingsData?.performance?.pagination?.defaultLimit) {
+      const newMaxVAs = Number(settingsData.performance.pagination.defaultLimit);
+      console.log('Updating maxVAsPerPage from settings:', newMaxVAs);
+      setMaxVAsPerPage(newMaxVAs);
+      // Invalidate the VAs query to refetch with new limit
+      queryClient.invalidateQueries(['vas']);
+      // Mirror latest for fast-start in new tabs
+      localStorage.setItem('defaultPageSize', String(newMaxVAs));
+    }
+  }, [settingsData, queryClient]);
+  // Fetch VAs with filters
+  const { data: vasData, isLoading, error, refetch } = useQuery({
+    queryKey: ['vas', { search: debouncedSearchTerm, status: statusFilter, page: currentPage, limit: maxVAsPerPage }],
+    queryFn: async () => {
+      try {
+        const response = await adminAPI.getVAs({
+          search: debouncedSearchTerm,
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          page: currentPage,
+          limit: maxVAsPerPage
+        });
+        console.log('VAs API response:', response);
+        // Return the full response for proper data access
+        return response.data;
+      } catch (error) {
+        console.error('Error in VAs queryFn:', error);
+        throw error;
+      }
+    },
+    keepPreviousData: true,
+    retry: 1,
+    onError: (error) => {
+      console.error('Error fetching VAs:', error);
+      if (error.response?.status !== 401) {
         toast.error('Failed to load Virtual Assistants');
       }
     }
-  );
+  });
 
   // Update VA status mutation
-  const updateStatusMutation = useMutation(
-    ({ id, status }) => adminAPI.updateVAStatus(id, status),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('vas');
-        toast.success('VA status updated successfully');
-      },
-      onError: (error) => {
-        toast.error('Failed to update VA status');
-      },
-    }
-  );
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }) => adminAPI.updateVAStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['vas']);
+      toast.success('VA status updated successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to update VA status');
+    },
+  });
 
   // Delete VA mutation
-  const deleteVAMutation = useMutation(
-    (id) => adminAPI.deleteVA(id),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('vas');
-        toast.success('VA deleted successfully');
-      },
-      onError: (error) => {
-        toast.error('Failed to delete VA');
-      },
-    }
-  );
+  const deleteVAMutation = useMutation({
+    mutationFn: (id) => adminAPI.deleteVA(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['vas']);
+      toast.success('VA deleted successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to delete VA');
+    },
+  });
 
-  // Update VA profile mutation
-  const updateVAMutation = useMutation(
-    ({ id, data }) => adminAPI.updateVA(id, data),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('vas');
-        toast.success('VA profile updated successfully');
-        setShowEditModal(false);
-        setEditingVA(null);
-      },
-      onError: (error) => {
-        toast.error('Failed to update VA profile');
-      },
+  // Removed old update mutation - now handled by VAEditModal component
+
+  // Handle highlighted VA from query params - improved timing
+  useEffect(() => {
+    console.log('🎯 VAManagement: highlightId:', highlightId);
+    console.log('📋 VAManagement: vasData loaded:', !!vasData?.data);
+    console.log('🔍 VAs count:', vasData?.data?.length);
+    
+    if (highlightId && vasData?.data && !isLoading) {
+      console.log('🔍 Looking for VA with ID:', highlightId);
+      console.log('📋 Available VAs:', vasData.data.map(va => ({ id: va._id, name: va.name })));
+      
+      const vaToHighlight = vasData.data.find(va => va._id === highlightId);
+      console.log('✅ Found VA to highlight:', vaToHighlight);
+      
+      if (vaToHighlight) {
+        console.log('🚀 Opening modal for VA:', vaToHighlight.name);
+        setSelectedVA(vaToHighlight);
+        setShowModal(true);
+        // Clear the highlight param after showing modal
+        setTimeout(() => {
+          navigate('/vas', { replace: true });
+        }, 100);
+      } else {
+        console.log('⚠️ VA not found in current results. Available VAs:');
+        vasData.data.forEach(va => console.log(`  - ${va.name} (${va._id})`));
+      }
     }
-  );
+  }, [highlightId, vasData, isLoading, navigate]);
 
   const handleStatusUpdate = (vaId, newStatus) => {
     updateStatusMutation.mutate({ id: vaId, status: newStatus });
@@ -138,28 +244,55 @@ const VAManagement = () => {
   };
 
   const handleEdit = (va) => {
-    setEditingVA({
-      ...va,
-      skills: va.skills?.join(', ') || ''
-    });
+    setEditingVAId(va._id);
     setShowEditModal(true);
   };
 
-  const handleSaveEdit = () => {
-    if (!editingVA) return;
+  const handleEditSuccess = () => {
+    queryClient.invalidateQueries(['vas']);
+    setShowEditModal(false);
+    setEditingVAId(null);
+  };
 
-    const updateData = {
-      name: editingVA.name,
-      bio: editingVA.bio,
-      location: editingVA.location,
-      hourlyRate: editingVA.hourlyRate ? parseFloat(editingVA.hourlyRate) : undefined,
-      skills: editingVA.skills ? editingVA.skills.split(',').map(s => s.trim()).filter(s => s) : [],
-      phone: editingVA.phone,
-      experience: editingVA.experience,
-      availability: editingVA.availability
-    };
+  const handleImpersonate = async (va) => {
+    try {
+      // Check if VA exists
+      if (!va) {
+        toast.error('VA data not available');
+        return;
+      }
 
-    updateVAMutation.mutate({ id: editingVA._id, data: updateData });
+      // Get the user ID associated with this VA
+      let userId = null;
+      if (va.user) {
+        // User could be an object with _id or just a string ID
+        userId = typeof va.user === 'object' ? va.user._id : va.user;
+      }
+      
+      if (!userId) {
+        toast.error('Cannot impersonate: VA has no associated user account');
+        return;
+      }
+
+      const response = await adminAPI.impersonateUser(userId);
+      if (response.data.success) {
+        // Store the impersonation token
+        const impersonationToken = response.data.data.token;
+        
+        // Store the token in localStorage for the main app to pick up
+        localStorage.setItem('token', impersonationToken);
+        localStorage.setItem('user', JSON.stringify(response.data.data.user));
+        
+        // Navigate to the main Linkage VA Hub app with the impersonation token
+        const linkageUrl = process.env.REACT_APP_MAIN_APP_URL || 'http://localhost:3000';
+        window.location.href = `${linkageUrl}/conversations`;
+        
+        toast.success(`Impersonating ${va.name || 'VA'}`);
+      }
+    } catch (error) {
+      console.error('Impersonation error:', error);
+      toast.error(error.response?.data?.error || 'Failed to impersonate user');
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -174,18 +307,32 @@ const VAManagement = () => {
     return <span className={config.class}>{config.text}</span>;
   };
 
-  // Handle different response structures
-  const vas = Array.isArray(vasData?.data) 
-    ? vasData.data 
-    : Array.isArray(vasData) 
-      ? vasData 
-      : [];
-  const pagination = vasData?.pagination || {};
+  // Handle the API response structure properly
+  const vas = Array.isArray(vasData?.data) ? vasData.data : [];
+  const pagination = vasData?.pagination || { pages: 1, total: 0, limit: maxVAsPerPage };
+  
+  console.log('VAs data:', vas);
+  console.log('Pagination data:', pagination);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="admin-loading"></div>
+      </div>
+    );
+  }
+
+  if (error && !isLoading) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-red-600 mb-4">Failed to load Virtual Assistants</div>
+        <div className="text-sm text-gray-600 mb-4">{error.message}</div>
+        <button 
+          onClick={() => refetch()}
+          className="admin-button-primary"
+        >
+          Retry
+        </button>
       </div>
     );
   }
@@ -196,9 +343,9 @@ const VAManagement = () => {
       <div className="mb-8">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-admin-900">Virtual Assistants</h1>
+            <h1 className="text-2xl font-bold text-admin-900">{t('vas-management')}</h1>
             <p className="mt-1 text-sm text-admin-600">
-              Manage and moderate virtual assistant profiles
+              {t('manage-and-moderate')}
             </p>
           </div>
           <div className="flex space-x-3">
@@ -207,7 +354,7 @@ const VAManagement = () => {
               className="admin-button-secondary"
             >
               <FunnelIcon className="h-5 w-5 mr-2" />
-              Filters
+              {t('filters')}
             </button>
           </div>
         </div>
@@ -217,14 +364,14 @@ const VAManagement = () => {
       <div className="admin-card p-6 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <div className="relative mt-0.5">
-              <div className="absolute top-0 left-0 pl-3 flex items-center pointer-events-none" style={{ marginTop: '2px', height: '100%' }}>
-                <MagnifyingGlassIcon className="h-5 w-5 text-admin-400" />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 type="text"
-                className="admin-input pl-10"
-                placeholder="Search by name, email, phone, skills, location..."
+                className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md"
+                placeholder={t('search-placeholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -236,50 +383,49 @@ const VAManagement = () => {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="suspended">Suspended</option>
-              <option value="rejected">Rejected</option>
+              <option value="all">{t('all-status')}</option>
+              <option value="approved">{t('approved')}</option>
+              <option value="suspended">{t('suspended')}</option>
+              <option value="rejected">{t('rejected')}</option>
             </select>
           </div>
         </div>
 
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-admin-200">
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-admin-700 mb-1">
-                  Experience Level
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {t('experience-level')}
                 </label>
                 <select className="admin-select">
-                  <option value="">All Levels</option>
-                  <option value="entry">Entry Level</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="expert">Expert</option>
+                  <option value="">{t('all-levels')}</option>
+                  <option value="entry">{t('entry-level')}</option>
+                  <option value="intermediate">{t('intermediate')}</option>
+                  <option value="expert">{t('expert')}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-admin-700 mb-1">
-                  Hourly Rate
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {t('hourly-rate')}
                 </label>
                 <select className="admin-select">
-                  <option value="">All Rates</option>
-                  <option value="0-10">$0 - $10</option>
-                  <option value="10-20">$10 - $20</option>
-                  <option value="20-50">$20 - $50</option>
-                  <option value="50+">$50+</option>
+                  <option value="">{t('all-rates')}</option>
+                  <option value="0-10">${t('0-10')}</option>
+                  <option value="10-20">${t('10-20')}</option>
+                  <option value="20-50">${t('20-50')}</option>
+                  <option value="50+">${t('50-plus')}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-admin-700 mb-1">
-                  Location
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {t('location')}
                 </label>
                 <select className="admin-select">
-                  <option value="">All Locations</option>
-                  <option value="philippines">Philippines</option>
-                  <option value="india">India</option>
-                  <option value="other">Other</option>
+                  <option value="">{t('all-locations')}</option>
+                  <option value="philippines">{t('philippines')}</option>
+                  <option value="india">{t('india')}</option>
+                  <option value="other">{t('other')}</option>
                 </select>
               </div>
             </div>
@@ -292,7 +438,7 @@ const VAManagement = () => {
         <div className="admin-card p-4 mb-6">
           <div className="flex items-center justify-between">
             <span className="text-sm text-admin-600">
-              {selectedVAs.length} VAs selected
+              {selectedVAs.length} {t('vas-selected')}
             </span>
             <div className="flex space-x-2">
               <button
@@ -300,21 +446,21 @@ const VAManagement = () => {
                 className="admin-button-success"
               >
                 <CheckIcon className="h-4 w-4 mr-1" />
-                Approve
+                {t('approve')}
               </button>
               <button
                 onClick={() => handleBulkAction('suspend')}
                 className="admin-button-danger"
               >
                 <XMarkIcon className="h-4 w-4 mr-1" />
-                Suspend
+                {t('suspend')}
               </button>
               <button
                 onClick={() => handleBulkAction('delete')}
                 className="admin-button-danger"
               >
                 <TrashIcon className="h-4 w-4 mr-1" />
-                Delete
+                {t('delete')}
               </button>
             </div>
           </div>
@@ -322,13 +468,14 @@ const VAManagement = () => {
       )}
 
       {/* VAs table */}
-      <div className="admin-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="admin-table">
-            <thead className="admin-table-header">
-              <tr>
-                <th className="admin-table-header-cell">
+      <div className="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-[#1e3a8a] dark:bg-gray-900/50">
+            <tr>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-white dark:text-gray-400 uppercase tracking-wider">
                   <input
+                    data-test="table-select-all"
                     type="checkbox"
                     className="rounded border-admin-300"
                     checked={selectedVAs.length === vas.length && vas.length > 0}
@@ -341,20 +488,21 @@ const VAManagement = () => {
                     }}
                   />
                 </th>
-                <th className="admin-table-header-cell">VA Profile</th>
-                <th className="admin-table-header-cell">Skills</th>
-                <th className="admin-table-header-cell">Location</th>
-                <th className="admin-table-header-cell">Rate</th>
-                <th className="admin-table-header-cell">Status</th>
-                <th className="admin-table-header-cell">Joined</th>
-                <th className="admin-table-header-cell">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white dark:text-gray-400 uppercase tracking-wider">{t('va-profile')}</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white dark:text-gray-400 uppercase tracking-wider">{t('skills')}</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white dark:text-gray-400 uppercase tracking-wider">{t('location')}</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white dark:text-gray-400 uppercase tracking-wider">{t('rate')}</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white dark:text-gray-400 uppercase tracking-wider">{t('status')}</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white dark:text-gray-400 uppercase tracking-wider">{t('joined')}</th>
+                <th className="px-6 py-4 text-right text-xs font-semibold text-white dark:text-gray-400 uppercase tracking-wider">{t('actions')}</th>
               </tr>
             </thead>
-            <tbody className="admin-table-body">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {vas.map((va) => (
-                <tr key={va._id} className="hover:bg-admin-50">
-                  <td className="admin-table-cell">
+                <tr key={va._id} data-test="table-row" className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <input
+                      data-test="table-row-select"
                       type="checkbox"
                       className="rounded border-admin-300"
                       checked={selectedVAs.includes(va._id)}
@@ -367,32 +515,32 @@ const VAManagement = () => {
                       }}
                     />
                   </td>
-                  <td className="admin-table-cell">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
+                      <div className="flex-shrink-0 h-12 w-12">
                         {va.avatar ? (
                           <img
-                            className="h-10 w-10 rounded-full object-cover"
+                            className="h-12 w-12 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700"
                             src={va.avatar}
                             alt={va.name}
                           />
                         ) : (
-                          <div className="h-10 w-10 rounded-full bg-admin-200 flex items-center justify-center">
-                            <UserIcon className="h-6 w-6 text-admin-500" />
+                          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center ring-2 ring-gray-200 dark:ring-gray-700">
+                            <UserIcon className="h-6 w-6 text-white" />
                           </div>
                         )}
                       </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-admin-900">
+                      <div className="ml-4 min-w-0 flex-1">
+                        <div className="text-base font-semibold text-gray-900 dark:text-white truncate">
                           {va.name}
                         </div>
-                        <div className="text-sm text-admin-500">
+                        <div className="text-sm text-white dark:text-gray-400 truncate">
                           {va.email}
                         </div>
                         {va.rating && (
                           <div className="flex items-center mt-1">
-                            <StarIcon className="h-4 w-4 text-warning-400 fill-current" />
-                            <span className="text-sm text-admin-600 ml-1">
+                            <StarIcon className="h-4 w-4 text-yellow-400 fill-current" />
+                            <span className="text-sm text-gray-600 dark:text-gray-300 ml-1 font-medium">
                               {va.rating.toFixed(1)}
                             </span>
                           </div>
@@ -400,79 +548,123 @@ const VAManagement = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="admin-table-cell">
-                    <div className="flex flex-wrap gap-1">
-                      {va.skills?.slice(0, 3).map((skill, index) => (
+                  <td className="px-6 py-4">
+                    <div className="flex flex-wrap gap-1.5">
+                      {va.skills?.slice(0, 2).map((skill, index) => (
                         <span
                           key={index}
-                          className="admin-badge-info text-xs"
+                          className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
                         >
                           {skill}
                         </span>
                       ))}
-                      {va.skills?.length > 3 && (
-                        <span className="text-xs text-admin-500">
-                          +{va.skills.length - 3} more
+                      {va.skills?.length > 2 && (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+                          +{va.skills.length - 2} more
                         </span>
+                      )}
+                      {(!va.skills || va.skills.length === 0) && (
+                        <span className="text-xs text-gray-400 dark:text-gray-500 italic">{t('no-skills')}</span>
                       )}
                     </div>
                   </td>
-                  <td className="admin-table-cell">
-                    <div className="flex items-center text-sm text-admin-900">
-                      <MapPinIcon className="h-4 w-4 text-admin-400 mr-1" />
-                      {va.location ?
-                        (typeof va.location === 'string' ? va.location :
-                         `${va.location.city || ''}${va.location.city && va.location.state ? ', ' : ''}${va.location.state || ''}${(va.location.city || va.location.state) && va.location.country ? ', ' : ''}${va.location.country || ''}`.trim() || 'Not specified'
-                        ) : 'Not specified'}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                      <MapPinIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2 flex-shrink-0" />
+                      <span className="truncate">
+                        {va.location ?
+                          (typeof va.location === 'string' ? va.location :
+                           `${va.location.city || ''}${va.location.city && va.location.state ? ', ' : ''}${va.location.state || ''}${(va.location.city || va.location.state) && va.location.country ? ', ' : ''}${va.location.country || ''}`.trim() ||
+                           <span className="text-gray-400 dark:text-gray-500 italic">{t('not-specified')}</span>
+                          ) : <span className="text-gray-400 dark:text-gray-500 italic">{t('not-specified')}</span>}
+                      </span>
                     </div>
                   </td>
-                  <td className="admin-table-cell">
-                    <div className="flex items-center text-sm text-admin-900">
-                      <CurrencyDollarIcon className="h-4 w-4 text-admin-400 mr-1" />
-                      {va.hourlyRate ? `$${va.hourlyRate}/hr` : 'Not set'}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center text-sm">
+                      <CurrencyDollarIcon className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0" />
+                      {va.hourlyRate ? (
+                        <span className="font-semibold text-green-700 dark:text-green-300">
+                          ${va.hourlyRate}/hr
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 dark:text-gray-500 italic">{t('not-set')}</span>
+                      )}
                     </div>
                   </td>
-                  <td className="admin-table-cell">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(va.status)}
                   </td>
-                  <td className="admin-table-cell">
-                    <div className="flex items-center text-sm text-admin-500">
-                      <ClockIcon className="h-4 w-4 mr-1" />
-                      {new Date(va.createdAt).toLocaleDateString()}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center text-sm text-white dark:text-gray-400">
+                      <ClockIcon className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="font-medium">
+                        {new Date(va.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
                     </div>
                   </td>
-                  <td className="admin-table-cell">
-                    <div className="flex items-center space-x-2">
+                  <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <div className="flex items-center justify-end space-x-1">
+                      {/* View Details - Primary */}
                       <button
                         onClick={() => {
                           setSelectedVA(va);
                           setShowModal(true);
                         }}
-                        className="text-primary-600 hover:text-primary-900"
-                        title="View Details"
+                        className="p-2 rounded-lg text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all duration-200 group"
+                        title={t('view-details')}
                       >
-                        <EyeIcon className="h-5 w-5" />
+                        <EyeIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
                       </button>
+                      
+                      {/* Edit Profile - Warning */}
                       <button
                         onClick={() => handleEdit(va)}
-                        className="text-warning-600 hover:text-warning-900"
-                        title="Edit Profile"
+                        className="p-2 rounded-lg text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all duration-200 group"
+                        title={t('edit-profile')}
                       >
-                        <PencilIcon className="h-5 w-5" />
+                        <PencilIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
                       </button>
+                      
+                      {/* Status Toggle - Success/Danger */}
                       <button
                         onClick={() => handleStatusUpdate(va._id, va.status === 'approved' ? 'suspended' : 'approved')}
-                        className={va.status === 'approved' ? 'text-danger-600 hover:text-danger-900' : 'text-success-600 hover:text-success-900'}
-                        title={va.status === 'approved' ? 'Suspend' : 'Approve'}
+                        className={va.status === 'approved'
+                          ? 'p-2 rounded-lg text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 transition-all duration-200 group'
+                          : 'p-2 rounded-lg text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50 transition-all duration-200 group'
+                        }
+                        title={va.status === 'approved' ? t('suspend') : t('approve')}
                       >
-                        {va.status === 'approved' ? <XMarkIcon className="h-5 w-5" /> : <CheckIcon className="h-5 w-5" />}
+                        {va.status === 'approved'
+                          ? <XMarkIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                          : <CheckIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                        }
                       </button>
+                      
+                      {/* Delete - Danger */}
                       <button
                         onClick={() => handleDelete(va._id)}
-                        className="text-danger-600 hover:text-danger-900"
-                        title="Delete"
+                        className="p-2 rounded-lg text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 transition-all duration-200 group"
+                        title={t('delete')}
                       >
-                        <TrashIcon className="h-5 w-5" />
+                        <TrashIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                      </button>
+                      
+                      {/* Impersonate - Special */}
+                      <button
+                        onClick={() => handleImpersonate(va)}
+                        className={va.user
+                          ? "p-2 rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all duration-200 group"
+                          : "p-2 rounded-lg text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-50"
+                        }
+                        title={va.user ? t('impersonate-va') : t('no-user-account')}
+                        disabled={!va.user}
+                      >
+                        <ArrowRightOnRectangleIcon className={va.user ? "h-4 w-4 group-hover:scale-110 transition-transform" : "h-4 w-4"} />
                       </button>
                     </div>
                   </td>
@@ -483,57 +675,65 @@ const VAManagement = () => {
         </div>
 
         {/* Pagination */}
-        {pagination.pages > 1 && (
-          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-admin-200 sm:px-6">
+        {vas.length > 0 && (
+          <div data-test="pagination" className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700">
             <div className="flex-1 flex justify-between sm:hidden">
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
                 className="admin-button-secondary"
               >
-                Previous
+                {t('previous')}
               </button>
               <button
                 onClick={() => setCurrentPage(Math.min(pagination.pages, currentPage + 1))}
                 disabled={currentPage === pagination.pages}
                 className="admin-button-secondary"
               >
-                Next
+                {t('next')}
               </button>
             </div>
             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm text-admin-700">
-                  Showing{' '}
-                  <span className="font-medium">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  {t('showing')}{' '}
+                  <span className="font-semibold text-gray-900 dark:text-white">
                     {(currentPage - 1) * pagination.limit + 1}
                   </span>{' '}
-                  to{' '}
-                  <span className="font-medium">
+                  {t('to')}{' '}
+                  <span className="font-semibold text-gray-900 dark:text-white">
                     {Math.min(currentPage * pagination.limit, pagination.total)}
                   </span>{' '}
-                  of{' '}
-                  <span className="font-medium">{pagination.total}</span> results
+                  {t('of')}{' '}
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {pagination.total}
+                  </span>{' '}
+                  {t('results')}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <span data-test="page-size">{pagination.limit}</span> per page
                 </p>
               </div>
-              <div>
-                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                  <button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className="admin-button-secondary rounded-l-md"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => setCurrentPage(Math.min(pagination.pages, currentPage + 1))}
-                    disabled={currentPage === pagination.pages}
-                    className="admin-button-secondary rounded-r-md"
-                  >
-                    Next
-                  </button>
-                </nav>
-              </div>
+              {pagination.pages > 1 && (
+                <div>
+                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                    <button
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-l-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                    >
+                      {t('previous')}
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(Math.min(pagination.pages, currentPage + 1))}
+                      disabled={currentPage === pagination.pages}
+                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-r-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 -ml-px"
+                    >
+                      {t('next')}
+                    </button>
+                  </nav>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -544,7 +744,7 @@ const VAManagement = () => {
         <div className="admin-modal-overlay" onClick={() => setShowModal(false)}>
           <div className="admin-modal-content max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-admin-900">VA Details</h3>
+              <h3 className="text-lg font-medium text-admin-900">{t('va-details')}</h3>
               <button
                 onClick={() => setShowModal(false)}
                 className="text-admin-400 hover:text-admin-600"
@@ -575,22 +775,22 @@ const VAManagement = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-admin-700">Location</label>
+                  <label className="block text-sm font-medium text-admin-700">{t('location')}</label>
                   <p className="text-sm text-admin-900">
                     {selectedVA.location ?
                       (typeof selectedVA.location === 'string' ? selectedVA.location :
-                       `${selectedVA.location.city || ''}${selectedVA.location.city && selectedVA.location.state ? ', ' : ''}${selectedVA.location.state || ''}${(selectedVA.location.city || selectedVA.location.state) && selectedVA.location.country ? ', ' : ''}${selectedVA.location.country || ''}`.trim() || 'Not specified'
-                      ) : 'Not specified'}
+                       `${selectedVA.location.city || ''}${selectedVA.location.city && selectedVA.location.state ? ', ' : ''}${selectedVA.location.state || ''}${(selectedVA.location.city || selectedVA.location.state) && selectedVA.location.country ? ', ' : ''}${selectedVA.location.country || ''}`.trim() || t('not-specified')
+                      ) : t('not-specified')}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-admin-700">Hourly Rate</label>
-                  <p className="text-sm text-admin-900">{selectedVA.hourlyRate ? `$${selectedVA.hourlyRate}/hr` : 'Not set'}</p>
+                  <label className="block text-sm font-medium text-admin-700">{t('hourly-rate')}</label>
+                  <p className="text-sm text-admin-900">{selectedVA.hourlyRate ? `$${selectedVA.hourlyRate}/hr` : t('not-set')}</p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-admin-700 mb-2">Skills</label>
+                <label className="block text-sm font-medium text-admin-700 mb-2">{t('skills')}</label>
                 <div className="flex flex-wrap gap-2">
                   {selectedVA.skills?.map((skill, index) => (
                     <span key={index} className="admin-badge-info">
@@ -601,8 +801,8 @@ const VAManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-admin-700">Bio</label>
-                <p className="text-sm text-admin-900 mt-1">{selectedVA.bio || 'No bio provided'}</p>
+                <label className="block text-sm font-medium text-admin-700">{t('bio')}</label>
+                <p className="text-sm text-admin-900 mt-1">{selectedVA.bio || t('no-bio')}</p>
               </div>
 
               <div className="flex justify-end space-x-3 pt-4 border-t border-admin-200">
@@ -610,7 +810,7 @@ const VAManagement = () => {
                   onClick={() => setShowModal(false)}
                   className="admin-button-secondary"
                 >
-                  Close
+                  {t('close')}
                 </button>
                 <button
                   onClick={() => {
@@ -619,7 +819,7 @@ const VAManagement = () => {
                   }}
                   className={selectedVA.status === 'approved' ? 'admin-button-danger' : 'admin-button-success'}
                 >
-                  {selectedVA.status === 'approved' ? 'Suspend' : 'Approve'}
+                  {selectedVA.status === 'approved' ? t('suspend') : t('approve')}
                 </button>
               </div>
             </div>
@@ -627,134 +827,16 @@ const VAManagement = () => {
         </div>
       )}
 
-      {/* VA Edit Modal */}
-      {showEditModal && editingVA && (
-        <div className="admin-modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="admin-modal-content max-w-3xl w-full" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-admin-900">Edit VA Profile</h3>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="text-admin-400 hover:text-admin-600"
-              >
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-admin-700 mb-1">Name</label>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    value={editingVA.name || ''}
-                    onChange={(e) => setEditingVA({ ...editingVA, name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-admin-700 mb-1">Phone</label>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    value={editingVA.phone || ''}
-                    onChange={(e) => setEditingVA({ ...editingVA, phone: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-admin-700 mb-1">Location</label>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    value={typeof editingVA.location === 'string' ? editingVA.location :
-                           `${editingVA.location?.city || ''}${editingVA.location?.city && editingVA.location?.state ? ', ' : ''}${editingVA.location?.state || ''}${(editingVA.location?.city || editingVA.location?.state) && editingVA.location?.country ? ', ' : ''}${editingVA.location?.country || ''}`.trim() || ''}
-                    onChange={(e) => setEditingVA({ ...editingVA, location: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-admin-700 mb-1">Hourly Rate ($)</label>
-                  <input
-                    type="number"
-                    className="admin-input"
-                    value={editingVA.hourlyRate || ''}
-                    onChange={(e) => setEditingVA({ ...editingVA, hourlyRate: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-admin-700 mb-1">Skills (comma-separated)</label>
-                <input
-                  type="text"
-                  className="admin-input"
-                  value={editingVA.skills || ''}
-                  onChange={(e) => setEditingVA({ ...editingVA, skills: e.target.value })}
-                  placeholder="e.g., JavaScript, React, Node.js"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-admin-700 mb-1">Bio</label>
-                <textarea
-                  className="admin-input"
-                  rows={4}
-                  value={editingVA.bio || ''}
-                  onChange={(e) => setEditingVA({ ...editingVA, bio: e.target.value })}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-admin-700 mb-1">Experience Level</label>
-                  <select
-                    className="admin-select"
-                    value={editingVA.experience || ''}
-                    onChange={(e) => setEditingVA({ ...editingVA, experience: e.target.value })}
-                  >
-                    <option value="">Select Experience</option>
-                    <option value="entry">Entry Level</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="expert">Expert</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-admin-700 mb-1">Availability</label>
-                  <select
-                    className="admin-select"
-                    value={editingVA.availability || ''}
-                    onChange={(e) => setEditingVA({ ...editingVA, availability: e.target.value })}
-                  >
-                    <option value="">Select Availability</option>
-                    <option value="full-time">Full Time</option>
-                    <option value="part-time">Part Time</option>
-                    <option value="contract">Contract</option>
-                    <option value="freelance">Freelance</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4 border-t border-admin-200">
-                <button
-                  onClick={() => setShowEditModal(false)}
-                  className="admin-button-secondary"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveEdit}
-                  disabled={updateVAMutation.isLoading}
-                  className="admin-button-primary"
-                >
-                  {updateVAMutation.isLoading ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Comprehensive VA Edit Modal */}
+      <VAEditModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingVAId(null);
+        }}
+        vaId={editingVAId}
+        onSuccess={handleEditSuccess}
+      />
     </div>
   );
 };

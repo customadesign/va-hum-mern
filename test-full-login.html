@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .status { margin: 20px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button { 
+            padding: 10px 20px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            margin: 10px 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button:hover { background-color: #f0f0f0; }
+        .log { 
+            background: #f5f5f5; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Login Test</h1>
+    
+    <div>
+        <h2>Test Configuration:</h2>
+        <ul>
+            <li>Backend URL: http://localhost:8000</li>
+            <li>Frontend URL: http://localhost:4000</li>
+            <li>Email: admin@linkage.ph</li>
+            <li>Password: admin123</li>
+        </ul>
+    </div>
+    
+    <div>
+        <button onclick="testDirectLogin()">Test Direct Backend Login</button>
+        <button onclick="testFrontendLogin()">Test Frontend Login Flow</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <div id="logs"></div>
+    
+    <script>
+        const backendURL = 'http://localhost:8000';
+        const frontendURL = 'http://localhost:4000';
+        const logs = document.getElementById('logs');
+        
+        function addLog(message, type = 'info') {
+            const log = document.createElement('div');
+            log.className = 'log ' + type;
+            log.innerHTML = new Date().toLocaleTimeString() + ' - ' + message;
+            logs.appendChild(log);
+        }
+        
+        function clearLogs() {
+            logs.innerHTML = '';
+        }
+        
+        async function testDirectLogin() {
+            addLog('Starting direct backend login test...', 'info');
+            
+            try {
+                // Step 1: Get CSRF token
+                addLog('Getting CSRF token from backend...', 'info');
+                const csrfResponse = await fetch(backendURL + '/api/auth/csrf', {
+                    credentials: 'include'
+                });
+                const csrfData = await csrfResponse.json();
+                addLog('CSRF token obtained: ' + csrfData.csrfToken.substring(0, 20) + '...', 'success');
+                
+                // Extract XSRF-TOKEN from cookies
+                const xsrfToken = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('XSRF-TOKEN='))
+                    ?.split('=')[1];
+                
+                // Step 2: Login
+                addLog('Attempting login with credentials...', 'info');
+                const loginResponse = await fetch(backendURL + '/api/auth/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': xsrfToken || csrfData.csrfToken
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'admin@linkage.ph',
+                        password: 'admin123'
+                    })
+                });
+                
+                const loginData = await loginResponse.json();
+                
+                if (loginData.success) {
+                    addLog('✅ Login successful!', 'success');
+                    addLog('User: ' + JSON.stringify(loginData.user), 'success');
+                    addLog('Token received: ' + (loginData.token ? 'Yes' : 'No'), 'success');
+                } else {
+                    addLog('❌ Login failed: ' + (loginData.error || 'Unknown error'), 'error');
+                }
+                
+            } catch (error) {
+                addLog('❌ Error: ' + error.message, 'error');
+            }
+        }
+        
+        async function testFrontendLogin() {
+            addLog('Opening frontend login page in new window...', 'info');
+            addLog('Please login manually with:', 'info');
+            addLog('Email: admin@linkage.ph', 'info');
+            addLog('Password: admin123', 'info');
+            window.open(frontendURL + '/login', '_blank');
+        }
+    </script>
+</body>
+</html>

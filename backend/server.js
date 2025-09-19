@@ -56,7 +56,16 @@ const adminModerationRoutes = require('./routes/adminModeration');
 const monitoringRoutes = require('./routes/monitoring');
 const adminNotificationRoutes = require('./routes/adminNotifications');
 const adminInvitationRoutes = require('./routes/adminInvitations');
+const adminInterceptRoutes = require('./routes/adminIntercept');
 const healthRoutes = require('./routes/health');
+const announcementRoutes = require('./routes/announcements');
+const billingRoutes = require('./routes/billing');
+const settingsRoutes = require('./routes/settings');
+const universalSearchRoutes = require('./routes/universalSearch');
+const emailTestRoutes = require('./routes/emailTest');
+const passwordResetRoutes = require('./routes/passwordReset');
+const discordRoutes = require('./routes/discord');
+const webinarRoutes = require('./routes/webinar');
 
 
 // Dynamic LinkedIn credentials based on mode (same logic as passport.js)
@@ -95,6 +104,7 @@ if (credentials.clientId && credentials.clientSecret) {
 // Import middleware
 const errorHandler = require('./middleware/error');
 const { validateLinkedInConfig, logLinkedInRequest } = require('./middleware/linkedinValidation');
+const { attachNotificationHelper, trackNotificationInteraction } = require('./middleware/notificationMiddleware');
 
 
 
@@ -130,7 +140,7 @@ const corsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-CSRF-Token'],
   exposedHeaders: ['Set-Cookie'],
   optionsSuccessStatus: 200,
   maxAge: 86400 // Cache preflight for 24 hours
@@ -153,11 +163,11 @@ const performanceMetrics = new PerformanceMetrics();
 // Monitor database performance
 monitorDatabasePerformance(mongoose, performanceMetrics);
 
-// Sentry request handler (must be first)
-if (process.env.SENTRY_DSN) {
-  app.use(Sentry.Handlers.requestHandler());
-  app.use(Sentry.Handlers.tracingHandler());
-}
+// Sentry request handler (must be first) - Disabled due to compatibility issues
+// if (process.env.SENTRY_DSN) {
+//   app.use(Sentry.Handlers.requestHandler());
+//   app.use(Sentry.Handlers.tracingHandler());
+// }
 
 // Status monitor (development only)
 if (process.env.NODE_ENV !== 'production') {
@@ -187,10 +197,32 @@ app.use(performanceMiddleware(performanceMetrics));
 require('./config/passport');
 app.use(passport.initialize());
 
-// Security middleware
-app.use(helmet());
+// Security middleware with relaxed CSP for development
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "http://localhost:*", "https://images.unsplash.com"],
+      mediaSrc: ["'self'", "http://localhost:*"],
+      connectSrc: ["'self'", "http://localhost:*"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+      scriptSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: null, // Disable for localhost
+    },
+  },
+  crossOriginResourcePolicy: { policy: "cross-origin" } // Allow cross-origin access to uploads
+}));
 app.use(cors(corsOptions));
 app.use(compression());
+
+// Trust proxy for rate limiting (required for X-Forwarded-For header handling)
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', true);
+} else {
+  // In development, only trust localhost proxy
+  app.set('trust proxy', 'loopback');
+}
 
 // Rate limiting with safe defaults to avoid NaN/undefined crashes when env vars are missing
 const windowMinutes = parseInt(process.env.RATE_LIMIT_WINDOW || '15', 10);
@@ -211,6 +243,10 @@ app.use(cookieParser());
 // LinkedIn OAuth validation middleware
 app.use(validateLinkedInConfig);
 app.use(logLinkedInRequest);
+
+// Notification middleware - attach helpers to all requests
+app.use(attachNotificationHelper);
+app.use(trackNotificationInteraction);
 
 
 // Health check route
@@ -258,6 +294,16 @@ app.use('/api/system', systemRoutes); // System status and health
 app.use('/api/admin/moderation', adminModerationRoutes); // Admin moderation tools
 app.use('/api/admin/notifications', adminNotificationRoutes); // Admin notification control
 app.use('/api/admin/invitations', adminInvitationRoutes); // Admin invitation system
+app.use('/api/admin/intercept', adminInterceptRoutes); // Admin intercept messaging system
+app.use('/api/announcements', announcementRoutes); // Announcement system
+app.use('/api/billing', billingRoutes); // Billing and trial management
+app.use('/api/settings', settingsRoutes); // Business settings management
+app.use('/api/admin/search', universalSearchRoutes); // Universal search for admin panel
+app.use('/api/admin/settings', settingsRoutes); // Admin panel settings management
+app.use('/api/email-test', emailTestRoutes); // Email configuration testing (admin only)
+app.use('/api/password-reset', passwordResetRoutes); // Password reset system
+app.use('/api/discord', discordRoutes); // Discord integration for notifications
+app.use('/api/webinar', webinarRoutes); // Webinar registration system
 
 // Health and monitoring routes
 app.use('/api/health', healthRoutes); // Health check endpoints
@@ -285,10 +331,10 @@ if (linkedinAuthRoutes) {
 // Static files for uploads with CORS
 app.use('/uploads', cors(corsOptions), express.static(path.join(__dirname, 'uploads')));
 
-// Sentry error handler (must be before any other error middleware)
-if (process.env.SENTRY_DSN) {
-  app.use(Sentry.Handlers.errorHandler());
-}
+// Sentry error handler (must be before any other error middleware) - Disabled due to compatibility issues
+// if (process.env.SENTRY_DSN) {
+//   app.use(Sentry.Handlers.errorHandler());
+// }
 
 // Performance error tracking middleware
 app.use(errorTrackingMiddleware(performanceMetrics));
@@ -296,18 +342,88 @@ app.use(errorTrackingMiddleware(performanceMetrics));
 // Error handler (must be last)
 app.use(errorHandler);
 
-// Socket.io connection handling
+// Socket.io connection handling with enhanced admin support
 io.on('connection', (socket) => {
   console.log('New WebSocket connection');
 
-  socket.on('join', (userId) => {
+  // Handle user room join
+  socket.on('join', async (userId) => {
     socket.join(userId);
     console.log(`User ${userId} joined their room`);
+    
+    // Check if user is admin and join admin room
+    try {
+      const User = require('./models/User');
+      const user = await User.findById(userId);
+      if (user && user.admin) {
+        socket.join('admin-notifications');
+        console.log(`Admin ${userId} joined admin notification room`);
+      }
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+    }
   });
 
+  // Handle user room leave
   socket.on('leave', (userId) => {
     socket.leave(userId);
-    console.log(`User ${userId} left their room`);
+    socket.leave('admin-notifications');
+    console.log(`User ${userId} left their rooms`);
+  });
+  
+  // Handle admin-specific events
+  socket.on('join-admin-room', (adminId) => {
+    socket.join('admin-notifications');
+    socket.join(`admin-${adminId}`);
+    console.log(`Admin ${adminId} joined admin rooms`);
+  });
+  
+  socket.on('leave-admin-room', (adminId) => {
+    socket.leave('admin-notifications');
+    socket.leave(`admin-${adminId}`);
+    console.log(`Admin ${adminId} left admin rooms`);
+  });
+
+  // Handle typing indicators
+  socket.on('typing_start', (data) => {
+    const { conversationId, userId } = data;
+    console.log(`User ${userId} started typing in conversation ${conversationId}`);
+    
+    // Emit to all other participants in the conversation
+    socket.to(`conversation-${conversationId}`).emit('typing_status', {
+      conversationId,
+      userId,
+      isTyping: true
+    });
+  });
+
+  socket.on('typing_stop', (data) => {
+    const { conversationId, userId } = data;
+    console.log(`User ${userId} stopped typing in conversation ${conversationId}`);
+    
+    // Emit to all other participants in the conversation
+    socket.to(`conversation-${conversationId}`).emit('typing_status', {
+      conversationId,
+      userId,
+      isTyping: false
+    });
+  });
+
+  // Handle joining conversation rooms for real-time updates
+  socket.on('join-conversation', (conversationId) => {
+    socket.join(`conversation-${conversationId}`);
+    console.log(`Socket joined conversation room: ${conversationId}`);
+  });
+
+  socket.on('leave-conversation', (conversationId) => {
+    socket.leave(`conversation-${conversationId}`);
+    console.log(`Socket left conversation room: ${conversationId}`);
+  });
+
+  // Handle notification acknowledgment
+  socket.on('notification-acknowledged', async (data) => {
+    const { notificationId, userId } = data;
+    console.log(`Notification ${notificationId} acknowledged by user ${userId}`);
   });
 
   socket.on('disconnect', () => {
@@ -320,15 +436,25 @@ app.set('io', io);
 
 // Import database connection
 const connectDB = require('./config/database');
+const ensureAdminUser = require('./utils/ensureAdminUser');
 
 // Start server
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
-  await connectDB();
-  
+  try {
+    await connectDB();
+
+    // Ensure admin user exists
+    await ensureAdminUser();
+  } catch (error) {
+    console.error('Warning: Database connection failed:', error.message);
+    console.log('Server will start with limited functionality (webinar routes will work)');
+  }
+
   server.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    console.log('Webinar registration endpoint available at: POST /api/webinar/register');
   });
 };
 

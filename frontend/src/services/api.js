@@ -8,6 +8,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Always send cookies with requests
 });
 
 // Global token getter function (set by auth context)
@@ -74,5 +75,17 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Announcement-specific endpoints
+export const announcementAPI = {
+  // Get announcements for current user based on their role
+  getAnnouncements: () => api.get('/announcements'),
+  
+  // Mark a specific announcement as read
+  markAnnouncementAsRead: (id) => api.post(`/announcements/${id}/read`),
+  
+  // Get count of unread announcements
+  getUnreadCount: () => api.get('/announcements/unread-count'),
+};
 
 export default api;

@@ -40,8 +40,9 @@ const createShortUrl = catchAsync(async (req, res) => {
     }
   } while (!(await ShortUrl.isCodeUnique(shortCode)));
 
-  // Create the short URL
-  const originalUrl = `${req.protocol}://${req.get('host')}/vas/${vaId}`;
+  // Create the short URL - redirect to frontend VA profile
+  const frontendHost = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const originalUrl = `${frontendHost}/vas/${vaId}`;
   const shortUrl = new ShortUrl({
     originalUrl,
     shortCode,
@@ -97,8 +98,9 @@ const createPublicVAShortUrl = catchAsync(async (req, res) => {
     }
   } while (!(await ShortUrl.isCodeUnique(shortCode)));
 
-  // Create the short URL
-  const originalUrl = `${req.protocol}://${req.get('host')}/vas/${vaId}`;
+  // Create the short URL - redirect to frontend VA profile
+  const frontendHost = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const originalUrl = `${frontendHost}/vas/${vaId}`;
   const shortUrl = new ShortUrl({
     originalUrl,
     shortCode,
@@ -142,8 +144,10 @@ const redirectShortUrl = catchAsync(async (req, res) => {
   shortUrl.clicks += 1;
   await shortUrl.save();
 
-  // Redirect to original URL
-  res.redirect(shortUrl.originalUrl);
+  // Redirect to original URL with share parameter and shortlink tracking
+  const separator = shortUrl.originalUrl.includes('?') ? '&' : '?';
+  const redirectUrl = `${shortUrl.originalUrl}${separator}share=true&via=shortlink`;
+  res.redirect(redirectUrl);
 });
 
 // Get short URL info (for analytics)

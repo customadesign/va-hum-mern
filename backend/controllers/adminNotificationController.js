@@ -3,6 +3,7 @@ const User = require('../models/User');
 const VA = require('../models/VA');
 const Business = require('../models/Business');
 const { sendEmail } = require('../utils/email');
+const { createNotificationWithSocket, broadcastNotification } = require('../utils/notificationHelper');
 
 // Notification types that admins can control
 const ADMIN_NOTIFICATION_TYPES = {
@@ -49,19 +50,22 @@ exports.sendTargetedNotification = async (req, res) => {
     const notifications = [];
     const emailPromises = [];
 
+    // Get Socket.io instance from Express app
+    const io = req.app.get('io');
+    
     for (const userId of userIds) {
-      const notification = await Notification.create({
+      const notification = await createNotificationWithSocket({
         recipient: userId,
         type,
-        title,
-        message,
-        priority,
-        data: {
+        params: {
+          title,
+          message,
+          priority,
           ...data,
           sentBy: req.user._id,
           sentAt: new Date()
         }
-      });
+      }, io);
       notifications.push(notification);
 
       // Send email notification if requested
@@ -169,24 +173,27 @@ exports.sendBroadcastNotification = async (req, res) => {
     const notifications = [];
     const emailPromises = [];
 
+    // Get Socket.io instance from Express app
+    const io = req.app.get('io');
+    
     // Create notifications for all users
     for (const user of users) {
       if (!user || !user._id) continue;
 
-      const notification = await Notification.create({
+      const notification = await createNotificationWithSocket({
         recipient: user._id,
         type,
-        title,
-        message,
-        priority,
-        data: {
+        params: {
+          title,
+          message,
+          priority,
           ...data,
           sentBy: req.user._id,
           sentAt: new Date(),
           broadcast: true,
           targetGroup
         }
-      });
+      }, io);
       notifications.push(notification);
 
       // Send email notification if requested and user has email notifications enabled
@@ -519,6 +526,191 @@ exports.updateUserNotificationSettings = async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to update notification settings'
+    });
+  }
+};
+
+/**
+ * Get archived notifications statistics for admin
+ */
+exports.getArchivedStats = async (req, res) => {
+  try {
+    const { startDate, endDate, userId } = req.query;
+    
+    const dateFilter = {};
+    if (startDate) dateFilter.$gte = new Date(startDate);
+    if (endDate) dateFilter.$lte = new Date(endDate);
+    
+    const query = { archived: true };
+    if (dateFilter.$gte || dateFilter.$lte) {
+      query.archivedAt = dateFilter;
+    }
+    if (userId) {
+      query.recipient = userId;
+    }
+
+    const [
+      totalArchived,
+      archivedByType,
+      archivedByUser,
+      recentlyArchived
+    ] = await Promise.all([
+      Notification.countDocuments(query),
+      Notification.aggregate([
+        { $match: query },
+        { $group: { _id: '$type', count: { $sum: 1 } } }
+      ]),
+      Notification.aggregate([
+        { $match: query },
+        { $group: { _id: '$recipient', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 10 },
+        { $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }},
+        { $unwind: '$user' },
+        { $project: {
+          count: 1,
+          email: '$user.email'
+        }}
+      ]),
+      Notification.find(query)
+        .sort('-archivedAt')
+        .limit(10)
+        .populate('recipient', 'email')
+        .select('type archivedAt createdAt recipient')
+    ]);
+
+    res.json({
+      success: true,
+      stats: {
+        totalArchived,
+        byType: archivedByType.reduce((acc, item) => {
+          acc[item._id] = item.count;
+          return acc;
+        }, {}),
+        topUsersByArchived: archivedByUser,
+        recentlyArchived
+      }
+    });
+  } catch (error) {
+    console.error('Get archived stats error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve archived statistics'
+    });
+  }
+};
+
+/**
+ * Bulk archive notifications for admin
+ */
+exports.bulkArchiveNotifications = async (req, res) => {
+  try {
+    const { criteria } = req.body;
+    
+    if (!criteria) {
+      return res.status(400).json({
+        success: false,
+        error: 'Archive criteria required'
+      });
+    }
+
+    const query = { archived: false };
+
+    // Build query based on criteria
+    if (criteria.olderThan) {
+      query.createdAt = { $lt: new Date(criteria.olderThan) };
+    }
+    if (criteria.type) {
+      query.type = criteria.type;
+    }
+    if (criteria.read === true) {
+      query.readAt = { $ne: null };
+    }
+    if (criteria.userId) {
+      query.recipient = criteria.userId;
+    }
+
+    const result = await Notification.updateMany(
+      query,
+      {
+        archived: true,
+        archivedAt: new Date()
+      }
+    );
+
+    res.json({
+      success: true,
+      message: `Archived ${result.modifiedCount} notifications`,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('Bulk archive error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to bulk archive notifications'
+    });
+  }
+};
+
+/**
+ * Restore archived notifications for admin
+ */
+exports.restoreArchivedNotifications = async (req, res) => {
+  try {
+    const { notificationIds, criteria } = req.body;
+    
+    let result;
+
+    if (notificationIds && notificationIds.length > 0) {
+      result = await Notification.updateMany(
+        { _id: { $in: notificationIds }, archived: true },
+        {
+          archived: false,
+          $unset: { archivedAt: 1 }
+        }
+      );
+    } else if (criteria) {
+      const query = { archived: true };
+      
+      if (criteria.archivedAfter) {
+        query.archivedAt = { $gte: new Date(criteria.archivedAfter) };
+      }
+      if (criteria.type) {
+        query.type = criteria.type;
+      }
+      if (criteria.userId) {
+        query.recipient = criteria.userId;
+      }
+
+      result = await Notification.updateMany(
+        query,
+        {
+          archived: false,
+          $unset: { archivedAt: 1 }
+        }
+      );
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: 'No restoration criteria specified'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Restored ${result.modifiedCount} notifications`,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('Restore archived error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to restore archived notifications'
     });
   }
 };

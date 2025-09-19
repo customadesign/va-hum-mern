@@ -3,9 +3,50 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { protect } = require('../middleware/auth');
+const { protect } = require('../middleware/hybridAuth');
 const { sendEmail } = require('../utils/email');
-const { authLimiter, passwordResetLimiter } = require('../middleware/rateLimiter');
+const { authLimiter, passwordResetLimiter, twoFactorValidationLimiter } = require('../middleware/rateLimiter');
+const { checkTwoFactorStatus, validateTwoFactorForLogin } = require('../middleware/twoFactorAuth');
+const { trackLoginSession } = require('../middleware/sessionTracker');
+const crypto = require('crypto');
+
+// Add crypto for CSRF token generation
+// CSRF helper: create token and set cookie
+function generateCsrfToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+// Middleware to validate CSRF via double-submit cookie
+function requireCsrf(req, res, next) {
+  const cookieToken = req.cookies && (req.cookies['XSRF-TOKEN'] || req.cookies['xsrf-token']);
+  const headerToken = req.headers['x-csrf-token'];
+  if (!cookieToken || !headerToken || cookieToken !== headerToken) {
+    return res.status(403).json({ success: false, error: 'Invalid CSRF token' });
+  }
+  return next();
+}
+// Helper to sanitize logs (avoid logging raw credentials)
+function sanitizeBody(body = {}) {
+  const clone = { ...body };
+  if (clone.password) clone.password = '***';
+  if (clone.twoFactorCode) clone.twoFactorCode = '***';
+  return clone;
+}
+
+// @route   GET /api/auth/csrf
+// @desc    Issue CSRF token cookie for subsequent state-changing requests
+// @access  Public
+router.get('/csrf', (req, res) => {
+  const token = generateCsrfToken();
+  // XSRF cookie: readable by JS (not httpOnly) to support SPA header submission
+  res.cookie('XSRF-TOKEN', token, {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 1000 // 1 hour
+  });
+  res.json({ success: true, csrfToken: token });
+});
 
 // @route   POST /api/auth/register
 // @desc    Register user
@@ -110,19 +151,43 @@ router.post('/register', authLimiter, [
 // @access  Public
 router.post('/login', authLimiter, [
   body('email').isEmail().normalizeEmail(),
-  body('password').exists()
+  body('password').exists(),
+  body('twoFactorCode').optional().isLength({ min: 6, max: 8 })
 ], async (req, res) => {
+  console.log('🔐 Login request received:', {
+    body: sanitizeBody(req.body),
+    headers: {
+      'content-type': req.headers['content-type'],
+      'origin': req.headers.origin,
+      'user-agent': req.headers['user-agent']
+    }
+  });
+  
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    console.log('❌ Validation errors:', errors.array());
+    return res.status(400).json({ 
+      success: false,
+      error: 'Validation failed',
+      errors: errors.array() 
+    });
   }
 
   try {
-    const { email, password } = req.body;
+    const { email, password, twoFactorCode } = req.body;
+    console.log('🔍 Looking for user with email:', email);
 
     // Check for user
     const user = await User.findOne({ email }).select('+password');
+    console.log('👤 User found:', {
+      exists: !!user,
+      email: user?.email,
+      hasPassword: !!user?.password,
+      admin: user?.admin
+    });
+    
     if (!user) {
+      console.log('❌ User not found, sending 401');
       return res.status(401).json({
         success: false,
         error: 'Invalid credentials'
@@ -130,8 +195,12 @@ router.post('/login', authLimiter, [
     }
 
     // Check password
+    console.log('🔐 Checking password for user:', user.email);
     const isMatch = await user.matchPassword(password);
+    console.log('🔑 Password match result:', isMatch);
+    
     if (!isMatch) {
+      console.log('❌ Password mismatch, sending 401');
       return res.status(401).json({
         success: false,
         error: 'Invalid credentials'
@@ -144,6 +213,48 @@ router.post('/login', authLimiter, [
         success: false,
         error: 'Account suspended'
       });
+    }
+
+    // Check 2FA status
+    const twoFactorStatus = await checkTwoFactorStatus(user._id);
+    console.log('🔒 2FA Status:', twoFactorStatus);
+
+    if (twoFactorStatus.enabled) {
+      if (twoFactorStatus.locked) {
+        return res.status(429).json({
+          success: false,
+          error: 'Account temporarily locked due to too many failed 2FA attempts'
+        });
+      }
+
+      if (!twoFactorCode) {
+        console.log('🔐 2FA required but not provided');
+        return res.status(200).json({
+          success: false,
+          requiresTwoFactor: true,
+          message: 'Please provide your two-factor authentication code'
+        });
+      }
+
+      // Validate 2FA code
+      console.log('🔐 Validating 2FA code');
+      const twoFactorResult = await validateTwoFactorForLogin(user._id, twoFactorCode);
+      
+      if (!twoFactorResult.valid) {
+        console.log('❌ Invalid 2FA code');
+        return res.status(401).json({
+          success: false,
+          error: twoFactorResult.error || 'Invalid two-factor authentication code',
+          attemptsRemaining: twoFactorResult.attemptsRemaining
+        });
+      }
+
+      console.log('✅ 2FA validation successful');
+      
+      // Add warning if backup code was used
+      if (twoFactorResult.backupCodeUsed) {
+        console.log(`⚠️  Backup code used. ${twoFactorResult.remainingBackupCodes} codes remaining`);
+      }
     }
 
     // Update sign in info
@@ -160,11 +271,20 @@ router.post('/login', authLimiter, [
     // Load related data
     await user.populate(['va', 'business']);
 
-    // Set secure cookie options for production
+    // Track login session for security monitoring
+    req.user = user;
+    await new Promise((resolve, reject) => {
+      trackLoginSession(req, res, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+
+    // Set secure cookie options for cross-site cookies
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-origin in production
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Relax sameSite in development
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       path: '/'
     };
@@ -173,7 +293,7 @@ router.post('/login', authLimiter, [
     res.cookie('authToken', token, cookieOptions);
     res.cookie('refreshToken', refreshToken, { ...cookieOptions, httpOnly: true });
 
-    res.json({
+    const response = {
       success: true,
       token,
       refreshToken,
@@ -185,7 +305,17 @@ router.post('/login', authLimiter, [
         va: user.va,
         business: user.business
       }
-    });
+    };
+
+    // Add 2FA warnings if applicable
+    if (twoFactorStatus.enabled && twoFactorCode) {
+      const twoFactorResult = await validateTwoFactorForLogin(user._id, twoFactorCode);
+      if (twoFactorResult.backupCodeUsed) {
+        response.warning = `Backup code used. ${twoFactorResult.remainingBackupCodes} backup codes remaining. Please generate new ones if running low.`;
+      }
+    }
+
+    res.json(response);
   } catch (err) {
     console.error(err);
     res.status(500).json({
@@ -193,6 +323,29 @@ router.post('/login', authLimiter, [
       error: 'Server error'
     });
   }
+});
+
+// @route   POST /api/auth/clear-session
+// @desc    Clear authentication session (for login page)
+// @access  Public
+router.post('/clear-session', (req, res) => {
+  // SECURITY FIX: Clear authentication cookies when accessing login page
+  // This prevents auto-authentication on refresh
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    path: '/'
+  };
+
+  // Clear both auth and refresh tokens
+  res.clearCookie('authToken', cookieOptions);
+  res.clearCookie('refreshToken', cookieOptions);
+
+  res.json({
+    success: true,
+    message: 'Session cleared successfully'
+  });
 });
 
 // @route   POST /api/auth/admin/login
@@ -255,11 +408,11 @@ router.post('/admin/login', authLimiter, [
     const refreshToken = user.getRefreshToken();
     await user.save();
 
-    // Set secure cookie options for production
+    // Set secure cookie options for cross-site cookies
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Relax sameSite in development
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       path: '/'
     };
@@ -350,7 +503,8 @@ router.get('/me', protect, async (req, res) => {
     
     const user = await User.findById(req.user.id)
       .populate('va')
-      .populate('business');
+      .populate('business')
+      .populate('avatarFileId');
 
     if (!user) {
       console.log('User not found in database:', req.user.id);
@@ -474,7 +628,7 @@ router.post('/complete-profile', protect, async (req, res) => {
       const VA = require('../models/VA');
       const existingVA = await VA.findOne({ user: userId });
       if (!existingVA) {
-        await VA.create({
+        const newVA = await VA.create({
           user: userId,
           name: user.name || user.email.split('@')[0],
           email: user.email,
@@ -482,18 +636,57 @@ router.post('/complete-profile', protect, async (req, res) => {
           hourlyRate: 5,
           bio: ''
         });
+        
+        // Emit Socket.io event for real-time dashboard updates
+        const io = req.app.get('io');
+        if (io) {
+          io.to('admin-notifications').emit('new_va_registered', {
+            vaId: newVA._id,
+            name: newVA.name,
+            email: newVA.email,
+            createdAt: newVA.createdAt
+          });
+          
+          io.to('admin-notifications').emit('dashboard_update', {
+            type: 'new_va',
+            data: {
+              vaId: newVA._id,
+              name: newVA.name
+            }
+          });
+        }
       }
     } else if (role === 'business') {
       const Business = require('../models/Business');
       const existingBusiness = await Business.findOne({ user: userId });
       if (!existingBusiness) {
-        await Business.create({
+        const newBusiness = await Business.create({
           user: userId,
           contactName: user.name || user.email.split('@')[0],
           email: user.email,
           company: '',
           bio: ''
         });
+        
+        // Emit Socket.io event for real-time dashboard updates  
+        const io = req.app.get('io');
+        if (io) {
+          io.to('admin-notifications').emit('new_business_registered', {
+            businessId: newBusiness._id,
+            company: newBusiness.company || 'New Business',
+            contactName: newBusiness.contactName,
+            email: newBusiness.email,
+            createdAt: newBusiness.createdAt
+          });
+          
+          io.to('admin-notifications').emit('dashboard_update', {
+            type: 'new_business',
+            data: {
+              businessId: newBusiness._id,
+              company: newBusiness.company || 'New Business'
+            }
+          });
+        }
       }
     }
 
@@ -709,19 +902,27 @@ router.post('/refresh', async (req, res) => {
 // @route   POST /api/auth/admin/logout
 // @desc    Logout admin user (clear cookies)
 // @access  Private
-router.post('/admin/logout', protect, async (req, res) => {
+router.post('/admin/logout', protect, requireCsrf, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    
+
     if (user) {
       user.refreshToken = undefined;
       user.refreshTokenExpire = undefined;
       await user.save();
     }
 
-    // Clear cookies
-    res.clearCookie('authToken');
-    res.clearCookie('refreshToken');
+    // SECURITY FIX: Clear cookies with proper options to prevent auth bypass
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/'
+    };
+
+    // Clear both auth and refresh tokens
+    res.clearCookie('authToken', cookieOptions);
+    res.clearCookie('refreshToken', cookieOptions);
 
     res.json({
       success: true,
@@ -736,18 +937,83 @@ router.post('/admin/logout', protect, async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/change-password
+// @desc    Change user password
+// @access  Private
+router.post('/change-password', protect, [
+  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters long')
+], requireCsrf, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      errors: errors.array()
+    });
+  }
+
+  try {
+    const { currentPassword, newPassword } = req.body;
+    
+    // Get user with password
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    // Check current password
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        error: 'Current password is incorrect'
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully'
+    });
+  } catch (err) {
+    console.error('Change password error:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
 // @route   POST /api/auth/logout
 // @desc    Logout user (invalidate refresh token)
 // @access  Private
-router.post('/logout', protect, async (req, res) => {
+router.post('/logout', protect, requireCsrf, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    
+
     if (user) {
       user.refreshToken = undefined;
       user.refreshTokenExpire = undefined;
       await user.save();
     }
+
+    // SECURITY FIX: Clear HttpOnly cookies to prevent auth bypass
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/'
+    };
+
+    // Clear both auth and refresh tokens
+    res.clearCookie('authToken', cookieOptions);
+    res.clearCookie('refreshToken', cookieOptions);
 
     res.json({
       success: true,

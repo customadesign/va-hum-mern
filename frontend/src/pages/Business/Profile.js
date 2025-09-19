@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useFormik } from 'formik';
@@ -6,8 +6,11 @@ import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import { useBranding } from '../../contexts/BrandingContext';
+import { getAllCountries, getStatesForCountry, getCitiesForState } from '../../data/locationData';
+import GooglePlacesAutocomplete from '../../components/GooglePlacesAutocomplete';
 import { 
-  CameraIcon, 
+  CameraIcon,
+  ArrowUpTrayIcon,
   InformationCircleIcon, 
   PlusIcon, 
   TrashIcon,
@@ -45,6 +48,72 @@ const WORK_ENVIRONMENTS = [
   { value: 'flexible', label: 'Flexible' }
 ];
 
+// Comprehensive country list
+const COUNTRIES = [
+  'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda',
+  'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas',
+  'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize',
+  'Benin', 'Bhutan', 'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil',
+  'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon',
+  'Canada', 'Cape Verde', 'Central African Republic', 'Chad', 'Chile', 'China',
+  'Colombia', 'Comoros', 'Congo', 'Costa Rica', 'Croatia', 'Cuba',
+  'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic',
+  'East Timor', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea',
+  'Estonia', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon',
+  'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada',
+  'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Honduras',
+  'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq',
+  'Ireland', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jordan',
+  'Kazakhstan', 'Kenya', 'Kiribati', 'North Korea', 'South Korea', 'Kosovo',
+  'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho',
+  'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macedonia',
+  'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta',
+  'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico', 'Micronesia', 'Moldova',
+  'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar',
+  'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Zealand', 'Nicaragua',
+  'Niger', 'Nigeria', 'Norway', 'Oman', 'Pakistan', 'Palau',
+  'Palestine', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines',
+  'Poland', 'Portugal', 'Qatar', 'Romania', 'Russia', 'Rwanda',
+  'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines',
+  'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal',
+  'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia',
+  'Solomon Islands', 'Somalia', 'South Africa', 'South Sudan', 'Spain', 'Sri Lanka',
+  'Sudan', 'Suriname', 'Swaziland', 'Sweden', 'Switzerland', 'Syria',
+  'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Togo', 'Tonga',
+  'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Tuvalu', 'Uganda',
+  'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay',
+  'Uzbekistan', 'Vanuatu', 'Vatican City', 'Venezuela', 'Vietnam', 'Yemen',
+  'Zambia', 'Zimbabwe'
+].sort();
+
+// Example suggestions for company specialties
+const SPECIALTY_SUGGESTIONS = [
+  'Digital Marketing', 'Web Development', 'E-commerce', 'Social Media Management',
+  'Content Creation', 'SEO/SEM', 'Brand Strategy', 'Mobile App Development',
+  'Data Analytics', 'Cloud Services', 'AI/Machine Learning', 'Cybersecurity',
+  'Project Management', 'Customer Support', 'Sales', 'Business Development',
+  'Graphic Design', 'Video Production', 'UX/UI Design', 'Consulting'
+];
+
+// Example suggestions for benefits & perks
+const BENEFITS_SUGGESTIONS = [
+  'Flexible Hours', 'Remote Work', 'Health Insurance', 'Paid Time Off',
+  'Professional Development', 'Performance Bonuses', 'Equipment Provided',
+  'Team Building Events', 'Career Growth', 'Work-Life Balance',
+  'Competitive Salary', 'Commission Structure', 'Training Programs',
+  'Mentorship', 'Parental Leave', 'Retirement Plan', 'Wellness Programs',
+  'Internet Stipend', 'Home Office Setup', 'Conference Attendance'
+];
+
+// Example suggestions for company values
+const VALUES_SUGGESTIONS = [
+  'Innovation', 'Integrity', 'Excellence', 'Teamwork', 'Customer Focus',
+  'Transparency', 'Accountability', 'Diversity & Inclusion', 'Sustainability',
+  'Continuous Learning', 'Quality', 'Trust', 'Respect', 'Collaboration',
+  'Entrepreneurship', 'Creativity', 'Passion', 'Results-Driven', 'Agility',
+  'Social Responsibility', 'Work-Life Balance', 'Growth Mindset', 'Empowerment'
+];
+
 const validationSchema = Yup.object({
   // Basic Information
   contactName: Yup.string().required('Contact name is required'),
@@ -53,7 +122,16 @@ const validationSchema = Yup.object({
   contactRole: Yup.string().required('Contact role is required'),
   email: Yup.string().email('Invalid email').required('Email is required'),
   phone: Yup.string(),
-  website: Yup.string().url('Must be a valid URL'),
+  website: Yup.string()
+    .test('valid-url', 'Must be a valid URL', function(value) {
+      if (!value) return true; // Allow empty
+      // Check if it's already a valid URL with protocol
+      if (/^https?:\/\/.+/.test(value)) {
+        return /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/.test(value);
+      }
+      // Check if it's a valid domain without protocol (we'll add https:// later)
+      return /^(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/.test(value);
+    }),
   
   // Company Details
   industry: Yup.string().required('Industry is required'),
@@ -91,6 +169,8 @@ export default function BusinessProfile() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [linkedinFilled, setLinkedinFilled] = useState(false);
   const [showLinkedinSuccess, setShowLinkedinSuccess] = useState(false);
+  const [availableStates, setAvailableStates] = useState([]);
+  const [availableCities, setAvailableCities] = useState([]);
 
   // Fetch current business profile
   const { data: profile, isLoading } = useQuery(
@@ -127,7 +207,7 @@ export default function BusinessProfile() {
   );
 
   // If bio/contactName are still defaults from setup, show as placeholders
-  const { user } = require('../../contexts/HybridAuthContext').useAuth();
+  const { user } = require('../../contexts/AuthContext').useAuth();
   const emailUsername = user?.email ? user.email.split('@')[0] : '';
   const isDefaultBio = profile?.bio === 'Tell us about your business...';
   const isDefaultCompany = !profile?.company || profile?.company === 'Your Company';
@@ -184,13 +264,86 @@ export default function BusinessProfile() {
       vaNotifications: profile?.vaNotifications || 'no',
       invisible: profile?.invisible || false,
       surveyRequestNotifications: profile?.surveyRequestNotifications ?? true,
+      
+      // Email Notifications
+      emailNotifications: {
+        newMessages: profile?.emailNotifications?.newMessages ?? true,
+        vaApplications: profile?.emailNotifications?.vaApplications ?? true,
+        vaMatches: profile?.emailNotifications?.vaMatches ?? true,
+        platformUpdates: profile?.emailNotifications?.platformUpdates ?? false,
+        marketingEmails: profile?.emailNotifications?.marketingEmails ?? false,
+        weeklyDigest: profile?.emailNotifications?.weeklyDigest ?? true
+      },
+      
+      // Communication Preferences
+      communicationPreferences: {
+        preferredContactMethod: profile?.communicationPreferences?.preferredContactMethod || 'email',
+        responseTime: profile?.communicationPreferences?.responseTime || 'within-24h',
+        availableForInterviews: profile?.communicationPreferences?.availableForInterviews ?? true,
+        allowDirectMessages: profile?.communicationPreferences?.allowDirectMessages ?? true,
+        autoReplyEnabled: profile?.communicationPreferences?.autoReplyEnabled ?? false,
+        autoReplyMessage: profile?.communicationPreferences?.autoReplyMessage || ''
+      },
+      
+      // Privacy Settings
+      privacySettings: {
+        showEmail: profile?.privacySettings?.showEmail ?? false,
+        showPhone: profile?.privacySettings?.showPhone ?? false,
+        showLocation: profile?.privacySettings?.showLocation ?? true,
+        showCompanySize: profile?.privacySettings?.showCompanySize ?? true,
+        allowAnalytics: profile?.privacySettings?.allowAnalytics ?? true
+      },
     },
     validationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
-      await updateProfileMutation.mutateAsync(values);
+      // Auto-prepend https:// to website if it doesn't have a protocol
+      const processedValues = {
+        ...values,
+        website: values.website && !values.website.match(/^https?:\/\//) 
+          ? `https://${values.website}` 
+          : values.website
+      };
+      
+      await updateProfileMutation.mutateAsync(processedValues);
     },
   });
+
+  // Update states when country changes
+  useEffect(() => {
+    if (formik.values.country) {
+      const states = getStatesForCountry(formik.values.country);
+      setAvailableStates(states);
+      // Reset state and city if country changed and no states available
+      if (states.length === 0) {
+        formik.setFieldValue('state', '');
+        formik.setFieldValue('city', '');
+        setAvailableCities([]);
+      }
+    } else {
+      setAvailableStates([]);
+      setAvailableCities([]);
+    }
+  }, [formik.values.country]);
+
+  // Update cities when state changes
+  useEffect(() => {
+    if (formik.values.country && formik.values.state) {
+      const cities = getCitiesForState(formik.values.country, formik.values.state);
+      setAvailableCities(cities);
+      // Only reset city if it's empty or if user is changing states manually (not from Google Places)
+      // Keep the city value if it was set by Google Places
+      if (cities.length > 0 && !formik.values.city) {
+        // Don't reset if city has a value from Google Places
+      } else if (cities.length > 0 && cities.includes(formik.values.city)) {
+        // City is in the list, keep it
+      } else if (cities.length === 0) {
+        // No predefined cities for this state, keep whatever city value exists
+      }
+    } else {
+      setAvailableCities([]);
+    }
+  }, [formik.values.state, formik.values.country]);
 
   // LinkedIn Auto-fill Effect (E Systems only)
   React.useEffect(() => {
@@ -258,7 +411,11 @@ export default function BusinessProfile() {
       
       // Update the profile with new avatar URL
       await api.put('/businesses/me', { avatar: response.data.url });
+      
+      // Invalidate both business profile and user profile queries to update all components
       queryClient.invalidateQueries('businessProfile');
+      queryClient.invalidateQueries('userProfile');
+      
       toast.success('Company logo updated successfully');
     } catch (error) {
       toast.error('Failed to upload company logo');
@@ -429,38 +586,72 @@ export default function BusinessProfile() {
                     {/* Company Logo */}
                     <div>
                       <span className="block text-sm font-medium text-gray-700">Company Logo *</span>
-                      <div className="mt-1 flex items-center">
-                        <div className="relative">
+                      <p className="mt-1 text-sm text-gray-500">
+                        Upload your company logo. Best dimensions: 400×400 pixels (square). PNG, JPG, GIF up to 5MB.
+                      </p>
+                      <div className="mt-3 flex items-center gap-4">
+                        <div 
+                          className="relative group cursor-pointer"
+                          onClick={() => !uploadingAvatar && avatarInputRef.current?.click()}
+                        >
+                          {/* Company Logo Image */}
                           {profile?.avatar || avatarPreview ? (
-                            <img
-                              className="h-24 w-24 rounded-lg object-cover border-2 border-gray-200"
-                              src={avatarPreview || profile?.avatar}
-                              alt="Company Logo"
-                            />
+                            <div className="relative">
+                              <img
+                                className="h-32 w-32 rounded-lg object-cover ring-4 ring-white shadow-lg transition-transform group-hover:scale-105"
+                                src={avatarPreview || profile?.avatar}
+                                alt="Company Logo"
+                              />
+                              {/* Hover Overlay - Only shown when logo exists */}
+                              <div className="absolute inset-0 rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
+                                <CameraIcon className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                              </div>
+                            </div>
                           ) : (
-                            <div className="h-24 w-24 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center border-2 border-gray-200">
-                              <span className="text-2xl font-bold text-white">
-                                {formik.values.company?.[0]?.toUpperCase() || 'C'}
-                              </span>
+                            <div className="relative">
+                              <div className="h-32 w-32 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center ring-4 ring-white shadow-lg transition-transform group-hover:scale-105">
+                                <BuildingOfficeIcon className="h-12 w-12 text-indigo-600" />
+                              </div>
+                              {/* Camera Icon Overlay - Always shown when no logo */}
+                              <div className="absolute inset-0 rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                                <div className="absolute bottom-0 right-0 bg-indigo-600 rounded-full p-2 shadow-lg transform translate-x-1 -translate-y-1 group-hover:scale-110 transition-transform">
+                                  <CameraIcon className="h-5 w-5 text-white" />
+                                </div>
+                              </div>
                             </div>
                           )}
+                          
+                          {/* Upload Progress Overlay */}
                           {uploadingAvatar && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 rounded-lg">
-                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 rounded-lg">
+                              <div className="text-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                                <span className="text-xs text-white font-medium">Uploading...</span>
+                              </div>
                             </div>
                           )}
                         </div>
-                        <div className="ml-5">
+
+                        {/* Upload Instructions */}
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium text-gray-900">
+                            {profile?.avatar ? "Update your logo" : "Add your company logo"}
+                          </h4>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {profile?.avatar 
+                              ? "Click on your logo to change it" 
+                              : "Click the camera icon to upload"}
+                          </p>
                           <button
                             type="button"
                             onClick={() => avatarInputRef.current?.click()}
-                            className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="mt-2 inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
                           >
-                            <CameraIcon className="h-4 w-4 inline mr-2" />
-                            Upload Logo
+                            <ArrowUpTrayIcon className="h-4 w-4 mr-1.5 text-gray-400" />
+                            Choose File
                           </button>
-                          <p className="mt-2 text-xs text-gray-500">Recommended: 400x400px minimum</p>
                         </div>
+                        
                         <input
                           ref={avatarInputRef}
                           type="file"
@@ -614,19 +805,22 @@ export default function BusinessProfile() {
                         </label>
                         <div className="mt-1">
                           <input
-                            type="url"
+                            type="text"
                             name="website"
                             id="website"
                             value={formik.values.website}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
-                            placeholder="https://www.yourcompany.com"
+                            placeholder="www.yourcompany.com"
                             className={`block w-full rounded-md shadow-sm sm:text-sm ${
                               formik.touched.website && formik.errors.website
                                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                                 : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                             }`}
                           />
+                          <p className="mt-1 text-xs text-gray-500">
+                            No need to include https:// - we'll add it automatically
+                          </p>
                         </div>
                         {formik.touched.website && formik.errors.website && (
                           <p className="mt-1 text-sm text-red-600">{formik.errors.website}</p>
@@ -786,6 +980,7 @@ export default function BusinessProfile() {
                     <div className="flex">
                       <input
                         type="text"
+                        id="specialties-input"
                         placeholder="Add a specialty (e.g. Digital Marketing, Web Development)"
                         className="flex-1 rounded-l-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         onKeyPress={(e) => {
@@ -798,15 +993,35 @@ export default function BusinessProfile() {
                       />
                       <button
                         type="button"
-                        onClick={(e) => {
-                          const input = e.target.previousElementSibling;
-                          addArrayItem('specialties', input.value);
-                          input.value = '';
+                        onClick={() => {
+                          const input = document.getElementById('specialties-input');
+                          if (input && input.value) {
+                            addArrayItem('specialties', input.value);
+                            input.value = '';
+                          }
                         }}
                         className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <PlusIcon className="h-4 w-4" />
                       </button>
+                    </div>
+                    {/* Suggestions */}
+                    <div className="mt-3">
+                      <p className="text-xs text-gray-500 mb-2">Suggestions (click to add):</p>
+                      <div className="flex flex-wrap gap-1">
+                        {SPECIALTY_SUGGESTIONS.filter(suggestion => 
+                          !formik.values.specialties?.includes(suggestion)
+                        ).map((suggestion, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => addArrayItem('specialties', suggestion)}
+                            className="text-xs px-2 py-1 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-full transition-colors"
+                          >
+                            + {suggestion}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -841,6 +1056,7 @@ export default function BusinessProfile() {
                     <div className="flex">
                       <input
                         type="text"
+                        id="benefits-input"
                         placeholder="Add a benefit (e.g. Flexible Hours, Professional Development)"
                         className="flex-1 rounded-l-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         onKeyPress={(e) => {
@@ -853,15 +1069,35 @@ export default function BusinessProfile() {
                       />
                       <button
                         type="button"
-                        onClick={(e) => {
-                          const input = e.target.previousElementSibling;
-                          addArrayItem('benefits', input.value);
-                          input.value = '';
+                        onClick={() => {
+                          const input = document.getElementById('benefits-input');
+                          if (input && input.value) {
+                            addArrayItem('benefits', input.value);
+                            input.value = '';
+                          }
                         }}
                         className="bg-green-500 text-white px-4 py-2 rounded-r-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
                       >
                         <PlusIcon className="h-4 w-4" />
                       </button>
+                    </div>
+                    {/* Suggestions */}
+                    <div className="mt-3">
+                      <p className="text-xs text-gray-500 mb-2">Suggestions (click to add):</p>
+                      <div className="flex flex-wrap gap-1">
+                        {BENEFITS_SUGGESTIONS.filter(suggestion => 
+                          !formik.values.benefits?.includes(suggestion)
+                        ).map((suggestion, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => addArrayItem('benefits', suggestion)}
+                            className="text-xs px-2 py-1 bg-gray-100 hover:bg-green-100 text-gray-700 hover:text-green-700 rounded-full transition-colors"
+                          >
+                            + {suggestion}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -896,6 +1132,7 @@ export default function BusinessProfile() {
                     <div className="flex">
                       <input
                         type="text"
+                        id="company-values-input"
                         placeholder="Add a company value (e.g. Innovation, Integrity, Collaboration)"
                         className="flex-1 rounded-l-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         onKeyPress={(e) => {
@@ -908,15 +1145,35 @@ export default function BusinessProfile() {
                       />
                       <button
                         type="button"
-                        onClick={(e) => {
-                          const input = e.target.previousElementSibling;
-                          addArrayItem('companyValues', input.value);
-                          input.value = '';
+                        onClick={() => {
+                          const input = document.getElementById('company-values-input');
+                          if (input && input.value) {
+                            addArrayItem('companyValues', input.value);
+                            input.value = '';
+                          }
                         }}
                         className="bg-purple-500 text-white px-4 py-2 rounded-r-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       >
                         <PlusIcon className="h-4 w-4" />
                       </button>
+                    </div>
+                    {/* Suggestions */}
+                    <div className="mt-3">
+                      <p className="text-xs text-gray-500 mb-2">Suggestions (click to add):</p>
+                      <div className="flex flex-wrap gap-1">
+                        {VALUES_SUGGESTIONS.filter(suggestion => 
+                          !formik.values.companyValues?.includes(suggestion)
+                        ).map((suggestion, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => addArrayItem('companyValues', suggestion)}
+                            className="text-xs px-2 py-1 bg-gray-100 hover:bg-purple-100 text-gray-700 hover:text-purple-700 rounded-full transition-colors"
+                          >
+                            + {suggestion}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1195,36 +1452,108 @@ export default function BusinessProfile() {
                   <p className="mt-2 text-sm text-gray-500">Physical address (optional, for VAs who prefer local companies).</p>
                 </div>
                 <div className="mt-5 md:mt-0 md:col-span-2">
-                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                    <div className="sm:col-span-6">
-                      <label htmlFor="streetAddress" className="block text-sm font-medium text-gray-700">
-                        Street Address
+                  <div className="space-y-6">
+                    {/* Google Places Autocomplete */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Quick Address Search
                       </label>
-                      <div className="mt-1">
-                        <input
-                          type="text"
-                          name="streetAddress"
-                          id="streetAddress"
-                          value={formik.values.streetAddress}
-                          onChange={formik.handleChange}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
-                        />
+                      <GooglePlacesAutocomplete
+                        onPlaceSelected={(place) => {
+                          // Auto-fill form fields with Google Places data
+                          formik.setFieldValue('streetAddress', place.streetAddress);
+                          formik.setFieldValue('city', place.city);
+                          formik.setFieldValue('state', place.state);
+                          formik.setFieldValue('country', place.country);
+                          formik.setFieldValue('postalCode', place.postalCode);
+                          
+                          // Update available states and cities based on country
+                          if (place.country) {
+                            const states = getStatesForCountry(place.country);
+                            setAvailableStates(states);
+                            if (place.state) {
+                              const cities = getCitiesForState(place.country, place.state);
+                              setAvailableCities(cities);
+                            }
+                          }
+                        }}
+                        defaultValue={formik.values.streetAddress}
+                        placeholder="Start typing your office address..."
+                      />
+                    </div>
+
+                    {/* Divider */}
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div className="w-full border-t border-gray-300" />
+                      </div>
+                      <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-white text-gray-500">Or enter manually</span>
                       </div>
                     </div>
+
+                    {/* Manual Entry Fields */}
+                    <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                      <div className="sm:col-span-6">
+                        <label htmlFor="streetAddress" className="block text-sm font-medium text-gray-700">
+                          Street Address
+                        </label>
+                        <div className="mt-1">
+                          <input
+                            type="text"
+                            name="streetAddress"
+                            id="streetAddress"
+                            value={formik.values.streetAddress}
+                            onChange={formik.handleChange}
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                          />
+                        </div>
+                      </div>
 
                     <div className="sm:col-span-2">
                       <label htmlFor="city" className="block text-sm font-medium text-gray-700">
                         City
                       </label>
                       <div className="mt-1">
-                        <input
-                          type="text"
-                          name="city"
-                          id="city"
-                          value={formik.values.city}
-                          onChange={formik.handleChange}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
-                        />
+                        {availableCities.length > 0 && !formik.values.city ? (
+                          // Show dropdown only if no city is selected yet
+                          <select
+                            name="city"
+                            id="city"
+                            value={formik.values.city}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (value === "Other") {
+                                // Switch to text input for custom city
+                                setAvailableCities([]);
+                                formik.setFieldValue('city', '');
+                              } else {
+                                formik.setFieldValue('city', value);
+                              }
+                            }}
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                          >
+                            <option value="">Select a city</option>
+                            {availableCities.map(city => (
+                              <option key={city} value={city}>
+                                {city}
+                              </option>
+                            ))}
+                            <option value="Other">Other (Enter manually)</option>
+                          </select>
+                        ) : (
+                          // Show text input for custom cities or when Google Places fills it
+                          <input
+                            type="text"
+                            name="city"
+                            id="city"
+                            value={formik.values.city}
+                            onChange={formik.handleChange}
+                            placeholder={formik.values.state ? "Enter city" : formik.values.country ? "Enter city" : "Select a country first"}
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                            disabled={!formik.values.country}
+                          />
+                        )}
                       </div>
                     </div>
 
@@ -1233,14 +1562,33 @@ export default function BusinessProfile() {
                         State / Province
                       </label>
                       <div className="mt-1">
-                        <input
-                          type="text"
-                          name="state"
-                          id="state"
-                          value={formik.values.state}
-                          onChange={formik.handleChange}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
-                        />
+                        {availableStates.length > 0 ? (
+                          <select
+                            name="state"
+                            id="state"
+                            value={formik.values.state}
+                            onChange={formik.handleChange}
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                          >
+                            <option value="">Select a state/province</option>
+                            {availableStates.map(state => (
+                              <option key={state} value={state}>
+                                {state}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            name="state"
+                            id="state"
+                            value={formik.values.state}
+                            onChange={formik.handleChange}
+                            placeholder={formik.values.country ? "Enter state/province" : "Select a country first"}
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                            disabled={!formik.values.country}
+                          />
+                        )}
                       </div>
                     </div>
 
@@ -1265,90 +1613,444 @@ export default function BusinessProfile() {
                         Country
                       </label>
                       <div className="mt-1">
-                        <input
-                          type="text"
+                        <select
                           name="country"
                           id="country"
                           value={formik.values.country}
                           onChange={formik.handleChange}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
-                        />
+                        >
+                          <option value="">Select a country</option>
+                          {COUNTRIES.map(country => (
+                            <option key={country} value={country}>
+                              {country}
+                            </option>
+                          ))}
+                        </select>
                       </div>
+                    </div>
                     </div>
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* Preferences */}
+            {/* Preferences - Enhanced Section */}
             <section className="bg-white shadow mt-8 px-4 py-5 lg:rounded-lg sm:p-6">
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Preferences</h3>
-                  <p className="mt-1 text-sm text-gray-500">Manage your notification and visibility settings.</p>
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Notification & Communication Preferences</h3>
+                  <p className="mt-1 text-sm text-gray-500">Manage how you want to be contacted and what notifications you receive.</p>
                 </div>
                 <div className="mt-5 md:mt-0 md:col-span-2">
-                  <div className="space-y-6">
-                    {/* VA Notifications */}
+                  <div className="space-y-8">
+                    
+                    {/* Email Notifications */}
                     <div>
-                      <label htmlFor="vaNotifications" className="block text-sm font-medium text-gray-700">
-                        New VA Notifications
-                      </label>
-                      <p className="text-sm text-gray-500">Get notified when new VAs join the platform</p>
-                      <div className="mt-2">
-                        <select
-                          id="vaNotifications"
-                          name="vaNotifications"
-                          value={formik.values.vaNotifications}
-                          onChange={formik.handleChange}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
-                        >
-                          <option value="no">No notifications</option>
-                          <option value="daily">Daily digest</option>
-                          <option value="weekly">Weekly digest</option>
-                        </select>
+                      <h4 className="text-base font-medium text-gray-900 mb-4">Email Notifications</h4>
+                      <div className="space-y-4">
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="emailNotifications.newMessages"
+                              name="emailNotifications.newMessages"
+                              type="checkbox"
+                              checked={formik.values.emailNotifications.newMessages}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="emailNotifications.newMessages" className="font-medium text-gray-700">
+                              New Messages
+                            </label>
+                            <p className="text-gray-500">Get notified when you receive new messages from VAs</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="emailNotifications.vaApplications"
+                              name="emailNotifications.vaApplications"
+                              type="checkbox"
+                              checked={formik.values.emailNotifications.vaApplications}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="emailNotifications.vaApplications" className="font-medium text-gray-700">
+                              VA Applications
+                            </label>
+                            <p className="text-gray-500">Get notified when VAs apply to your job postings</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="emailNotifications.vaMatches"
+                              name="emailNotifications.vaMatches"
+                              type="checkbox"
+                              checked={formik.values.emailNotifications.vaMatches}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="emailNotifications.vaMatches" className="font-medium text-gray-700">
+                              VA Matches
+                            </label>
+                            <p className="text-gray-500">Get notified when we find VAs that match your requirements</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="emailNotifications.weeklyDigest"
+                              name="emailNotifications.weeklyDigest"
+                              type="checkbox"
+                              checked={formik.values.emailNotifications.weeklyDigest}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="emailNotifications.weeklyDigest" className="font-medium text-gray-700">
+                              Weekly Digest
+                            </label>
+                            <p className="text-gray-500">Receive a weekly summary of platform activity</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="emailNotifications.platformUpdates"
+                              name="emailNotifications.platformUpdates"
+                              type="checkbox"
+                              checked={formik.values.emailNotifications.platformUpdates}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="emailNotifications.platformUpdates" className="font-medium text-gray-700">
+                              Platform Updates
+                            </label>
+                            <p className="text-gray-500">Get notified about new features and platform updates</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="emailNotifications.marketingEmails"
+                              name="emailNotifications.marketingEmails"
+                              type="checkbox"
+                              checked={formik.values.emailNotifications.marketingEmails}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="emailNotifications.marketingEmails" className="font-medium text-gray-700">
+                              Marketing Emails
+                            </label>
+                            <p className="text-gray-500">Receive promotional offers and marketing communications</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
+                    
+                    {/* Communication Preferences */}
+                    <div>
+                      <h4 className="text-base font-medium text-gray-900 mb-4">Communication Preferences</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="communicationPreferences.preferredContactMethod" className="block text-sm font-medium text-gray-700">
+                            Preferred Contact Method
+                          </label>
+                          <div className="mt-1">
+                            <select
+                              id="communicationPreferences.preferredContactMethod"
+                              name="communicationPreferences.preferredContactMethod"
+                              value={formik.values.communicationPreferences.preferredContactMethod}
+                              onChange={formik.handleChange}
+                              className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                              <option value="email">Email</option>
+                              <option value="phone">Phone</option>
+                              <option value="platform">Platform Messages</option>
+                              <option value="any">Any Method</option>
+                            </select>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label htmlFor="communicationPreferences.responseTime" className="block text-sm font-medium text-gray-700">
+                            Expected Response Time
+                          </label>
+                          <div className="mt-1">
+                            <select
+                              id="communicationPreferences.responseTime"
+                              name="communicationPreferences.responseTime"
+                              value={formik.values.communicationPreferences.responseTime}
+                              onChange={formik.handleChange}
+                              className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                              <option value="immediate">Immediate</option>
+                              <option value="within-24h">Within 24 hours</option>
+                              <option value="within-48h">Within 48 hours</option>
+                              <option value="within-week">Within a week</option>
+                            </select>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="communicationPreferences.availableForInterviews"
+                              name="communicationPreferences.availableForInterviews"
+                              type="checkbox"
+                              checked={formik.values.communicationPreferences.availableForInterviews}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="communicationPreferences.availableForInterviews" className="font-medium text-gray-700">
+                              Available for Interviews
+                            </label>
+                            <p className="text-gray-500">VAs can request interviews with you</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="communicationPreferences.allowDirectMessages"
+                              name="communicationPreferences.allowDirectMessages"
+                              type="checkbox"
+                              checked={formik.values.communicationPreferences.allowDirectMessages}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="communicationPreferences.allowDirectMessages" className="font-medium text-gray-700">
+                              Allow Direct Messages
+                            </label>
+                            <p className="text-gray-500">VAs can send you direct messages through the platform</p>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="flex items-start">
+                            <div className="flex items-center h-5">
+                              <input
+                                id="communicationPreferences.autoReplyEnabled"
+                                name="communicationPreferences.autoReplyEnabled"
+                                type="checkbox"
+                                checked={formik.values.communicationPreferences.autoReplyEnabled}
+                                onChange={formik.handleChange}
+                                className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                              />
+                            </div>
+                            <div className="ml-3 text-sm flex-1">
+                              <label htmlFor="communicationPreferences.autoReplyEnabled" className="font-medium text-gray-700">
+                                Enable Auto-Reply
+                              </label>
+                              <p className="text-gray-500">Automatically reply to new messages when you're unavailable</p>
+                            </div>
+                          </div>
+                          {formik.values.communicationPreferences.autoReplyEnabled && (
+                            <div className="mt-3 ml-7">
+                              <label htmlFor="communicationPreferences.autoReplyMessage" className="block text-sm font-medium text-gray-700">
+                                Auto-Reply Message
+                              </label>
+                              <textarea
+                                id="communicationPreferences.autoReplyMessage"
+                                name="communicationPreferences.autoReplyMessage"
+                                rows={3}
+                                value={formik.values.communicationPreferences.autoReplyMessage}
+                                onChange={formik.handleChange}
+                                placeholder="Thank you for your message. I'll get back to you within 24 hours."
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Privacy Settings */}
+                    <div>
+                      <h4 className="text-base font-medium text-gray-900 mb-4">Privacy Settings</h4>
+                      <div className="space-y-4">
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="privacySettings.showEmail"
+                              name="privacySettings.showEmail"
+                              type="checkbox"
+                              checked={formik.values.privacySettings.showEmail}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="privacySettings.showEmail" className="font-medium text-gray-700">
+                              Show Email Address
+                            </label>
+                            <p className="text-gray-500">Display your email address on your public profile</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="privacySettings.showPhone"
+                              name="privacySettings.showPhone"
+                              type="checkbox"
+                              checked={formik.values.privacySettings.showPhone}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="privacySettings.showPhone" className="font-medium text-gray-700">
+                              Show Phone Number
+                            </label>
+                            <p className="text-gray-500">Display your phone number on your public profile</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="privacySettings.showLocation"
+                              name="privacySettings.showLocation"
+                              type="checkbox"
+                              checked={formik.values.privacySettings.showLocation}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="privacySettings.showLocation" className="font-medium text-gray-700">
+                              Show Company Location
+                            </label>
+                            <p className="text-gray-500">Display your company's location on your public profile</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="privacySettings.showCompanySize"
+                              name="privacySettings.showCompanySize"
+                              type="checkbox"
+                              checked={formik.values.privacySettings.showCompanySize}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="privacySettings.showCompanySize" className="font-medium text-gray-700">
+                              Show Company Size
+                            </label>
+                            <p className="text-gray-500">Display your company size on your public profile</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="privacySettings.allowAnalytics"
+                              name="privacySettings.allowAnalytics"
+                              type="checkbox"
+                              checked={formik.values.privacySettings.allowAnalytics}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="privacySettings.allowAnalytics" className="font-medium text-gray-700">
+                              Allow Analytics
+                            </label>
+                            <p className="text-gray-500">Help us improve the platform by sharing anonymous usage data</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Legacy Settings */}
+                    <div>
+                      <h4 className="text-base font-medium text-gray-900 mb-4">General Settings</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="vaNotifications" className="block text-sm font-medium text-gray-700">
+                            New VA Notifications
+                          </label>
+                          <p className="text-sm text-gray-500">Get notified when new VAs join the platform</p>
+                          <div className="mt-2">
+                            <select
+                              id="vaNotifications"
+                              name="vaNotifications"
+                              value={formik.values.vaNotifications}
+                              onChange={formik.handleChange}
+                              className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                              <option value="no">No notifications</option>
+                              <option value="daily">Daily digest</option>
+                              <option value="weekly">Weekly digest</option>
+                            </select>
+                          </div>
+                        </div>
 
-                    {/* Visibility */}
-                    <div className="flex items-start">
-                      <div className="flex items-center h-5">
-                        <input
-                          id="invisible"
-                          name="invisible"
-                          type="checkbox"
-                          checked={formik.values.invisible}
-                          onChange={formik.handleChange}
-                          className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm">
-                        <label htmlFor="invisible" className="font-medium text-gray-700">
-                          Make my profile invisible
-                        </label>
-                        <p className="text-gray-500">Hide your profile from VAs</p>
-                      </div>
-                    </div>
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="invisible"
+                              name="invisible"
+                              type="checkbox"
+                              checked={formik.values.invisible}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="invisible" className="font-medium text-gray-700">
+                              Make my profile invisible
+                            </label>
+                            <p className="text-gray-500">Hide your profile from VAs</p>
+                          </div>
+                        </div>
 
-                    {/* Survey Notifications */}
-                    <div className="flex items-start">
-                      <div className="flex items-center h-5">
-                        <input
-                          id="surveyRequestNotifications"
-                          name="surveyRequestNotifications"
-                          type="checkbox"
-                          checked={formik.values.surveyRequestNotifications}
-                          onChange={formik.handleChange}
-                          className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm">
-                        <label htmlFor="surveyRequestNotifications" className="font-medium text-gray-700">
-                          Survey notifications
-                        </label>
-                        <p className="text-gray-500">Receive occasional surveys to help improve the platform</p>
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                              id="surveyRequestNotifications"
+                              name="surveyRequestNotifications"
+                              type="checkbox"
+                              checked={formik.values.surveyRequestNotifications}
+                              onChange={formik.handleChange}
+                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="surveyRequestNotifications" className="font-medium text-gray-700">
+                              Survey notifications
+                            </label>
+                            <p className="text-gray-500">Receive occasional surveys to help improve the platform</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
+                    
                   </div>
                 </div>
               </div>

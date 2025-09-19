@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useQuery } from 'react-query';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
-import { useAuth } from '../../contexts/HybridAuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useBranding } from '../../contexts/BrandingContext';
 import { 
   MapPinIcon, 
@@ -30,14 +30,31 @@ export default function VADetail() {
   const [showChatModal, setShowChatModal] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
   const [isSendingMessage, setIsSendingMessage] = useState(false);
+  
+  // Check if this is a shared view (came from short URL or has share query param)
+  const isSharedView = React.useMemo(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasShareParam = urlParams.get('share') === 'true';
+    const referrer = document.referrer;
+    const cameFromShortUrl = referrer && (referrer.includes('/s/') || referrer.includes('localhost:8000'));
+    return hasShareParam || cameFromShortUrl;
+  }, []);
 
-  const { data: va, isLoading, error } = useQuery(
+  const { data: vaResponse, isLoading, error } = useQuery(
     ['va', id],
     async () => {
-      const response = await api.get(`/vas/${id}`);
-      return response.data.data;
+      // Add via=shortlink if this is a shared view
+      const queryParams = isSharedView ? '?via=shortlink' : '';
+      console.log('Fetching VA profile:', `/vas/${id}${queryParams}`);
+      const response = await api.get(`/vas/${id}${queryParams}`);
+      console.log('VA Response:', response.data);
+      console.log('Messaging config:', response.data?.messaging);
+      return response.data;
     }
   );
+  
+  const va = vaResponse?.data;
+  const messaging = vaResponse?.messaging;
 
   const handleStartConversation = async () => {
     if (!user) {
@@ -55,7 +72,9 @@ export default function VADetail() {
 
     setIsSendingMessage(true);
     try {
-      const response = await api.post(`/conversations/start/${va.user}`, {
+      // Use the VA's ID directly (not the user ID)
+      const vaId = va._id;
+      const response = await api.post(`/conversations/start/${vaId}`, {
         message: chatMessage
       });
       
@@ -144,7 +163,10 @@ export default function VADetail() {
         <div className="relative h-48 sm:h-64 lg:h-80">
           <img
             className="w-full h-full object-cover"
-            src={va.coverImage || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&h=300&fit=crop'}
+            src={va.coverImage && !va.coverImage.includes('supabase') ?
+              va.coverImage :
+              'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&h=300&fit=crop'
+            }
             alt="Cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
@@ -159,7 +181,10 @@ export default function VADetail() {
                   {va.avatar ? (
                     <img
                       className="h-24 w-24 sm:h-32 sm:w-32 rounded-full border-4 border-white shadow-lg"
-                      src={va.avatar}
+                      src={va.avatar && !va.avatar.includes('supabase') ?
+                        va.avatar :
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(va.name)}&background=6366f1&color=ffffff&size=128`
+                      }
                       alt={va.name}
                     />
                   ) : (
@@ -188,7 +213,40 @@ export default function VADetail() {
                   <ShareIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
                   {isCreatingShare ? 'Creating...' : 'Share Profile'}
                 </button>
-                {isBusiness && (
+                {/* Show message button or registration button based on messaging config */}
+                {console.log('Rendering button - Messaging:', messaging, 'User:', user, 'isBusiness:', isBusiness)}
+                {messaging?.actionButton && (
+                  <>
+                    {console.log('Action button type:', messaging.actionButton.type, 'Text:', messaging.actionButton.text)}
+                    {messaging.actionButton.type === 'message' ? (
+                      <button
+                        onClick={handleStartConversation}
+                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                      >
+                        <EnvelopeIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+                        {messaging.actionButton.text || (branding.isESystemsMode ? 'Contact Professional' : 'Start Conversation')}
+                      </button>
+                    ) : messaging.actionButton.type === 'register' ? (
+                      <a
+                        href={messaging.actionButton.url}
+                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <ChatBubbleLeftIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+                        {messaging.actionButton.text}
+                      </a>
+                    ) : messaging.actionButton.type === 'complete_profile' ? (
+                      <a
+                        href={messaging.actionButton.url}
+                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                      >
+                        <ChatBubbleLeftIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+                        {messaging.actionButton.text}
+                      </a>
+                    ) : null}
+                  </>
+                )}
+                {/* Fallback for old behavior if messaging is not available */}
+                {!messaging?.actionButton && isBusiness && (
                   <button
                     onClick={handleStartConversation}
                     className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
@@ -250,14 +308,35 @@ export default function VADetail() {
               </div>
 
               {/* Video Introduction */}
-              {va.videoIntroduction && (
+              {va.videoIntroduction && !va.videoIntroduction.includes('supabase') && (
                 <div className="bg-white shadow rounded-lg p-6 mt-6">
                   <h2 className="text-lg font-medium text-gray-900 mb-4">Video Introduction</h2>
                   <div className="flex justify-center">
                     <video controls className="w-full max-w-md lg:max-w-lg rounded-lg" style={{ maxHeight: '400px' }}>
-                      <source src={va.videoIntroduction} type="video/mp4" />
+                      <source
+                        src={va.videoIntroduction}
+                        type="video/mp4"
+                      />
                       Your browser does not support the video tag.
                     </video>
+                  </div>
+                </div>
+              )}
+              
+              {/* Video Introduction Placeholder for Supabase URLs */}
+              {va.videoIntroduction && va.videoIntroduction.includes('supabase') && (
+                <div className="bg-white shadow rounded-lg p-6 mt-6">
+                  <h2 className="text-lg font-medium text-gray-900 mb-4">Video Introduction</h2>
+                  <div className="flex justify-center">
+                    <div className="w-full max-w-md lg:max-w-lg rounded-lg bg-gray-100 flex items-center justify-center" style={{ height: '300px' }}>
+                      <div className="text-center text-gray-500">
+                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <p className="mt-2 text-sm">Video introduction available</p>
+                        <p className="text-xs text-gray-400">Contact for access</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

@@ -2,9 +2,748 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ========================================
+   COMPREHENSIVE DARK THEME SYSTEM
+   Professional Dark Mode for Admin Dashboard
+   ======================================== */
+
+/* ===== CSS VARIABLES & COLOR PALETTE ===== */
+:root {
+  /* Light Mode Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-tertiary: #6b7280;
+  --border-primary: #e5e7eb;
+  --border-secondary: #d1d5db;
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+}
+
+.dark {
+  /* Dark Mode Colors */
+  --bg-primary: #0f1419;
+  --bg-secondary: #1a1f2e;
+  --bg-tertiary: #22293b;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+  --border-primary: #374151;
+  --border-secondary: #4b5563;
+  --primary: #818cf8;
+  --primary-hover: #6366f1;
+  --success: #34d399;
+  --danger: #f87171;
+  --warning: #fbbf24;
+  color-scheme: dark;
+}
+
+.dark body {
+  background: linear-gradient(180deg, #0f1419 0%, #1a1f2e 100%);
+  color: var(--text-primary);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* ===== ENHANCED SCROLLBARS ===== */
+.dark::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+  border-radius: 4px;
+}
+
+.dark::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #4b5563 0%, #374151 100%);
+  border-radius: 4px;
+  border: 1px solid var(--border-primary);
+}
+
+.dark::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #6b7280 0%, #4b5563 100%);
+}
+
+/* ===== ICON OPTIMIZATION FOR BOTH THEMES ===== */
+
+/* Light Theme - Icons should be BLACK/DARK for visibility against light backgrounds */
+:root:not(.dark) .ant-layout-header button img[alt="menu"],
+:root:not(.dark) .ant-layout-header button img[alt="home"],
+:root:not(.dark) .ant-layout-header .ant-btn img,
+:root:not(.dark) .hamburger-menu-icon,
+.light .ant-layout-header button img[alt="menu"],
+.light .ant-layout-header button img[alt="home"],
+.light .ant-layout-header .ant-btn img,
+.light .hamburger-menu-icon {
+  filter: brightness(0) saturate(100%) invert(0%) !important; /* Black */
+  color: #000000 !important;
+}
+
+/* Light Theme - Ant Design Icons */
+:root:not(.dark) .ant-layout-header .anticon,
+:root:not(.dark) .ant-btn .anticon,
+:root:not(.dark) .ant-menu-item .anticon,
+.light .ant-layout-header .anticon,
+.light .ant-btn .anticon,
+.light .ant-menu-item .anticon {
+  color: #000000 !important;
+}
+
+/* Dark Theme - Icons should be WHITE/LIGHT for visibility against dark backgrounds */
+.dark .ant-layout-header button img[alt="menu"],
+.dark .ant-layout-header button img[alt="home"],
+.dark .ant-layout-header .ant-btn img,
+.dark .hamburger-menu-icon {
+  filter: brightness(0) saturate(100%) invert(100%) !important; /* White */
+  color: #ffffff !important;
+}
+
+/* Dark Theme - Ant Design Icons */
+.dark .ant-layout-header .anticon,
+.dark .ant-btn .anticon,
+.dark .ant-menu-item .anticon {
+  color: #ffffff !important;
+}
+
+/* Theme Toggle Button Positioning and Styling */
+.ant-layout-header .theme-toggle-btn,
+.ant-layout-header .ant-btn[aria-label*="theme"],
+.ant-layout-header .ant-btn[title*="theme"] {
+  position: relative !important;
+  margin-left: 8px !important;
+  margin-right: 12px !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  border-radius: 8px !important;
+  padding: 6px 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  transition: all 0.2s ease !important;
+}
+
+.ant-layout-header .theme-toggle-btn:hover,
+.ant-layout-header .ant-btn[aria-label*="theme"]:hover {
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* ===== ENHANCED CARDS & CONTAINERS ===== */
+.dark .admin-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.dark .admin-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  border-color: var(--border-secondary);
+}
+
+/* Enhanced Ant Design Dark Mode Support */
+.dark .ant-layout {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark .ant-layout-sider {
+  background: #1f2937 !important;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .ant-layout-header {
+  background: #1f2937 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid #374151 !important;
+}
+
+.dark .ant-layout-content {
+  background: #111827 !important;
+  color: #f9fafb !important;
+}
+
+.dark .ant-card {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .ant-card-head {
+  background: var(--bg-tertiary) !important;
+  border-bottom: 1px solid var(--border-primary) !important;
+}
+
+.dark .ant-card-head-title {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* ===== ENHANCED TABLES ===== */
+.dark .ant-table,
+.dark .admin-table {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+.dark .ant-table-thead > tr > th,
+.dark .admin-table-header-cell {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+  border-bottom: 2px solid var(--border-primary) !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.dark .ant-table-tbody > tr,
+.dark .admin-table-body tr {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-primary) !important;
+  transition: all 0.2s ease !important;
+}
+
+.dark .ant-table-tbody > tr:nth-child(even),
+.dark .admin-table-body tr:nth-child(even) {
+  background: rgba(30, 41, 59, 0.3) !important;
+}
+
+.dark .ant-table-tbody > tr:hover,
+.dark .admin-table-body tr:hover {
+  background: var(--bg-tertiary) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark .ant-table-tbody > tr > td,
+.dark .admin-table-cell {
+  border-bottom-color: var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Dark mode menu styles */
+.dark .ant-menu {
+  background: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+.dark .ant-menu-item {
+  color: #d1d5db !important;
+}
+
+.dark .ant-menu-item:hover {
+  color: #f9fafb !important;
+  background: #374151 !important;
+}
+
+.dark .ant-menu-item-selected {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.dark .ant-menu-dark .ant-menu-item-selected {
+  background-color: #3b82f6 !important;
+}
+
+/* ===== ENHANCED FORM ELEMENTS ===== */
+.dark .ant-input,
+.dark .admin-input,
+.dark .admin-textarea {
+  background: var(--bg-tertiary) !important;
+  border: 1px solid #4b5563 !important;
+  color: var(--text-primary) !important;
+  transition: all 0.2s ease !important;
+}
+
+.dark .ant-input:hover,
+.dark .admin-input:hover,
+.dark .admin-textarea:hover {
+  border-color: var(--primary) !important;
+  background: var(--bg-secondary) !important;
+}
+
+.dark .ant-input:focus,
+.dark .admin-input:focus,
+.dark .admin-textarea:focus {
+  background: var(--bg-primary) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1) !important;
+  outline: none !important;
+}
+
+.dark .ant-input::placeholder,
+.dark .admin-input::placeholder,
+.dark .admin-textarea::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+.dark .ant-select-selector {
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark .ant-select-selector:hover {
+  border-color: var(--primary) !important;
+  background: var(--bg-secondary) !important;
+}
+
+.dark .ant-select-selection-search-input {
+  color: var(--text-primary) !important;
+}
+
+/* Remove admin-select overrides to let index.css handle it */
+
+/* ===== ENHANCED BUTTONS ===== */
+.dark .ant-btn-default,
+.dark .admin-button-secondary {
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+  transition: all 0.2s ease !important;
+}
+
+.dark .ant-btn-default:hover,
+.dark .admin-button-secondary:hover {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-secondary) !important;
+  color: var(--text-primary) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark .admin-button-primary {
+  background: #1e3a8a !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(30, 58, 138, 0.4) !important;
+  box-shadow: 0 2px 4px rgba(30, 58, 138, 0.3) !important;
+}
+
+.dark .admin-button-primary:hover {
+  background: #164070 !important;
+  box-shadow: 0 4px 8px rgba(30, 58, 138, 0.5) !important;
+  transform: translateY(-1px) !important;
+  border: 1px solid rgba(30, 58, 138, 0.6) !important;
+}
+
+.dark .admin-button-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.dark .admin-button-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
+  border: none !important;
+}
+
+/* Dark mode modal styles */
+.dark .ant-modal-content {
+  background: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+.dark .ant-modal-header {
+  background: #1f2937 !important;
+  border-bottom-color: #374151 !important;
+}
+
+.dark .ant-modal-title {
+  color: #f9fafb !important;
+}
+
+.dark .ant-modal-footer {
+  background: #1f2937 !important;
+  border-top-color: #374151 !important;
+}
+
+/* Dark mode notification styles */
+.dark .ant-notification {
+  background: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  color: #f9fafb !important;
+}
+
+.dark .ant-message {
+  color: #f9fafb !important;
+}
+
+/* Ant Design overrides and custom styles */
+.ant-layout {
+  /* Remove min-height: 100vh to allow natural document flow and scrolling */
+}
+
+.ant-layout-sider {
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+}
+
+.ant-layout-header {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ant-menu-dark .ant-menu-item-selected {
+  background-color: #1890ff !important;
+}
+
+.ant-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ant-table-thead > tr > th {
+  background-color: #fafafa;
+  font-weight: 600;
+}
+
+.ant-btn-primary {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  border: none;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
+}
+
+.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%);
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.3);
+}
+
+.ant-input:focus,
+.ant-input-focused {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.ant-select-focused .ant-select-selector {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Loading animation */
+.ant-spin-dot {
+  font-size: 24px;
+}
+
+/* Chart container */
+.recharts-wrapper {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ant-layout-sider {
+    position: fixed !important;
+    height: 100vh;
+    z-index: 1000;
+  }
+  
+  .ant-layout-content {
+    margin-left: 0 !important;
+  }
+}
+
+/* ===== ENHANCED BADGES ===== */
+.dark .admin-badge-success {
+  background: rgba(52, 211, 153, 0.1) !important;
+  color: var(--success) !important;
+  border: 1px solid var(--success) !important;
+}
+
+.dark .admin-badge-danger {
+  background: rgba(248, 113, 113, 0.1) !important;
+  color: var(--danger) !important;
+  border: 1px solid var(--danger) !important;
+}
+
+.dark .admin-badge-warning {
+  background: rgba(251, 191, 36, 0.1) !important;
+  color: var(--warning) !important;
+  border: 1px solid var(--warning) !important;
+}
+
+.dark .admin-badge-info {
+  background: rgba(96, 165, 250, 0.1) !important;
+  color: #60a5fa !important;
+  border: 1px solid #60a5fa !important;
+}
+
+.dark .admin-badge-gray {
+  background: rgba(156, 163, 175, 0.1) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-primary) !important;
+}
+
 /* Custom admin loading animation */
 .admin-loading {
   @apply inline-block w-8 h-8 border-4 border-admin-200 border-t-admin-600 rounded-full animate-spin;
+}
+
+.dark .admin-loading {
+  border-color: var(--border-primary) !important;
+  border-top-color: var(--primary) !important;
+}
+
+/* Enhanced Modal Animations */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Enhanced focus states for accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Improved backdrop filter support */
+@supports (backdrop-filter: blur(10px)) {
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+  }
+}
+
+/* Billing Component Styles */
+.billing-card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md;
+}
+
+.billing-stat-card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-lg transition-all duration-200;
+}
+
+.billing-action-button {
+  @apply flex flex-col items-center p-4 rounded-lg transition-all duration-200 transform hover:scale-105;
+}
+
+.billing-status-badge {
+  @apply inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium;
+}
+
+.billing-tab-active {
+  @apply bg-white text-primary-600 shadow-sm font-medium;
+}
+
+.billing-tab-inactive {
+  @apply bg-white bg-opacity-10 text-white hover:bg-opacity-20 font-medium transition-all;
+}
+
+/* Payment Method Card Styles */
+.payment-method-card {
+  @apply flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors;
+}
+
+.payment-method-icon {
+  @apply p-2 rounded-lg bg-opacity-10;
+}
+
+/* Transaction Table Styles */
+.transaction-row {
+  @apply hover:bg-gray-50 transition-colors;
+}
+
+.transaction-status-successful {
+  @apply text-green-600 bg-green-100;
+}
+
+.transaction-status-failed {
+  @apply text-red-600 bg-red-100;
+}
+
+.transaction-status-pending {
+  @apply text-yellow-600 bg-yellow-100;
+}
+
+.transaction-status-refunded {
+  @apply text-purple-600 bg-purple-100;
+}
+
+/* Billing Modal Overlay */
+.billing-modal-overlay {
+  @apply fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity z-40;
+}
+
+.billing-modal-content {
+  @apply w-full h-full flex flex-col bg-white shadow-2xl;
+}
+
+/* Billing Modal Header Improvements */
+.billing-modal-header {
+  @apply relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 overflow-hidden;
+}
+
+.billing-modal-header-content {
+  @apply relative px-6 sm:px-8 py-6 sm:py-8;
+}
+
+.billing-company-name {
+  @apply text-primary-100 font-medium text-sm sm:text-base break-words leading-tight;
+  max-width: 20rem;
+}
+
+@media (min-width: 640px) {
+  .billing-company-name {
+    max-width: 28rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .billing-company-name {
+    max-width: 32rem;
+  }
+}
+
+/* Billing Form Styles */
+.billing-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors;
+}
+
+.billing-select {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors bg-white;
+}
+
+.billing-checkbox {
+  @apply h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500;
+}
+
+/* Billing Action Cards */
+.charge-action-card {
+  @apply p-4 rounded-lg border-2 transition-all cursor-pointer hover:shadow-md;
+}
+
+.charge-action-active {
+  @apply border-primary-500 bg-primary-50;
+}
+
+.credit-action-active {
+  @apply border-green-500 bg-green-50;
+}
+
+/* Billing Summary Stats */
+.billing-summary-grid {
+  @apply grid grid-cols-1 md:grid-cols-4 gap-4;
+}
+
+.billing-summary-card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all;
+}
+
+/* Billing Details Grid */
+.billing-details-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+}
+
+.billing-detail-item {
+  @apply flex items-center space-x-3;
+}
+
+.billing-detail-icon {
+  @apply bg-gray-100 p-2 rounded-lg;
+}
+
+/* Responsive Billing Modal */
+@media (max-width: 768px) {
+  .billing-modal-content {
+    @apply max-w-full;
+  }
+  
+  .billing-summary-grid {
+    @apply grid-cols-2;
+  }
+  
+  .billing-details-grid {
+    @apply grid-cols-1;
+  }
+}
+
+/* Animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.billing-slide-in {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Custom Switch for Billing Preferences */
+.billing-switch {
+  @apply relative inline-flex items-center cursor-pointer;
+}
+
+.billing-switch-input {
+  @apply sr-only;
+}
+
+.billing-switch-slider {
+  @apply w-11 h-6 bg-gray-200 rounded-full;
+  @apply after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all;
+}
+
+.billing-switch-input:focus ~ .billing-switch-slider {
+  @apply outline-none ring-4 ring-primary-300;
+}
+
+.billing-switch-input:checked ~ .billing-switch-slider {
+  @apply bg-primary-600;
+}
+
+.billing-switch-input:checked ~ .billing-switch-slider:after {
+  transform: translateX(20px);
 }
 
 .admin-loading-small {
@@ -153,4 +892,589 @@
     @apply p-4;
   }
 }
+
+/* Animation for success toast */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* Refresh button spinning animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-refresh {
+  animation: spin 1s linear infinite;
+}
+
+/* Custom select dropdown styling */
+.custom-select-dropdown {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-size: 20px;
+  background-position: right 8px center;
+  background-repeat: no-repeat;
+  padding-right: 36px;
+  appearance: none;
+}
+
+.custom-select-dropdown:hover {
+  border-color: #9CA3AF;
+}
+
+.custom-select-dropdown:focus {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Smooth transitions for settings fields */
+.admin-input {
+  @apply block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors;
+}
+
+/* ===== PAGINATION STYLES ===== */
+.dark .pagination-container {
+  background: var(--bg-secondary) !important;
+  border-top: 1px solid var(--border-primary) !important;
+  padding: 1rem !important;
+}
+
+.dark .pagination-button {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+  transition: all 0.2s ease !important;
+}
+
+.dark .pagination-button:hover:not(:disabled) {
+  background: var(--primary) !important;
+  color: white !important;
+  border-color: var(--primary) !important;
+  transform: translateY(-1px) !important;
+}
+
+.dark .pagination-button:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* ===== SEARCH ELEMENTS ===== */
+.dark input[type="search"],
+.dark .search-input {
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark input[type="search"]:focus,
+.dark .search-input:focus {
+  background: var(--bg-primary) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1) !important;
+}
+
+.dark .search-icon {
+  color: var(--text-tertiary) !important;
+}
+
+/* Custom scrollbar for settings panel */
+.settings-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.settings-scrollbar::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 3px;
+}
+
+.settings-scrollbar::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 3px;
+}
+
+.settings-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Settings field hover effects */
+.settings-field {
+  transition: all 0.2s ease;
+}
+
+.settings-field:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+/* Toggle switch animation */
+.toggle-switch {
+  transition: background-color 0.2s ease;
+}
+
+.toggle-switch-handle {
+  transition: transform 0.2s ease;
+}
+
+/* Category button active state */
+.category-active {
+  position: relative;
+}
+
+.category-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 70%;
+  background: currentColor;
+  border-radius: 0 2px 2px 0;
+}
+
+/* ===== REACT TOASTIFY DARK THEME ===== */
+.dark .Toastify__toast {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .Toastify__toast--success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+  color: var(--success) !important;
+  border-left: 4px solid var(--success) !important;
+}
+
+.dark .Toastify__toast--error {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%) !important;
+  color: var(--danger) !important;
+  border-left: 4px solid var(--danger) !important;
+}
+
+.dark .Toastify__toast--warning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%) !important;
+  color: var(--warning) !important;
+  border-left: 4px solid var(--warning) !important;
+}
+
+.dark .Toastify__progress-bar {
+  background: var(--primary) !important;
+}
+
+/* ===== ADDITIONAL DARK MODE ENHANCEMENTS ===== */
+
+/* Dark mode for specific page elements */
+.dark .page-header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: var(--text-primary);
+}
+
+.dark .text-admin-900 {
+  color: var(--text-primary) !important;
+}
+
+.dark .text-admin-600 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-admin-500 {
+  color: var(--text-tertiary) !important;
+}
+
+.dark .bg-admin-50 {
+  background: var(--bg-tertiary) !important;
+}
+
+.dark .hover\:bg-admin-50:hover {
+  background: var(--bg-tertiary) !important;
+}
+
+/* Dark mode dropdowns */
+.dark .ant-dropdown-menu,
+.dark .ant-select-dropdown {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-primary) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .ant-dropdown-menu-item:hover,
+.dark .ant-select-item-option-active {
+  background: var(--bg-tertiary) !important;
+}
+
+/* Dark mode tooltips */
+.dark .ant-tooltip-inner {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+}
+
+/* Focus visible for accessibility */
+.dark button:focus-visible,
+.dark input:focus-visible,
+.dark select:focus-visible,
+.dark textarea:focus-visible,
+.dark a:focus-visible {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* Dark mode stat cards */
+.dark .stat-card {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  border: 1px solid var(--border-primary);
+  transition: all 0.3s ease;
+}
+
+.dark .stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode for icon buttons */
+.dark button.text-primary-600 {
+  color: var(--primary) !important;
+}
+
+.dark button.text-danger-600 {
+  color: var(--danger) !important;
+}
+
+.dark button.text-success-600 {
+  color: var(--success) !important;
+}
+
+.dark button.text-warning-600 {
+  color: var(--warning) !important;
+}
+
+/* Dark mode hover states */
+.dark button.hover\:text-primary-900:hover {
+  color: var(--primary-hover) !important;
+}
+
+.dark button.hover\:text-danger-900:hover {
+  color: #dc2626 !important;
+}
+
+.dark button.hover\:text-success-900:hover {
+  color: #059669 !important;
+}
+
+.dark button.hover\:text-warning-900:hover {
+  color: #d97706 !important;
+}
+
+/* Modern Notification System Styling */
+.modern-notification-list {
+  padding: 16px !important;
+  background: #fafafa !important;
+  border-radius: 8px !important;
+  margin: 0 !important;
+}
+
+.modern-notification-list .ant-list {
+  background: transparent !important;
+}
+
+.modern-notification-list .ant-list-item {
+  padding: 0 !important;
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+}
+
+.modern-notification-item {
+  padding: 16px 20px !important;
+  border-bottom: none !important;
+  border-radius: 12px !important;
+  margin-bottom: 12px !important;
+  background: #ffffff !important;
+  border: 1px solid #f0f2f5 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.modern-notification-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.modern-notification-item.unread {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%) !important;
+  border-left: 4px solid #1890ff !important;
+}
+
+.modern-notification-item.unread::before {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+}
+
+.modern-notification-item.read {
+  background: #ffffff !important;
+  border-left: 4px solid #f0f0f0 !important;
+}
+
+.modern-notification-item:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  border-color: #d9d9d9 !important;
+}
+
+.notification-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  margin-right: 12px;
+}
+
+.notification-avatar .anticon {
+  font-size: 18px;
+}
+
+.notification-title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.notification-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.unread-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1890ff;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(24, 144, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0);
+  }
+}
+
+.notification-content {
+  margin-top: 8px;
+}
+
+.notification-timestamp {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #8c8c8c !important;
+  margin-top: 4px !important;
+}
+
+.modern-notification-item .ant-typography {
+  margin-bottom: 0 !important;
+  line-height: 1.5 !important;
+}
+
+.modern-notification-item .ant-typography-caption {
+  font-size: 12px !important;
+  color: #8c8c8c !important;
+  font-weight: 500 !important;
+}
+
+.modern-notification-item .ant-typography-secondary {
+  color: #595959 !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+}
+
+.modern-notification-item .ant-list-item-meta-title {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #262626 !important;
+  margin-bottom: 4px !important;
+  line-height: 1.4 !important;
+}
+
+.modern-notification-item .ant-list-item-meta-description {
+  font-size: 13px !important;
+  color: #595959 !important;
+  line-height: 1.4 !important;
+  margin-bottom: 8px !important;
+}
+
+.notification-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  margin-left: auto;
+  padding-left: 12px;
+}
+
+.notification-actions .ant-btn {
+  height: 28px !important;
+  padding: 0 12px !important;
+  font-size: 11px !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.notification-actions .ant-btn-text {
+  color: #1890ff !important;
+  border: 1px solid transparent !important;
+}
+
+.notification-actions .ant-btn-text:hover {
+  background: rgba(24, 144, 255, 0.1) !important;
+  border-color: rgba(24, 144, 255, 0.2) !important;
+  color: #1890ff !important;
+}
+
+.modern-notification-item .ant-tag {
+  border: none !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+.modern-notification-item .ant-tag-green {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%) !important;
+  color: #ffffff !important;
+}
+
+.modern-notification-item .ant-tag-red {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%) !important;
+  color: #ffffff !important;
+}
+
+.modern-notification-item .ant-tag-orange {
+  background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%) !important;
+  color: #ffffff !important;
+}
+
+.modern-notification-item .ant-tag-blue {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
+  color: #ffffff !important;
+}
+
+.modern-notification-item .ant-list-item-meta {
+  align-items: flex-start !important;
+}
+
+.modern-notification-item .ant-list-item-meta-avatar {
+  margin-right: 12px !important;
+}
+
+.modern-notification-item .ant-list-item-meta-content {
+  flex: 1 !important;
+}
+
+.modern-notification-item .ant-btn-text {
+  border: none !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.modern-notification-item .ant-btn-text:hover {
+  background: rgba(24, 144, 255, 0.1) !important;
+  color: #1890ff !important;
+}
+
+/* More aggressive overrides for Ant Design List.Item */
+.ant-drawer .ant-list-item.modern-notification-item {
+  padding: 16px 20px !important;
+  border-bottom: none !important;
+  border-radius: 12px !important;
+  margin-bottom: 12px !important;
+  background: #ffffff !important;
+  border: 1px solid #f0f2f5 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.ant-drawer .ant-list-item.modern-notification-item.unread {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%) !important;
+  border-left: 4px solid #1890ff !important;
+}
+
+.ant-drawer .ant-list-item.modern-notification-item.read {
+  background: #ffffff !important;
+  border-left: 4px solid #f0f0f0 !important;
+}
+
+.ant-drawer .ant-list-item.modern-notification-item:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  border-color: #d9d9d9 !important;
+}
+
+/* Override Ant Design's default list item styles */
+.ant-drawer .ant-list-item {
+  padding: 0 !important;
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+}
+
+/* Force the notification list container styling */
+.ant-drawer .modern-notification-list {
+  padding: 16px !important;
+  background: #fafafa !important;
+  border-radius: 8px !important;
+  margin: 0 !important;
+}
+
+.ant-drawer .modern-notification-list .ant-list {
+  background: transparent !important;
+}
+
+
+
+
+
+
+
+
+
+
+
 

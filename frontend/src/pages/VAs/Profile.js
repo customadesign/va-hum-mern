@@ -14,8 +14,10 @@ import {
   VideoCameraIcon,
   ArrowUpTrayIcon,
   EyeIcon,
+  CameraIcon,
 } from "@heroicons/react/24/outline";
 import ProfileCompletion from "../../components/ProfileCompletion";
+import DISCQuestionnaire from "../../components/DISCTest/DISCQuestionnaire";
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Name is required"),
@@ -1212,6 +1214,7 @@ export default function VAProfile() {
   const coverInputRef = useRef(null);
   const avatarInputRef = useRef(null);
   const videoInputRef = useRef(null);
+  const [showDISCTest, setShowDISCTest] = useState(false);
   const [coverPreview, setCoverPreview] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [uploadingCover, setUploadingCover] = useState(false);
@@ -1255,7 +1258,7 @@ export default function VAProfile() {
   );
 
   // Determine placeholders vs stored defaults
-  const { user } = require('../../contexts/HybridAuthContext').useAuth();
+  const { user } = require('../../contexts/AuthContext').useAuth();
   const emailUsername = user?.email ? user.email.split('@')[0] : '';
   const isDefaultBio = profile?.bio === 'Tell us about yourself...';
   const isDefaultName =
@@ -1570,7 +1573,11 @@ export default function VAProfile() {
 
       // Update the profile with new avatar URL
       await api.put("/vas/me", { avatar: response.data.url });
+      
+      // Invalidate both VA profile and user profile queries to update all components
       queryClient.invalidateQueries("vaProfile");
+      queryClient.invalidateQueries("userProfile");
+      
       toast.success("Profile picture updated successfully");
     } catch (error) {
       console.error("Avatar upload error:", error);
@@ -1581,6 +1588,32 @@ export default function VAProfile() {
     } finally {
       setUploadingAvatar(false);
     }
+  };
+
+  const handleDISCComplete = (scores) => {
+    // Update formik values with the questionnaire results
+    formik.setFieldValue("discPrimaryType", scores.primaryType);
+    formik.setFieldValue("discDominance", scores.dominance);
+    formik.setFieldValue("discInfluence", scores.influence);
+    formik.setFieldValue("discSteadiness", scores.steadiness);
+    formik.setFieldValue("discConscientiousness", scores.conscientiousness);
+    
+    // Hide the questionnaire
+    setShowDISCTest(false);
+    
+    // Save the profile with the new DISC scores
+    const values = formik.values;
+    values.discPrimaryType = scores.primaryType;
+    values.discDominance = scores.dominance;
+    values.discInfluence = scores.influence;
+    values.discSteadiness = scores.steadiness;
+    values.discConscientiousness = scores.conscientiousness;
+    
+    if (!updateProfileMutation.isLoading) {
+      updateProfileMutation.mutate(values);
+    }
+    
+    toast.success("DISC assessment completed and saved!");
   };
 
   const handleVideoChange = async (e) => {
@@ -1974,34 +2007,71 @@ export default function VAProfile() {
                       <p className="mt-1 text-sm text-gray-500">
                         Upload a professional profile picture. Best dimensions: 400×400 pixels (square). PNG, JPG, GIF up to 5MB.
                       </p>
-                      <div className="mt-2 flex items-center">
-                        <div className="relative">
+                      <div className="mt-3 flex items-center gap-4">
+                        <div 
+                          className="relative group cursor-pointer"
+                          onClick={() => !uploadingAvatar && avatarInputRef.current?.click()}
+                        >
+                          {/* Profile Image */}
                           {profile?.avatar || avatarPreview ? (
-                            <img
-                              className="h-24 w-24 rounded-full object-cover"
-                              src={avatarPreview || profile?.avatar}
-                              alt="Avatar"
-                            />
+                            <div className="relative">
+                              <img
+                                className="h-32 w-32 rounded-full object-cover ring-4 ring-white shadow-lg transition-transform group-hover:scale-105"
+                                src={avatarPreview || profile?.avatar}
+                                alt="Profile"
+                              />
+                              {/* Hover Overlay - Only shown when image exists */}
+                              <div className="absolute inset-0 rounded-full bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
+                                <CameraIcon className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                              </div>
+                            </div>
                           ) : (
-                            <div className="h-24 w-24 rounded-full bg-gray-300 flex items-center justify-center">
-                              <span className="text-3xl font-medium text-gray-700">
-                                {formik.values.name?.[0]?.toUpperCase() || "V"}
-                              </span>
+                            <div className="relative">
+                              <div className="h-32 w-32 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center ring-4 ring-white shadow-lg transition-transform group-hover:scale-105">
+                                <span className="text-3xl font-semibold text-indigo-600">
+                                  {formik.values.name?.[0]?.toUpperCase() || "V"}
+                                </span>
+                              </div>
+                              {/* Camera Icon Overlay - Always shown when no image */}
+                              <div className="absolute inset-0 rounded-full bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                                <div className="absolute bottom-0 right-0 bg-indigo-600 rounded-full p-2 shadow-lg transform translate-x-1 -translate-y-1 group-hover:scale-110 transition-transform">
+                                  <CameraIcon className="h-5 w-5 text-white" />
+                                </div>
+                              </div>
                             </div>
                           )}
+                          
+                          {/* Upload Progress Overlay */}
                           {uploadingAvatar && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 rounded-full">
-                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 rounded-full">
+                              <div className="text-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                                <span className="text-xs text-white font-medium">Uploading...</span>
+                              </div>
                             </div>
                           )}
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => avatarInputRef.current?.click()}
-                          className="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                        >
-                          Change
-                        </button>
+
+                        {/* Upload Instructions */}
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium text-gray-900">
+                            {profile?.avatar ? "Update your photo" : "Add a photo"}
+                          </h4>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {profile?.avatar 
+                              ? "Click on your photo to change it" 
+                              : "Click the camera icon to upload"}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => avatarInputRef.current?.click()}
+                            className="mt-2 inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                          >
+                            <ArrowUpTrayIcon className="h-4 w-4 mr-1.5 text-gray-400" />
+                            Choose File
+                          </button>
+                        </div>
+                        
                         <input
                           ref={avatarInputRef}
                           type="file"
@@ -2411,15 +2481,7 @@ export default function VAProfile() {
                     style by completing a DISC assessment.
                   </p>
                   <p className="mt-2 text-sm text-gray-500">
-                    <a
-                      href="https://openpsychometrics.org/tests/ODAT/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-700 font-medium underline hover:text-gray-900"
-                    >
-                      Take the free DISC test
-                    </a>{" "}
-                    (4-6 minutes) and enter your results below.
+                    Take the DISC assessment below (4-6 minutes) to automatically calculate and save your personality profile.
                   </p>
                   <h4 className="font-medium uppercase tracking-wide text-gray-500 text-sm mt-4">
                     ABOUT DISC
@@ -2432,146 +2494,83 @@ export default function VAProfile() {
 
                 <div className="mt-5 md:mt-0 md:col-span-2">
                   <div className="space-y-6">
-                    {/* Primary DISC Type */}
-                    <div>
-                      <label
-                        htmlFor="discPrimaryType"
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Primary DISC Type
-                      </label>
-                      <select
-                        id="discPrimaryType"
-                        name="discPrimaryType"
-                        value={formik.values.discPrimaryType || ""}
-                        onChange={formik.handleChange}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
-                      >
-                        <option value="">Select your primary type</option>
-                        <option value="D">
-                          D - Dominance (Direct, Results-oriented, Firm,
-                          Strong-willed)
-                        </option>
-                        <option value="I">
-                          I - Influence (Outgoing, Enthusiastic, Optimistic,
-                          People-oriented)
-                        </option>
-                        <option value="S">
-                          S - Steadiness (Even-tempered, Accommodating, Patient,
-                          Humble)
-                        </option>
-                        <option value="C">
-                          C - Conscientiousness (Analytical, Reserved, Precise,
-                          Systematic)
-                        </option>
-                      </select>
-                    </div>
-
-                    {/* DISC Scores */}
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* DISC Assessment */}
+                    {showDISCTest ? (
+                      <DISCQuestionnaire
+                        onComplete={handleDISCComplete}
+                        initialScores={
+                          formik.values.discPrimaryType
+                            ? {
+                                primaryType: formik.values.discPrimaryType,
+                                dominance: formik.values.discDominance,
+                                influence: formik.values.discInfluence,
+                                steadiness: formik.values.discSteadiness,
+                                conscientiousness: formik.values.discConscientiousness,
+                              }
+                            : null
+                        }
+                      />
+                    ) : (
                       <div>
-                        <label
-                          htmlFor="discDominance"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Dominance Score (0-100)
-                        </label>
-                        <input
-                          type="number"
-                          id="discDominance"
-                          name="discDominance"
-                          min="0"
-                          max="100"
-                          value={formik.values.discDominance || ""}
-                          onChange={formik.handleChange}
-                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
-                          placeholder="0"
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="discInfluence"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Influence Score (0-100)
-                        </label>
-                        <input
-                          type="number"
-                          id="discInfluence"
-                          name="discInfluence"
-                          min="0"
-                          max="100"
-                          value={formik.values.discInfluence || ""}
-                          onChange={formik.handleChange}
-                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
-                          placeholder="0"
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="discSteadiness"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Steadiness Score (0-100)
-                        </label>
-                        <input
-                          type="number"
-                          id="discSteadiness"
-                          name="discSteadiness"
-                          min="0"
-                          max="100"
-                          value={formik.values.discSteadiness || ""}
-                          onChange={formik.handleChange}
-                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
-                          placeholder="0"
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="discConscientiousness"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Conscientiousness Score (0-100)
-                        </label>
-                        <input
-                          type="number"
-                          id="discConscientiousness"
-                          name="discConscientiousness"
-                          min="0"
-                          max="100"
-                          value={formik.values.discConscientiousness || ""}
-                          onChange={formik.handleChange}
-                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
-                          placeholder="0"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Assessment Status */}
-                    {formik.values.discPrimaryType && (
-                      <div className="bg-green-50 border border-green-200 rounded-md p-4">
-                        <div className="flex">
-                          <div className="flex-shrink-0">
-                            <InformationCircleIcon
-                              className="h-5 w-5 text-green-400"
-                              aria-hidden="true"
-                            />
-                          </div>
-                          <div className="ml-3">
-                            <h3 className="text-sm font-medium text-green-800">
-                              DISC Assessment Completed
-                            </h3>
-                            <div className="mt-2 text-sm text-green-700">
-                              <p>
-                                Your primary type is{" "}
-                                <strong>{formik.values.discPrimaryType}</strong>
-                                . This will be displayed on your public profile
-                                to help businesses understand your working
-                                style.
-                              </p>
+                        {formik.values.discPrimaryType ? (
+                          <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                            <div className="flex">
+                              <div className="flex-shrink-0">
+                                <CheckCircleIcon
+                                  className="h-5 w-5 text-green-400"
+                                  aria-hidden="true"
+                                />
+                              </div>
+                              <div className="ml-3 flex-1">
+                                <h3 className="text-sm font-medium text-green-800">
+                                  DISC Assessment Completed
+                                </h3>
+                                <div className="mt-2 text-sm text-green-700">
+                                  <p className="mb-2">
+                                    Your primary type is{" "}
+                                    <strong>{formik.values.discPrimaryType}</strong>
+                                    . This will be displayed on your public profile
+                                    to help businesses understand your working style.
+                                  </p>
+                                  <div className="grid grid-cols-2 gap-2 text-xs">
+                                    <div>Dominance: {formik.values.discDominance}%</div>
+                                    <div>Influence: {formik.values.discInfluence}%</div>
+                                    <div>Steadiness: {formik.values.discSteadiness}%</div>
+                                    <div>Conscientiousness: {formik.values.discConscientiousness}%</div>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowDISCTest(true)}
+                                  className="mt-3 text-sm text-green-600 hover:text-green-700 font-medium"
+                                >
+                                  Retake Assessment →
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <h3 className="text-sm font-medium text-gray-700 mb-2">
+                              DISC Personality Assessment
+                            </h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                              Take the DISC assessment to help businesses understand your personality 
+                              type and working style. The test consists of 16 questions and takes about 
+                              4-6 minutes to complete.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setShowDISCTest(true)}
+                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                              <svg className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              Take DISC Assessment
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

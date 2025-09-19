@@ -33,9 +33,9 @@ exports.protect = async (req, res, next) => {
     console.log('Token decoded successfully for user:', decoded.id);
 
     // Get user from token
-    req.user = await User.findById(decoded.id).select('-password');
+    const userFromDb = await User.findById(decoded.id).select('-password');
 
-    if (!req.user) {
+    if (!userFromDb) {
       console.log('User not found in database:', decoded.id);
       return res.status(401).json({
         success: false,
@@ -43,15 +43,23 @@ exports.protect = async (req, res, next) => {
       });
     }
 
-    if (req.user.suspended) {
-      console.log('User suspended:', req.user.email);
+    if (userFromDb.suspended) {
+      console.log('User suspended:', userFromDb.email);
       return res.status(403).json({
         success: false,
         error: 'Account suspended'
       });
     }
 
-    console.log('Auth middleware passed for user:', req.user.email, 'Admin:', req.user.admin);
+    // Merge decoded token data with user data to preserve impersonation info
+    req.user = {
+      ...userFromDb.toObject(),
+      ...decoded, // This preserves isImpersonated, impersonatedBy, etc.
+      email: userFromDb.email,
+      admin: userFromDb.admin
+    };
+
+    console.log('Auth middleware passed for user:', req.user.email, 'Admin:', req.user.admin, 'Impersonating:', req.user.isImpersonated || false);
     next();
   } catch (err) {
     console.error('Token verification failed:', err.message);

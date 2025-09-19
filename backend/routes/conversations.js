@@ -11,8 +11,19 @@ router.get('/', protect, async (req, res) => {
   try {
     let query = {};
     
-    // Admins can see all conversations
-    if (!req.user.admin) {
+    // Admins can see all conversations (including intercepted ones)
+    if (req.user.admin) {
+      // Admin sees all conversations
+      query = {};
+    } else if (req.user.profile?.va) {
+      // VAs only see conversations where they are participants AND NOT intercepted
+      // This excludes business-initiated conversations
+      query = {
+        participants: req.user.id,
+        isIntercepted: { $ne: true }  // Exclude intercepted conversations from VA view
+      };
+    } else {
+      // Business users see their conversations normally
       query = { participants: req.user.id };
     }
 
@@ -20,6 +31,7 @@ router.get('/', protect, async (req, res) => {
       .populate('va', 'email profile')
       .populate('business', 'email profile') 
       .populate('messages.sender', 'email profile')
+      .populate('originalSender', 'email profile')  // Populate original sender for intercepted convos
       .sort('-lastMessageAt');
 
     res.json({
@@ -41,7 +53,8 @@ router.get('/:id', protect, async (req, res) => {
     const conversation = await Conversation.findById(req.params.id)
       .populate('va', 'email profile')
       .populate('business', 'email profile')
-      .populate('messages.sender', 'email profile');
+      .populate('messages.sender', 'email profile')
+      .populate('originalSender', 'email profile');
 
     if (!conversation) {
       return res.status(404).json({
@@ -50,18 +63,30 @@ router.get('/:id', protect, async (req, res) => {
       });
     }
 
-    // Check if user is participant or admin
+    // Check authorization
     const isParticipant = conversation.participants.includes(req.user.id);
+    const isVA = req.user.profile?.va && conversation.va.toString() === req.user.id;
+    const isIntercepted = conversation.isIntercepted;
+
+    // VAs cannot view intercepted conversations (business-initiated)
+    if (isVA && isIntercepted) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied to this conversation'
+      });
+    }
+
+    // Check if user is participant or admin
     if (!isParticipant && !req.user.admin) {
       return res.status(403).json({
         success: false,
-        error: 'Not protectorized to view this conversation'
+        error: 'Not authorized to view this conversation'
       });
     }
 
     // Mark messages as read for current user
-    if (isParticipant) {
-      await conversation.markAsRead(req.user.id);
+    if (isParticipant || req.user.admin) {
+      await conversation.markAsRead(req.user.id, req.user.admin);
       await conversation.save();
     }
 
@@ -79,34 +104,45 @@ router.get('/:id', protect, async (req, res) => {
 });
 
 // Start a new conversation with a VA
-// Start conversation requires 80% profile completion
+// Start conversation requires 80% profile completion for business users
 router.post('/start/:vaId', protect, profileCompletionGate(80), async (req, res) => {
   try {
     const { message } = req.body;
     const vaId = req.params.vaId;
 
-    // Check if VA exists
-    const vaUser = await User.findById(vaId);
-    if (!vaUser || !vaUser.profile?.va) {
+    // Check if VA exists (vaId is the VA model ID, not User ID)
+    const VA = require('../models/VA');
+    const va = await VA.findById(vaId).populate('user');
+    if (!va) {
       return res.status(404).json({
         success: false,
         error: 'VA not found'
       });
     }
+    
+    // Get the user ID associated with this VA
+    const vaUserId = va.user._id || va.user;
+
+    // Determine if this should be an intercepted conversation
+    // All messages from business users (including admins) to VAs should be intercepted
+    const isVAUser = req.user.profile?.va || req.user.va;
+    const isBusinessUser = !isVAUser; // If not a VA, they're a business user
+    const isIntercepted = isBusinessUser; // Business-to-VA conversations are intercepted
 
     // Check if conversation already exists
     let conversation = await Conversation.findOne({
-      participants: { $all: [req.user.id, vaId] }
+      participants: { $all: [req.user.id, vaUserId] },
+      isIntercepted: isIntercepted
     });
 
     if (conversation) {
       // Add message to existing conversation
-      conversation.addMessage(req.user.id, message);
+      conversation.addMessage(req.user.id, message, req.user.admin);
     } else {
       // Create new conversation
       conversation = new Conversation({
-        participants: [req.user.id, vaId],
-        va: vaId,
+        participants: [req.user.id, vaUserId],
+        va: vaUserId,
         business: req.user.id,
         messages: [{
           sender: req.user.id,
@@ -115,9 +151,14 @@ router.post('/start/:vaId', protect, profileCompletionGate(80), async (req, res)
         lastMessage: message,
         lastMessageAt: new Date(),
         unreadCount: {
-          va: 1,
-          business: 0
-        }
+          va: isIntercepted ? 0 : 1,  // VA doesn't get notified if intercepted
+          business: 0,
+          admin: isIntercepted ? 1 : 0  // Admin gets notified if intercepted
+        },
+        // Mark as intercepted if business is initiating
+        isIntercepted: isIntercepted,
+        originalSender: isIntercepted ? req.user.id : undefined,
+        interceptedAt: isIntercepted ? new Date() : undefined
       });
     }
 
@@ -127,12 +168,14 @@ router.post('/start/:vaId', protect, profileCompletionGate(80), async (req, res)
     await conversation.populate([
       { path: 'va', select: 'email profile' },
       { path: 'business', select: 'email profile' },
-      { path: 'messages.sender', select: 'email profile' }
+      { path: 'messages.sender', select: 'email profile' },
+      { path: 'originalSender', select: 'email profile' }
     ]);
 
     res.json({
       success: true,
-      data: conversation
+      data: conversation,
+      intercepted: isIntercepted  // Let frontend know if this was intercepted
     });
   } catch (error) {
     console.error('Error starting conversation:', error);
@@ -157,16 +200,29 @@ router.post('/:id/messages', protect, async (req, res) => {
       });
     }
 
-    // Check if user is participant
-    if (!conversation.participants.includes(req.user.id) && !req.user.admin) {
+    // Check authorization
+    const isParticipant = conversation.participants.includes(req.user.id);
+    const isVA = req.user.profile?.va && conversation.va.toString() === req.user.id;
+    const isIntercepted = conversation.isIntercepted;
+
+    // VAs cannot send messages in intercepted conversations
+    if (isVA && isIntercepted) {
       return res.status(403).json({
         success: false,
-        error: 'Not protectorized to send messages in this conversation'
+        error: 'Cannot send messages in this conversation'
       });
     }
 
-    // Add message
-    const newMessage = conversation.addMessage(req.user.id, message);
+    // Check if user is participant or admin
+    if (!isParticipant && !req.user.admin) {
+      return res.status(403).json({
+        success: false,
+        error: 'Not authorized to send messages in this conversation'
+      });
+    }
+
+    // Add message with admin flag
+    const newMessage = conversation.addMessage(req.user.id, message, req.user.admin);
     await conversation.save();
 
     // Populate sender info for response
@@ -191,22 +247,54 @@ router.post('/:id/messages', protect, async (req, res) => {
 // Get unread count for current user
 router.get('/unread/count', protect, async (req, res) => {
   try {
-    const conversations = await Conversation.find({
-      participants: req.user.id
-    });
-
     let unreadCount = 0;
-    conversations.forEach(conv => {
-      if (conv.va.toString() === req.user.id) {
-        unreadCount += conv.unreadCount.va;
-      } else if (conv.business.toString() === req.user.id) {
-        unreadCount += conv.unreadCount.business;
-      }
-    });
+    let interceptedCount = 0;
+
+    if (req.user.admin) {
+      // Admins see unread count from intercepted conversations
+      const interceptedConversations = await Conversation.find({
+        isIntercepted: true
+      });
+      
+      interceptedConversations.forEach(conv => {
+        unreadCount += conv.unreadCount.admin || 0;
+      });
+      interceptedCount = interceptedConversations.length;
+
+      // Also count direct admin conversations
+      const directConversations = await Conversation.find({
+        participants: req.user.id,
+        isIntercepted: false
+      });
+
+      directConversations.forEach(conv => {
+        if (conv.business.toString() === req.user.id) {
+          unreadCount += conv.unreadCount.business || 0;
+        }
+      });
+    } else {
+      // Regular users (VAs and Businesses) - exclude intercepted conversations for VAs
+      const query = req.user.profile?.va 
+        ? { participants: req.user.id, isIntercepted: { $ne: true } }
+        : { participants: req.user.id };
+
+      const conversations = await Conversation.find(query);
+
+      conversations.forEach(conv => {
+        if (conv.va.toString() === req.user.id) {
+          unreadCount += conv.unreadCount.va;
+        } else if (conv.business.toString() === req.user.id) {
+          unreadCount += conv.unreadCount.business;
+        }
+      });
+    }
 
     res.json({
       success: true,
-      data: { unreadCount }
+      data: { 
+        unreadCount,
+        ...(req.user.admin && { interceptedCount })
+      }
     });
   } catch (error) {
     console.error('Error getting unread count:', error);

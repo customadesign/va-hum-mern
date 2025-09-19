@@ -13,12 +13,12 @@ const siteConfigSchema = new mongoose.Schema({
   },
   valueType: {
     type: String,
-    enum: ['string', 'number', 'boolean', 'json', 'array'],
+    enum: ['string', 'text', 'textarea', 'number', 'boolean', 'json', 'array', 'email', 'url'],
     default: 'string'
   },
   category: {
     type: String,
-    enum: ['general', 'email', 'payment', 'features', 'appearance', 'security', 'integrations'],
+    enum: ['general', 'email', 'payment', 'features', 'appearance', 'security', 'integrations', 'limits'],
     default: 'general'
   },
   description: {
@@ -57,6 +57,11 @@ siteConfigSchema.statics.getValue = async function(key, defaultValue = null) {
       return typeof config.value === 'string' ? JSON.parse(config.value) : config.value;
     case 'array':
       return Array.isArray(config.value) ? config.value : [config.value];
+    case 'email':
+    case 'url':
+    case 'text':
+    case 'textarea':
+    case 'string':
     default:
       return config.value;
   }

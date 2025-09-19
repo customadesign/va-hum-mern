@@ -15,35 +15,47 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
 
   // Check if user is authenticated on mount
+  // SECURITY FIX: Only check auth status if NOT on login page
   useEffect(() => {
-    checkAuthStatus();
+    const currentPath = window.location.pathname;
+
+    // Skip auth check if we're on the login page to prevent auto-authentication
+    if (currentPath === '/login') {
+      console.log('[AuthContext] On login page - clearing auth state and cookies');
+      // Clear any existing auth state when on login page
+      clearAuthState();
+
+      // Also clear server-side cookies to ensure complete logout
+      api.post('/auth/clear-session')
+        .then(() => {
+          console.log('[AuthContext] Session cleared successfully');
+        })
+        .catch((error) => {
+          console.error('[AuthContext] Failed to clear session:', error);
+        })
+        .finally(() => {
+          setIsLoading(false);
+          setAuthChecked(true);
+        });
+    } else {
+      // Only check auth status for non-login pages
+      checkAuthStatus();
+    }
   }, []);
 
-  // Helper function to get cookie value
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
-  };
 
   // Check authentication status
   const checkAuthStatus = async () => {
+    // Always set loading when checking auth
+    setIsLoading(true);
+    
     try {
       console.log('[AuthContext] Checking authentication status...');
-      const token = getCookie('authToken');
       
-      if (!token) {
-        console.log('[AuthContext] No auth token found');
-        setIsAuthenticated(false);
-        setUser(null);
-        setIsLoading(false);
-        return;
-      }
-
-      // Set the token in API headers for this request
+      // Make API request - cookies will be sent automatically due to withCredentials: true
       const response = await api.get('/auth/me');
       
       if (response.data.success && response.data.user) {
@@ -56,35 +68,52 @@ export const AuthProvider = ({ children }) => {
           console.log('[AuthContext] User is not admin:', response.data.user.email);
           setUser(null);
           setIsAuthenticated(false);
-          // Clear invalid token cookie
-          document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         }
       } else {
         console.log('[AuthContext] Authentication failed:', response.data.error);
         setUser(null);
         setIsAuthenticated(false);
-        // Clear invalid token cookie
-        document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       }
     } catch (error) {
       console.error('[AuthContext] Auth check error:', error);
+      console.error('[AuthContext] Error details:', error.response?.status, error.response?.data);
+      // Ensure we explicitly set authenticated to false on any error
       setUser(null);
       setIsAuthenticated(false);
-      // Clear invalid token cookie
-      document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     } finally {
       setIsLoading(false);
+      setAuthChecked(true);
     }
   };
 
   // Login with email and password
   const loginWithEmail = async (credentials) => {
     try {
-      console.log('[AuthContext] Attempting email login...');
-      const response = await api.post('/auth/login', credentials);
-      
+      console.log('[AuthContext] Attempting email login with:', credentials.email);
+      console.log('[AuthContext] API URL:', api.defaults.baseURL);
+
+      // First get CSRF token
+      console.log('[AuthContext] Getting CSRF token...');
+      const csrfResponse = await api.get('/auth/csrf');
+      const csrfToken = csrfResponse.data.csrfToken;
+      console.log('[AuthContext] CSRF token obtained');
+
+      // Get the XSRF-TOKEN from cookies
+      const xsrfToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('XSRF-TOKEN='))
+        ?.split('=')[1];
+
+      // Now login with CSRF token
+      const response = await api.post('/auth/admin/login', credentials, {
+        headers: {
+          'X-CSRF-Token': xsrfToken || csrfToken
+        }
+      });
+      console.log('[AuthContext] Login response:', response.data);
+
       if (response.data.success) {
-        const { token, refreshToken, user } = response.data;
+        const { user } = response.data;
         
         // Check if user is admin
         if (user.admin !== true) {
@@ -92,28 +121,32 @@ export const AuthProvider = ({ children }) => {
           throw new Error('Access denied. Admin privileges required.');
         }
         
-        // Store tokens in cookies (secure, httpOnly)
-        const cookieOptions = {
-          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-          path: '/',
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
-        };
+        // Backend already sets HttpOnly cookies, no need to set them here
+        console.log('[AuthContext] Cookies should be set by backend');
         
-        document.cookie = `authToken=${token}; expires=${cookieOptions.expires.toUTCString()}; path=${cookieOptions.path}`;
-        document.cookie = `refreshToken=${refreshToken}; expires=${cookieOptions.expires.toUTCString()}; path=${cookieOptions.path}`;
-        
-        // Update state
+        // Update state immediately with batched updates for consistency
         setUser(user);
         setIsAuthenticated(true);
+        setIsLoading(false);
+        setAuthChecked(true);
         
-        console.log('[AuthContext] Email login successful (admin user)');
-        return { success: true };
+        console.log('[AuthContext] Email login successful (admin user):', user);
+        
+        // Return success immediately with updated state info
+        return { success: true, user, isAuthenticated: true };
       } else {
         throw new Error(response.data.error || 'Login failed');
       }
     } catch (error) {
       console.error('[AuthContext] Email login failed:', error);
+      console.error('[AuthContext] Error response data:', error.response?.data);
+      console.error('[AuthContext] Error status:', error.response?.status);
+      
+      // Clear state on login failure
+      setUser(null);
+      setIsAuthenticated(false);
+      setIsLoading(false);
+      
       throw error;
     }
   };
@@ -162,6 +195,13 @@ export const AuthProvider = ({ children }) => {
     return await loginWithEmail(credentials);
   };
 
+  // Clear authentication state (internal helper)
+  const clearAuthState = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    // Note: We don't clear cookies here as they are HttpOnly and managed by the backend
+  };
+
   // Logout
   const logout = async () => {
     try {
@@ -170,14 +210,9 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('[AuthContext] Logout API call failed:', error);
     } finally {
-      // Clear client-side cookies
-      document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      
       // Clear state
-      setUser(null);
-      setIsAuthenticated(false);
-      
+      clearAuthState();
+
       console.log('[AuthContext] User logged out');
     }
   };
@@ -185,26 +220,9 @@ export const AuthProvider = ({ children }) => {
   // Refresh token
   const refreshAuth = async () => {
     try {
-      const refreshToken = getCookie('refreshToken');
-      if (!refreshToken) {
-        throw new Error('No refresh token available');
-      }
-
-      const response = await api.post('/auth/refresh', { refreshToken });
+      const response = await api.post('/auth/refresh');
       if (response.data.success) {
-        const { token, refreshToken: newRefreshToken } = response.data;
-        
-        // Update cookies
-        const cookieOptions = {
-          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-          path: '/',
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
-        };
-        
-        document.cookie = `authToken=${token}; expires=${cookieOptions.expires.toUTCString()}; path=${cookieOptions.path}`;
-        document.cookie = `refreshToken=${newRefreshToken}; expires=${cookieOptions.expires.toUTCString()}; path=${cookieOptions.path}`;
-        
+        // Backend handles cookie updates automatically
         return { success: true };
       } else {
         throw new Error('Token refresh failed');
@@ -220,10 +238,12 @@ export const AuthProvider = ({ children }) => {
     user,
     isAuthenticated,
     isLoading,
+    authChecked,
     login,
     logout,
     refreshAuth,
-    checkAuthStatus
+    checkAuthStatus,
+    clearAuthState
   };
 
   return (

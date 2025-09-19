@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
+const Business = require('../models/Business');
 const File = require('../models/File');
 const { protect } = require('../middleware/auth');
-const { handleSupabaseUpload, deleteFromSupabase } = require('../utils/supabaseStorage');
+const { handleUnifiedUpload, deleteWithFallback, uploadWithFallback } = require('../utils/unifiedStorage');
 const { uploadLimiter } = require('../middleware/rateLimiter');
 const { getProfileCompletionStatus } = require('../middleware/profileCompletion');
 
@@ -146,10 +147,12 @@ router.put('/',
 router.post('/avatar',
   protect,
   uploadLimiter,
-  handleSupabaseUpload('avatar', 'avatars'),
+  handleUnifiedUpload('avatar', 'avatars'),
   async (req, res) => {
     try {
-      const user = await User.findById(req.user.id);
+      const user = await User.findById(req.user.id)
+        .populate('va')
+        .populate('business');
 
       if (!user) {
         return res.status(404).json({
@@ -162,7 +165,12 @@ router.post('/avatar',
       if (user.avatarFileId) {
         const oldFile = await File.findById(user.avatarFileId);
         if (oldFile) {
-          await deleteFromSupabase(oldFile.url, oldFile.bucket);
+          await deleteWithFallback({
+            provider: oldFile.storageProvider || 'supabase',
+            url: oldFile.url,
+            bucket: oldFile.bucket,
+            key: oldFile.s3Key
+          });
           await oldFile.softDelete();
         }
       }
@@ -174,8 +182,10 @@ router.post('/avatar',
         mimetype: req.file.mimetype,
         size: req.file.size,
         url: req.file.path,
-        bucket: process.env.SUPABASE_BUCKET || 'linkage-va-hub',
+        bucket: req.file.bucket || process.env.SUPABASE_BUCKET || 'linkage-va-hub',
         path: req.file.path,
+        storageProvider: req.file.storageProvider,
+        s3Key: req.file.s3Key,
         uploadedBy: req.user._id,
         category: 'profile',
         fileType: 'image',
@@ -185,6 +195,17 @@ router.post('/avatar',
       // Update user profile
       user.avatar = file.url;
       user.avatarFileId = file._id;
+      
+      // Also update VA or Business avatar if they exist
+      if (user.va) {
+        user.va.avatar = file.url;
+        await user.va.save();
+      }
+      if (user.business) {
+        user.business.avatar = file.url;
+        await user.business.save();
+      }
+      
       user.calculateProfileCompletion();
       await user.save();
 
@@ -198,7 +219,12 @@ router.post('/avatar',
       
       // Try to delete uploaded file if database save failed
       if (req.file && req.file.path) {
-        await deleteFromSupabase(req.file.path, process.env.SUPABASE_BUCKET || 'linkage-va-hub');
+        await deleteWithFallback({
+          provider: req.file.storageProvider,
+          url: req.file.path,
+          bucket: req.file.bucket,
+          key: req.file.s3Key
+        });
       }
       
       res.status(500).json({
@@ -215,7 +241,7 @@ router.post('/avatar',
 router.post('/cover',
   protect,
   uploadLimiter,
-  handleSupabaseUpload('cover', 'covers'),
+  handleUnifiedUpload('cover', 'covers'),
   async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
@@ -231,7 +257,12 @@ router.post('/cover',
       if (user.coverImageFileId) {
         const oldFile = await File.findById(user.coverImageFileId);
         if (oldFile) {
-          await deleteFromSupabase(oldFile.url, oldFile.bucket);
+          await deleteWithFallback({
+            provider: oldFile.storageProvider || 'supabase',
+            url: oldFile.url,
+            bucket: oldFile.bucket,
+            key: oldFile.s3Key
+          });
           await oldFile.softDelete();
         }
       }
@@ -574,5 +605,115 @@ router.delete('/',
 // @desc    Get profile completion status
 // @access  Private
 router.get('/completion', protect, getProfileCompletionStatus);
+
+// ================================
+// BUSINESS PROFILE ROUTES
+// ================================
+
+// @route   GET /api/profile/business
+// @desc    Get business profile for current user
+// @access  Private
+router.get('/business', protect, async (req, res) => {
+  try {
+    // Get user and populate business
+    const user = await User.findById(req.user.id).populate('business');
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    if (!user.business) {
+      return res.status(404).json({
+        success: false,
+        error: 'Business profile not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: user.business
+    });
+  } catch (error) {
+    console.error('Get business profile error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve business profile'
+    });
+  }
+});
+
+// @route   PUT /api/profile/business
+// @desc    Update business profile
+// @access  Private
+router.put('/business',
+  protect,
+  [
+    body('contactName').optional().trim().isLength({ min: 1, max: 100 }),
+    body('company').optional().trim().isLength({ min: 1, max: 100 }),
+    body('bio').optional().trim().isLength({ max: 1000 }),
+    body('industry').optional().trim().isLength({ max: 100 }),
+    body('employeeCount').optional().isInt({ min: 1 }),
+    body('city').optional().trim().isLength({ max: 100 }),
+    body('state').optional().trim().isLength({ max: 100 }),
+    body('country').optional().trim().isLength({ max: 100 }),
+    body('phone').optional().matches(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/),
+    body('website').optional().isURL()
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        success: false,
+        errors: errors.array() 
+      });
+    }
+
+    try {
+      const user = await User.findById(req.user.id).populate('business');
+      
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          error: 'User not found'
+        });
+      }
+
+      if (!user.business) {
+        return res.status(404).json({
+          success: false,
+          error: 'Business profile not found'
+        });
+      }
+
+      // Update business fields
+      const updateFields = [
+        'contactName', 'company', 'bio', 'industry', 'employeeCount',
+        'city', 'state', 'country', 'phone', 'website'
+      ];
+
+      updateFields.forEach(field => {
+        if (req.body[field] !== undefined) {
+          user.business[field] = req.body[field];
+        }
+      });
+
+      await user.business.save();
+
+      res.json({
+        success: true,
+        data: user.business
+      });
+    } catch (error) {
+      console.error('Update business profile error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to update business profile'
+      });
+    }
+  }
+);
 
 module.exports = router;
