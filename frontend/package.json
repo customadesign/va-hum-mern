@@ -62,5 +62,8 @@
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.32",
     "react-scripts": "5.0.1"
+  },
+  "overrides": {
+    "typescript": "^4.9.5"
   }
 }
