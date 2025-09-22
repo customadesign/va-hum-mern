@@ -18,7 +18,7 @@ const NotificationIcon = ({ type }) => {
     case 'profile_view':
       return <UserPlusIcon className="h-6 w-6 text-purple-500" />;
     default:
-      return <BellIcon className="h-6 w-6 text-gray-500" />;
+      return <BellIcon className="h-6 w-6 text-gray-700" />;
   }
 };
 
@@ -145,7 +145,7 @@ export default function Notifications() {
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
                 {unreadCount > 0 && (
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-gray-700 mt-1">
                     You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
                   </p>
                 )}
@@ -191,9 +191,9 @@ export default function Notifications() {
           <div className="divide-y divide-gray-200">
             {notifications.length === 0 ? (
               <div className="px-6 py-12 text-center">
-                <BellIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <BellIcon className="mx-auto h-12 w-12 text-gray-700" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">No notifications</h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-700">
                   {filter === 'unread' ? "You're all caught up!" : "You don't have any notifications yet."}
                 </p>
               </div>
@@ -218,7 +218,7 @@ export default function Notifications() {
                       )}>
                         {notification.messageText}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-700 mt-1">
                         {formatNotificationDate(notification.createdAt)}
                       </p>
                     </div>
@@ -231,7 +231,7 @@ export default function Notifications() {
                           e.stopPropagation();
                           handleDelete(notification._id);
                         }}
-                        className="text-gray-400 hover:text-gray-500"
+                        className="text-gray-700 hover:text-gray-700"
                       >
                         <XMarkIcon className="h-5 w-5" />
                       </button>
@@ -251,7 +251,7 @@ export default function Notifications() {
                   disabled={page === 1}
                   className={classNames(
                     page === 1
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      ? 'bg-gray-100 text-gray-700 cursor-not-allowed'
                       : 'bg-white text-gray-700 hover:bg-gray-50',
                     'px-4 py-2 border border-gray-300 rounded-md text-sm font-medium'
                   )}
@@ -266,7 +266,7 @@ export default function Notifications() {
                   disabled={page === totalPages}
                   className={classNames(
                     page === totalPages
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      ? 'bg-gray-100 text-gray-700 cursor-not-allowed'
                       : 'bg-white text-gray-700 hover:bg-gray-50',
                     'px-4 py-2 border border-gray-300 rounded-md text-sm font-medium'
                   )}

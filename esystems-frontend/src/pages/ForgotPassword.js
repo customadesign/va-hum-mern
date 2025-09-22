@@ -55,7 +55,7 @@ export default function ForgotPassword() {
               <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
                 Check your email
               </h2>
-              <p className="mt-2 text-sm text-gray-600">
+              <p className="mt-2 text-sm text-gray-700">
                 We've sent password reset instructions to {formik.values.email}
               </p>
             </div>
@@ -70,7 +70,7 @@ export default function ForgotPassword() {
             <div className="text-center">
               <Link
                 to="/login"
-                className="font-medium text-gray-600 hover:text-gray-500"
+                className="font-medium text-gray-700 hover:text-gray-700"
               >
                 Back to sign in
               </Link>
@@ -98,7 +98,7 @@ export default function ForgotPassword() {
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
               Forgot your password?
             </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
+            <p className="mt-2 text-center text-sm text-gray-700">
               Enter your email address and we'll send you instructions to reset your password.
             </p>
           </div>
@@ -142,7 +142,7 @@ export default function ForgotPassword() {
             <div className="text-center">
               <Link
                 to="/login"
-                className="font-medium text-gray-600 hover:text-gray-500"
+                className="font-medium text-gray-700 hover:text-gray-700"
               >
                 Back to sign in
               </Link>

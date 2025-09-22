@@ -1727,7 +1727,7 @@ export default function VAProfile() {
                   <h2 className="text-lg font-medium leading-6 text-gray-900">
                     Profile
                   </h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     This information will be displayed publicly so be careful
                     what you share.
                   </p>
@@ -1759,7 +1759,7 @@ export default function VAProfile() {
                           }`}
                         />
                       </div>
-                      <p className="mt-2 text-sm text-gray-500">
+                      <p className="mt-2 text-sm text-gray-700">
                         Your name will be displayed on your profile and in
                         search results.
                       </p>
@@ -1794,7 +1794,7 @@ export default function VAProfile() {
                           }`}
                         />
                       </div>
-                      <p className="mt-2 text-sm text-gray-500">
+                      <p className="mt-2 text-sm text-gray-700">
                         A brief statement that describes what you do.
                       </p>
                       {formik.touched.hero && formik.errors.hero && (
@@ -1999,7 +1999,7 @@ export default function VAProfile() {
                       <span className="block text-sm font-medium text-gray-700">
                         Profile Picture
                       </span>
-                      <p className="mt-1 text-sm text-gray-500">
+                      <p className="mt-1 text-sm text-gray-700">
                         Upload a professional profile picture. Best dimensions: 400×400 pixels (square). PNG, JPG, GIF up to 5MB.
                       </p>
                       <div className="mt-2 flex items-center">
@@ -2045,7 +2045,7 @@ export default function VAProfile() {
                       <span className="block text-sm font-medium text-gray-700">
                         Cover Image
                       </span>
-                      <p className="mt-1 text-sm text-gray-500">
+                      <p className="mt-1 text-sm text-gray-700">
                         Upload a professional banner image for your profile.
                         Best dimensions: 1200×400 pixels. PNG, JPG, GIF up to
                         10MB.
@@ -2095,7 +2095,7 @@ export default function VAProfile() {
                   <h3 className="text-lg font-medium leading-6 text-gray-900">
                     Contact Information
                   </h3>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-gray-700">
                     Your contact details for employers to reach you.
                   </p>
                 </div>
@@ -2124,7 +2124,7 @@ export default function VAProfile() {
                           }`}
                         />
                       </div>
-                      <p className="mt-2 text-sm text-gray-500">
+                      <p className="mt-2 text-sm text-gray-700">
                         Your professional email address for employers to contact
                         you.
                       </p>
@@ -2138,7 +2138,7 @@ export default function VAProfile() {
                         Phone Number
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
-                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-700 sm:text-sm">
                           +63
                         </span>
                         <input
@@ -2151,7 +2151,7 @@ export default function VAProfile() {
                           className="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                         />
                       </div>
-                      <p className="mt-2 text-sm text-gray-500">
+                      <p className="mt-2 text-sm text-gray-700">
                         Your primary phone number for employers to contact you
                         directly.
                       </p>
@@ -2168,11 +2168,11 @@ export default function VAProfile() {
                   <h2 className="text-lg font-medium leading-6 text-gray-900">
                     Video Introduction
                   </h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     A short video introduction helps you stand out. Upload a 1-2
                     minute video telling employers about yourself.
                   </p>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     Videos up to 1GB are supported.
                   </p>
                 </div>
@@ -2225,10 +2225,10 @@ export default function VAProfile() {
                           Upload Video Introduction
                         </button>
 
-                        <p className="mt-3 text-sm text-gray-500">
+                        <p className="mt-3 text-sm text-gray-700">
                           Upload a 1-2 minute video introducing yourself
                         </p>
-                        <p className="mt-1 text-xs text-gray-400">
+                        <p className="mt-1 text-xs text-gray-700">
                           MP4, MOV, WebM up to 1GB
                         </p>
                       </div>
@@ -2299,15 +2299,15 @@ export default function VAProfile() {
                   <h2 className="text-lg font-medium leading-6 text-gray-900">
                     Bio
                   </h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     Share some information about yourself. What you did before,
                     what you're doing now, and what you're looking for next.
                   </p>
 
-                  <h4 className="font-medium uppercase tracking-wide text-gray-500 text-sm mt-4">
+                  <h4 className="font-medium uppercase tracking-wide text-gray-700 text-sm mt-4">
                     EXAMPLES
                   </h4>
-                  <ul className="text-sm text-gray-500 list-disc list-inside">
+                  <ul className="text-sm text-gray-700 list-disc list-inside">
                     <li className="mt-1">Where you're originally from</li>
                     <li className="mt-1">What you've accomplished</li>
                     <li className="mt-1">What you've learned</li>
@@ -2316,7 +2316,7 @@ export default function VAProfile() {
                     <li className="mt-1">What makes you unique</li>
                   </ul>
 
-                  <p className="mt-4 text-sm text-gray-500">
+                  <p className="mt-4 text-sm text-gray-700">
                     You can use Markdown for formatting.
                   </p>
                 </div>
@@ -2337,7 +2337,7 @@ export default function VAProfile() {
                             : "border-gray-300 focus:ring-gray-500 focus:border-gray-500"
                         }`}
                       />
-                      <p className="mt-2 text-sm text-gray-500">
+                      <p className="mt-2 text-sm text-gray-700">
                         {formik.values.bio.length} characters. Minimum 100
                         characters.
                       </p>
@@ -2359,11 +2359,11 @@ export default function VAProfile() {
                   <h2 className="text-lg font-medium leading-6 text-gray-900">
                     Specialties
                   </h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     Pick the things you're good at, have experience with, or
                     want to learn.
                   </p>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     Missing a specialty?{" "}
                     <a
                       href="mailto:hello@linkage.ph?subject=New specialty suggestion"
@@ -2374,10 +2374,10 @@ export default function VAProfile() {
                     .
                   </p>
 
-                  <h4 className="font-medium uppercase tracking-wide text-gray-500 text-sm mt-4">
+                  <h4 className="font-medium uppercase tracking-wide text-gray-700 text-sm mt-4">
                     NOTE
                   </h4>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-gray-700">
                     These affect the search results and are public, so be honest
                     about your skills.
                   </p>
@@ -2411,7 +2411,7 @@ export default function VAProfile() {
                                 );
                               }
                             }}
-                            className="h-4 w-4 border-gray-300 rounded text-gray-600 focus:ring-gray-500"
+                            className="h-4 w-4 border-gray-300 rounded text-gray-700 focus:ring-gray-500"
                           />
                           <label
                             htmlFor={`specialty-${specialty._id}`}
@@ -2434,17 +2434,17 @@ export default function VAProfile() {
                   <h2 className="text-lg font-medium leading-6 text-gray-900">
                     DISC Personality Assessment
                   </h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     Help businesses understand your personality type and working
                     style by completing a DISC assessment.
                   </p>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     Take the DISC assessment below (4-6 minutes) to automatically calculate and save your personality profile.
                   </p>
-                  <h4 className="font-medium uppercase tracking-wide text-gray-500 text-sm mt-4">
+                  <h4 className="font-medium uppercase tracking-wide text-gray-700 text-sm mt-4">
                     ABOUT DISC
                   </h4>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-gray-700">
                     DISC measures four personality types: Dominance (D),
                     Influence (I), Steadiness (S), and Conscientiousness (C).
                   </p>
@@ -2512,7 +2512,7 @@ export default function VAProfile() {
                             <h3 className="text-sm font-medium text-gray-700 mb-2">
                               DISC Personality Assessment
                             </h3>
-                            <p className="text-sm text-gray-600 mb-4">
+                            <p className="text-sm text-gray-700 mb-4">
                               Take the DISC assessment to help businesses understand your personality 
                               type and working style. The test consists of 16 questions and takes about 
                               4-6 minutes to complete.
@@ -2543,7 +2543,7 @@ export default function VAProfile() {
                   <h2 className="text-lg font-medium leading-6 text-gray-900">
                     Work preferences
                   </h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     Let businesses know your work preferences and availability.
                   </p>
                 </div>
@@ -2568,7 +2568,7 @@ export default function VAProfile() {
                                 "actively_looking"
                               }
                               onChange={formik.handleChange}
-                              className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300"
+                              className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300"
                             />
                           </div>
                           <div className="ml-3 text-sm">
@@ -2578,7 +2578,7 @@ export default function VAProfile() {
                             >
                               Actively looking
                             </label>
-                            <p className="text-gray-500">
+                            <p className="text-gray-700">
                               You're actively looking for new opportunities.
                             </p>
                           </div>
@@ -2592,7 +2592,7 @@ export default function VAProfile() {
                               value="open"
                               checked={formik.values.searchStatus === "open"}
                               onChange={formik.handleChange}
-                              className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300"
+                              className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300"
                             />
                           </div>
                           <div className="ml-3 text-sm">
@@ -2602,7 +2602,7 @@ export default function VAProfile() {
                             >
                               Open to opportunities
                             </label>
-                            <p className="text-gray-500">
+                            <p className="text-gray-700">
                               You're not looking but open to hearing about new
                               opportunities.
                             </p>
@@ -2619,7 +2619,7 @@ export default function VAProfile() {
                                 formik.values.searchStatus === "not_interested"
                               }
                               onChange={formik.handleChange}
-                              className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300"
+                              className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300"
                             />
                           </div>
                           <div className="ml-3 text-sm">
@@ -2629,7 +2629,7 @@ export default function VAProfile() {
                             >
                               Not interested
                             </label>
-                            <p className="text-gray-500">
+                            <p className="text-gray-700">
                               You're not interested in new opportunities.
                             </p>
                           </div>
@@ -2645,7 +2645,7 @@ export default function VAProfile() {
                                 formik.values.searchStatus === "invisible"
                               }
                               onChange={formik.handleChange}
-                              className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300"
+                              className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300"
                             />
                           </div>
                           <div className="ml-3 text-sm">
@@ -2655,7 +2655,7 @@ export default function VAProfile() {
                             >
                               Invisible
                             </label>
-                            <p className="text-gray-500">
+                            <p className="text-gray-700">
                               Your profile is hidden from search results.
                             </p>
                           </div>
@@ -2669,7 +2669,7 @@ export default function VAProfile() {
                         <legend className="text-base font-medium text-gray-900">
                           Role type
                         </legend>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-700">
                           What type of work are you interested in?
                         </p>
                       </div>
@@ -2681,7 +2681,7 @@ export default function VAProfile() {
                             type="checkbox"
                             checked={formik.values.roleType.part_time_contract}
                             onChange={formik.handleChange}
-                            className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
+                            className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300 rounded"
                           />
                           <label
                             htmlFor="part_time_contract"
@@ -2697,7 +2697,7 @@ export default function VAProfile() {
                             type="checkbox"
                             checked={formik.values.roleType.full_time_contract}
                             onChange={formik.handleChange}
-                            className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
+                            className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300 rounded"
                           />
                           <label
                             htmlFor="full_time_contract"
@@ -2715,7 +2715,7 @@ export default function VAProfile() {
                               formik.values.roleType.full_time_employment
                             }
                             onChange={formik.handleChange}
-                            className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
+                            className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300 rounded"
                           />
                           <label
                             htmlFor="full_time_employment"
@@ -2733,7 +2733,7 @@ export default function VAProfile() {
                         <legend className="text-base font-medium text-gray-900">
                           Role level
                         </legend>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-700">
                           What level of role are you looking for?
                         </p>
                       </div>
@@ -2745,7 +2745,7 @@ export default function VAProfile() {
                             type="checkbox"
                             checked={formik.values.roleLevel.junior}
                             onChange={formik.handleChange}
-                            className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
+                            className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300 rounded"
                           />
                           <label
                             htmlFor="junior"
@@ -2761,7 +2761,7 @@ export default function VAProfile() {
                             type="checkbox"
                             checked={formik.values.roleLevel.mid}
                             onChange={formik.handleChange}
-                            className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
+                            className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300 rounded"
                           />
                           <label
                             htmlFor="mid"
@@ -2777,7 +2777,7 @@ export default function VAProfile() {
                             type="checkbox"
                             checked={formik.values.roleLevel.senior}
                             onChange={formik.handleChange}
-                            className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
+                            className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300 rounded"
                           />
                           <label
                             htmlFor="senior"
@@ -2793,7 +2793,7 @@ export default function VAProfile() {
                             type="checkbox"
                             checked={formik.values.roleLevel.principal}
                             onChange={formik.handleChange}
-                            className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
+                            className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300 rounded"
                           />
                           <label
                             htmlFor="principal"
@@ -2809,7 +2809,7 @@ export default function VAProfile() {
                             type="checkbox"
                             checked={formik.values.roleLevel.c_level}
                             onChange={formik.handleChange}
-                            className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
+                            className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300 rounded"
                           />
                           <label
                             htmlFor="c_level"
@@ -2827,7 +2827,7 @@ export default function VAProfile() {
                         <legend className="text-base font-medium text-gray-900">
                           Hourly Rate Range
                         </legend>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-700">
                           Your preferred hourly rate range (in USD)
                         </p>
                       </div>
@@ -2896,7 +2896,7 @@ export default function VAProfile() {
                   <h2 className="text-lg font-medium leading-6 text-gray-900">
                     Online presence
                   </h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     Where can people find you online?
                   </p>
                 </div>
@@ -2911,7 +2911,7 @@ export default function VAProfile() {
                         Website
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
-                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-700 sm:text-sm">
                           https://
                         </span>
                         <input
@@ -2933,7 +2933,7 @@ export default function VAProfile() {
                         Facebook
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
-                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-700 sm:text-sm">
                           facebook.com/
                         </span>
                         <input
@@ -2955,7 +2955,7 @@ export default function VAProfile() {
                         Instagram
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
-                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-700 sm:text-sm">
                           instagram.com/
                         </span>
                         <input
@@ -2977,7 +2977,7 @@ export default function VAProfile() {
                         LinkedIn
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
-                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-700 sm:text-sm">
                           linkedin.com/in/
                         </span>
                         <input
@@ -2999,7 +2999,7 @@ export default function VAProfile() {
                         WhatsApp
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
-                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-700 sm:text-sm">
                           +63
                         </span>
                         <input
@@ -3022,7 +3022,7 @@ export default function VAProfile() {
                         Twitter
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
-                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-700 sm:text-sm">
                           twitter.com/
                         </span>
                         <input
@@ -3044,7 +3044,7 @@ export default function VAProfile() {
                         Viber
                       </label>
                       <div className="mt-1 flex rounded-md shadow-sm">
-                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-700 sm:text-sm">
                           +63
                         </span>
                         <input
@@ -3083,7 +3083,7 @@ export default function VAProfile() {
                             type="checkbox"
                             checked={formik.values.profileReminderNotifications}
                             onChange={formik.handleChange}
-                            className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
+                            className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300 rounded"
                           />
                         </div>
                         <div className="ml-3 text-sm">
@@ -3093,7 +3093,7 @@ export default function VAProfile() {
                           >
                             Profile reminders
                           </label>
-                          <p className="text-gray-500">
+                          <p className="text-gray-700">
                             Get notified when you haven't updated your profile
                             in a while.
                           </p>
@@ -3113,7 +3113,7 @@ export default function VAProfile() {
                               formik.values.productAnnouncementNotifications
                             }
                             onChange={formik.handleChange}
-                            className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300 rounded"
+                            className="focus:ring-gray-500 h-4 w-4 text-gray-700 border-gray-300 rounded"
                           />
                         </div>
                         <div className="ml-3 text-sm">
@@ -3123,7 +3123,7 @@ export default function VAProfile() {
                           >
                             Product announcements
                           </label>
-                          <p className="text-gray-500">
+                          <p className="text-gray-700">
                             Get notified about new features and updates.
                           </p>
                         </div>

@@ -165,9 +165,9 @@ export default function SavedVAs() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full bg-white shadow rounded-lg p-6">
           <div className="text-center">
-            <BookmarkIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <BookmarkIcon className="mx-auto h-12 w-12 text-gray-700" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">Access Restricted</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-700">
               This feature is available to E-Systems business accounts only.
             </p>
             <div className="mt-6">
@@ -207,7 +207,7 @@ export default function SavedVAs() {
                 Saved Team Members
               </h2>
             </div>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-700">
               Manage your collection of saved professionals
             </p>
           </div>
@@ -269,7 +269,7 @@ export default function SavedVAs() {
                 <label htmlFor="search" className="sr-only">Search</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-700" aria-hidden="true" />
                   </div>
                   <input
                     type="search"
@@ -368,7 +368,7 @@ export default function SavedVAs() {
 
                 {/* Clear Filters */}
                 <div className="mt-4 flex justify-between items-center">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-700">
                     {data?.data?.length || 0} saved team members
                   </p>
                   <button
@@ -393,9 +393,9 @@ export default function SavedVAs() {
             </div>
           ) : error ? (
             <div className="text-center py-12">
-              <BookmarkIcon className="mx-auto h-12 w-12 text-gray-400" />
+              <BookmarkIcon className="mx-auto h-12 w-12 text-gray-700" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">Error loading saved team members</h3>
-              <p className="mt-1 text-sm text-gray-500">Please try again later.</p>
+              <p className="mt-1 text-sm text-gray-700">Please try again later.</p>
               <div className="mt-6">
                 <button
                   onClick={() => refetch()}
@@ -407,9 +407,9 @@ export default function SavedVAs() {
             </div>
           ) : data?.data?.length === 0 ? (
             <div className="text-center py-12">
-              <BookmarkIcon className="mx-auto h-12 w-12 text-gray-400" />
+              <BookmarkIcon className="mx-auto h-12 w-12 text-gray-700" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No saved team members</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 {search || filters.status !== 'all' || filters.industry.length > 0 || filters.specialties.length > 0
                   ? 'Try adjusting your search or filters.'
                   : 'Start saving team members you\'re interested in.'
@@ -454,7 +454,7 @@ export default function SavedVAs() {
                           />
                         </div>
                         {/* Saved date */}
-                        <div className="absolute bottom-4 right-16 text-xs text-gray-500">
+                        <div className="absolute bottom-4 right-16 text-xs text-gray-700">
                           Saved {new Date(savedVA.savedAt).toLocaleDateString()}
                         </div>
                       </li>
@@ -504,7 +504,7 @@ export default function SavedVAs() {
                               {/* Headline/Hero (clamp to 2 lines) */}
                               {getHero(savedVA.va) && (
                                 <p
-                                  className="text-sm text-gray-600 mt-0.5"
+                                  className="text-sm text-gray-700 mt-0.5"
                                   style={{
                                     display: '-webkit-box',
                                     WebkitLineClamp: 2,
@@ -517,7 +517,7 @@ export default function SavedVAs() {
                               )}
 
                               {savedVA.va.yearsOfExperience && (
-                                <p className="text-xs text-gray-400 mt-1">
+                                <p className="text-xs text-gray-700 mt-1">
                                   {savedVA.va.yearsOfExperience} years experience
                                 </p>
                               )}
@@ -562,7 +562,7 @@ export default function SavedVAs() {
 
                       {/* Saved date */}
                       <div className="px-6 pb-4 pr-16">
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-700">
                           Saved on {new Date(savedVA.savedAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -607,7 +607,7 @@ export default function SavedVAs() {
                         <button
                           onClick={() => setPage(Math.max(1, page - 1))}
                           disabled={page === 1}
-                          className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                          className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                         >
                           <span className="sr-only">Previous</span>
                           <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -620,7 +620,7 @@ export default function SavedVAs() {
                         <button
                           onClick={() => setPage(Math.min(data.pagination.pages, page + 1))}
                           disabled={page === data.pagination.pages}
-                          className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                          className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                         >
                           <span className="sr-only">Next</span>
                           <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

@@ -82,9 +82,9 @@ export default function ShortUrlManager() {
   if (!shortUrls?.data?.length) {
     return (
       <div className="text-center py-12">
-        <ShareIcon className="mx-auto h-12 w-12 text-gray-400" />
+        <ShareIcon className="mx-auto h-12 w-12 text-gray-700" />
         <h3 className="mt-2 text-sm font-medium text-gray-900">No shared profiles</h3>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-700">
           Create shareable links for your profiles to make them easier to share.
         </p>
       </div>
@@ -95,7 +95,7 @@ export default function ShortUrlManager() {
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-medium text-gray-900 mb-4">Your Shared Profiles</h2>
-        <p className="text-sm text-gray-600 mb-6">
+        <p className="text-sm text-gray-700 mb-6">
           Manage your shareable profile links and track their performance.
         </p>
       </div>
@@ -121,7 +121,7 @@ export default function ShortUrlManager() {
                   )}
                 </div>
                 
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                <div className="flex items-center space-x-4 text-sm text-gray-700">
                   <div className="flex items-center">
                     <ChartBarIcon className="h-4 w-4 mr-1" />
                     {shortUrl.clicks} clicks
@@ -133,14 +133,14 @@ export default function ShortUrlManager() {
 
                 <div className="mt-3 flex items-center space-x-2">
                   <div className="flex-1 bg-gray-50 rounded px-3 py-2">
-                    <code className="text-sm text-gray-600 break-all">
+                    <code className="text-sm text-gray-700 break-all">
                       {`${window.location.origin}/s/${shortUrl.shortCode}`}
                     </code>
                   </div>
                   
                   <button
                     onClick={() => handleCopyUrl(`${window.location.origin}/s/${shortUrl.shortCode}`)}
-                    className="p-2 text-gray-400 hover:text-gray-600"
+                    className="p-2 text-gray-700 hover:text-gray-700"
                     title="Copy URL"
                   >
                     <ClipboardDocumentIcon className="h-4 w-4" />
@@ -151,7 +151,7 @@ export default function ShortUrlManager() {
                       `${window.location.origin}/s/${shortUrl.shortCode}`,
                       shortUrl.vaId?.name
                     )}
-                    className="p-2 text-gray-400 hover:text-gray-600"
+                    className="p-2 text-gray-700 hover:text-gray-700"
                     title="Share URL"
                   >
                     <ShareIcon className="h-4 w-4" />

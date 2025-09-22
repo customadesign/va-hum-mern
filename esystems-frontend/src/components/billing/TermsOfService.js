@@ -27,7 +27,7 @@ const TermsOfService = ({ isOpen, onClose, onAccept, accepted, setAccepted }) =>
                 <h3 className="text-2xl font-bold text-gray-900">
                   Terms of Service & No Refund Policy
                 </h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-700">
                   Please read carefully before proceeding with your purchase
                 </p>
               </div>
@@ -99,7 +99,7 @@ const TermsOfService = ({ isOpen, onClose, onAccept, accepted, setAccepted }) =>
             {/* Legal Disclaimer */}
             <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
               <div className="flex">
-                <ShieldCheckIcon className="h-6 w-6 text-gray-600 mt-1" />
+                <ShieldCheckIcon className="h-6 w-6 text-gray-700 mt-1" />
                 <div className="ml-3">
                   <h4 className="text-lg font-semibold text-gray-900">
                     Legal Disclaimer & Liability
@@ -169,7 +169,7 @@ const TermsOfService = ({ isOpen, onClose, onAccept, accepted, setAccepted }) =>
                   <span className="font-bold text-gray-900">
                     I have read, understood, and agree to all terms and conditions, especially the NO REFUND policy.
                   </span>
-                  <span className="block mt-1 text-gray-600">
+                  <span className="block mt-1 text-gray-700">
                     I understand this is a final sale and I will not request a refund or initiate a chargeback under any circumstances.
                   </span>
                 </span>

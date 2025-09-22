@@ -55,7 +55,7 @@ function BusinessProfileWithTabsContent() {
               <h1 className="text-3xl font-bold text-gray-900">
                 {branding.isESystemsMode ? 'Company Dashboard' : 'Business Dashboard'}
               </h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Manage your company profile, billing, and settings
               </p>
             </div>
@@ -73,7 +73,7 @@ function BusinessProfileWithTabsContent() {
                         group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm
                         ${activeTab === tab.id
                           ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor-pointer'
+                          : 'border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 cursor-pointer'
                         }
                       `}
                       aria-current={activeTab === tab.id ? 'page' : undefined}
@@ -83,7 +83,7 @@ function BusinessProfileWithTabsContent() {
                           -ml-0.5 mr-2 h-5 w-5
                           ${activeTab === tab.id
                             ? 'text-blue-500'
-                            : 'text-gray-400 group-hover:text-gray-500'
+                            : 'text-gray-700 group-hover:text-gray-700'
                           }
                         `}
                         aria-hidden="true"
@@ -101,7 +101,7 @@ function BusinessProfileWithTabsContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Tab Description */}
           <div className="mb-6">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-700">
               {tabs.find(tab => tab.id === activeTab)?.description}
             </p>
           </div>

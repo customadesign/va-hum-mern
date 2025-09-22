@@ -143,7 +143,7 @@ const SaveVAButton = ({ vaId, vaName, className = '', size = 'md', showText = tr
     return (
       <button
         disabled
-        className={`inline-flex items-center ${sizeClasses[size]} text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed ${className}`}
+        className={`inline-flex items-center ${sizeClasses[size]} text-gray-700 bg-gray-100 rounded-lg cursor-not-allowed ${className}`}
         title="Available to E-Systems business accounts"
       >
         <BookmarkIcon className={iconSizes[size]} />

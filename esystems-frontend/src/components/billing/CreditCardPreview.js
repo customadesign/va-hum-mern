@@ -173,7 +173,7 @@ const CreditCardPreview = ({
       <div className="text-center mt-4">
         <button
           onClick={() => {}} // This will be controlled by parent component
-          className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+          className="text-xs text-gray-700 hover:text-gray-700 transition-colors"
         >
           {isFlipped ? 'Click to see front' : 'Click to see back'}
         </button>

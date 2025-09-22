@@ -731,11 +731,11 @@ export default function Community() {
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user.profile?.name || 'VA'}!</h1>
-                  <p className="text-gray-600">Continue your learning journey</p>
+                  <p className="text-gray-700">Continue your learning journey</p>
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
-                    <div className="text-sm text-gray-500">Learning Streak</div>
+                    <div className="text-sm text-gray-700">Learning Streak</div>
                     <div className="flex items-center text-orange-600">
                       <FireIconSolid className="h-5 w-5 mr-1" />
                       <span className="font-bold">7 days</span>
@@ -757,7 +757,7 @@ export default function Community() {
                       <h2 className="text-2xl font-bold text-gray-900 flex items-center">
                         <BookOpenIcon className="h-6 w-6 mr-3 text-blue-600" />
                         Course Library
-                        <span className="ml-3 text-sm font-normal text-gray-500">
+                        <span className="ml-3 text-sm font-normal text-gray-700">
                           ({getFilteredCourses().length} courses)
                         </span>
                       </h2>
@@ -774,7 +774,7 @@ export default function Community() {
                           onChange={(e) => setSearchQuery(e.target.value)}
                           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
-                        <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                       </div>
@@ -811,7 +811,7 @@ export default function Community() {
                             <option value="duration">Shortest First</option>
                           </select>
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-gray-700">
                           Showing {getFilteredCourses().length} of {currentTutorials.length} courses
                         </div>
                       </div>
@@ -845,12 +845,12 @@ export default function Community() {
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{tutorial.description}</p>
+                                <p className="text-sm text-gray-700 mb-3 line-clamp-2">{tutorial.description}</p>
                               </div>
                             </div>
 
                             {/* Course Meta */}
-                            <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
+                            <div className="flex items-center space-x-4 text-sm text-gray-700 mb-3">
                               <div className="flex items-center">
                                 <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -879,7 +879,7 @@ export default function Community() {
                                 }`}>
                                   {tutorial.difficulty}
                                 </span>
-                                <span className="text-xs text-gray-500">{tutorial.category}</span>
+                                <span className="text-xs text-gray-700">{tutorial.category}</span>
                               </div>
                             </div>
 
@@ -891,7 +891,7 @@ export default function Community() {
                                 </span>
                               ))}
                               {tutorial.tags.length > 3 && (
-                                <span className="text-xs text-gray-500">+{tutorial.tags.length - 3} more</span>
+                                <span className="text-xs text-gray-700">+{tutorial.tags.length - 3} more</span>
                               )}
                             </div>
 
@@ -899,8 +899,8 @@ export default function Community() {
                             {tutorial.progress > 0 && (
                               <div className="mb-4">
                                 <div className="flex items-center justify-between mb-1">
-                                  <span className="text-xs text-gray-600">Progress</span>
-                                  <span className="text-xs text-gray-600">{tutorial.progress}%</span>
+                                  <span className="text-xs text-gray-700">Progress</span>
+                                  <span className="text-xs text-gray-700">{tutorial.progress}%</span>
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-2">
                                   <div 
@@ -930,9 +930,9 @@ export default function Community() {
                     {/* No Results Message */}
                     {getFilteredCourses().length === 0 && (
                       <div className="text-center py-12">
-                        <BookOpenIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <BookOpenIcon className="h-12 w-12 text-gray-700 mx-auto mb-4" />
                         <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
-                        <p className="text-gray-500 mb-4">
+                        <p className="text-gray-700 mb-4">
                           Try adjusting your search or filters to find what you're looking for.
                         </p>
                         <button
@@ -960,7 +960,7 @@ export default function Community() {
                         <div className="grid md:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <h4 className="font-medium text-gray-900">✅ Templates Included:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
+                            <ul className="text-sm text-gray-700 space-y-1">
                               <li>• Product showcase templates</li>
                               <li>• Behind-the-scenes layouts</li>
                               <li>• Call-to-action designs</li>
@@ -969,7 +969,7 @@ export default function Community() {
                           </div>
                           <div className="space-y-2">
                             <h4 className="font-medium text-gray-900">🎯 Key Techniques:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
+                            <ul className="text-sm text-gray-700 space-y-1">
                               <li>• Color psychology in design</li>
                               <li>• Typography best practices</li>
                               <li>• Brand consistency tips</li>
@@ -984,13 +984,13 @@ export default function Community() {
                           <VideoCameraIcon className="h-4 w-4 mr-2 text-blue-600" />
                           Video Tutorial Preview
                         </h4>
-                        <div className="bg-gray-200 rounded-lg h-32 flex items-center justify-center text-gray-500 mb-2">
+                        <div className="bg-gray-200 rounded-lg h-32 flex items-center justify-center text-gray-700 mb-2">
                           <div className="text-center">
                             <PlayIcon className="h-8 w-8 mx-auto mb-2" />
                             <span className="text-sm">Watch: "Creating Your First Story Template"</span>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-700">
                           See how to create professional Instagram story templates using free tools and boost client engagement by 300%.
                         </p>
                       </div>
@@ -1018,8 +1018,8 @@ export default function Community() {
                           Email Subject Line Mastery
                         </h3>
                         <div className="flex items-center space-x-2">
-                          <ClockIcon className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-500">5 min</span>
+                          <ClockIcon className="h-4 w-4 text-gray-700" />
+                          <span className="text-sm text-gray-700">5 min</span>
                           <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Marketing</span>
                         </div>
                       </div>
@@ -1031,7 +1031,7 @@ export default function Community() {
                         <div className="grid md:grid-cols-3 gap-4">
                           <div className="space-y-2">
                             <h4 className="font-medium text-gray-900">📧 Proven Formulas:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
+                            <ul className="text-sm text-gray-700 space-y-1">
                               <li>• Curiosity-driven headlines</li>
                               <li>• Urgency and scarcity tactics</li>
                               <li>• Personalization techniques</li>
@@ -1039,7 +1039,7 @@ export default function Community() {
                           </div>
                           <div className="space-y-2">
                             <h4 className="font-medium text-gray-900">✉️ Examples:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
+                            <ul className="text-sm text-gray-700 space-y-1">
                               <li>• "John, your exclusive invite..."</li>
                               <li>• "Last chance: 50% off ends tonight"</li>
                               <li>• "The secret that changed everything"</li>
@@ -1047,7 +1047,7 @@ export default function Community() {
                           </div>
                           <div className="space-y-2">
                             <h4 className="font-medium text-gray-900">📊 A/B Testing:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
+                            <ul className="text-sm text-gray-700 space-y-1">
                               <li>• Testing strategies</li>
                               <li>• Metrics to track</li>
                               <li>• Optimization tips</li>
@@ -1090,8 +1090,8 @@ export default function Community() {
                           Client Onboarding Checklist
                         </h3>
                         <div className="flex items-center space-x-2">
-                          <ClockIcon className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-500">12 min</span>
+                          <ClockIcon className="h-4 w-4 text-gray-700" />
+                          <span className="text-sm text-gray-700">12 min</span>
                           <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Business</span>
                         </div>
                       </div>
@@ -1103,7 +1103,7 @@ export default function Community() {
                         <div className="grid md:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <h4 className="font-medium text-gray-900">📋 Complete Checklist:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
+                            <ul className="text-sm text-gray-700 space-y-1">
                               <li>• Welcome packet template</li>
                               <li>• Project scope document</li>
                               <li>• Communication preferences</li>
@@ -1113,7 +1113,7 @@ export default function Community() {
                           </div>
                           <div className="space-y-2">
                             <h4 className="font-medium text-gray-900">🎯 Key Benefits:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
+                            <ul className="text-sm text-gray-700 space-y-1">
                               <li>• Reduced project confusion</li>
                               <li>• Professional first impression</li>
                               <li>• Clear expectations set</li>
@@ -1167,8 +1167,8 @@ export default function Community() {
                           Keyword Research Mastery
                         </h3>
                         <div className="flex items-center space-x-2">
-                          <ClockIcon className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-500">15 min</span>
+                          <ClockIcon className="h-4 w-4 text-gray-700" />
+                          <span className="text-sm text-gray-700">15 min</span>
                           <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">SEO</span>
                         </div>
                       </div>
@@ -1180,7 +1180,7 @@ export default function Community() {
                         <div className="grid md:grid-cols-3 gap-4">
                           <div className="space-y-2">
                             <h4 className="font-medium text-gray-900">🔍 Research Tools:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
+                            <ul className="text-sm text-gray-700 space-y-1">
                               <li>• Google Keyword Planner</li>
                               <li>• Ubersuggest (Free)</li>
                               <li>• AnswerThePublic</li>
@@ -1189,7 +1189,7 @@ export default function Community() {
                           </div>
                           <div className="space-y-2">
                             <h4 className="font-medium text-gray-900">📊 Key Metrics:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
+                            <ul className="text-sm text-gray-700 space-y-1">
                               <li>• Search volume</li>
                               <li>• Keyword difficulty</li>
                               <li>• Cost per click (CPC)</li>
@@ -1198,7 +1198,7 @@ export default function Community() {
                           </div>
                           <div className="space-y-2">
                             <h4 className="font-medium text-gray-900">🎯 Strategies:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
+                            <ul className="text-sm text-gray-700 space-y-1">
                               <li>• Long-tail keywords</li>
                               <li>• Competitor analysis</li>
                               <li>• Local SEO keywords</li>
@@ -1257,7 +1257,7 @@ export default function Community() {
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">
                         Ready to Master All 4 Skills?
                       </h3>
-                      <p className="text-gray-600 mb-4">
+                      <p className="text-gray-700 mb-4">
                         Join our community to access the complete guides, templates, and video tutorials.
                       </p>
                       <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -1333,7 +1333,7 @@ export default function Community() {
                   <div className="p-6 space-y-3">
                     {achievements.map((achievement) => (
                       <div key={achievement.id} className={`flex items-center space-x-3 ${
-                        achievement.unlocked ? 'text-gray-900' : 'text-gray-400'
+                        achievement.unlocked ? 'text-gray-900' : 'text-gray-700'
                       }`}>
                         <achievement.icon className={`h-5 w-5 ${
                           achievement.unlocked ? 'text-yellow-500' : 'text-gray-300'
@@ -1351,15 +1351,15 @@ export default function Community() {
                   </div>
                   <div className="p-6 space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Tutorials Completed</span>
+                      <span className="text-sm text-gray-700">Tutorials Completed</span>
                       <span className="font-semibold">23</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Hours Learned</span>
+                      <span className="text-sm text-gray-700">Hours Learned</span>
                       <span className="font-semibold">12.5</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Current Level</span>
+                      <span className="text-sm text-gray-700">Current Level</span>
                       <span className="font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">Intermediate</span>
                     </div>
                   </div>
@@ -1401,7 +1401,7 @@ export default function Community() {
                     </h3>
                     <button
                       onClick={handleLeaveMeeting}
-                      className="bg-gray-200 rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+                      className="bg-gray-200 rounded-md p-2 inline-flex items-center justify-center text-gray-700 hover:text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
                     >
                       <span className="sr-only">Close</span>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1446,7 +1446,7 @@ export default function Community() {
             <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
               Free VA Learning Community
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-8">
               Join thousands of Virtual Assistants learning in-demand skills to grow their careers. 
               Access free resources on web development, design, marketing, AI, and more.
             </p>
@@ -1470,9 +1470,9 @@ export default function Community() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
               {resourceTypes.map((type) => (
                 <div key={type.label} className="text-center">
-                  <type.icon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <type.icon className="h-8 w-8 text-gray-700 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-gray-900">{type.count}</div>
-                  <div className="text-sm text-gray-500">{type.label}</div>
+                  <div className="text-sm text-gray-700">{type.label}</div>
                 </div>
               ))}
             </div>
@@ -1485,9 +1485,9 @@ export default function Community() {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {features.map((feature) => (
                 <div key={feature.title} className="text-center">
-                  <feature.icon className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+                  <feature.icon className="h-12 w-12 text-gray-700 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-sm text-gray-500">{feature.description}</p>
+                  <p className="text-sm text-gray-700">{feature.description}</p>
                 </div>
               ))}
             </div>
@@ -1502,7 +1502,7 @@ export default function Community() {
                 <BoltIcon className="h-8 w-8 mr-3 text-yellow-600" />
                 Quick Skills (5-15 min)
               </h2>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-gray-700">
                 Master essential VA skills with our bite-sized tutorials. Perfect for busy schedules.
               </p>
             </div>
@@ -1518,14 +1518,14 @@ export default function Community() {
                   key={index}
                   className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer group">
                   <div className="flex items-center justify-between mb-4">
-                    <PlayIcon className="h-8 w-8 text-gray-400 group-hover:text-blue-600 transition-colors" />
-                    <ClockIcon className="h-5 w-5 text-gray-400" />
+                    <PlayIcon className="h-8 w-8 text-gray-700 group-hover:text-blue-600 transition-colors" />
+                    <ClockIcon className="h-5 w-5 text-gray-700" />
                   </div>
                   <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                     {skill.title}
                   </h4>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">{skill.time}</span>
+                    <span className="text-sm text-gray-700">{skill.time}</span>
                     <span className={`text-xs px-2 py-1 rounded-full ${skill.color}`}>
                       {skill.category}
                     </span>
@@ -1551,7 +1551,7 @@ export default function Community() {
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 Choose Your Learning Path
               </h2>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-gray-700">
                 Develop skills that clients are actively looking for. Each path includes free resources to get you started.
               </p>
             </div>
@@ -1568,7 +1568,7 @@ export default function Community() {
                       <div className={`p-3 rounded-lg ${path.color} bg-opacity-10`}>
                         <path.icon className={`h-6 w-6 ${path.color.replace('bg-', 'text-')}`} />
                       </div>
-                      <span className="ml-3 text-sm font-medium text-gray-500 uppercase">
+                      <span className="ml-3 text-sm font-medium text-gray-700 uppercase">
                         {path.level}
                       </span>
                     </div>
@@ -1576,7 +1576,7 @@ export default function Community() {
                     <h3 className="text-xl font-bold text-gray-900 mb-2">
                       {path.title}
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-gray-700 mb-4">
                       {path.description}
                     </p>
 
@@ -1638,7 +1638,7 @@ export default function Community() {
         {/* Testimonial */}
         <div className="py-16 bg-gray-50">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <blockquote className="text-xl text-gray-600 italic mb-4">
+            <blockquote className="text-xl text-gray-700 italic mb-4">
               "This community transformed my VA career. I learned web development skills 
               that helped me triple my rates and work with amazing clients worldwide."
             </blockquote>
@@ -1646,7 +1646,7 @@ export default function Community() {
               <div className="h-12 w-12 rounded-full bg-gray-300 mr-4"></div>
               <div className="text-left">
                 <div className="font-medium text-gray-900">Maria Santos</div>
-                <div className="text-sm text-gray-500">Full-Stack VA, Philippines</div>
+                <div className="text-sm text-gray-700">Full-Stack VA, Philippines</div>
               </div>
             </div>
           </div>

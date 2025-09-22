@@ -193,7 +193,7 @@ const PaymentFormContent = ({ onSuccess, onCancel, submitButtonText = 'Save Paym
       <div className="credit-card-preview">
         <div className="text-center mb-4">
           <h3 className="text-lg font-medium text-gray-900 mb-2">Card Preview</h3>
-          <p className="text-sm text-gray-600">See how your card information appears as you type</p>
+          <p className="text-sm text-gray-700">See how your card information appears as you type</p>
         </div>
         
         <div onClick={() => setShowCardBack(!showCardBack)} className="cursor-pointer">
@@ -259,7 +259,7 @@ const PaymentFormContent = ({ onSuccess, onCancel, submitButtonText = 'Save Paym
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <CreditCardIcon className="h-5 w-5 text-gray-400" />
+              <CreditCardIcon className="h-5 w-5 text-gray-700" />
             </div>
             <div className="pl-10 p-3 border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
               <CardNumberElement 
@@ -368,7 +368,7 @@ const PaymentFormContent = ({ onSuccess, onCancel, submitButtonText = 'Save Paym
       </div>
 
       {/* Security Notice */}
-      <div className="text-center text-xs text-gray-500 mt-4">
+      <div className="text-center text-xs text-gray-700 mt-4">
         <p>Your payment information is encrypted and secure.</p>
         <p>We never store your card details on our servers.</p>
       </div>

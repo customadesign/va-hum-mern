@@ -495,7 +495,7 @@ export default function BusinessProfile() {
             </h1>
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <div className="text-sm text-gray-500">Profile Completion</div>
+                <div className="text-sm text-gray-700">Profile Completion</div>
                 <div className="flex items-center">
                   <div className="text-2xl font-bold text-gray-900">{calculateCompletion()}%</div>
                   <StarIcon className="h-5 w-5 text-yellow-400 ml-1" />
@@ -571,7 +571,7 @@ export default function BusinessProfile() {
                     <BuildingOfficeIcon className="h-5 w-5 mr-2 text-blue-500" />
                     Company Header
                   </h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     Your company's primary information that VAs will see first.
                   </p>
                 </div>
@@ -611,7 +611,7 @@ export default function BusinessProfile() {
                             <CameraIcon className="h-4 w-4 inline mr-2" />
                             Upload Logo
                           </button>
-                          <p className="mt-2 text-xs text-gray-500">Recommended: 400x400px minimum</p>
+                          <p className="mt-2 text-xs text-gray-700">Recommended: 400x400px minimum</p>
                         </div>
                         <input
                           ref={avatarInputRef}
@@ -779,7 +779,7 @@ export default function BusinessProfile() {
                                 : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                             }`}
                           />
-                          <p className="mt-1 text-xs text-gray-500">
+                          <p className="mt-1 text-xs text-gray-700">
                             No need to include https:// - we'll add it automatically
                           </p>
                         </div>
@@ -815,7 +815,7 @@ export default function BusinessProfile() {
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
                   <h2 className="text-lg font-medium leading-6 text-gray-900">About Your Company</h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     Tell your company's story. This is like LinkedIn's About section.
                   </p>
                 </div>
@@ -843,10 +843,10 @@ export default function BusinessProfile() {
                         />
                       </div>
                       <div className="mt-2 flex justify-between">
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-700">
                           {formik.values.bio.length}/2600 characters (minimum 100)
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-700">
                           {formik.values.bio.length >= 100 ? '✓' : '○'} Complete
                         </p>
                       </div>
@@ -918,7 +918,7 @@ export default function BusinessProfile() {
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
                   <h2 className="text-lg font-medium leading-6 text-gray-900">Company Specialties</h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     What your company specializes in. Like LinkedIn skills for companies.
                   </p>
                 </div>
@@ -968,7 +968,7 @@ export default function BusinessProfile() {
                     </div>
                     {/* Suggestions */}
                     <div className="mt-3">
-                      <p className="text-xs text-gray-500 mb-2">Suggestions (click to add):</p>
+                      <p className="text-xs text-gray-700 mb-2">Suggestions (click to add):</p>
                       <div className="flex flex-wrap gap-1">
                         {SPECIALTY_SUGGESTIONS.filter(suggestion => 
                           !formik.values.specialties?.includes(suggestion)
@@ -994,7 +994,7 @@ export default function BusinessProfile() {
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
                   <h2 className="text-lg font-medium leading-6 text-gray-900">Benefits & Perks</h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     What you offer to VAs beyond compensation.
                   </p>
                 </div>
@@ -1044,7 +1044,7 @@ export default function BusinessProfile() {
                     </div>
                     {/* Suggestions */}
                     <div className="mt-3">
-                      <p className="text-xs text-gray-500 mb-2">Suggestions (click to add):</p>
+                      <p className="text-xs text-gray-700 mb-2">Suggestions (click to add):</p>
                       <div className="flex flex-wrap gap-1">
                         {BENEFITS_SUGGESTIONS.filter(suggestion => 
                           !formik.values.benefits?.includes(suggestion)
@@ -1070,7 +1070,7 @@ export default function BusinessProfile() {
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
                   <h2 className="text-lg font-medium leading-6 text-gray-900">Company Values</h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     Core values that guide your company culture.
                   </p>
                 </div>
@@ -1120,7 +1120,7 @@ export default function BusinessProfile() {
                     </div>
                     {/* Suggestions */}
                     <div className="mt-3">
-                      <p className="text-xs text-gray-500 mb-2">Suggestions (click to add):</p>
+                      <p className="text-xs text-gray-700 mb-2">Suggestions (click to add):</p>
                       <div className="flex flex-wrap gap-1">
                         {VALUES_SUGGESTIONS.filter(suggestion => 
                           !formik.values.companyValues?.includes(suggestion)
@@ -1146,7 +1146,7 @@ export default function BusinessProfile() {
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
                   <h2 className="text-lg font-medium leading-6 text-gray-900">Social Media & Links</h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     Your company's online presence and social media profiles.
                   </p>
                 </div>
@@ -1286,7 +1286,7 @@ export default function BusinessProfile() {
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
                   <h2 className="text-lg font-medium leading-6 text-gray-900">Contact Information</h2>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-gray-700">
                     How VAs can reach you for opportunities.
                   </p>
                 </div>
@@ -1410,7 +1410,7 @@ export default function BusinessProfile() {
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
                   <h2 className="text-lg font-medium leading-6 text-gray-900">8. Office Location</h2>
-                  <p className="mt-2 text-sm text-gray-500">Physical address (optional, for VAs who prefer local companies).</p>
+                  <p className="mt-2 text-sm text-gray-700">Physical address (optional, for VAs who prefer local companies).</p>
                 </div>
                 <div className="mt-5 md:mt-0 md:col-span-2">
                   <div className="space-y-6">
@@ -1449,7 +1449,7 @@ export default function BusinessProfile() {
                         <div className="w-full border-t border-gray-300" />
                       </div>
                       <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-white text-gray-500">Or enter manually</span>
+                        <span className="px-2 bg-white text-gray-700">Or enter manually</span>
                       </div>
                     </div>
 
@@ -1601,7 +1601,7 @@ export default function BusinessProfile() {
               <div className="md:grid md:grid-cols-3 md:gap-6">
                 <div className="md:col-span-1">
                   <h3 className="text-lg font-medium leading-6 text-gray-900">Notification & Communication Preferences</h3>
-                  <p className="mt-1 text-sm text-gray-500">Manage how you want to be contacted and what notifications you receive.</p>
+                  <p className="mt-1 text-sm text-gray-700">Manage how you want to be contacted and what notifications you receive.</p>
                 </div>
                 <div className="mt-5 md:mt-0 md:col-span-2">
                   <div className="space-y-8">
@@ -1625,7 +1625,7 @@ export default function BusinessProfile() {
                             <label htmlFor="emailNotifications.newMessages" className="font-medium text-gray-700">
                               New Messages
                             </label>
-                            <p className="text-gray-500">Get notified when you receive new messages from VAs</p>
+                            <p className="text-gray-700">Get notified when you receive new messages from VAs</p>
                           </div>
                         </div>
                         
@@ -1644,7 +1644,7 @@ export default function BusinessProfile() {
                             <label htmlFor="emailNotifications.vaApplications" className="font-medium text-gray-700">
                               VA Applications
                             </label>
-                            <p className="text-gray-500">Get notified when VAs apply to your job postings</p>
+                            <p className="text-gray-700">Get notified when VAs apply to your job postings</p>
                           </div>
                         </div>
                         
@@ -1663,7 +1663,7 @@ export default function BusinessProfile() {
                             <label htmlFor="emailNotifications.vaMatches" className="font-medium text-gray-700">
                               VA Matches
                             </label>
-                            <p className="text-gray-500">Get notified when we find VAs that match your requirements</p>
+                            <p className="text-gray-700">Get notified when we find VAs that match your requirements</p>
                           </div>
                         </div>
                         
@@ -1682,7 +1682,7 @@ export default function BusinessProfile() {
                             <label htmlFor="emailNotifications.weeklyDigest" className="font-medium text-gray-700">
                               Weekly Digest
                             </label>
-                            <p className="text-gray-500">Receive a weekly summary of platform activity</p>
+                            <p className="text-gray-700">Receive a weekly summary of platform activity</p>
                           </div>
                         </div>
                         
@@ -1701,7 +1701,7 @@ export default function BusinessProfile() {
                             <label htmlFor="emailNotifications.platformUpdates" className="font-medium text-gray-700">
                               Platform Updates
                             </label>
-                            <p className="text-gray-500">Get notified about new features and platform updates</p>
+                            <p className="text-gray-700">Get notified about new features and platform updates</p>
                           </div>
                         </div>
                         
@@ -1720,7 +1720,7 @@ export default function BusinessProfile() {
                             <label htmlFor="emailNotifications.marketingEmails" className="font-medium text-gray-700">
                               Marketing Emails
                             </label>
-                            <p className="text-gray-500">Receive promotional offers and marketing communications</p>
+                            <p className="text-gray-700">Receive promotional offers and marketing communications</p>
                           </div>
                         </div>
                       </div>
@@ -1785,7 +1785,7 @@ export default function BusinessProfile() {
                             <label htmlFor="communicationPreferences.availableForInterviews" className="font-medium text-gray-700">
                               Available for Interviews
                             </label>
-                            <p className="text-gray-500">VAs can request interviews with you</p>
+                            <p className="text-gray-700">VAs can request interviews with you</p>
                           </div>
                         </div>
                         
@@ -1804,7 +1804,7 @@ export default function BusinessProfile() {
                             <label htmlFor="communicationPreferences.allowDirectMessages" className="font-medium text-gray-700">
                               Allow Direct Messages
                             </label>
-                            <p className="text-gray-500">VAs can send you direct messages through the platform</p>
+                            <p className="text-gray-700">VAs can send you direct messages through the platform</p>
                           </div>
                         </div>
                         
@@ -1824,7 +1824,7 @@ export default function BusinessProfile() {
                               <label htmlFor="communicationPreferences.autoReplyEnabled" className="font-medium text-gray-700">
                                 Enable Auto-Reply
                               </label>
-                              <p className="text-gray-500">Automatically reply to new messages when you're unavailable</p>
+                              <p className="text-gray-700">Automatically reply to new messages when you're unavailable</p>
                             </div>
                           </div>
                           {formik.values.communicationPreferences.autoReplyEnabled && (
@@ -1866,7 +1866,7 @@ export default function BusinessProfile() {
                             <label htmlFor="privacySettings.showEmail" className="font-medium text-gray-700">
                               Show Email Address
                             </label>
-                            <p className="text-gray-500">Display your email address on your public profile</p>
+                            <p className="text-gray-700">Display your email address on your public profile</p>
                           </div>
                         </div>
                         
@@ -1885,7 +1885,7 @@ export default function BusinessProfile() {
                             <label htmlFor="privacySettings.showPhone" className="font-medium text-gray-700">
                               Show Phone Number
                             </label>
-                            <p className="text-gray-500">Display your phone number on your public profile</p>
+                            <p className="text-gray-700">Display your phone number on your public profile</p>
                           </div>
                         </div>
                         
@@ -1904,7 +1904,7 @@ export default function BusinessProfile() {
                             <label htmlFor="privacySettings.showLocation" className="font-medium text-gray-700">
                               Show Company Location
                             </label>
-                            <p className="text-gray-500">Display your company's location on your public profile</p>
+                            <p className="text-gray-700">Display your company's location on your public profile</p>
                           </div>
                         </div>
                         
@@ -1923,7 +1923,7 @@ export default function BusinessProfile() {
                             <label htmlFor="privacySettings.showCompanySize" className="font-medium text-gray-700">
                               Show Company Size
                             </label>
-                            <p className="text-gray-500">Display your company size on your public profile</p>
+                            <p className="text-gray-700">Display your company size on your public profile</p>
                           </div>
                         </div>
                         
@@ -1942,7 +1942,7 @@ export default function BusinessProfile() {
                             <label htmlFor="privacySettings.allowAnalytics" className="font-medium text-gray-700">
                               Allow Analytics
                             </label>
-                            <p className="text-gray-500">Help us improve the platform by sharing anonymous usage data</p>
+                            <p className="text-gray-700">Help us improve the platform by sharing anonymous usage data</p>
                           </div>
                         </div>
                       </div>
@@ -1956,7 +1956,7 @@ export default function BusinessProfile() {
                           <label htmlFor="vaNotifications" className="block text-sm font-medium text-gray-700">
                             New VA Notifications
                           </label>
-                          <p className="text-sm text-gray-500">Get notified when new VAs join the platform</p>
+                          <p className="text-sm text-gray-700">Get notified when new VAs join the platform</p>
                           <div className="mt-2">
                             <select
                               id="vaNotifications"
@@ -1987,7 +1987,7 @@ export default function BusinessProfile() {
                             <label htmlFor="invisible" className="font-medium text-gray-700">
                               Make my profile invisible
                             </label>
-                            <p className="text-gray-500">Hide your profile from VAs</p>
+                            <p className="text-gray-700">Hide your profile from VAs</p>
                           </div>
                         </div>
 
@@ -2006,7 +2006,7 @@ export default function BusinessProfile() {
                             <label htmlFor="surveyRequestNotifications" className="font-medium text-gray-700">
                               Survey notifications
                             </label>
-                            <p className="text-gray-500">Receive occasional surveys to help improve the platform</p>
+                            <p className="text-gray-700">Receive occasional surveys to help improve the platform</p>
                           </div>
                         </div>
                       </div>

@@ -83,7 +83,7 @@ export default function VAList() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-700" aria-hidden="true" />
                   </div>
                   <input
                     type="search"
@@ -144,7 +144,7 @@ export default function VAList() {
                           <label key={industry.value} className="flex items-center">
                             <input
                               type="checkbox"
-                              className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
+                              className="rounded border-gray-300 text-gray-700 focus:ring-gray-500"
                               checked={filters.industry.includes(industry.value)}
                               onChange={(e) => {
                                 if (e.target.checked) {
@@ -246,12 +246,12 @@ export default function VAList() {
             </div>
           ) : error ? (
             <div className="text-center py-12">
-              <p className="text-sm text-gray-500">Error loading VAs. Please try again.</p>
+              <p className="text-sm text-gray-700">Error loading VAs. Please try again.</p>
             </div>
           ) : data?.data?.length === 0 ? (
             <div className="text-center py-12">
               <svg
-                className="mx-auto h-12 w-12 text-gray-400"
+                className="mx-auto h-12 w-12 text-gray-700"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -266,7 +266,7 @@ export default function VAList() {
                 />
               </svg>
               <h3 className="mt-2 text-sm font-medium text-gray-900">No VAs found</h3>
-              <p className="mt-1 text-sm text-gray-500">Try adjusting your search or filters.</p>
+              <p className="mt-1 text-sm text-gray-700">Try adjusting your search or filters.</p>
             </div>
           ) : (
             <>
@@ -316,7 +316,7 @@ export default function VAList() {
                         <button
                           onClick={() => setPage(Math.max(1, page - 1))}
                           disabled={page === 1}
-                          className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                          className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                         >
                           <span className="sr-only">Previous</span>
                           <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -329,7 +329,7 @@ export default function VAList() {
                         <button
                           onClick={() => setPage(Math.min(data.pagination.pages, page + 1))}
                           disabled={page === data.pagination.pages}
-                          className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                          className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                         >
                           <span className="sr-only">Next</span>
                           <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

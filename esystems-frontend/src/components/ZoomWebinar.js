@@ -166,10 +166,10 @@ const MeetingView = ({ onLeave }) => {
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             Ready to Join Training?
           </h3>
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-700 mb-4">
             Click below to join the live video session
           </p>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-gray-700 mb-4">
             Meeting ID: {meetingId}
           </p>
         </div>
@@ -214,7 +214,7 @@ const VideoSDKMeeting = ({ meetingConfig, onLeave, className = '' }) => {
   if (!meetingConfig) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
-        <p className="text-gray-500">No meeting configuration provided</p>
+        <p className="text-gray-700">No meeting configuration provided</p>
       </div>
     );
   }

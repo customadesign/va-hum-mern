@@ -31,7 +31,7 @@ class ErrorBoundary extends React.Component {
               <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
                 Oops! Something went wrong
               </h2>
-              <p className="mt-2 text-sm text-gray-600">
+              <p className="mt-2 text-sm text-gray-700">
                 We're sorry, but something unexpected happened. Please try refreshing the page.
               </p>
               {process.env.NODE_ENV === 'development' && this.state.error && (
@@ -39,7 +39,7 @@ class ErrorBoundary extends React.Component {
                   <summary className="cursor-pointer text-sm font-medium text-gray-700">
                     Error Details (Development Mode)
                   </summary>
-                  <div className="mt-2 text-xs text-gray-600">
+                  <div className="mt-2 text-xs text-gray-700">
                     <p className="font-medium">Error:</p>
                     <pre className="whitespace-pre-wrap break-words">{this.state.error.toString()}</pre>
                     <p className="font-medium mt-2">Component Stack:</p>

@@ -87,7 +87,7 @@ const AnnouncementBanner = () => {
           bg: 'bg-gradient-to-r from-gray-50 to-slate-50',
           border: 'border-gray-300',
           icon: BellIcon,
-          iconColor: 'text-gray-600',
+          iconColor: 'text-gray-700',
           textColor: 'text-gray-900',
           badgeBg: 'bg-gray-100',
           badgeText: 'text-gray-800',
@@ -171,7 +171,7 @@ const AnnouncementBanner = () => {
                   
                   {/* Additional announcements indicator */}
                   {visibleAnnouncements.length > 1 && (
-                    <div className="mt-2 text-xs text-gray-600">
+                    <div className="mt-2 text-xs text-gray-700">
                       +{visibleAnnouncements.length - 1} more announcement{visibleAnnouncements.length - 1 > 1 ? 's' : ''}
                     </div>
                   )}

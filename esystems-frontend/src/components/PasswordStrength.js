@@ -35,7 +35,7 @@ const PasswordStrength = ({ password }) => {
   return (
     <div className="mt-2">
       <div className="flex justify-between items-center mb-1">
-        <span className="text-xs text-gray-600">Password strength:</span>
+        <span className="text-xs text-gray-700">Password strength:</span>
         <span className={`text-xs font-medium ${
           strength.label === 'Weak' ? 'text-red-600' :
           strength.label === 'Fair' ? 'text-orange-600' :
@@ -55,7 +55,7 @@ const PasswordStrength = ({ password }) => {
           />
         ))}
       </div>
-      <div className="mt-2 text-xs text-gray-500">
+      <div className="mt-2 text-xs text-gray-700">
         {strength.score < 4 && (
           <ul className="space-y-1">
             {!password || password.length < 8 ? (

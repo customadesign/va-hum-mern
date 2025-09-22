@@ -144,7 +144,7 @@ function VADetailContent() {
         <div className="text-center">
           <h3 className="text-lg font-medium text-gray-900">{branding.isESystemsMode ? 'Team member not found' : 'VA not found'}</h3>
           <div className="mt-2">
-            <Link to="/vas" className="text-gray-600 hover:text-gray-500">
+            <Link to="/vas" className="text-gray-700 hover:text-gray-700">
               {branding.isESystemsMode ? 'Back to team members' : 'Back to VAs'}
             </Link>
           </div>
@@ -201,7 +201,7 @@ function VADetailContent() {
                       <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
                         {va.name}
                       </h1>
-                      <p className="text-sm text-gray-600">{va.hero}</p>
+                      <p className="text-sm text-gray-700">{va.hero}</p>
                     </div>
                   </div>
                 </div>
@@ -287,7 +287,7 @@ function VADetailContent() {
                     )}
                     {va.searchStatus === 'not_interested' && (
                       <span className="inline-flex items-center px-4 py-2 rounded-full text-base font-semibold bg-gray-100 text-gray-800 border-2 border-gray-200 shadow-sm">
-                        <CheckCircleIcon className="h-5 w-5 mr-2 text-gray-600" />
+                        <CheckCircleIcon className="h-5 w-5 mr-2 text-gray-700" />
                         Not currently available
                       </span>
                     )}
@@ -304,7 +304,7 @@ function VADetailContent() {
               {/* Bio */}
               <div className="bg-white shadow rounded-lg p-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">About</h2>
-                <div className="prose prose-sm text-gray-500">
+                <div className="prose prose-sm text-gray-700">
                   <p>{va.bio}</p>
                 </div>
               </div>
@@ -331,12 +331,12 @@ function VADetailContent() {
                   <h2 className="text-lg font-medium text-gray-900 mb-4">Video Introduction</h2>
                   <div className="flex justify-center">
                     <div className="w-full max-w-md lg:max-w-lg rounded-lg bg-gray-100 flex items-center justify-center" style={{ height: '300px' }}>
-                      <div className="text-center text-gray-500">
-                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <div className="text-center text-gray-700">
+                        <svg className="mx-auto h-12 w-12 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                         <p className="mt-2 text-sm">Video introduction available</p>
-                        <p className="text-xs text-gray-400">Contact for access</p>
+                        <p className="text-xs text-gray-700">Contact for access</p>
                       </div>
                     </div>
                   </div>
@@ -354,7 +354,7 @@ function VADetailContent() {
                 <dl className="space-y-3">
                   {va.location && (
                     <div>
-                      <dt className="text-sm font-medium text-gray-500 flex items-center">
+                      <dt className="text-sm font-medium text-gray-700 flex items-center">
                         <MapPinIcon className="h-4 w-4 mr-1" />
                         Location
                       </dt>
@@ -370,7 +370,7 @@ function VADetailContent() {
 
                   {(va.preferredMinHourlyRate || va.preferredMinSalary) && (
                     <div>
-                      <dt className="text-sm font-medium text-gray-500 flex items-center">
+                      <dt className="text-sm font-medium text-gray-700 flex items-center">
                         <CurrencyDollarIcon className="h-4 w-4 mr-1" />
                         Rate
                       </dt>
@@ -386,7 +386,7 @@ function VADetailContent() {
 
                   {va.roleType && (
                     <div>
-                      <dt className="text-sm font-medium text-gray-500 flex items-center">
+                      <dt className="text-sm font-medium text-gray-700 flex items-center">
                         <BriefcaseIcon className="h-4 w-4 mr-1" />
                         Availability
                       </dt>
@@ -401,7 +401,7 @@ function VADetailContent() {
 
                   {va.roleLevel && (
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Experience Level</dt>
+                      <dt className="text-sm font-medium text-gray-700">Experience Level</dt>
                       <dd className="mt-1 text-sm text-gray-900">
                         {Object.entries(va.roleLevel || {})
                           .filter(([key, value]) => value === true && key !== '_id')
@@ -454,7 +454,7 @@ function VADetailContent() {
                             va.discAssessment.primaryType === 'C' ? 'Conscientiousness' : ''
                           }
                         </p>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-gray-700 mt-1">
                           {va.discAssessment.primaryType === 'D' && 'Direct, Results-oriented, Firm, Strong-willed'}
                           {va.discAssessment.primaryType === 'I' && 'Outgoing, Enthusiastic, Optimistic, People-oriented'}
                           {va.discAssessment.primaryType === 'S' && 'Even-tempered, Accommodating, Patient, Humble'}
@@ -507,7 +507,7 @@ function VADetailContent() {
 
                     {/* Assessment Info */}
                     <div className="border-t pt-3">
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-700">
                         DISC assessment completed
                         {va.discAssessment.completedAt && 
                           ` on ${new Date(va.discAssessment.completedAt).toLocaleDateString()}`
@@ -534,7 +534,7 @@ function VADetailContent() {
                       href={va.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-gray-600 hover:text-gray-500 flex items-center"
+                      className="text-sm text-gray-700 hover:text-gray-700 flex items-center"
                     >
                       <GlobeAltIcon className="h-4 w-4 mr-2" />
                       Portfolio Website
@@ -545,7 +545,7 @@ function VADetailContent() {
                       href={va.linkedin.startsWith('http') ? va.linkedin : `https://linkedin.com/in/${va.linkedin}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-gray-600 hover:text-gray-500 flex items-center"
+                      className="text-sm text-gray-700 hover:text-gray-700 flex items-center"
                     >
                       <GlobeAltIcon className="h-4 w-4 mr-2" />
                       LinkedIn
@@ -556,7 +556,7 @@ function VADetailContent() {
                       href={va.twitter.startsWith('http') ? va.twitter : `https://twitter.com/${va.twitter}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-gray-600 hover:text-gray-500 flex items-center"
+                      className="text-sm text-gray-700 hover:text-gray-700 flex items-center"
                     >
                       <GlobeAltIcon className="h-4 w-4 mr-2" />
                       Twitter
@@ -567,7 +567,7 @@ function VADetailContent() {
                       href={va.instagram.startsWith('http') ? va.instagram : `https://instagram.com/${va.instagram}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-gray-600 hover:text-gray-500 flex items-center"
+                      className="text-sm text-gray-700 hover:text-gray-700 flex items-center"
                     >
                       <GlobeAltIcon className="h-4 w-4 mr-2" />
                       Instagram
@@ -576,7 +576,7 @@ function VADetailContent() {
                   {va.email && user && (
                     <a
                       href={`mailto:${va.email}`}
-                      className="text-sm text-gray-600 hover:text-gray-500 flex items-center"
+                      className="text-sm text-gray-700 hover:text-gray-700 flex items-center"
                     >
                       <EnvelopeIcon className="h-4 w-4 mr-2" />
                       {va.email}
@@ -587,7 +587,7 @@ function VADetailContent() {
                       href={va.schedulingLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-gray-600 hover:text-gray-500 flex items-center"
+                      className="text-sm text-gray-700 hover:text-gray-700 flex items-center"
                     >
                       <CalendarIcon className="h-4 w-4 mr-2" />
                       Schedule a call
@@ -600,7 +600,7 @@ function VADetailContent() {
               {va.createdAt && (
                 <div className="bg-white shadow rounded-lg p-6 mt-6">
                   <div className="text-center">
-                    <p className="text-sm text-gray-500">Member since</p>
+                    <p className="text-sm text-gray-700">Member since</p>
                     <p className="text-lg font-medium text-gray-900">
                       {format(new Date(va.createdAt), 'MMMM yyyy')}
                     </p>
@@ -713,7 +713,7 @@ function VADetailContent() {
                     type="text"
                     value={shareUrl}
                     readOnly
-                    className="flex-1 bg-transparent text-sm text-gray-600 focus:outline-none"
+                    className="flex-1 bg-transparent text-sm text-gray-700 focus:outline-none"
                   />
                 </div>
               </div>

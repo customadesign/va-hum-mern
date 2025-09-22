@@ -92,7 +92,7 @@ export default function AdminDashboard() {
           <h1 className="text-2xl font-semibold text-gray-900">
             {isESystems ? 'E-Systems Management' : 'Linkage VA Hub'} Admin Dashboard
           </h1>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-gray-700">
             Manage the entire ecosystem from one place
           </p>
         </div>
@@ -111,7 +111,7 @@ export default function AdminDashboard() {
                     <div className={`absolute rounded-md p-3 ${item.color}`}>
                       <item.icon className="h-6 w-6 text-white" aria-hidden="true" />
                     </div>
-                    <p className="ml-16 text-sm font-medium text-gray-500 truncate">{item.name}</p>
+                    <p className="ml-16 text-sm font-medium text-gray-700 truncate">{item.name}</p>
                   </dt>
                   <dd className="ml-16 pb-6 flex items-baseline sm:pb-7">
                     <p className="text-2xl font-semibold text-gray-900">{item.stat}</p>
@@ -130,12 +130,12 @@ export default function AdminDashboard() {
                 className="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
               >
                 <div className="flex-shrink-0">
-                  <UsersIcon className="h-6 w-6 text-gray-600" />
+                  <UsersIcon className="h-6 w-6 text-gray-700" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="absolute inset-0" aria-hidden="true" />
                   <p className="text-sm font-medium text-gray-900">Manage VAs</p>
-                  <p className="text-sm text-gray-500">View and manage all VAs</p>
+                  <p className="text-sm text-gray-700">View and manage all VAs</p>
                 </div>
               </Link>
 
@@ -144,12 +144,12 @@ export default function AdminDashboard() {
                 className="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
               >
                 <div className="flex-shrink-0">
-                  <BuildingOfficeIcon className="h-6 w-6 text-gray-600" />
+                  <BuildingOfficeIcon className="h-6 w-6 text-gray-700" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="absolute inset-0" aria-hidden="true" />
                   <p className="text-sm font-medium text-gray-900">Manage Businesses</p>
-                  <p className="text-sm text-gray-500">View all registered businesses</p>
+                  <p className="text-sm text-gray-700">View all registered businesses</p>
                 </div>
               </Link>
 
@@ -158,12 +158,12 @@ export default function AdminDashboard() {
                 className="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
               >
                 <div className="flex-shrink-0">
-                  <ClockIcon className="h-6 w-6 text-gray-600" />
+                  <ClockIcon className="h-6 w-6 text-gray-700" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="absolute inset-0" aria-hidden="true" />
                   <p className="text-sm font-medium text-gray-900">Pending Approvals</p>
-                  <p className="text-sm text-gray-500">Review VA applications</p>
+                  <p className="text-sm text-gray-700">Review VA applications</p>
                 </div>
               </Link>
 
@@ -172,12 +172,12 @@ export default function AdminDashboard() {
                 className="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
               >
                 <div className="flex-shrink-0">
-                  <ChartBarIcon className="h-6 w-6 text-gray-600" />
+                  <ChartBarIcon className="h-6 w-6 text-gray-700" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="absolute inset-0" aria-hidden="true" />
                   <p className="text-sm font-medium text-gray-900">System Settings</p>
-                  <p className="text-sm text-gray-500">Configure platform settings</p>
+                  <p className="text-sm text-gray-700">Configure platform settings</p>
                 </div>
               </Link>
             </div>
@@ -196,16 +196,16 @@ export default function AdminDashboard() {
                           <h3 className="text-sm font-semibold text-gray-800">
                             {activity.title}
                           </h3>
-                          <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                          <p className="mt-1 text-sm text-gray-700 line-clamp-2">
                             {activity.description}
                           </p>
-                          <p className="mt-1 text-xs text-gray-500">
+                          <p className="mt-1 text-xs text-gray-700">
                             {new Date(activity.createdAt).toLocaleDateString()}
                           </p>
                         </div>
                       </li>
                     )) || (
-                      <li className="py-5 text-center text-gray-500">
+                      <li className="py-5 text-center text-gray-700">
                         No recent activity
                       </li>
                     )}

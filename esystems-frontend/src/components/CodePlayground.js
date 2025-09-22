@@ -161,7 +161,7 @@ export default Counter;`
       react: 'text-cyan-500',
       python: 'text-green-500'
     };
-    return colors[language] || 'text-gray-500';
+    return colors[language] || 'text-gray-700';
   };
 
   return (
@@ -194,7 +194,7 @@ export default Counter;`
           {/* Theme Toggle */}
           <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="text-gray-400 hover:text-white transition-colors p-1"
+            className="text-gray-700 hover:text-white transition-colors p-1"
             title="Toggle theme"
           >
             {theme === 'dark' ? <EyeIcon className="h-4 w-4" /> : <EyeSlashIcon className="h-4 w-4" />}
@@ -203,7 +203,7 @@ export default Counter;`
           {/* Copy Button */}
           <button
             onClick={handleCopy}
-            className="text-gray-400 hover:text-white transition-colors p-1"
+            className="text-gray-700 hover:text-white transition-colors p-1"
             title="Copy code"
           >
             {copied ? (
@@ -216,7 +216,7 @@ export default Counter;`
           {/* Reset Button */}
           <button
             onClick={handleReset}
-            className="text-gray-400 hover:text-white transition-colors p-1"
+            className="text-gray-700 hover:text-white transition-colors p-1"
             title="Reset code"
           >
             <ArrowPathIcon className="h-4 w-4" />
@@ -228,7 +228,7 @@ export default Counter;`
             disabled={isRunning || readOnly}
             className={`flex items-center space-x-1 px-3 py-1 rounded text-sm font-medium transition-colors ${
               isRunning || readOnly
-                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                ? 'bg-gray-700 text-gray-700 cursor-not-allowed'
                 : 'bg-green-600 text-white hover:bg-green-700'
             }`}
           >
@@ -240,7 +240,7 @@ export default Counter;`
 
       {/* Code Editor */}
       <div className="relative">
-        <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-800 text-gray-500 text-right pr-2 pt-4 select-none">
+        <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-800 text-gray-700 text-right pr-2 pt-4 select-none">
           {code.split('\n').map((_, i) => (
             <div key={i} style={{ fontSize, lineHeight: '1.5' }}>
               {i + 1}
@@ -276,9 +276,9 @@ export default Counter;`
           >
             <span className="text-sm font-medium text-gray-300">Output</span>
             {showOutput ? (
-              <ChevronUpIcon className="h-4 w-4 text-gray-400" />
+              <ChevronUpIcon className="h-4 w-4 text-gray-700" />
             ) : (
-              <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+              <ChevronDownIcon className="h-4 w-4 text-gray-700" />
             )}
           </div>
           
@@ -289,7 +289,7 @@ export default Counter;`
                   {output}
                 </pre>
               ) : (
-                <p className="text-gray-500 text-sm italic">
+                <p className="text-gray-700 text-sm italic">
                   Output will appear here when you run the code...
                 </p>
               )}

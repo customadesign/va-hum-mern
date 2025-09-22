@@ -227,7 +227,7 @@ const DesignCanvas = ({ initialDesign, onDesignChange, readOnly = false }) => {
             
             {/* Color Picker */}
             <div className="flex items-center space-x-2">
-              <SwatchIcon className="h-5 w-5 text-gray-500" />
+              <SwatchIcon className="h-5 w-5 text-gray-700" />
               <div className="flex space-x-1">
                 {colorPalette.map(color => (
                   <button
@@ -289,7 +289,7 @@ const DesignCanvas = ({ initialDesign, onDesignChange, readOnly = false }) => {
             <div className="flex items-center space-x-1 bg-gray-100 rounded-lg px-2 py-1">
               <button
                 onClick={() => handleZoom('out')}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-700 hover:text-gray-900"
               >
                 -
               </button>
@@ -298,7 +298,7 @@ const DesignCanvas = ({ initialDesign, onDesignChange, readOnly = false }) => {
               </span>
               <button
                 onClick={() => handleZoom('in')}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-700 hover:text-gray-900"
               >
                 +
               </button>
@@ -364,7 +364,7 @@ const DesignCanvas = ({ initialDesign, onDesignChange, readOnly = false }) => {
               ) : (
                 <>
                   <div className="flex items-center space-x-2">
-                    <label className="text-sm text-gray-600">Width:</label>
+                    <label className="text-sm text-gray-700">Width:</label>
                     <input
                       type="number"
                       value={selectedElement.width || selectedElement.radius * 2}
@@ -385,7 +385,7 @@ const DesignCanvas = ({ initialDesign, onDesignChange, readOnly = false }) => {
                   </div>
                   {selectedElement.type === 'rectangle' && (
                     <div className="flex items-center space-x-2">
-                      <label className="text-sm text-gray-600">Height:</label>
+                      <label className="text-sm text-gray-700">Height:</label>
                       <input
                         type="number"
                         value={selectedElement.height}
@@ -405,7 +405,7 @@ const DesignCanvas = ({ initialDesign, onDesignChange, readOnly = false }) => {
                 </>
               )}
               <div className="flex items-center space-x-2">
-                <label className="text-sm text-gray-600">Opacity:</label>
+                <label className="text-sm text-gray-700">Opacity:</label>
                 <input
                   type="range"
                   min="0"
@@ -423,7 +423,7 @@ const DesignCanvas = ({ initialDesign, onDesignChange, readOnly = false }) => {
                   className="w-24"
                   disabled={readOnly}
                 />
-                <span className="text-sm text-gray-600">{selectedElement.opacity}%</span>
+                <span className="text-sm text-gray-700">{selectedElement.opacity}%</span>
               </div>
             </div>
           </div>
@@ -552,7 +552,7 @@ const DesignCanvas = ({ initialDesign, onDesignChange, readOnly = false }) => {
               disabled={readOnly}
               className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <DocumentDuplicateIcon className="h-5 w-5 text-gray-600" />
+              <DocumentDuplicateIcon className="h-5 w-5 text-gray-700" />
             </button>
           </div>
           
@@ -579,9 +579,9 @@ const DesignCanvas = ({ initialDesign, onDesignChange, readOnly = false }) => {
                       disabled={readOnly}
                     >
                       {layer.visible ? (
-                        <EyeIcon className="h-4 w-4 text-gray-600" />
+                        <EyeIcon className="h-4 w-4 text-gray-700" />
                       ) : (
-                        <EyeSlashIcon className="h-4 w-4 text-gray-400" />
+                        <EyeSlashIcon className="h-4 w-4 text-gray-700" />
                       )}
                     </button>
                     <button
@@ -593,9 +593,9 @@ const DesignCanvas = ({ initialDesign, onDesignChange, readOnly = false }) => {
                       disabled={readOnly}
                     >
                       {layer.locked ? (
-                        <LockClosedIcon className="h-4 w-4 text-gray-600" />
+                        <LockClosedIcon className="h-4 w-4 text-gray-700" />
                       ) : (
-                        <LockOpenIcon className="h-4 w-4 text-gray-400" />
+                        <LockOpenIcon className="h-4 w-4 text-gray-700" />
                       )}
                     </button>
                   </div>
@@ -603,7 +603,7 @@ const DesignCanvas = ({ initialDesign, onDesignChange, readOnly = false }) => {
                 {selectedLayer === layer.id && (
                   <div className="mt-2 pt-2 border-t border-gray-200">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">Opacity</span>
+                      <span className="text-xs text-gray-700">Opacity</span>
                       <span className="text-xs font-medium text-gray-700">{layer.opacity}%</span>
                     </div>
                     <input
