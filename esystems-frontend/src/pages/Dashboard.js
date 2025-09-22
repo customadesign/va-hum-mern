@@ -205,23 +205,23 @@ export default function Dashboard() {
 
         <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {/* Announcements Card */}
-          <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-purple-500">
+          <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-blue-500">
             <div className="p-5">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-purple-100 rounded-lg p-3">
-                  <svg className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                  <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                   </svg>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Announcements</dt>
+                    <dt className="text-sm font-medium text-gray-700 truncate">Announcements</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-purple-900">
+                      <div className="text-2xl font-semibold text-blue-900">
                         {unreadAnnouncementsCount > 0 ? (
                           <>
-                            <span className="text-purple-600">{unreadAnnouncementsCount}</span>
-                            <span className="text-sm font-normal text-gray-500 ml-1">unread</span>
+                            <span className="text-blue-600">{unreadAnnouncementsCount}</span>
+                            <span className="text-sm font-normal text-gray-700 ml-1">unread</span>
                           </>
                         ) : (
                           'All read'
@@ -232,9 +232,9 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            <div className="bg-purple-50 px-5 py-3">
+            <div className="bg-blue-50 px-5 py-3">
               <div className="text-sm">
-                <Link to="/notifications" className="font-medium text-purple-700 hover:text-purple-900">
+                <Link to="/notifications" className="font-medium text-blue-700 hover:text-blue-900">
                   View all →
                 </Link>
               </div>
@@ -252,7 +252,7 @@ export default function Dashboard() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Profile Completion</dt>
+                    <dt className="text-sm font-medium text-gray-700 truncate">Profile Completion</dt>
                     <dd className="flex items-baseline">
                       <div className="text-2xl font-semibold text-blue-900">{profileCompletion.percentage}%</div>
                     </dd>
@@ -270,27 +270,27 @@ export default function Dashboard() {
           </div>
 
           {/* Messages Card */}
-          <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-sky-500">
+          <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-blue-500">
             <div className="p-5">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-sky-100 rounded-lg p-3">
-                  <svg className="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                  <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                   </svg>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Active Conversations</dt>
+                    <dt className="text-sm font-medium text-gray-700 truncate">Active Conversations</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-sky-900">{analytics?.activeConversations || 0}</div>
+                      <div className="text-2xl font-semibold text-blue-900">{analytics?.activeConversations || 0}</div>
                     </dd>
                   </dl>
                 </div>
               </div>
             </div>
-            <div className="bg-sky-50 px-5 py-3">
+            <div className="bg-blue-50 px-5 py-3">
               <div className="text-sm">
-                <Link to="/conversations" className="font-medium text-sky-700 hover:text-sky-900">
+                <Link to="/conversations" className="font-medium text-blue-700 hover:text-blue-900">
                   View conversations →
                 </Link>
               </div>
@@ -298,21 +298,21 @@ export default function Dashboard() {
           </div>
 
           {/* Stats Card */}
-          <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-indigo-500">
+          <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-blue-500">
             <div className="p-5">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-indigo-100 rounded-lg p-3">
-                  <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                  <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-gray-700 truncate">
                       Profile Views
                     </dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-indigo-900">
+                      <div className="text-2xl font-semibold text-blue-900">
                         {analytics?.profileViews || 0}
                       </div>
                     </dd>
@@ -320,9 +320,9 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            <div className="bg-indigo-50 px-5 py-3">
+            <div className="bg-blue-50 px-5 py-3">
               <div className="text-sm">
-                <Link to="/analytics" className="font-medium text-indigo-700 hover:text-indigo-900">
+                <Link to="/analytics" className="font-medium text-blue-700 hover:text-blue-900">
                   View analytics →
                 </Link>
               </div>
@@ -347,13 +347,13 @@ export default function Dashboard() {
                 <Link to={branding.isESystemsMode ? "/business/profile" : "/va/profile"} className="focus:outline-none">
                   <span className="absolute inset-0" aria-hidden="true" />
                   <p className="text-sm font-medium text-gray-900">Update Profile</p>
-                  <p className="text-sm text-gray-500">Keep your profile up to date</p>
+                  <p className="text-sm text-gray-700">Keep your profile up to date</p>
                 </Link>
               </div>
             </div>
-            <div className="relative rounded-lg border border-sky-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-sky-500 transition-colors">
+            <div className="relative rounded-lg border border-blue-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-blue-500 transition-colors">
               <div className="flex-shrink-0">
-                <div className="flex items-center justify-center h-10 w-10 rounded-md bg-sky-600 text-white">
+                <div className="flex items-center justify-center h-10 w-10 rounded-md bg-blue-600 text-white">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                   </svg>
@@ -363,16 +363,16 @@ export default function Dashboard() {
                 <Link to="/conversations" className="focus:outline-none">
                   <span className="absolute inset-0" aria-hidden="true" />
                   <p className="text-sm font-medium text-gray-900">Check Messages</p>
-                  <p className="text-sm text-gray-500">Respond to potential employers</p>
+                  <p className="text-sm text-gray-700">Respond to potential employers</p>
                 </Link>
               </div>
             </div>
             
             {/* Admin Panel - Only show for admin users */}
             {user?.admin && (
-              <div className="relative rounded-lg border border-purple-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-purple-500 transition-colors">
+              <div className="relative rounded-lg border border-blue-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-blue-500 transition-colors">
                 <div className="flex-shrink-0">
-                  <div className="flex items-center justify-center h-10 w-10 rounded-md bg-purple-600 text-white">
+                  <div className="flex items-center justify-center h-10 w-10 rounded-md bg-blue-600 text-white">
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -383,7 +383,7 @@ export default function Dashboard() {
                   <Link to="/admin" className="focus:outline-none">
                     <span className="absolute inset-0" aria-hidden="true" />
                     <p className="text-sm font-medium text-gray-900">Admin Panel</p>
-                    <p className="text-sm text-gray-500">Manage the entire ecosystem</p>
+                    <p className="text-sm text-gray-700">Manage the entire ecosystem</p>
                   </Link>
                 </div>
               </div>
@@ -398,20 +398,20 @@ export default function Dashboard() {
             <div className="space-y-3">
               {latestAnnouncements.map((announcement) => {
                 const priorityColors = {
-                  urgent: 'bg-red-50 border-red-200 text-red-900',
-                  high: 'bg-orange-50 border-orange-200 text-orange-900',
+                  urgent: 'bg-blue-100 border-blue-300 text-blue-900',
+                  high: 'bg-blue-75 border-blue-250 text-blue-900',
                   normal: 'bg-blue-50 border-blue-200 text-blue-900',
-                  low: 'bg-gray-50 border-gray-200 text-gray-900',
+                  low: 'bg-white border-blue-100 text-blue-700',
                 };
                 
                 const priorityIcons = {
                   urgent: (
-                    <svg className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                   ),
                   high: (
-                    <svg className="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                     </svg>
                   ),
@@ -421,7 +421,7 @@ export default function Dashboard() {
                     </svg>
                   ),
                   low: (
-                    <svg className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                   ),
@@ -440,12 +440,12 @@ export default function Dashboard() {
                         <h4 className="text-sm font-semibold">
                           {announcement.title}
                           {!announcement.isRead && (
-                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gradient-to-r from-emerald-400 to-cyan-400 text-white">
+                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500 text-white">
                               New
                             </span>
                           )}
                         </h4>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-700">
                           {new Date(announcement.createdAt).toLocaleDateString()}
                         </span>
                       </div>
@@ -463,9 +463,9 @@ export default function Dashboard() {
               })}
             </div>
             <div className="mt-4">
-              <Link 
-                to="/notifications" 
-                className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+              <Link
+                to="/notifications"
+                className="text-sm font-medium text-blue-600 hover:text-blue-500"
               >
                 View all announcements →
               </Link>
@@ -476,11 +476,11 @@ export default function Dashboard() {
         {/* Profile Completion Encouragement Banner - Show for incomplete profiles */}
         {!profileCompletion.isComplete && (
           <div className="mt-8">
-            <div className="bg-gradient-to-r from-emerald-50 to-cyan-50 border border-emerald-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl shadow-sm overflow-hidden">
               <div className="px-6 py-5">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg">
+                    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-blue-500 text-white shadow-lg">
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
@@ -492,24 +492,24 @@ export default function Dashboard() {
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">
                           Get Placed Faster with a Complete Profile
                         </h3>
-                        <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                        <p className="text-sm text-gray-700 leading-relaxed mb-3">
                           Complete your profile to appear higher in search results and increase your visibility to potential employers.
                           VAs with completed profiles get contacted 3x more often and secure placements faster.
                         </p>
                         <div className="flex items-center space-x-4">
-                          <div className="flex items-center text-xs text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">
+                          <div className="flex items-center text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full">
                             <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
                             Higher search ranking
                           </div>
-                          <div className="flex items-center text-xs text-cyan-700 bg-cyan-100 px-2 py-1 rounded-full">
+                          <div className="flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
                             <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
                             Increased visibility
                           </div>
-                          <div className="flex items-center text-xs text-indigo-700 bg-indigo-100 px-2 py-1 rounded-full">
+                          <div className="flex items-center text-xs text-blue-800 bg-blue-200 px-2 py-1 rounded-full">
                             <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
@@ -518,9 +518,9 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div className="flex-shrink-0 ml-4">
-                        <Link 
-                          to={branding.isESystemsMode ? "/business/profile" : "/va/profile"} 
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        <Link
+                          to={branding.isESystemsMode ? "/business/profile" : "/va/profile"}
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                         >
                           Complete Profile
                           <svg className="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -534,15 +534,15 @@ export default function Dashboard() {
               </div>
               
               {/* Progress indicator */}
-              <div className="bg-gradient-to-r from-emerald-100 to-cyan-100 px-6 py-3 border-t border-emerald-200">
+              <div className="bg-blue-100 px-6 py-3 border-t border-blue-200">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600 font-medium">Profile Completeness</span>
-                  <span className="text-emerald-700 font-semibold">{profileCompletion.percentage}% Complete</span>
+                  <span className="text-gray-700 font-medium">Profile Completeness</span>
+                  <span className="text-blue-700 font-semibold">{profileCompletion.percentage}% Complete</span>
                 </div>
                 <div className="mt-2 bg-white rounded-full h-2 overflow-hidden shadow-inner">
-                  <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all duration-500 ease-out" style={{width: `${profileCompletion.percentage}%`}}></div>
+                  <div className="h-full bg-blue-500 rounded-full transition-all duration-500 ease-out" style={{width: `${profileCompletion.percentage}%`}}></div>
                 </div>
-                <p className="mt-2 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-gray-700">
                   Just a few more details needed to reach 100% and maximize your placement opportunities!
                 </p>
               </div>

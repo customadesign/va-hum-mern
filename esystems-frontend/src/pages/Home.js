@@ -45,17 +45,17 @@ export default function Home() {
                   <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
                     {branding.isESystemsMode ? (
                       <>
-                        <span className="block text-gray-600">Build your dream team</span>
-                        <span className="block text-gray-800">with skilled professionals</span>
+                        <span className="block text-primary-700">Build your dream team</span>
+                        <span className="block text-primary-700">with skilled professionals</span>
                       </>
                     ) : (
                       <>
-                        <span className="block text-gray-600">Join Linkage VA Hub &</span>
+                        <span className="block text-gray-700">Join Linkage VA Hub &</span>
                         <span className="block text-gray-800">start earning today</span>
                       </>
                     )}
                   </h1>
-                  <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                  <p className="mt-3 text-base text-gray-700 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                     {branding.isESystemsMode ? (
                       <>
                         E-Systems Management helps you find pre-screened, skilled professionals ready to join your team.
@@ -69,12 +69,21 @@ export default function Home() {
                   </p>
                   <div className="mt-5 sm:mt-8 flex justify-center lg:justify-start">
                     <div className="rounded-md shadow">
-                      <Link
-                        to="/register"
-                        className="btn-primary w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md md:py-4 md:text-lg md:px-10"
-                      >
-                        Register as VA
-                      </Link>
+                      {branding.isESystemsMode ? (
+                        <Link
+                          to="/how-it-works"
+                          className="btn-primary w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md md:py-4 md:text-lg md:px-10"
+                        >
+                          How It Works
+                        </Link>
+                      ) : (
+                        <Link
+                          to="/register"
+                          className="btn-primary w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md md:py-4 md:text-lg md:px-10"
+                        >
+                          Register as VA
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -99,7 +108,7 @@ export default function Home() {
         {/* Featured VAs Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="pb-5 sm:flex sm:items-center sm:justify-between">
-            <h2 className="text-lg leading-6 font-medium text-gray-900">
+            <h2 className={`text-lg leading-6 font-medium ${branding.isESystemsMode ? 'text-primary-700' : 'text-gray-900'}`}>
               Success Stories - Our Top Earning VAs
             </h2>
           </div>
@@ -141,7 +150,7 @@ export default function Home() {
               </div>
             </>
           ) : (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-700">
               Be the first to join our community of successful virtual assistants.
             </div>
           )}

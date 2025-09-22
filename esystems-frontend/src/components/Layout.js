@@ -31,6 +31,7 @@ export default function Layout() {
 
   const navigation = [
     { name: 'Home', href: '/', current: false },
+    { name: 'How It Works', href: '/how-it-works', current: false },
     { name: 'Virtual Assistants', href: '/vas', current: false },
     ...(!branding.isESystemsMode ? [{ name: 'Community', href: '/community', current: false }] : []),
     { name: 'About', href: '/about', current: false },
@@ -74,7 +75,7 @@ export default function Layout() {
                         className={classNames(
                           item.current
                             ? branding.isESystemsMode ? 'border-white text-white' : 'border-gray-900 text-gray-900'
-                            : branding.isESystemsMode ? 'border-transparent text-white hover:border-white hover:text-gray-200' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                            : branding.isESystemsMode ? 'border-transparent text-white hover:border-white hover:text-gray-200' : 'border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-700',
                           'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium'
                         )}
                       >
@@ -94,7 +95,7 @@ export default function Layout() {
                         className={classNames(
                           branding.isESystemsMode
                             ? "bg-primary-800 text-white hover:text-gray-200 focus:ring-offset-primary-700 focus:ring-white"
-                            : "bg-gray-100 text-gray-400 hover:text-gray-500 focus:ring-offset-2 focus:ring-gray-500",
+                            : "bg-gray-100 text-gray-700 hover:text-gray-700 focus:ring-offset-2 focus:ring-gray-500",
                           "p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 relative transition-all duration-200",
                           isHoveringBell ? "transform scale-110" : "transform scale-100"
                         )}
@@ -206,7 +207,7 @@ export default function Layout() {
                   <Disclosure.Button className={classNames(
                     branding.isESystemsMode 
                       ? "bg-primary-800 text-primary-400 hover:text-white hover:bg-primary-600 focus:ring-offset-primary-700 focus:ring-white"
-                      : "bg-gray-100 text-gray-500 hover:text-gray-700 hover:bg-gray-200 focus:ring-offset-2 focus:ring-gray-500",
+                      : "bg-gray-100 text-gray-700 hover:text-gray-700 hover:bg-gray-200 focus:ring-offset-2 focus:ring-gray-500",
                     "inline-flex items-center justify-center p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2"
                   )}>
                     <span className="sr-only">Open main menu</span>
@@ -233,7 +234,7 @@ export default function Layout() {
                     className={classNames(
                       item.current
                         ? branding.isESystemsMode ? 'bg-primary-800 border-white text-white' : 'bg-gray-50 border-gray-900 text-gray-900'
-                        : branding.isESystemsMode ? 'border-transparent text-white hover:bg-primary-600 hover:border-white hover:text-gray-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800',
+                        : branding.isESystemsMode ? 'border-transparent text-white hover:bg-primary-600 hover:border-white hover:text-gray-200' : 'border-transparent text-gray-700 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800',
                       'block pl-3 pr-4 py-2 border-l-4 text-base font-medium'
                     )}
                   >
@@ -271,7 +272,7 @@ export default function Layout() {
                       className={classNames(
                         branding.isESystemsMode 
                           ? "bg-primary-800 text-white hover:text-gray-200"
-                          : "bg-gray-100 text-gray-400 hover:text-gray-500",
+                          : "bg-gray-100 text-gray-700 hover:text-gray-700",
                         "p-2 rounded-full relative mr-2"
                       )}
                     >
@@ -347,13 +348,13 @@ export default function Layout() {
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex justify-center md:order-2">
               <div className="flex space-x-6">
-                <Link to="/terms" className="text-gray-400 hover:text-gray-500 text-sm">
+                <Link to="/terms" className="text-gray-700 hover:text-gray-700 text-sm">
                   Terms of Service
                 </Link>
-                <Link to="/privacy" className="text-gray-400 hover:text-gray-500 text-sm">
+                <Link to="/privacy" className="text-gray-700 hover:text-gray-700 text-sm">
                   Privacy Policy
                 </Link>
-                <a href="#" className="text-gray-400 hover:text-gray-500">
+                <a href="#" className="text-gray-700 hover:text-gray-700">
                   <span className="sr-only">Twitter</span>
                   <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
@@ -362,7 +363,7 @@ export default function Layout() {
               </div>
             </div>
             <div className="mt-8 md:mt-0 md:order-1">
-              <p className="text-center text-base text-gray-400">
+              <p className="text-center text-base text-gray-700">
                 &copy; 2025 {branding.name}. All rights reserved.
               </p>
             </div>

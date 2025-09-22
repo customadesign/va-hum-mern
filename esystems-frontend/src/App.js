@@ -22,6 +22,7 @@ import ImpersonationBanner from './components/ImpersonationBanner';
 import Home from './pages/Home';
 import About from './pages/About';
 import Community from './pages/Community';
+import HowItWorks from './pages/HowItWorks';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
@@ -90,6 +91,7 @@ function App() {
                       <Route path="/" element={<Layout />}>
                         <Route index element={<Home />} />
                         <Route path="about" element={<About />} />
+                        <Route path="how-it-works" element={<HowItWorks />} />
                         <Route path="community" element={<Community />} />
                         <Route path="community/lesson/:lessonId" element={<Community />} />
                         

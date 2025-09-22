@@ -23,18 +23,18 @@ export default function About() {
       <div className="bg-white">
         <div className="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-base font-semibold text-gray-600 tracking-wide uppercase">About</h2>
-            <p className="mt-1 text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
+            <h2 className={`text-base font-semibold tracking-wide uppercase ${branding.isESystemsMode ? 'text-primary-700' : 'text-gray-700'}`}>About</h2>
+            <p className={`mt-1 text-4xl font-extrabold sm:text-5xl sm:tracking-tight lg:text-6xl ${branding.isESystemsMode ? 'text-primary-700' : 'text-gray-900'}`}>
               {branding.name}
             </p>
             {!branding.isESystemsMode && (
-              <p className="max-w-xl mt-5 mx-auto text-xl text-gray-500">
+              <p className="max-w-xl mt-5 mx-auto text-xl text-gray-700">
                 Operated by Linkage Web Solutions
               </p>
             )}
           </div>
 
-          <div className="mt-12 prose prose-lg text-gray-500 mx-auto">
+          <div className="mt-12 prose prose-lg text-gray-700 mx-auto">
             {branding.isESystemsMode ? (
               <>
                 <p>
@@ -42,14 +42,14 @@ export default function About() {
                   professionals from the Philippines.
                 </p>
 
-                <h3>Our Mission</h3>
+                <h3 className={branding.isESystemsMode ? 'text-primary-700' : ''}>Our Mission</h3>
                 <p>
                   We streamline the process of finding and hiring skilled professionals for your business. 
                   Our platform connects you with talented individuals who are ready to become valuable 
                   members of your team.
                 </p>
 
-                <h3>What We Offer Employers</h3>
+                <h3 className={branding.isESystemsMode ? 'text-primary-700' : ''}>What We Offer Employers</h3>
                 <ul>
                   <li>Pre-screened professionals ready to join your team</li>
                   <li>Direct communication with candidates</li>
@@ -58,7 +58,7 @@ export default function About() {
                   <li>Cost-effective staffing solutions</li>
                 </ul>
 
-                <h3>Why Hire Filipino Professionals?</h3>
+                <h3 className={branding.isESystemsMode ? 'text-primary-700' : ''}>Why Hire Filipino Professionals?</h3>
                 <p>
                   The Philippines offers a deep talent pool of skilled professionals who excel in:
                 </p>
@@ -70,7 +70,7 @@ export default function About() {
                   <li>Flexibility and adaptability</li>
                 </ul>
 
-                <h3>Build Your Team</h3>
+                <h3 className={branding.isESystemsMode ? 'text-primary-700' : ''}>Build Your Team</h3>
                 <p>
                   E-Systems Management makes it easy to find the right professionals for your business needs. 
                   Start building your dream team today with our curated selection of skilled candidates.
@@ -83,14 +83,14 @@ export default function About() {
                   with permanent contract opportunities through our trusted network of employers.
                 </p>
 
-                <h3>Our Mission</h3>
+                <h3 className={branding.isESystemsMode ? 'text-primary-700' : ''}>Our Mission</h3>
                 <p>
                   We believe in creating meaningful connections between skilled virtual assistants and businesses 
                   that value their expertise. Our platform is designed to make the hiring process seamless, 
                   transparent, and beneficial for both parties.
                 </p>
 
-                <h3>What We Offer</h3>
+                <h3 className={branding.isESystemsMode ? 'text-primary-700' : ''}>What We Offer</h3>
                 <ul>
                   <li>Access to pre-screened, skilled Filipino virtual assistants</li>
                   <li>Direct communication between VAs and businesses</li>
@@ -99,7 +99,7 @@ export default function About() {
                   <li>Fair and competitive rates</li>
                 </ul>
 
-                <h3>Why Choose Filipino VAs?</h3>
+                <h3 className={branding.isESystemsMode ? 'text-primary-700' : ''}>Why Choose Filipino VAs?</h3>
                 <p>
                   The Philippines has emerged as a global leader in virtual assistance, offering:
                 </p>
@@ -111,7 +111,7 @@ export default function About() {
                   <li>Diverse skill sets across various industries</li>
                 </ul>
 
-                <h3>Get Started</h3>
+                <h3 className={branding.isESystemsMode ? 'text-primary-700' : ''}>Get Started</h3>
                 <p>
                   Whether you're a business looking for talented virtual assistants or a VA seeking new opportunities, 
                   Linkage VA Hub is here to help you succeed. Join our growing community today.
