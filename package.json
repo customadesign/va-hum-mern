@@ -4,6 +4,7 @@
   "description": "Linkage VA Hub - MERN Stack Implementation",
   "main": "index.js",
   "scripts": {
+    "preinstall": "npm config set legacy-peer-deps true",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd backend && npm run dev",
     "client": "cd frontend && npm start",
@@ -29,5 +30,8 @@
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.2",
     "mongoose": "^8.18.1"
+  },
+  "overrides": {
+    "typescript": "^4.9.5"
   }
 }
