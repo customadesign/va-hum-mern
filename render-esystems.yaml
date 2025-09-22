@@ -38,7 +38,7 @@ services:
     runtime: static
     repo: https://github.com/customadesign/va-hum-mern
     buildCommand: |
-      cd esystems-frontend && npm install && 
+      cd esystems-frontend && npm install --legacy-peer-deps &&
       npm run build
     staticPublishPath: esystems-frontend/build
     routes:
