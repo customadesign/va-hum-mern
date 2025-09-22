@@ -50,4 +50,49 @@ dev-debug.log
 
 # Task files
 # tasks.json
-# tasks/ 
+# tasks/
+
+# Documentation files
+*.md
+README.md
+docs/
+
+# Sensitive and test files
+*.env*
+!.env.example
+!.env.esystems.example
+cookies.txt
+test-*.js
+debug-*.js
+fix-*.js
+create-*.js
+uploads/
+playwright-report/
+test-results/
+screenshots/
+temp-*/
+Debugging/
+Disc Test/
+
+# Backend specific
+backend/uploads/
+backend/cookies.txt
+backend/test-*.js
+backend/debug-*.js
+backend/fix-*.js
+backend/create-*.js
+backend/eng.traineddata
+backend/services/
+backend/scripts/*.js
+!backend/scripts/ensure-uploads-dir.js
+
+# Frontend specific
+frontend/build/
+admin-frontend/build/
+esystems-frontend/build/
+
+# Test files
+tests/
+__tests__/
+*.test.js
+*.spec.js 
