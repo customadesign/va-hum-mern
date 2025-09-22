@@ -108,14 +108,15 @@ export default function Login() {
               src={branding.logoUrl}
               alt={branding.name}
             />
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-center text-3xl font-extrabold" style={{color: '#1f2937'}}>
               Sign in to your account
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
               Or{' '}
               <Link
                 to="/register"
-                className="font-medium text-gray-600 hover:text-gray-500"
+                className="font-medium hover:opacity-80"
+                style={{color: '#2173b8'}}
               >
                 create a new account
               </Link>
@@ -190,7 +191,8 @@ export default function Login() {
               <div className="text-sm">
                 <Link
                   to="/forgot-password"
-                  className="font-medium text-gray-600 hover:text-gray-500"
+                  className="font-medium hover:opacity-80"
+                  style={{color: '#2173b8'}}
                 >
                   Forgot your password?
                 </Link>
@@ -201,7 +203,10 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{backgroundColor: loading ? '#94a3b8' : '#2173b8'}}
+                onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#1e40af')}
+                onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#2173b8')}
               >
                 {loading ? 'Signing in...' : 'Sign in'}
               </button>

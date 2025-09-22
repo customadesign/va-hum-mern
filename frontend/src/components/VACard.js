@@ -10,17 +10,18 @@ export default function VACard({ va }) {
     switch (va.searchStatus) {
       case 'actively_looking':
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800 border border-green-200">
             {branding.isESystemsMode ? 'Available now' : 'Actively looking'}
           </span>
         );
       case 'open':
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 border border-blue-200">
             {branding.isESystemsMode ? 'Open to offers' : 'Open to opportunities'}
           </span>
         );
       default:
+        // Don't show any badge for other statuses
         return null;
     }
   };
@@ -78,8 +79,8 @@ export default function VACard({ va }) {
           </div>
           <div className="flex flex-col items-end space-y-2">
             {getStatusBadge()}
-            {va.industry && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+            {va.industry && va.industry.toLowerCase() !== 'other' && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 border border-gray-200">
                 {va.industry.charAt(0).toUpperCase() + va.industry.slice(1).replace(/_/g, ' ')}
               </span>
             )}

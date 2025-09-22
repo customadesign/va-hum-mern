@@ -526,7 +526,7 @@ export default function Dashboard() {
               <>
                 <div className="relative rounded-lg border border-blue-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-blue-500 transition-colors">
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-10 w-10 rounded-md bg-blue-600 text-white">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-md text-white" style={{backgroundColor: '#1e40af'}}>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
@@ -543,7 +543,7 @@ export default function Dashboard() {
 
                 <div className="relative rounded-lg border border-sky-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-sky-500 transition-colors">
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-10 w-10 rounded-md bg-sky-600 text-white">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-md text-white" style={{backgroundColor: '#1e40af'}}>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                       </svg>
@@ -685,7 +685,7 @@ export default function Dashboard() {
               <div className="px-6 py-5">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg">
+                    <div className="flex items-center justify-center h-12 w-12 rounded-full text-white shadow-lg" style={{backgroundColor: '#1e40af'}}>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
@@ -725,7 +725,10 @@ export default function Dashboard() {
                       <div className="flex-shrink-0 ml-4">
                         <Link 
                           to={branding.isESystemsMode ? "/business/profile" : "/va/profile"} 
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                          style={{backgroundColor: '#1e40af'}}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#1e3a8a'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = '#1e40af'}
                         >
                           Complete Profile
                           <svg className="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -745,7 +748,7 @@ export default function Dashboard() {
                   <span className="text-emerald-700 font-semibold">{profileCompletion.percentage}% Complete</span>
                 </div>
                 <div className="mt-2 bg-white rounded-full h-2 overflow-hidden shadow-inner">
-                  <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all duration-500 ease-out" style={{width: `${profileCompletion.percentage}%`}}></div>
+                  <div className="h-full rounded-full transition-all duration-500 ease-out" style={{width: `${profileCompletion.percentage}%`, backgroundColor: '#1e40af'}}></div>
                 </div>
                 <p className="mt-2 text-xs text-gray-500">
                   Just a few more details needed to reach 100% and maximize your placement opportunities!

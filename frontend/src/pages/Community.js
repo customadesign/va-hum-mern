@@ -208,7 +208,7 @@ function VideoPlayer({ src, poster, fallbackPoster, onPlay, className = '' }) {
       {videoState === VIDEO_STATES.LOADING && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-xl z-10">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderBottomColor: '#2663eb' }}></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderBottomColor: '#2173b8' }}></div>
             <p className="mt-2 text-sm text-gray-600">Loading video...</p>
           </div>
         </div>
@@ -308,15 +308,15 @@ export default function Community() {
     style.textContent = `
       @keyframes glowPulse {
         0% {
-          box-shadow: 0 0 5px #2663eb, 0 0 10px #2663eb, 0 0 15px #2663eb;
+          box-shadow: 0 0 5px #2173b8, 0 0 10px #2173b8, 0 0 15px #2173b8;
           transform: scale(1);
         }
         50% {
-          box-shadow: 0 0 10px #2663eb, 0 0 20px #2663eb, 0 0 30px #2663eb, 0 0 40px #2663eb;
+          box-shadow: 0 0 10px #2173b8, 0 0 20px #2173b8, 0 0 30px #2173b8, 0 0 40px #2173b8;
           transform: scale(1.02);
         }
         100% {
-          box-shadow: 0 0 5px #2663eb, 0 0 10px #2663eb, 0 0 15px #2663eb;
+          box-shadow: 0 0 5px #2173b8, 0 0 10px #2173b8, 0 0 15px #2173b8;
           transform: scale(1);
         }
       }
@@ -620,7 +620,7 @@ export default function Community() {
                 <a
                   href="#register"
                   className="inline-flex justify-center items-center rounded-md text-white px-6 py-3 text-base font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 relative hover:opacity-90"
-                  style={{ backgroundColor: '#2663eb', '--tw-ring-color': '#2663eb' }}
+                  style={{ backgroundColor: '#2173b8', '--tw-ring-color': '#2173b8' }}
                   aria-label="Register for the ₱999 webinar"
                   onClick={() => track('webinar_register_cta_click', { source: 'community_page_hero' })}
                 >
@@ -761,7 +761,7 @@ export default function Community() {
                       onChange={(e) => setFormData({...formData, consent: e.target.checked})}
                       required
                       className="mt-0.5 h-4 w-4 rounded border-gray-300 focus:ring-2"
-                      style={{ accentColor: '#2663eb' }}
+                      style={{ accentColor: '#2173b8' }}
                     />
                     <label htmlFor="consent" className="text-sm text-gray-800">
                       I agree to receive webinar information and job-related updates and accept the Privacy Policy.
@@ -773,7 +773,7 @@ export default function Community() {
                       type="submit"
                       disabled={isSubmitting}
                       className={`inline-flex justify-center items-center rounded-md text-white px-6 py-3 text-base font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-90 ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
-                      style={{ backgroundColor: '#2663eb' }}
+                      style={{ backgroundColor: '#2173b8' }}
                     >
                       {isSubmitting ? 'Registering...' : 'Proceed to Payment (₱999)'}
                     </button>
@@ -786,9 +786,9 @@ export default function Community() {
                 </form>
               ) : (
                 /* Success state */
-                <div className="mt-6 rounded-lg border p-4" style={{ backgroundColor: '#e4effe', borderColor: '#2663eb' }}>
-                  <p className="font-semibold" style={{ color: '#2663eb' }}>Registration received! Check your email for payment instructions (₱999) and joining details.</p>
-                  <p className="mt-1 text-sm" style={{ color: '#2663eb' }}>
+                <div className="mt-6 rounded-lg border p-4" style={{ backgroundColor: '#e4effe', borderColor: '#2173b8' }}>
+                  <p className="font-semibold" style={{ color: '#2173b8' }}>Registration received! Check your email for payment instructions (₱999) and joining details.</p>
+                  <p className="mt-1 text-sm" style={{ color: '#2173b8' }}>
                     Next session: {nextWebinarDate ? nextWebinarDate.toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' }) : ''}
                   </p>
                   <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -834,12 +834,12 @@ export default function Community() {
                 className={`rounded-xl border transform transition-all cursor-pointer ${
                   expandedBenefit === 'priority' ? 'sm:col-span-3' : 'priority-glow'
                 }`}
-                style={{ backgroundColor: '#e4effe', borderColor: '#2663eb' }}
+                style={{ backgroundColor: '#e4effe', borderColor: '#2173b8' }}
                 onClick={() => setExpandedBenefit(expandedBenefit === 'priority' ? null : 'priority')}
               >
                 <div className="p-4">
                   <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 text-white rounded-full p-2" style={{ backgroundColor: '#2663eb' }}>
+                    <div className="flex-shrink-0 text-white rounded-full p-2" style={{ backgroundColor: '#2173b8' }}>
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
@@ -855,35 +855,35 @@ export default function Community() {
                       {expandedBenefit === 'priority' && (
                         <div className="mt-4 space-y-3 animate-fadeIn">
                           <div className="rounded-lg p-3" style={{ backgroundColor: '#f8f9fa' }}>
-                            <h4 className="font-semibold text-sm mb-2" style={{ color: '#2663eb' }}>What Priority Access Means for You:</h4>
+                            <h4 className="font-semibold text-sm mb-2" style={{ color: '#2173b8' }}>What Priority Access Means for You:</h4>
                             <ul className="space-y-2 text-xs text-gray-700">
                               <li className="flex items-start">
-                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2663eb" viewBox="0 0 20 20">
+                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2173b8" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                 </svg>
                                 Your profile appears AHEAD of regular accounts when clients search for VAs
                               </li>
                               <li className="flex items-start">
-                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2663eb" viewBox="0 0 20 20">
+                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2173b8" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                 </svg>
                                 First notification when new high-paying clients post jobs
                               </li>
                               <li className="flex items-start">
-                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2663eb" viewBox="0 0 20 20">
+                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2173b8" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                 </svg>
                                 Exclusive access to premium client accounts paying $5+/hour
                               </li>
                               <li className="flex items-start">
-                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2663eb" viewBox="0 0 20 20">
+                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2173b8" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                 </svg>
                                 Priority support from our team when you need help
                               </li>
                             </ul>
                           </div>
-                          <p className="text-xs italic font-medium" style={{ color: '#2663eb' }}>
+                          <p className="text-xs italic font-medium" style={{ color: '#2173b8' }}>
                             "Our trained VAs get hired 3x faster than regular applicants!"
                           </p>
                         </div>
@@ -948,12 +948,12 @@ export default function Community() {
                 className={`rounded-xl border transform transition-all cursor-pointer ${
                   expandedBenefit === 'investment' ? 'sm:col-span-3' : 'hover:scale-105'
                 } ${expandedBenefit === 'priority' || expandedBenefit === 'earnings' ? 'hidden' : ''}`}
-                style={{ backgroundColor: '#e4effe', borderColor: '#2663eb' }}
+                style={{ backgroundColor: '#e4effe', borderColor: '#2173b8' }}
                 onClick={() => setExpandedBenefit(expandedBenefit === 'investment' ? null : 'investment')}
               >
                 <div className="p-4">
                   <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 text-white rounded-full p-2" style={{ backgroundColor: '#2663eb' }}>
+                    <div className="flex-shrink-0 text-white rounded-full p-2" style={{ backgroundColor: '#2173b8' }}>
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                       </svg>
@@ -964,32 +964,32 @@ export default function Community() {
                       {expandedBenefit === 'investment' && (
                         <div className="mt-4 space-y-3 animate-fadeIn">
                           <div className="rounded-lg p-3" style={{ backgroundColor: '#f8f9fa' }}>
-                            <h4 className="font-semibold text-sm mb-2" style={{ color: '#2663eb' }}>Your ₱999 Investment Includes:</h4>
+                            <h4 className="font-semibold text-sm mb-2" style={{ color: '#2173b8' }}>Your ₱999 Investment Includes:</h4>
                             <ul className="space-y-2 text-xs text-gray-700">
                               <li className="flex items-start">
-                                <span className="font-bold mr-2" style={{ color: '#2663eb' }}>✓</span>
+                                <span className="font-bold mr-2" style={{ color: '#2173b8' }}>✓</span>
                                 40 hours of live training (20 days × 2 hours)
                               </li>
                               <li className="flex items-start">
-                                <span className="font-bold mr-2" style={{ color: '#2663eb' }}>✓</span>
+                                <span className="font-bold mr-2" style={{ color: '#2173b8' }}>✓</span>
                                 Free GoHighLevel account (₱5,500/month value)
                               </li>
                               <li className="flex items-start">
-                                <span className="font-bold mr-2" style={{ color: '#2663eb' }}>✓</span>
+                                <span className="font-bold mr-2" style={{ color: '#2173b8' }}>✓</span>
                                 AI tools training for content creation
                               </li>
                               <li className="flex items-start">
-                                <span className="font-bold mr-2" style={{ color: '#2663eb' }}>✓</span>
+                                <span className="font-bold mr-2" style={{ color: '#2173b8' }}>✓</span>
                                 Lifetime access to our VA community
                               </li>
                               <li className="flex items-start">
-                                <span className="font-bold mr-2" style={{ color: '#2663eb' }}>✓</span>
+                                <span className="font-bold mr-2" style={{ color: '#2173b8' }}>✓</span>
                                 Job placement assistance after graduation
                               </li>
                             </ul>
                           </div>
                           <div className="rounded-lg p-2 text-center" style={{ backgroundColor: '#e4effe' }}>
-                            <p className="text-xs font-bold" style={{ color: '#2663eb' }}>
+                            <p className="text-xs font-bold" style={{ color: '#2173b8' }}>
                               ROI: Earn back your investment in just 6-8 hours of VA work!
                             </p>
                           </div>
@@ -1008,7 +1008,7 @@ export default function Community() {
             }}>
               {/* 100% Bonus & Raise Benefits Banner */}
               <div className="mb-8 relative overflow-hidden rounded-2xl p-6 text-center" style={{
-                background: 'linear-gradient(135deg, #2663eb 0%, #4338ca 50%, #3b82f6 100%)',
+                background: 'linear-gradient(135deg, #2173b8 0%, #4338ca 50%, #3b82f6 100%)',
                 boxShadow: '0 20px 40px rgba(38, 99, 235, 0.3)'
               }}>
                 <div className="absolute inset-0 bg-white bg-opacity-10 backdrop-blur-sm"></div>
@@ -1049,7 +1049,7 @@ export default function Community() {
               </div>
 
               {/* Interactive Rate Calculator */}
-              <div className="bg-white rounded-2xl p-6 shadow-xl border-2 mb-6" style={{ borderColor: '#2663eb' }}>
+              <div className="bg-white rounded-2xl p-6 shadow-xl border-2 mb-6" style={{ borderColor: '#2173b8' }}>
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">
                     Your Hourly Rate Calculator
@@ -1065,7 +1065,7 @@ export default function Community() {
                     <span className="text-sm font-medium text-gray-700">$4/hour</span>
                     <div className="text-center">
                       <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-1 transform transition-all duration-300 hover:scale-110" style={{
-                        backgroundColor: '#2663eb',
+                        backgroundColor: '#2173b8',
                         boxShadow: `0 0 30px rgba(38, 99, 235, 0.4)`
                       }}>
                         <span className="text-2xl font-bold text-white">${selectedRate}</span>
@@ -1085,7 +1085,7 @@ export default function Community() {
                       onChange={(e) => setSelectedRate(parseFloat(e.target.value))}
                       className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                       style={{
-                        background: `linear-gradient(to right, #2663eb 0%, #2663eb ${((selectedRate - 4) / 11) * 100}%, #e5e7eb ${((selectedRate - 4) / 11) * 100}%, #e5e7eb 100%)`
+                        background: `linear-gradient(to right, #2173b8 0%, #2173b8 ${((selectedRate - 4) / 11) * 100}%, #e5e7eb ${((selectedRate - 4) / 11) * 100}%, #e5e7eb 100%)`
                       }}
                     />
                     <style jsx>{`
@@ -1094,7 +1094,7 @@ export default function Community() {
                         height: 24px;
                         width: 24px;
                         border-radius: 50%;
-                        background: #2663eb;
+                        background: #2173b8;
                         cursor: pointer;
                         box-shadow: 0 4px 8px rgba(38, 99, 235, 0.3);
                         transition: all 0.15s ease-in-out;
@@ -1107,7 +1107,7 @@ export default function Community() {
                         height: 24px;
                         width: 24px;
                         border-radius: 50%;
-                        background: #2663eb;
+                        background: #2173b8;
                         cursor: pointer;
                         border: none;
                         box-shadow: 0 4px 8px rgba(38, 99, 235, 0.3);
@@ -1119,22 +1119,22 @@ export default function Community() {
                 {/* Dynamic Earnings Display */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="text-center p-4 rounded-xl transition-all duration-300 hover:scale-105" style={{ backgroundColor: '#f8f9fa' }}>
-                    <div className="text-lg font-bold" style={{ color: '#2663eb' }}>₱{earnings.hourly.toLocaleString()}</div>
+                    <div className="text-lg font-bold" style={{ color: '#2173b8' }}>₱{earnings.hourly.toLocaleString()}</div>
                     <div className="text-xs text-gray-600">per hour</div>
                   </div>
                   <div className="text-center p-4 rounded-xl transition-all duration-300 hover:scale-105" style={{ backgroundColor: '#f8f9fa' }}>
-                    <div className="text-lg font-bold" style={{ color: '#2663eb' }}>₱{earnings.daily.toLocaleString()}</div>
+                    <div className="text-lg font-bold" style={{ color: '#2173b8' }}>₱{earnings.daily.toLocaleString()}</div>
                     <div className="text-xs text-gray-600">per day</div>
                   </div>
                   <div className="text-center p-4 rounded-xl transition-all duration-300 hover:scale-105" style={{ backgroundColor: '#f8f9fa' }}>
-                    <div className="text-lg font-bold" style={{ color: '#2663eb' }}>₱{earnings.weekly.toLocaleString()}</div>
+                    <div className="text-lg font-bold" style={{ color: '#2173b8' }}>₱{earnings.weekly.toLocaleString()}</div>
                     <div className="text-xs text-gray-600">per week</div>
                   </div>
                   <div className="text-center p-4 rounded-xl transition-all duration-300 hover:scale-105 animate-pulse" style={{
                     backgroundColor: '#e4effe',
-                    border: '2px solid #2663eb'
+                    border: '2px solid #2173b8'
                   }}>
-                    <div className="text-xl font-extrabold" style={{ color: '#2663eb' }}>₱{earnings.monthly.toLocaleString()}</div>
+                    <div className="text-xl font-extrabold" style={{ color: '#2173b8' }}>₱{earnings.monthly.toLocaleString()}</div>
                     <div className="text-xs font-semibold text-gray-900">per month</div>
                   </div>
                 </div>
@@ -1215,14 +1215,14 @@ export default function Community() {
                   {/* VA at Current Selected Rate */}
                   <div className="relative">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-bold" style={{ color: '#2663eb' }}>VA at ${selectedRate}/hour (YOU!)</span>
-                      <span className="text-sm font-bold" style={{ color: '#2663eb' }}>₱{earnings.monthly.toLocaleString()}/mo</span>
+                      <span className="text-sm font-bold" style={{ color: '#2173b8' }}>VA at ${selectedRate}/hour (YOU!)</span>
+                      <span className="text-sm font-bold" style={{ color: '#2173b8' }}>₱{earnings.monthly.toLocaleString()}/mo</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
                       <div className="h-full rounded-full flex items-center justify-end pr-2"
                            style={{
                              width: `${Math.min(100, (earnings.monthly / 44800) * 100)}%`,
-                             background: 'linear-gradient(90deg, #2663eb 0%, #3b82f6 100%)'
+                             background: 'linear-gradient(90deg, #2173b8 0%, #3b82f6 100%)'
                            }}>
                         <span className="text-xs text-white font-extrabold">
                           above minimum wage!
@@ -1362,7 +1362,7 @@ export default function Community() {
                     <div className="text-2xl mb-1">🏠</div>
                     <p className="text-sm font-semibold text-gray-900">Rent a Nice Condo</p>
                     <p className="text-sm text-gray-600">₱15,000-20,000/mo</p>
-                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>✓ Covered!</p>
+                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>✓ Covered!</p>
                   </div>
 
                   <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
@@ -1376,7 +1376,7 @@ export default function Community() {
                     <div className="text-2xl mb-1">📱</div>
                     <p className="text-sm font-semibold text-gray-900">Internet & Phone</p>
                     <p className="text-sm text-gray-600">₱2,000-3,000/mo</p>
-                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>✓ No problem!</p>
+                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>✓ No problem!</p>
                   </div>
 
                   <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
@@ -1390,7 +1390,7 @@ export default function Community() {
                     <div className="text-2xl mb-1">👨‍👩‍👧‍👦</div>
                     <p className="text-sm font-semibold text-gray-900">Family Support</p>
                     <p className="text-sm text-gray-600">Help parents/siblings</p>
-                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>✓ Be the hero!</p>
+                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>✓ Be the hero!</p>
                   </div>
 
                   <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
@@ -1421,7 +1421,7 @@ export default function Community() {
                       <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                     <div className="text-center">
-                      <p className="text-2xl font-bold" style={{ color: '#2663eb' }}>₱{earnings.monthly.toLocaleString()}+</p>
+                      <p className="text-2xl font-bold" style={{ color: '#2173b8' }}>₱{earnings.monthly.toLocaleString()}+</p>
                       <p className="text-xs text-gray-600">Monthly Income</p>
                     </div>
                   </div>
@@ -1450,8 +1450,8 @@ export default function Community() {
 
             {/* Global Reach Section */}
             <div className="rounded-xl p-6 border-2" style={{
-              background: 'linear-gradient(135deg, #1a365d 0%, #2663eb 50%, #1a365d 100%)',
-              borderColor: '#2663eb'
+              background: 'linear-gradient(135deg, #1a365d 0%, #2173b8 50%, #1a365d 100%)',
+              borderColor: '#2173b8'
             }}>
               <div className="text-center mb-6">
                 <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">
@@ -1518,9 +1518,9 @@ export default function Community() {
             </div>
 
             {/* Audio Testimonial Section */}
-            <div className="rounded-xl p-5 border" style={{ backgroundColor: '#e4effe', borderColor: '#2663eb' }}>
+            <div className="rounded-xl p-5 border" style={{ backgroundColor: '#e4effe', borderColor: '#2173b8' }}>
               <div className="flex items-center mb-3">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="#2663eb" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="#2173b8" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                 </svg>
                 <h3 className="font-bold text-gray-900">Hear From Our Founder</h3>
@@ -1588,22 +1588,22 @@ export default function Community() {
             </div>
 
             {/* Training Schedule Timeline */}
-            <div className="rounded-xl p-5 border" style={{ backgroundColor: '#f8f9fa', borderColor: '#2663eb' }}>
+            <div className="rounded-xl p-5 border" style={{ backgroundColor: '#f8f9fa', borderColor: '#2173b8' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-gray-900 flex items-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="#2663eb" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="#2173b8" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Live Training Schedule
                 </h3>
-                <span className="text-white text-xs px-3 py-1 rounded-full font-semibold" style={{ backgroundColor: '#2663eb' }}>20 DAYS</span>
+                <span className="text-white text-xs px-3 py-1 rounded-full font-semibold" style={{ backgroundColor: '#2173b8' }}>20 DAYS</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center space-x-3">
                   <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2" style={{ borderColor: '#2663eb' }}>
-                      <svg className="w-5 h-5" fill="none" stroke="#2663eb" viewBox="0 0 24 24">
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2" style={{ borderColor: '#2173b8' }}>
+                      <svg className="w-5 h-5" fill="none" stroke="#2173b8" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                       </svg>
                     </div>
@@ -1616,8 +1616,8 @@ export default function Community() {
 
                 <div className="flex items-center space-x-3">
                   <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2" style={{ borderColor: '#2663eb' }}>
-                      <svg className="w-5 h-5" fill="none" stroke="#2663eb" viewBox="0 0 24 24">
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2" style={{ borderColor: '#2173b8' }}>
+                      <svg className="w-5 h-5" fill="none" stroke="#2173b8" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
                     </div>
@@ -1636,27 +1636,27 @@ export default function Community() {
               </div>
 
               {/* Meet Your Training Team */}
-              <div className="mt-4 rounded-lg p-4 border" style={{ backgroundColor: '#e4effe', borderColor: '#2663eb' }}>
+              <div className="mt-4 rounded-lg p-4 border" style={{ backgroundColor: '#e4effe', borderColor: '#2173b8' }}>
                 <h4 className="font-semibold text-gray-900 mb-3 text-center">Meet Your Training Team</h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-white rounded-lg p-2 text-center">
-                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>Pat Murphy</p>
+                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>Pat Murphy</p>
                     <p className="text-xs text-gray-600">Lead Trainer & Owner</p>
                   </div>
                   <div className="bg-white rounded-lg p-2 text-center">
-                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>Kristina Mauri</p>
+                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>Kristina Mauri</p>
                     <p className="text-xs text-gray-600">VA Trainer</p>
                   </div>
                   <div className="bg-white rounded-lg p-2 text-center">
-                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>Shey Tiglao</p>
+                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>Shey Tiglao</p>
                     <p className="text-xs text-gray-600">VA Onboarding</p>
                   </div>
                   <div className="bg-white rounded-lg p-2 text-center">
-                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>Rhoda Guevarra</p>
+                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>Rhoda Guevarra</p>
                     <p className="text-xs text-gray-600">Human Resources</p>
                   </div>
                   <div className="bg-white rounded-lg p-2 text-center col-span-2">
-                    <p className="text-sm font-bold" style={{ color: '#2663eb' }}>Brian Murphy</p>
+                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>Brian Murphy</p>
                     <p className="text-xs text-gray-600">Chief of Operations</p>
                   </div>
                 </div>
@@ -1664,7 +1664,7 @@ export default function Community() {
             </div>
 
             {/* What's Included Feature List */}
-            <div className="rounded-xl p-5 border" style={{ backgroundColor: '#f8f9fa', borderColor: '#2663eb' }}>
+            <div className="rounded-xl p-5 border" style={{ backgroundColor: '#f8f9fa', borderColor: '#2173b8' }}>
               <h3 className="font-bold text-gray-900 mb-4 flex items-center justify-between">
                 <span className="flex items-center">
                   <svg className="w-5 h-5 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
@@ -1691,7 +1691,7 @@ export default function Community() {
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-gray-900">{item.title}</p>
                       <p className="text-xs text-gray-600">{item.desc}</p>
-                      <p className="text-sm font-bold mt-1" style={{ color: '#2663eb' }}>{item.value}</p>
+                      <p className="text-sm font-bold mt-1" style={{ color: '#2173b8' }}>{item.value}</p>
                     </div>
                     {index === 0 && (
                       <div className="absolute top-0 right-0 text-white text-xs px-2 py-0.5 rounded-bl-lg font-bold" style={{ backgroundColor: '#4338ca' }}>
@@ -1716,7 +1716,7 @@ export default function Community() {
 
         {/* FAQ Section */}
         <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 pb-16">
-          <div className="rounded-2xl p-6 sm:p-8 border" style={{ backgroundColor: '#f8f9fa', borderColor: '#2663eb' }}>
+          <div className="rounded-2xl p-6 sm:p-8 border" style={{ backgroundColor: '#f8f9fa', borderColor: '#2173b8' }}>
             <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 text-gray-900">
               Frequently Asked Questions
             </h2>
@@ -1799,11 +1799,11 @@ export default function Community() {
             </div>
 
             <div className="mt-8 border rounded-lg p-4 text-center" style={{ backgroundColor: '#e0e7ff', borderColor: '#3b82f6' }}>
-              <p className="text-sm font-semibold mb-2" style={{ color: '#2663eb' }}>
+              <p className="text-sm font-semibold mb-2" style={{ color: '#2173b8' }}>
                 Still have questions?
               </p>
               <p className="text-sm text-gray-700">
-                Contact us at <a href="mailto:support@linkagevahub.com" className="hover:underline" style={{ color: '#2663eb' }}>support@linkagevahub.com</a> or join our community to connect with other VAs.
+                Contact us at <a href="mailto:support@linkagevahub.com" className="hover:underline" style={{ color: '#2173b8' }}>support@linkagevahub.com</a> or join our community to connect with other VAs.
               </p>
             </div>
           </div>
@@ -1838,7 +1838,7 @@ export default function Community() {
                 <span className="block text-gray-600">{mobileTimeShort}</span>
                 <span className="block font-bold" style={{ color: '#4338ca' }}>₱999 Fee</span>
               </div>
-              <a href="#register" className="inline-flex justify-center items-center rounded-md text-white px-4 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-90" style={{ backgroundColor: '#2663eb' }}>
+              <a href="#register" className="inline-flex justify-center items-center rounded-md text-white px-4 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-90" style={{ backgroundColor: '#2173b8' }}>
                 <span>₱999</span>
               </a>
             </div>

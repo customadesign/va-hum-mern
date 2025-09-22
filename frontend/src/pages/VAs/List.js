@@ -98,7 +98,10 @@ export default function VAList() {
               </div>
               <button
                 type="submit"
-                className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                style={{backgroundColor: '#2173b8'}}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#1e40af'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#2173b8'}
               >
                 Search
               </button>

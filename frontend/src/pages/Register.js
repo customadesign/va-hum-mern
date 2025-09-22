@@ -69,14 +69,15 @@ export default function Register() {
               src={branding.logoUrl}
               alt={branding.name}
             />
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-center text-3xl font-extrabold" style={{color: '#1f2937'}}>
               {branding.isESystemsMode ? 'Create your employer account' : 'Create your account'}
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
               {branding.isESystemsMode ? 'Start hiring talented professionals' : 'Or'}{' '}
               <Link
                 to="/login"
-                className="font-medium text-gray-600 hover:text-gray-500"
+                className="font-medium hover:opacity-80"
+                style={{color: '#2173b8'}}
               >
                 {branding.isESystemsMode ? 'or sign in' : 'sign in to your existing account'}
               </Link>
@@ -187,11 +188,11 @@ export default function Register() {
               />
               <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-900">
                 I agree to the{' '}
-                <Link to="/terms" className="text-gray-600 hover:text-gray-500">
+                <Link to="/terms" className="hover:opacity-80" style={{color: '#2173b8'}}>
                   Terms and Conditions
                 </Link>{' '}
                 and{' '}
-                <Link to="/privacy" className="text-gray-600 hover:text-gray-500">
+                <Link to="/privacy" className="hover:opacity-80" style={{color: '#2173b8'}}>
                   Privacy Policy
                 </Link>
               </label>
@@ -201,7 +202,10 @@ export default function Register() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{backgroundColor: loading ? '#94a3b8' : '#2173b8'}}
+                onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#1e40af')}
+                onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#2173b8')}
               >
                 {loading ? 'Creating account...' : 'Create account'}
               </button>
