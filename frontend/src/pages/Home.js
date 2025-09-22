@@ -40,7 +40,7 @@ export default function Home() {
         <div className="relative overflow-hidden">
           <div className="max-w-7xl mx-auto">
             <div className="relative z-10 pb-8 bg-gray-50 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32 lg:pr-0">
-              <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28 lg:pr-0">
+              <main className="pt-10 mx-auto max-w-7xl px-4 sm:pt-12 sm:px-6 md:pt-16 lg:pt-20 lg:px-8 xl:pt-28 lg:pr-0">
                 <div className="sm:text-center lg:text-left">
                   <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
                     {branding.isESystemsMode ? (
@@ -71,7 +71,10 @@ export default function Home() {
                     <div className="rounded-md shadow">
                       <Link
                         to="/register"
-                        className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 md:py-4 md:text-lg md:px-10"
+                        className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white md:py-4 md:text-lg md:px-10"
+                        style={{backgroundColor: '#2173b8'}}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#1e40af'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#2173b8'}
                       >
                         Register as VA
                       </Link>
@@ -133,7 +136,10 @@ export default function Home() {
               <div className="mt-8 text-right">
                 <Link
                   to="/vas"
-                  className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                  className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  style={{backgroundColor: '#2173b8'}}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#1e40af'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#2173b8'}
                 >
                   Join Our Community
                   <ArrowRightCircleIcon className="ml-3 -mr-1 h-5 w-5" aria-hidden="true" />

@@ -82,9 +82,9 @@ export default function Layout() {
   return (
     <div className="min-h-full">
       <Disclosure as="nav" className={classNames(
-        branding.isESystemsMode ? "bg-gray-700" : "bg-white border-b border-gray-200",
+        branding.isESystemsMode ? "bg-gray-700" : "border-b border-gray-200",
         "shadow"
-      )}>
+      )} style={{backgroundColor: '#2173b8'}}>
         {({ open }) => (
           <>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -109,8 +109,8 @@ export default function Layout() {
                         to={item.href}
                         className={classNames(
                           item.current
-                            ? branding.isESystemsMode ? 'border-white text-white' : 'border-gray-900 text-gray-900'
-                            : branding.isESystemsMode ? 'border-transparent text-gray-300 hover:border-gray-300 hover:text-white' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                            ? 'border-white text-white'
+                            : 'border-transparent text-white hover:border-white hover:text-gray-200',
                           'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium'
                         )}
                       >
@@ -222,23 +222,14 @@ export default function Layout() {
                     <div className="flex items-center space-x-4">
                       <Link
                         to="/sign-in"
-                        className={classNames(
-                          branding.isESystemsMode 
-                            ? "text-gray-300 hover:text-white" 
-                            : "text-gray-700 hover:text-gray-900",
-                          "px-3 py-2 text-sm font-medium"
-                        )}
+                        className="px-3 py-2 text-sm font-medium text-white hover:text-gray-200"
                       >
                         Sign in
                       </Link>
                       <Link
                         to="/sign-up"
-                        className={classNames(
-                          branding.isESystemsMode 
-                            ? "bg-white hover:bg-gray-100 text-gray-700" 
-                            : "bg-gray-900 hover:bg-gray-700 text-white",
-                          "px-3 py-2 rounded-md text-sm font-medium"
-                        )}
+                        className="px-3 py-2 rounded-md text-sm font-medium text-white hover:opacity-90"
+                        style={{backgroundColor: '#ff6b6b'}}
                       >
                         Get started
                       </Link>
@@ -263,10 +254,7 @@ export default function Layout() {
               </div>
             </div>
 
-            <Disclosure.Panel className={classNames(
-              "sm:hidden",
-              branding.isESystemsMode ? "bg-gray-700" : "bg-white border-b border-gray-200"
-            )}>
+            <Disclosure.Panel className="sm:hidden border-b border-gray-200" style={{backgroundColor: '#2173b8'}}>
               <div className="pt-2 pb-3 space-y-1">
                 {navigation.map((item) => (
                   <Disclosure.Button
@@ -275,8 +263,8 @@ export default function Layout() {
                     to={item.href}
                     className={classNames(
                       item.current
-                        ? branding.isESystemsMode ? 'bg-gray-800 border-white text-white' : 'bg-gray-50 border-gray-900 text-gray-900'
-                        : branding.isESystemsMode ? 'border-transparent text-gray-300 hover:bg-gray-600 hover:border-gray-300 hover:text-white' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800',
+                        ? 'bg-blue-700 border-white text-white'
+                        : 'border-transparent text-white hover:bg-blue-700 hover:border-white hover:text-white',
                       'block pl-3 pr-4 py-2 border-l-4 text-base font-medium'
                     )}
                   >
@@ -369,14 +357,15 @@ export default function Layout() {
                     <Disclosure.Button
                       as={Link}
                       to="/sign-in"
-                      className="block px-4 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-600"
+                      className="block px-4 py-2 text-base font-medium text-white hover:text-gray-200 hover:bg-blue-700"
                     >
                       Sign in
                     </Disclosure.Button>
                     <Disclosure.Button
                       as={Link}
                       to="/sign-up"
-                      className="block px-4 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-600"
+                      className="block px-4 py-2 text-base font-medium text-white hover:opacity-90 mx-4 rounded-md"
+                      style={{backgroundColor: '#ff6b6b'}}
                     >
                       Get started
                     </Disclosure.Button>
@@ -388,38 +377,38 @@ export default function Layout() {
         )}
       </Disclosure>
 
-      <main className="flex-1">
+      <main className="flex-1 -mt-px">
         <Outlet />
       </main>
 
-      <footer className="bg-white">        
+      <footer style={{backgroundColor: '#2173b8'}}>        
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex justify-center md:order-2">
               <div className="flex space-x-6">
-                <Link to="/terms" className="text-gray-400 hover:text-gray-500 text-sm">
+                <Link to="/terms" className="text-white hover:text-gray-200 text-sm">
                   Terms of Service
                 </Link>
-                <Link to="/privacy" className="text-gray-400 hover:text-gray-500 text-sm">
+                <Link to="/privacy" className="text-white hover:text-gray-200 text-sm">
                   Privacy Policy
                 </Link>
 
                 {/* Social Media Icons */}
-                <a href="https://facebook.com/linkagevasolutions" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-500">
+                <a href="https://facebook.com/linkagevasolutions" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-200">
                   <span className="sr-only">Meta (Facebook)</span>
                   <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
                 </a>
 
-                <a href="https://x.com/linkagevasolutions" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-500">
+                <a href="https://x.com/linkagevasolutions" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-200">
                   <span className="sr-only">X (Twitter)</span>
                   <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                   </svg>
                 </a>
 
-                <a href="https://discord.gg/linkagevasolutions" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-500">
+                <a href="https://discord.gg/linkagevasolutions" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-200">
                   <span className="sr-only">Discord</span>
                   <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0189 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9554 2.4189-2.1568 2.4189Z"/>
@@ -428,7 +417,7 @@ export default function Layout() {
               </div>
             </div>
             <div className="mt-8 md:mt-0 md:order-1">
-              <p className="text-center text-base text-gray-400">
+              <p className="text-center text-base text-white">
                 &copy; 2025 {branding.name}. All rights reserved.
               </p>
             </div>
