@@ -71,7 +71,7 @@ export default function Home() {
                     <div className="rounded-md shadow">
                       <Link
                         to="/register"
-                        className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 md:py-4 md:text-lg md:px-10"
+                        className="btn-primary w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md md:py-4 md:text-lg md:px-10"
                       >
                         Register as VA
                       </Link>
@@ -133,7 +133,7 @@ export default function Home() {
               <div className="mt-8 text-right">
                 <Link
                   to="/vas"
-                  className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                  className="btn-primary inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md"
                 >
                   Join Our Community
                   <ArrowRightCircleIcon className="ml-3 -mr-1 h-5 w-5" aria-hidden="true" />
