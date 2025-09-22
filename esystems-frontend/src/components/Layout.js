@@ -93,7 +93,7 @@ export default function Layout() {
                         onMouseLeave={() => setIsHoveringBell(false)}
                         className={classNames(
                           branding.isESystemsMode
-                            ? "bg-primary-800 text-primary-200 hover:text-white focus:ring-offset-primary-700 focus:ring-white"
+                            ? "bg-primary-800 text-white hover:text-gray-200 focus:ring-offset-primary-700 focus:ring-white"
                             : "bg-gray-100 text-gray-400 hover:text-gray-500 focus:ring-offset-2 focus:ring-gray-500",
                           "p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 relative transition-all duration-200",
                           isHoveringBell ? "transform scale-110" : "transform scale-100"
@@ -121,11 +121,11 @@ export default function Layout() {
                           )}>
                             <span className="sr-only">Open user menu</span>
                             <div className={classNames(
-                              branding.isESystemsMode ? "bg-primary-600" : "bg-gray-400",
+                              branding.isESystemsMode ? "bg-primary-600 border-2 border-white" : "bg-gray-400",
                               "h-8 w-8 rounded-full flex items-center justify-center"
                             )}>
                               <span className={classNames(
-                                branding.isESystemsMode ? "text-primary-200" : "text-white",
+                                branding.isESystemsMode ? "text-white" : "text-white",
                                 "text-sm font-medium"
                               )}>
                                 {user.email[0].toUpperCase()}
@@ -249,11 +249,11 @@ export default function Layout() {
                   <div className="flex items-center px-4">
                     <div className="flex-shrink-0">
                       <div className={classNames(
-                        branding.isESystemsMode ? "bg-primary-600" : "bg-gray-400",
+                        branding.isESystemsMode ? "bg-primary-600 border-2 border-white" : "bg-gray-400",
                         "h-10 w-10 rounded-full flex items-center justify-center"
                       )}>
                         <span className={classNames(
-                          branding.isESystemsMode ? "text-primary-200" : "text-white",
+                          branding.isESystemsMode ? "text-white" : "text-white",
                           "text-sm font-medium"
                         )}>
                           {user.email[0].toUpperCase()}

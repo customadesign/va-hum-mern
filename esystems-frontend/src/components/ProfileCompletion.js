@@ -2,11 +2,13 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
+import { useBranding } from '../contexts/BrandingContext';
 import { useQuery } from 'react-query';
 import api from '../services/api';
 
 const ProfileCompletion = ({ className = '', showInFooter = false }) => {
   const { user, isVA, isBusiness } = useAuth();
+  const { branding } = useBranding();
 
   // Fetch profile data - moved to top to avoid conditional hook call
   const { data: profileData } = useQuery({
@@ -221,9 +223,10 @@ const ProfileCompletion = ({ className = '', showInFooter = false }) => {
   // Full version for other uses
   return (
     <div className={`rounded-lg p-4 border shadow-lg ${
-      profileCompletion.percentage >= 80 ? 'bg-green-50 border-green-200' :
-      profileCompletion.percentage >= 60 ? 'bg-yellow-50 border-yellow-200' :
-      'bg-blue-50 border-blue-200'
+      profileCompletion.percentage >= 80
+        ? (branding?.isESystemsMode ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200')
+        : profileCompletion.percentage >= 60 ? 'bg-yellow-50 border-yellow-200'
+        : 'bg-blue-50 border-blue-200'
     } ${className}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center">
@@ -270,11 +273,12 @@ const ProfileCompletion = ({ className = '', showInFooter = false }) => {
       {/* Progress Bar */}
       <div className="mt-3">
         <div className="bg-gray-200 rounded-full h-2">
-          <div 
+          <div
             className={`h-2 rounded-full transition-all duration-500 ${
-              profileCompletion.percentage >= 80 ? 'bg-green-500' :
-              profileCompletion.percentage >= 60 ? 'bg-yellow-500' :
-              'bg-blue-600'
+              profileCompletion.percentage >= 80
+                ? (branding?.isESystemsMode ? 'bg-orange-400' : 'bg-green-500')
+                : profileCompletion.percentage >= 60 ? 'bg-yellow-500'
+                : 'bg-blue-600'
             }`}
             style={{ width: `${profileCompletion.percentage}%` }}
           ></div>
