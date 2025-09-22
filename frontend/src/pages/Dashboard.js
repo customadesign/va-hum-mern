@@ -205,11 +205,11 @@ export default function Dashboard() {
         {user?.admin ? (
           <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {/* Total VAs Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-blue-500">
+            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4" style={{borderTopColor: '#3b82f6'}}>
               <div className="p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3">
-                    <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex-shrink-0 rounded-lg p-3" style={{backgroundColor: '#eff6ff'}}>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{color: '#3b82f6'}}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                     </svg>
                   </div>
@@ -233,11 +233,11 @@ export default function Dashboard() {
             </div>
 
             {/* Active VAs Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-green-500">
+            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4" style={{borderTopColor: '#3b82f6'}}>
               <div className="p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-green-100 rounded-lg p-3">
-                    <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex-shrink-0 rounded-lg p-3" style={{backgroundColor: '#eff6ff'}}>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{color: '#3b82f6'}}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
@@ -245,15 +245,15 @@ export default function Dashboard() {
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">Active VAs</dt>
                       <dd className="flex items-baseline">
-                        <div className="text-2xl font-semibold text-green-900">{adminStats?.activeVAs || 0}</div>
+                        <div className="text-2xl font-semibold text-gray-900">{adminStats?.activeVAs || 0}</div>
                       </dd>
                     </dl>
                   </div>
                 </div>
               </div>
-              <div className="bg-green-50 px-5 py-3">
+              <div className="bg-blue-50 px-5 py-3">
                 <div className="text-sm">
-                  <Link to="/admin/vas?status=active" className="font-medium text-green-700 hover:text-green-900">
+                  <Link to="/admin/vas?status=active" className="font-medium text-blue-600 hover:text-blue-800">
                     View active →
                   </Link>
                 </div>
@@ -261,11 +261,11 @@ export default function Dashboard() {
             </div>
 
             {/* Total Businesses Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-purple-500">
+            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4" style={{borderTopColor: '#3b82f6'}}>
               <div className="p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-purple-100 rounded-lg p-3">
-                    <svg className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex-shrink-0 rounded-lg p-3" style={{backgroundColor: '#eff6ff'}}>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{color: '#3b82f6'}}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
@@ -273,15 +273,15 @@ export default function Dashboard() {
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">Total Businesses</dt>
                       <dd className="flex items-baseline">
-                        <div className="text-2xl font-semibold text-purple-900">{adminStats?.totalBusinesses || 0}</div>
+                        <div className="text-2xl font-semibold text-gray-900">{adminStats?.totalBusinesses || 0}</div>
                       </dd>
                     </dl>
                   </div>
                 </div>
               </div>
-              <div className="bg-purple-50 px-5 py-3">
+              <div className="bg-gray-50 px-5 py-3">
                 <div className="text-sm">
-                  <Link to="/admin/businesses" className="font-medium text-purple-700 hover:text-purple-900">
+                  <Link to="/admin/businesses" className="font-medium text-blue-600 hover:text-blue-800">
                     Manage businesses →
                   </Link>
                 </div>
@@ -289,11 +289,11 @@ export default function Dashboard() {
             </div>
 
             {/* Pending Approvals Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-yellow-500">
+            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4" style={{borderTopColor: '#3b82f6'}}>
               <div className="p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
-                    <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex-shrink-0 rounded-lg p-3" style={{backgroundColor: '#eff6ff'}}>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{color: '#3b82f6'}}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
@@ -301,15 +301,15 @@ export default function Dashboard() {
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">Pending Approvals</dt>
                       <dd className="flex items-baseline">
-                        <div className="text-2xl font-semibold text-yellow-900">{adminStats?.pendingApprovals || 0}</div>
+                        <div className="text-2xl font-semibold text-gray-900">{adminStats?.pendingApprovals || 0}</div>
                       </dd>
                     </dl>
                   </div>
                 </div>
               </div>
-              <div className="bg-yellow-50 px-5 py-3">
+              <div className="bg-blue-50 px-5 py-3">
                 <div className="text-sm">
-                  <Link to="/admin/approvals" className="font-medium text-yellow-700 hover:text-yellow-900">
+                  <Link to="/admin/approvals" className="font-medium text-blue-600 hover:text-blue-800">
                     Review approvals →
                   </Link>
                 </div>
@@ -320,11 +320,11 @@ export default function Dashboard() {
           /* Regular User Stats Cards */
           <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {/* Announcements Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-purple-500">
+            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4" style={{borderTopColor: '#3b82f6'}}>
               <div className="p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-purple-100 rounded-lg p-3">
-                    <svg className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex-shrink-0 rounded-lg p-3" style={{backgroundColor: '#eff6ff'}}>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{color: '#3b82f6'}}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                     </svg>
                   </div>
@@ -332,10 +332,10 @@ export default function Dashboard() {
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">Announcements</dt>
                       <dd className="flex items-baseline">
-                        <div className="text-2xl font-semibold text-purple-900">
+                        <div className="text-2xl font-semibold text-gray-900">
                           {unreadAnnouncementsCount > 0 ? (
                             <>
-                              <span className="text-purple-600">{unreadAnnouncementsCount}</span>
+                              <span className="text-blue-600">{unreadAnnouncementsCount}</span>
                               <span className="text-sm font-normal text-gray-500 ml-1">unread</span>
                             </>
                           ) : (
@@ -347,9 +347,9 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="bg-purple-50 px-5 py-3">
+              <div className="bg-blue-50 px-5 py-3">
                 <div className="text-sm">
-                  <Link to="/notifications" className="font-medium text-purple-700 hover:text-purple-900">
+                  <Link to="/notifications" className="font-medium text-blue-600 hover:text-blue-800">
                     View all →
                   </Link>
                 </div>
@@ -357,11 +357,11 @@ export default function Dashboard() {
             </div>
 
             {/* Profile Completion Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-blue-500">
+            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4" style={{borderTopColor: '#3b82f6'}}>
               <div className="p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3">
-                    <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex-shrink-0 rounded-lg p-3" style={{backgroundColor: '#eff6ff'}}>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{color: '#3b82f6'}}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
@@ -369,7 +369,7 @@ export default function Dashboard() {
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">Profile Completion</dt>
                       <dd className="flex items-baseline">
-                        <div className="text-2xl font-semibold text-blue-900">{profileCompletion.percentage}%</div>
+                        <div className="text-2xl font-semibold text-gray-900">{profileCompletion.percentage}%</div>
                       </dd>
                     </dl>
                   </div>
@@ -377,7 +377,7 @@ export default function Dashboard() {
               </div>
               <div className="bg-blue-50 px-5 py-3">
                 <div className="text-sm">
-                    <Link to={branding.isESystemsMode ? "/business/profile" : "/va/profile"} className="font-medium text-blue-700 hover:text-blue-900">
+                    <Link to={branding.isESystemsMode ? "/business/profile" : "/va/profile"} className="font-medium text-blue-600 hover:text-blue-800">
                      Complete profile →
                    </Link>
                 </div>
@@ -385,11 +385,11 @@ export default function Dashboard() {
             </div>
 
             {/* Messages Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-sky-500">
+            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4" style={{borderTopColor: '#3b82f6'}}>
               <div className="p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-sky-100 rounded-lg p-3">
-                    <svg className="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex-shrink-0 rounded-lg p-3" style={{backgroundColor: '#eff6ff'}}>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{color: '#3b82f6'}}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                     </svg>
                   </div>
@@ -397,15 +397,15 @@ export default function Dashboard() {
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">Active Conversations</dt>
                       <dd className="flex items-baseline">
-                        <div className="text-2xl font-semibold text-sky-900">{analytics?.activeConversations || 0}</div>
+                        <div className="text-2xl font-semibold text-gray-900">{analytics?.activeConversations || 0}</div>
                       </dd>
                     </dl>
                   </div>
                 </div>
               </div>
-              <div className="bg-sky-50 px-5 py-3">
+              <div className="bg-gray-50 px-5 py-3">
                 <div className="text-sm">
-                  <Link to="/conversations" className="font-medium text-sky-700 hover:text-sky-900">
+                  <Link to="/conversations" className="font-medium text-blue-600 hover:text-blue-800">
                     View conversations →
                   </Link>
                 </div>
@@ -413,11 +413,11 @@ export default function Dashboard() {
             </div>
 
             {/* Stats Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4 border-indigo-500">
+            <div className="bg-white overflow-hidden shadow rounded-lg border-t-4" style={{borderTopColor: '#3b82f6'}}>
               <div className="p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-indigo-100 rounded-lg p-3">
-                    <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex-shrink-0 rounded-lg p-3" style={{backgroundColor: '#eff6ff'}}>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{color: '#3b82f6'}}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
@@ -427,7 +427,7 @@ export default function Dashboard() {
                         Profile Views
                       </dt>
                       <dd className="flex items-baseline">
-                        <div className="text-2xl font-semibold text-indigo-900">
+                        <div className="text-2xl font-semibold text-gray-900">
                           {analytics?.profileViews || 0}
                         </div>
                       </dd>
@@ -435,9 +435,9 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="bg-indigo-50 px-5 py-3">
+              <div className="bg-blue-50 px-5 py-3">
                 <div className="text-sm">
-                  <Link to="/analytics" className="font-medium text-indigo-700 hover:text-indigo-900">
+                  <Link to="/analytics" className="font-medium text-blue-600 hover:text-blue-800">
                     View analytics →
                   </Link>
                 </div>
@@ -453,9 +453,9 @@ export default function Dashboard() {
             {/* Admin Quick Actions */}
             {user?.admin ? (
               <>
-                <div className="relative rounded-lg border border-blue-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-blue-500 transition-colors">
+                <div className="relative rounded-lg border bg-white px-6 py-5 shadow-sm flex items-center space-x-3 transition-colors" style={{borderColor: '#e5e7eb'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3b82f6'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}>
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-10 w-10 rounded-md bg-blue-600 text-white">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-md text-white" style={{backgroundColor: '#3b82f6'}}>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                       </svg>
@@ -470,9 +470,9 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="relative rounded-lg border border-purple-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-purple-500 transition-colors">
+                <div className="relative rounded-lg border bg-white px-6 py-5 shadow-sm flex items-center space-x-3 transition-colors" style={{borderColor: '#e5e7eb'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3b82f6'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}>
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-10 w-10 rounded-md bg-purple-600 text-white">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-md text-white" style={{backgroundColor: '#3b82f6'}}>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
@@ -487,9 +487,9 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="relative rounded-lg border border-yellow-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-yellow-500 transition-colors">
+                <div className="relative rounded-lg border bg-white px-6 py-5 shadow-sm flex items-center space-x-3 transition-colors" style={{borderColor: '#e5e7eb'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3b82f6'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}>
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-10 w-10 rounded-md bg-yellow-600 text-white">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-md text-white" style={{backgroundColor: '#3b82f6'}}>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
@@ -504,9 +504,9 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="relative rounded-lg border border-indigo-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-indigo-500 transition-colors">
+                <div className="relative rounded-lg border bg-white px-6 py-5 shadow-sm flex items-center space-x-3 transition-colors" style={{borderColor: '#e5e7eb'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3b82f6'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}>
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-10 w-10 rounded-md bg-indigo-600 text-white">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-md text-white" style={{backgroundColor: '#3b82f6'}}>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                       </svg>
@@ -524,9 +524,9 @@ export default function Dashboard() {
             ) : (
               /* Regular User Quick Actions */
               <>
-                <div className="relative rounded-lg border border-blue-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-blue-500 transition-colors">
+                <div className="relative rounded-lg border bg-white px-6 py-5 shadow-sm flex items-center space-x-3 transition-colors" style={{borderColor: '#e5e7eb'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3b82f6'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}>
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-10 w-10 rounded-md text-white" style={{backgroundColor: '#1e40af'}}>
+                    <div className="flex items-center justify-center h-10 w-10 rounded-md text-white" style={{backgroundColor: '#3b82f6'}}>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
@@ -541,9 +541,9 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="relative rounded-lg border border-sky-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-sky-500 transition-colors">
+                <div className="relative rounded-lg border bg-white px-6 py-5 shadow-sm flex items-center space-x-3 transition-colors" style={{borderColor: '#e5e7eb'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3b82f6'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}>
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-10 w-10 rounded-md text-white" style={{backgroundColor: '#1e40af'}}>
+                    <div className="flex items-center justify-center h-10 w-10 rounded-md text-white" style={{backgroundColor: '#3b82f6'}}>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                       </svg>
@@ -558,9 +558,9 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="relative rounded-lg border border-green-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-green-500 transition-colors">
+                <div className="relative rounded-lg border bg-white px-6 py-5 shadow-sm flex items-center space-x-3 transition-colors" style={{borderColor: '#e5e7eb'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3b82f6'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}>
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-10 w-10 rounded-md bg-green-600 text-white">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-md text-white" style={{backgroundColor: '#3b82f6'}}>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
@@ -575,9 +575,9 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="relative rounded-lg border border-purple-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-purple-500 transition-colors">
+                <div className="relative rounded-lg border bg-white px-6 py-5 shadow-sm flex items-center space-x-3 transition-colors" style={{borderColor: '#e5e7eb'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3b82f6'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}>
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-10 w-10 rounded-md bg-purple-600 text-white">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-md text-white" style={{backgroundColor: '#3b82f6'}}>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                       </svg>
@@ -603,20 +603,20 @@ export default function Dashboard() {
             <div className="space-y-3">
               {latestAnnouncements.map((announcement) => {
                 const priorityColors = {
-                  urgent: 'bg-red-50 border-red-200 text-red-900',
-                  high: 'bg-orange-50 border-orange-200 text-orange-900',
-                  normal: 'bg-blue-50 border-blue-200 text-blue-900',
-                  low: 'bg-gray-50 border-gray-200 text-gray-900',
+                  urgent: 'bg-blue-100 border-blue-300 text-blue-900',
+                  high: 'bg-blue-50 border-blue-200 text-blue-800',
+                  normal: 'bg-white border-blue-100 text-gray-800',
+                  low: 'bg-gray-50 border-gray-200 text-gray-700',
                 };
                 
                 const priorityIcons = {
                   urgent: (
-                    <svg className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                   ),
                   high: (
-                    <svg className="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                     </svg>
                   ),
@@ -645,7 +645,7 @@ export default function Dashboard() {
                         <h4 className="text-sm font-semibold">
                           {announcement.title}
                           {!announcement.isRead && (
-                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gradient-to-r from-emerald-400 to-cyan-400 text-white">
+                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500 text-white">
                               New
                             </span>
                           )}
@@ -670,7 +670,7 @@ export default function Dashboard() {
             <div className="mt-4">
               <Link 
                 to="/notifications" 
-                className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                className="text-sm font-medium text-blue-600 hover:text-blue-500"
               >
                 View all announcements →
               </Link>
@@ -681,7 +681,7 @@ export default function Dashboard() {
         {/* Profile Completion Encouragement Banner - Show for incomplete profiles */}
         {!profileCompletion.isComplete && (
           <div className="mt-8">
-            <div className="bg-gradient-to-r from-emerald-50 to-cyan-50 border border-emerald-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl shadow-sm overflow-hidden">
               <div className="px-6 py-5">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
@@ -702,19 +702,19 @@ export default function Dashboard() {
                           VAs with completed profiles get contacted 3x more often and secure placements faster.
                         </p>
                         <div className="flex items-center space-x-4">
-                          <div className="flex items-center text-xs text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">
+                          <div className="flex items-center text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full">
                             <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
                             Higher search ranking
                           </div>
-                          <div className="flex items-center text-xs text-cyan-700 bg-cyan-100 px-2 py-1 rounded-full">
+                          <div className="flex items-center text-xs text-blue-700 bg-white border border-blue-200 px-2 py-1 rounded-full">
                             <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
                             Increased visibility
                           </div>
-                          <div className="flex items-center text-xs text-indigo-700 bg-indigo-100 px-2 py-1 rounded-full">
+                          <div className="flex items-center text-xs text-gray-700 bg-gray-50 px-2 py-1 rounded-full">
                             <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
@@ -742,10 +742,10 @@ export default function Dashboard() {
               </div>
               
               {/* Progress indicator */}
-              <div className="bg-gradient-to-r from-emerald-100 to-cyan-100 px-6 py-3 border-t border-emerald-200">
+              <div className="bg-blue-50 px-6 py-3 border-t border-blue-200">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600 font-medium">Profile Completeness</span>
-                  <span className="text-emerald-700 font-semibold">{profileCompletion.percentage}% Complete</span>
+                  <span className="text-blue-700 font-semibold">{profileCompletion.percentage}% Complete</span>
                 </div>
                 <div className="mt-2 bg-white rounded-full h-2 overflow-hidden shadow-inner">
                   <div className="h-full rounded-full transition-all duration-500 ease-out" style={{width: `${profileCompletion.percentage}%`, backgroundColor: '#1e40af'}}></div>
