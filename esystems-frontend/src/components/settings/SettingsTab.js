@@ -490,7 +490,7 @@ const SettingsTab = () => {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Account Information</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Update your business information and contact details.
               </p>
             </div>
@@ -675,7 +675,7 @@ const SettingsTab = () => {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Notification Preferences</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Choose how you want to receive notifications.
               </p>
             </div>
@@ -683,7 +683,7 @@ const SettingsTab = () => {
             {/* Email Notifications */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center mb-4">
-                <EnvelopeIcon className="h-5 w-5 text-gray-400 mr-2" />
+                <EnvelopeIcon className="h-5 w-5 text-gray-700 mr-2" />
                 <h4 className="text-base font-medium text-gray-900">Email Notifications</h4>
               </div>
               <div className="space-y-4">
@@ -693,7 +693,7 @@ const SettingsTab = () => {
                       <p className="text-sm font-medium text-gray-700">
                         {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-700">
                         {getNotificationDescription(key)}
                       </p>
                     </div>
@@ -719,7 +719,7 @@ const SettingsTab = () => {
             {/* SMS Notifications */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center mb-4">
-                <DevicePhoneMobileIcon className="h-5 w-5 text-gray-400 mr-2" />
+                <DevicePhoneMobileIcon className="h-5 w-5 text-gray-700 mr-2" />
                 <h4 className="text-base font-medium text-gray-900">SMS Notifications</h4>
                 {!phoneVerified && (
                   <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
@@ -731,7 +731,7 @@ const SettingsTab = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-700">Enable SMS Notifications</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-700">
                       Receive important alerts via text message
                     </p>
                   </div>
@@ -786,14 +786,14 @@ const SettingsTab = () => {
             {/* In-App Notifications */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center mb-4">
-                <ComputerDesktopIcon className="h-5 w-5 text-gray-400 mr-2" />
+                <ComputerDesktopIcon className="h-5 w-5 text-gray-700 mr-2" />
                 <h4 className="text-base font-medium text-gray-900">In-App Notifications</h4>
               </div>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-700">Enable In-App Notifications</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-700">
                       Show notifications within the application
                     </p>
                   </div>
@@ -818,7 +818,7 @@ const SettingsTab = () => {
             {/* Notification Frequency */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center mb-4">
-                <ClockIcon className="h-5 w-5 text-gray-400 mr-2" />
+                <ClockIcon className="h-5 w-5 text-gray-700 mr-2" />
                 <h4 className="text-base font-medium text-gray-900">Notification Frequency</h4>
               </div>
               <div className="space-y-2">
@@ -852,7 +852,7 @@ const SettingsTab = () => {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Security Settings</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Manage your account security and authentication.
               </p>
             </div>
@@ -861,7 +861,7 @@ const SettingsTab = () => {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
-                  <KeyIcon className="h-5 w-5 text-gray-400 mr-2" />
+                  <KeyIcon className="h-5 w-5 text-gray-700 mr-2" />
                   <h4 className="text-base font-medium text-gray-900">Password</h4>
                 </div>
                 <button
@@ -936,10 +936,10 @@ const SettingsTab = () => {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
-                  <ShieldCheckIcon className="h-5 w-5 text-gray-400 mr-2" />
+                  <ShieldCheckIcon className="h-5 w-5 text-gray-700 mr-2" />
                   <div>
                     <h4 className="text-base font-medium text-gray-900">Google Authenticator (2FA)</h4>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-700">
                       Add an extra layer of security with time-based codes
                     </p>
                   </div>
@@ -965,7 +965,7 @@ const SettingsTab = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="bg-gray-50 rounded-lg p-4">
                         <div className="flex items-center">
-                          <KeyIcon className="h-4 w-4 text-gray-400 mr-2" />
+                          <KeyIcon className="h-4 w-4 text-gray-700 mr-2" />
                           <span className="text-sm font-medium text-gray-700">Backup Codes</span>
                         </div>
                         <p className="text-lg font-semibold text-gray-900 mt-1">
@@ -975,7 +975,7 @@ const SettingsTab = () => {
                       {securitySettings.last2FAActivity && (
                         <div className="bg-gray-50 rounded-lg p-4">
                           <div className="flex items-center">
-                            <ClockIcon className="h-4 w-4 text-gray-400 mr-2" />
+                            <ClockIcon className="h-4 w-4 text-gray-700 mr-2" />
                             <span className="text-sm font-medium text-gray-700">Last Used</span>
                           </div>
                           <p className="text-sm text-gray-900 mt-1">
@@ -1004,9 +1004,9 @@ const SettingsTab = () => {
                   </>
                 ) : (
                   <div className="text-center py-8">
-                    <QrCodeIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                    <QrCodeIcon className="mx-auto h-12 w-12 text-gray-700 mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">Secure Your Account</h3>
-                    <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
+                    <p className="text-sm text-gray-700 mb-6 max-w-md mx-auto">
                       Enable two-factor authentication using Google Authenticator, Authy, or any compatible TOTP app for enhanced security.
                     </p>
                     <button
@@ -1024,7 +1024,7 @@ const SettingsTab = () => {
             {/* Login History */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center mb-4">
-                <ClockIcon className="h-5 w-5 text-gray-400 mr-2" />
+                <ClockIcon className="h-5 w-5 text-gray-700 mr-2" />
                 <h4 className="text-base font-medium text-gray-900">Recent Login Activity</h4>
               </div>
               {securitySettings.sessions && securitySettings.sessions.length > 0 ? (
@@ -1035,7 +1035,7 @@ const SettingsTab = () => {
                         <p className="text-sm font-medium text-gray-900">
                           {session.device || 'Unknown Device'}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-700">
                           {session.location || 'Unknown Location'} • {format(new Date(session.timestamp), 'MMM dd, yyyy HH:mm')}
                         </p>
                       </div>
@@ -1048,7 +1048,7 @@ const SettingsTab = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">No recent login activity</p>
+                <p className="text-sm text-gray-700">No recent login activity</p>
               )}
             </div>
 
@@ -1056,7 +1056,7 @@ const SettingsTab = () => {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
-                  <KeyIcon className="h-5 w-5 text-gray-400 mr-2" />
+                  <KeyIcon className="h-5 w-5 text-gray-700 mr-2" />
                   <h4 className="text-base font-medium text-gray-900">API Keys</h4>
                 </div>
                 <button
@@ -1082,7 +1082,7 @@ const SettingsTab = () => {
                     <div key={key.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div>
                         <p className="text-sm font-medium text-gray-900">{key.name}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-700">
                           Created {format(new Date(key.createdAt), 'MMM dd, yyyy')}
                         </p>
                       </div>
@@ -1106,7 +1106,7 @@ const SettingsTab = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">No API keys generated</p>
+                <p className="text-sm text-gray-700">No API keys generated</p>
               )}
             </div>
           </div>
@@ -1117,10 +1117,10 @@ const SettingsTab = () => {
           <div className="space-y-6">
             <div className="text-center py-12">
               <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-gray-100">
-                <UsersIcon className="h-10 w-10 text-gray-400" />
+                <UsersIcon className="h-10 w-10 text-gray-700" />
               </div>
               <h3 className="mt-4 text-lg font-medium text-gray-900">Team Management</h3>
-              <p className="mt-2 text-sm text-gray-500 max-w-sm mx-auto">
+              <p className="mt-2 text-sm text-gray-700 max-w-sm mx-auto">
                 Team collaboration features are coming soon. You'll be able to invite team members and manage permissions.
               </p>
               <div className="mt-6">
@@ -1137,7 +1137,7 @@ const SettingsTab = () => {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Integrations</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Connect your account with third-party services.
               </p>
             </div>
@@ -1146,10 +1146,10 @@ const SettingsTab = () => {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
-                  <CalendarIcon className="h-5 w-5 text-gray-400 mr-2" />
+                  <CalendarIcon className="h-5 w-5 text-gray-700 mr-2" />
                   <div>
                     <h4 className="text-base font-medium text-gray-900">Calendar Integration</h4>
-                    <p className="text-sm text-gray-500">Sync VA schedules with your calendar</p>
+                    <p className="text-sm text-gray-700">Sync VA schedules with your calendar</p>
                   </div>
                 </div>
               </div>
@@ -1203,10 +1203,10 @@ const SettingsTab = () => {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
-                  <LinkIcon className="h-5 w-5 text-gray-400 mr-2" />
+                  <LinkIcon className="h-5 w-5 text-gray-700 mr-2" />
                   <div>
                     <h4 className="text-base font-medium text-gray-900">Communication Tools</h4>
-                    <p className="text-sm text-gray-500">Get notifications in your preferred channels</p>
+                    <p className="text-sm text-gray-700">Get notifications in your preferred channels</p>
                   </div>
                 </div>
               </div>
@@ -1239,10 +1239,10 @@ const SettingsTab = () => {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
-                  <CogIcon className="h-5 w-5 text-gray-400 mr-2" />
+                  <CogIcon className="h-5 w-5 text-gray-700 mr-2" />
                   <div>
                     <h4 className="text-base font-medium text-gray-900">Automation</h4>
-                    <p className="text-sm text-gray-500">Connect with automation platforms</p>
+                    <p className="text-sm text-gray-700">Connect with automation platforms</p>
                   </div>
                 </div>
               </div>
@@ -1284,7 +1284,7 @@ const SettingsTab = () => {
                             navigator.clipboard.writeText(integrations.zapier.webhook);
                             toast.success('Webhook URL copied to clipboard');
                           }}
-                          className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm hover:bg-gray-100"
+                          className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-700 text-sm hover:bg-gray-100"
                         >
                           Copy
                         </button>
@@ -1299,10 +1299,10 @@ const SettingsTab = () => {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <DocumentArrowDownIcon className="h-5 w-5 text-gray-400 mr-2" />
+                  <DocumentArrowDownIcon className="h-5 w-5 text-gray-700 mr-2" />
                   <div>
                     <h4 className="text-base font-medium text-gray-900">API Documentation</h4>
-                    <p className="text-sm text-gray-500">Build custom integrations with our API</p>
+                    <p className="text-sm text-gray-700">Build custom integrations with our API</p>
                   </div>
                 </div>
                 <a
@@ -1324,7 +1324,7 @@ const SettingsTab = () => {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Preferences</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Configure default settings for your VA management.
               </p>
             </div>
@@ -1332,7 +1332,7 @@ const SettingsTab = () => {
             {/* Working Hours */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center mb-4">
-                <ClockIcon className="h-5 w-5 text-gray-400 mr-2" />
+                <ClockIcon className="h-5 w-5 text-gray-700 mr-2" />
                 <h4 className="text-base font-medium text-gray-900">Default Working Hours</h4>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -1378,7 +1378,7 @@ const SettingsTab = () => {
             {/* VA Preferences */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center mb-4">
-                <UserCircleIcon className="h-5 w-5 text-gray-400 mr-2" />
+                <UserCircleIcon className="h-5 w-5 text-gray-700 mr-2" />
                 <h4 className="text-base font-medium text-gray-900">VA Preferences</h4>
               </div>
               
@@ -1417,7 +1417,7 @@ const SettingsTab = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-700">Auto-approve VA Applications</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-700">
                       Automatically approve VA applications that meet your criteria
                     </p>
                   </div>
@@ -1482,7 +1482,7 @@ const SettingsTab = () => {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Data & Privacy</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Manage your data and privacy settings.
               </p>
             </div>
@@ -1491,10 +1491,10 @@ const SettingsTab = () => {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <ArrowDownTrayIcon className="h-5 w-5 text-gray-400 mr-2" />
+                  <ArrowDownTrayIcon className="h-5 w-5 text-gray-700 mr-2" />
                   <div>
                     <h4 className="text-base font-medium text-gray-900">Export Your Data</h4>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-700">
                       Download all your data in JSON format
                     </p>
                   </div>
@@ -1527,14 +1527,14 @@ const SettingsTab = () => {
             {/* Privacy Settings */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center mb-4">
-                <EyeIcon className="h-5 w-5 text-gray-400 mr-2" />
+                <EyeIcon className="h-5 w-5 text-gray-700 mr-2" />
                 <h4 className="text-base font-medium text-gray-900">Privacy Settings</h4>
               </div>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-700">Profile Visibility</p>
-                    <p className="text-xs text-gray-500">Allow VAs to see your company profile</p>
+                    <p className="text-xs text-gray-700">Allow VAs to see your company profile</p>
                   </div>
                   <Switch
                     checked={true}
@@ -1548,7 +1548,7 @@ const SettingsTab = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-700">Share Usage Analytics</p>
-                    <p className="text-xs text-gray-500">Help us improve by sharing anonymous usage data</p>
+                    <p className="text-xs text-gray-700">Help us improve by sharing anonymous usage data</p>
                   </div>
                   <Switch
                     checked={false}
@@ -1565,7 +1565,7 @@ const SettingsTab = () => {
             {/* Data Retention */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center mb-4">
-                <ClockIcon className="h-5 w-5 text-gray-400 mr-2" />
+                <ClockIcon className="h-5 w-5 text-gray-700 mr-2" />
                 <h4 className="text-base font-medium text-gray-900">Data Retention</h4>
               </div>
               <div>
@@ -1726,7 +1726,7 @@ const SettingsTab = () => {
                 <h3 className="text-lg font-medium text-gray-900">Enable Two-Factor Authentication</h3>
                 <button
                   onClick={() => setShow2FASetupModal(false)}
-                  className="text-gray-400 hover:text-gray-500"
+                  className="text-gray-700 hover:text-gray-700"
                 >
                   <XMarkIcon className="h-5 w-5" />
                 </button>
@@ -1738,7 +1738,7 @@ const SettingsTab = () => {
                   {[1, 2, 3].map((step) => (
                     <div key={step} className="flex items-center">
                       <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
-                        setupStep >= step ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+                        setupStep >= step ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
                       }`}>
                         {setupStep > step ? <CheckIcon className="h-4 w-4" /> : step}
                       </div>
@@ -1750,7 +1750,7 @@ const SettingsTab = () => {
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-between mt-2 text-xs text-gray-500">
+                <div className="flex justify-between mt-2 text-xs text-gray-700">
                   <span>Verify Password</span>
                   <span>Scan QR Code</span>
                   <span>Backup Codes</span>
@@ -1764,7 +1764,7 @@ const SettingsTab = () => {
                   <div className="text-center">
                     <KeyIcon className="mx-auto h-12 w-12 text-blue-600 mb-4" />
                     <h4 className="text-lg font-medium text-gray-900 mb-2">Verify Your Password</h4>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-700">
                       Please enter your current password to continue with 2FA setup.
                     </p>
                   </div>
@@ -1807,7 +1807,7 @@ const SettingsTab = () => {
                   <div className="text-center">
                     <QrCodeIcon className="mx-auto h-12 w-12 text-blue-600 mb-4" />
                     <h4 className="text-lg font-medium text-gray-900 mb-2">Scan QR Code</h4>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-700">
                       Use Google Authenticator, Authy, or any compatible TOTP app to scan this QR code.
                     </p>
                   </div>
@@ -1854,7 +1854,7 @@ const SettingsTab = () => {
                       maxLength="6"
                       onKeyPress={(e) => e.key === 'Enter' && verificationCode.length === 6 && verify2FACode()}
                     />
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-gray-700">
                       Enter the 6-digit code shown in your authenticator app
                     </p>
                   </div>
@@ -1886,7 +1886,7 @@ const SettingsTab = () => {
                   <div className="text-center">
                     <CheckCircleIcon className="mx-auto h-12 w-12 text-green-600 mb-4" />
                     <h4 className="text-lg font-medium text-gray-900 mb-2">2FA Enabled Successfully!</h4>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-700">
                       Save these backup codes in a safe place. You can use them to access your account if you lose your phone.
                     </p>
                   </div>
@@ -1961,7 +1961,7 @@ const SettingsTab = () => {
             
             <div className="px-6 py-6">
               <div className="mb-4">
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-700">
                   Disabling 2FA will make your account less secure. Please enter your password and a current 2FA code to confirm.
                 </p>
               </div>
@@ -2030,7 +2030,7 @@ const SettingsTab = () => {
                 <h3 className="text-lg font-medium text-gray-900">New Backup Codes</h3>
                 <button
                   onClick={() => setShowBackupCodesModal(false)}
-                  className="text-gray-400 hover:text-gray-500"
+                  className="text-gray-700 hover:text-gray-700"
                 >
                   <XMarkIcon className="h-5 w-5" />
                 </button>
@@ -2103,7 +2103,7 @@ const SettingsTab = () => {
               <ExclamationTriangleIcon className="h-6 w-6 text-red-600 mr-2" />
               <h3 className="text-lg font-medium text-gray-900">Delete Account</h3>
             </div>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-gray-700 mb-4">
               This action cannot be undone. All your data, including VA connections, payment history, and settings will be permanently deleted.
             </p>
             <p className="text-sm text-gray-700 mb-4">

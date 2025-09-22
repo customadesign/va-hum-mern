@@ -131,7 +131,7 @@ export default function NotificationControl() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Notification Control Center</h1>
-        <p className="mt-2 text-gray-600">Manage and send system-wide notifications</p>
+        <p className="mt-2 text-gray-700">Manage and send system-wide notifications</p>
       </div>
 
       {/* Statistics Overview */}
@@ -141,7 +141,7 @@ export default function NotificationControl() {
             <div className="flex items-center">
               <BellIcon className="h-10 w-10 text-blue-500" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Sent</p>
+                <p className="text-sm font-medium text-gray-700">Total Sent</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
               </div>
             </div>
@@ -151,7 +151,7 @@ export default function NotificationControl() {
             <div className="flex items-center">
               <CheckCircleIcon className="h-10 w-10 text-green-500" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Read Rate</p>
+                <p className="text-sm font-medium text-gray-700">Read Rate</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.readRate}</p>
               </div>
             </div>
@@ -161,7 +161,7 @@ export default function NotificationControl() {
             <div className="flex items-center">
               <ClockIcon className="h-10 w-10 text-yellow-500" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Unread</p>
+                <p className="text-sm font-medium text-gray-700">Unread</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.unread}</p>
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function NotificationControl() {
             <div className="flex items-center">
               <ChartBarIcon className="h-10 w-10 text-purple-500" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">This Week</p>
+                <p className="text-sm font-medium text-gray-700">This Week</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.recentNotifications?.length || 0}
                 </p>
@@ -189,7 +189,7 @@ export default function NotificationControl() {
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'send'
                 ? 'border-indigo-500 text-indigo-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
             Send Notification
@@ -199,7 +199,7 @@ export default function NotificationControl() {
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'templates'
                 ? 'border-indigo-500 text-indigo-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
             Templates
@@ -209,7 +209,7 @@ export default function NotificationControl() {
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'history'
                 ? 'border-indigo-500 text-indigo-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
             History
@@ -352,16 +352,16 @@ export default function NotificationControl() {
                       }`}>
                         {template.priority}
                       </span>
-                      <span className="ml-2 text-xs text-gray-500">{template.type}</span>
+                      <span className="ml-2 text-xs text-gray-700">{template.type}</span>
                     </div>
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-gray-700">
                       <strong>Title:</strong> {template.title}
                     </p>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <p className="mt-1 text-sm text-gray-700">
                       <strong>Message:</strong> {template.message}
                     </p>
                     {template.variables && template.variables.length > 0 && (
-                      <p className="mt-2 text-xs text-gray-500">
+                      <p className="mt-2 text-xs text-gray-700">
                         Variables: {template.variables.join(', ')}
                       </p>
                     )}
@@ -406,7 +406,7 @@ export default function NotificationControl() {
                         }`}>
                           {notification.priority}
                         </span>
-                        <span className="text-xs text-gray-500">{notification.type}</span>
+                        <span className="text-xs text-gray-700">{notification.type}</span>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                           notification.status === 'read' 
                             ? 'bg-green-100 text-green-800' 
@@ -416,7 +416,7 @@ export default function NotificationControl() {
                         </span>
                       </div>
                     </div>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-700">
                       {new Date(notification.createdAt).toLocaleString()}
                     </span>
                   </div>
@@ -432,7 +432,7 @@ export default function NotificationControl() {
               <div className="space-y-2">
                 {Object.entries(stats.byType || {}).map(([type, count]) => (
                   <div key={type} className="flex justify-between">
-                    <span className="text-sm text-gray-600">{type}</span>
+                    <span className="text-sm text-gray-700">{type}</span>
                     <span className="text-sm font-medium text-gray-900">{count}</span>
                   </div>
                 ))}

@@ -200,7 +200,7 @@ export default function PendingApprovals() {
         <div className="text-center">
           <XCircleIcon className="mx-auto h-12 w-12 text-red-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">Error loading pending approvals</h3>
-          <p className="mt-1 text-sm text-gray-500">{error.message}</p>
+          <p className="mt-1 text-sm text-gray-700">{error.message}</p>
         </div>
       </div>
     );
@@ -220,7 +220,7 @@ export default function PendingApprovals() {
               <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
                 Pending Approvals
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Review and approve VA and business registrations
               </p>
             </div>
@@ -242,7 +242,7 @@ export default function PendingApprovals() {
               <div className="flex-1">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-700" />
                   </div>
                   <input
                     type="text"
@@ -304,13 +304,13 @@ export default function PendingApprovals() {
             {isLoading ? (
               <div className="p-6 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-                <p className="mt-2 text-sm text-gray-500">Loading pending approvals...</p>
+                <p className="mt-2 text-sm text-gray-700">Loading pending approvals...</p>
               </div>
             ) : pendingData?.data?.length === 0 ? (
               <div className="p-6 text-center">
-                <ClockIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <ClockIcon className="mx-auto h-12 w-12 text-gray-700" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">No pending approvals</h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-700">
                   {search || type !== 'all' ? 'Try adjusting your search or filters.' : 'All registrations have been reviewed.'}
                 </p>
               </div>
@@ -362,11 +362,11 @@ export default function PendingApprovals() {
                                   {item.type === 'va' ? 'VA' : 'Business'}
                                 </span>
                               </p>
-                              <p className="text-sm text-gray-500 truncate">{details.subtitle}</p>
-                              <p className="text-sm text-gray-500 truncate">{getItemContact(item)}</p>
+                              <p className="text-sm text-gray-700 truncate">{details.subtitle}</p>
+                              <p className="text-sm text-gray-700 truncate">{getItemContact(item)}</p>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-gray-700">
                                 {new Date(item.createdAt).toLocaleDateString()}
                               </span>
                               <Link
@@ -392,12 +392,12 @@ export default function PendingApprovals() {
                             </div>
                           </div>
                           {details.description && (
-                            <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                            <p className="mt-1 text-sm text-gray-700 line-clamp-2">
                               {details.description}
                             </p>
                           )}
                           {details.extra && (
-                            <p className="mt-1 text-xs text-gray-500">
+                            <p className="mt-1 text-xs text-gray-700">
                               {item.type === 'va' ? 'Skills: ' : 'Size: '}{details.extra}
                             </p>
                           )}
@@ -449,7 +449,7 @@ export default function PendingApprovals() {
                     <button
                       onClick={() => setPage(page - 1)}
                       disabled={page === 1}
-                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Previous
                     </button>
@@ -460,7 +460,7 @@ export default function PendingApprovals() {
                         className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                           pageNum === page
                             ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                         }`}
                       >
                         {pageNum}
@@ -469,7 +469,7 @@ export default function PendingApprovals() {
                     <button
                       onClick={() => setPage(page + 1)}
                       disabled={page === pendingData.pagination.pages}
-                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Next
                     </button>

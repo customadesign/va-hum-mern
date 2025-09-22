@@ -280,11 +280,11 @@ export default function ConversationDetail() {
   }, [conversation?.messages]);
 
   const getOtherParticipant = () => {
-    if (user.profile?.va) {
-      return conversation?.business;
-    } else {
-      return conversation?.va;
-    }
+    // Prefer admin participant when present (E Systems Admin)
+    if (conversation?.business?.admin) return conversation.business;
+    if (conversation?.va?.admin) return conversation.va;
+    // Fallback to role-based other participant
+    return user.profile?.va ? conversation?.business : conversation?.va;
   };
 
   const formatMessageTime = (date) => {
@@ -349,7 +349,7 @@ export default function ConversationDetail() {
               <div className="flex items-center space-x-3">
                 <Link
                   to="/conversations"
-                  className="text-gray-400 hover:text-gray-500"
+                  className="text-gray-700 hover:text-gray-700"
                 >
                   <ArrowLeftIcon className="h-5 w-5" />
                 </Link>
@@ -362,18 +362,22 @@ export default function ConversationDetail() {
                   />
                 ) : (
                   <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                    <UserCircleIcon className="h-7 w-7 text-gray-500" />
+                    <UserCircleIcon className="h-7 w-7 text-gray-700" />
                   </div>
                 )}
                 
                 <div>
                   <h1 className="text-lg font-medium text-gray-900 flex items-center">
-                    {otherParticipant?.profile?.name || otherParticipant?.profile?.company || 'Unknown User'}
+                    {otherParticipant?.profile?.name 
+                      || otherParticipant?.name 
+                      || otherParticipant?.profile?.company 
+                      || otherParticipant?.email 
+                      || (otherParticipant?.admin ? 'E Systems Admin' : 'Unknown User')}
                     {otherParticipant?.admin && (
                       <CheckBadgeIcon className="h-5 w-5 text-purple-600 ml-1" />
                     )}
                   </h1>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-700">
                     {otherParticipant?.profile?.hero || otherParticipant?.email}
                   </p>
                 </div>
@@ -382,7 +386,7 @@ export default function ConversationDetail() {
               <div className="relative">
                 <button
                   onClick={() => setShowOptions(!showOptions)}
-                  className="text-gray-400 hover:text-gray-500"
+                  className="text-gray-700 hover:text-gray-700"
                 >
                   <EllipsisVerticalIcon className="h-6 w-6" />
                 </button>
@@ -412,7 +416,7 @@ export default function ConversationDetail() {
               <div key={date}>
                 <div className="flex items-center justify-center mb-4">
                   <div className="bg-gray-200 rounded-full px-3 py-1">
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-gray-700">
                       {isToday(new Date(date)) 
                         ? 'Today' 
                         : isYesterday(new Date(date)) 
@@ -424,7 +428,11 @@ export default function ConversationDetail() {
                 
                 <div className="space-y-3">
                   {messages.map((msg, idx) => {
-                    const isCurrentUser = msg.sender === user.id || msg.sender._id === user.id;
+                    const myId = (user && (user.id || user._id)) || null;
+                    const senderId = typeof msg.sender === 'string' 
+                      ? msg.sender 
+                      : (msg.sender?._id || msg.sender?.id);
+                    const isCurrentUser = !!myId && senderId === myId;
                     const showAvatar = idx === 0 || messages[idx - 1].sender !== msg.sender;
                     
                     return (
@@ -444,7 +452,7 @@ export default function ConversationDetail() {
                               />
                             ) : (
                               <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0">
-                                <UserCircleIcon className="h-5 w-5 text-gray-500" />
+                                <UserCircleIcon className="h-5 w-5 text-gray-700" />
                               </div>
                             )
                           )}
@@ -461,7 +469,7 @@ export default function ConversationDetail() {
                             }`}>
                               <p className="text-sm">{msg.content}</p>
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-gray-700 mt-1">
                               {formatMessageTime(msg.createdAt)}
                               {isCurrentUser && msg.read && ' • Read'}
                             </p>

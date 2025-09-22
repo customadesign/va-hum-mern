@@ -218,7 +218,7 @@ export default function SystemSettings() {
         <div className="text-center">
           <XCircleIcon className="mx-auto h-12 w-12 text-red-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">Error loading system settings</h3>
-          <p className="mt-1 text-sm text-gray-500">{error.message}</p>
+          <p className="mt-1 text-sm text-gray-700">{error.message}</p>
         </div>
       </div>
     );
@@ -249,7 +249,7 @@ export default function SystemSettings() {
               <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
                 System Settings
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Configure platform-wide settings and preferences
               </p>
             </div>
@@ -311,7 +311,7 @@ export default function SystemSettings() {
                     >
                       <Icon
                         className={`${
-                          activeCategory === key ? 'text-indigo-500' : 'text-gray-400'
+                          activeCategory === key ? 'text-indigo-500' : 'text-gray-700'
                         } flex-shrink-0 -ml-1 mr-3 h-6 w-6`}
                       />
                       <span className="truncate">{config.label}</span>
@@ -327,7 +327,7 @@ export default function SystemSettings() {
                 <div className="bg-white shadow sm:rounded-lg p-6">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-                    <p className="mt-2 text-sm text-gray-500">Loading settings...</p>
+                    <p className="mt-2 text-sm text-gray-700">Loading settings...</p>
                   </div>
                 </div>
               ) : (
@@ -340,17 +340,17 @@ export default function SystemSettings() {
                     <div className="space-y-6">
                       {!configData ? (
                         <div className="text-center py-6">
-                          <CogIcon className="mx-auto h-12 w-12 text-gray-400 animate-pulse" />
+                          <CogIcon className="mx-auto h-12 w-12 text-gray-700 animate-pulse" />
                           <h3 className="mt-2 text-sm font-medium text-gray-900">Loading settings...</h3>
-                          <p className="mt-1 text-sm text-gray-500">
+                          <p className="mt-1 text-sm text-gray-700">
                             Fetching configuration from server...
                           </p>
                         </div>
                       ) : getConfigsByCategory(activeCategory).length === 0 ? (
                         <div className="text-center py-6">
-                          <CogIcon className="mx-auto h-12 w-12 text-gray-400" />
+                          <CogIcon className="mx-auto h-12 w-12 text-gray-700" />
                           <h3 className="mt-2 text-sm font-medium text-gray-900">No settings available</h3>
-                          <p className="mt-1 text-sm text-gray-500">
+                          <p className="mt-1 text-sm text-gray-700">
                             No configurable settings found for this category.
                           </p>
                         </div>
@@ -358,7 +358,7 @@ export default function SystemSettings() {
                         getConfigsByCategory(activeCategory).map(([key, config]) => (
                           <div key={key} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
                             <div className="mb-1">
-                              <span className="text-xs text-gray-500 font-mono">{key}</span>
+                              <span className="text-xs text-gray-700 font-mono">{key}</span>
                             </div>
                             {renderConfigField(key, config)}
                           </div>

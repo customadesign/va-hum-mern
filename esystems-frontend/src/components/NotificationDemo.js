@@ -28,7 +28,7 @@ const NotificationDemo = () => {
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
               className={`
-                bg-gray-100 text-gray-400 hover:text-gray-500 
+                bg-gray-100 text-gray-700 hover:text-gray-700 
                 p-1 rounded-full focus:outline-none focus:ring-2 
                 focus:ring-offset-2 focus:ring-gray-500 relative 
                 transition-all duration-200
@@ -43,7 +43,7 @@ const NotificationDemo = () => {
               <NotificationBadge count={count} />
             </button>
           </div>
-          <p className="text-center text-gray-600">
+          <p className="text-center text-gray-700">
             {count === 0 ? 'No unread notifications' : `${count} unread notification${count !== 1 ? 's' : ''}`}
           </p>
         </div>
@@ -110,13 +110,13 @@ const NotificationDemo = () => {
                 <div className="flex justify-center mb-2">
                   <button
                     type="button"
-                    className="bg-gray-100 text-gray-400 p-1 rounded-full relative"
+                    className="bg-gray-100 text-gray-700 p-1 rounded-full relative"
                   >
                     <BellIcon className="h-6 w-6" aria-hidden="true" />
                     <NotificationBadge count={state.count} />
                   </button>
                 </div>
-                <p className="text-sm text-gray-600">{state.label}</p>
+                <p className="text-sm text-gray-700">{state.label}</p>
               </div>
             ))}
           </div>
@@ -130,13 +130,13 @@ const NotificationDemo = () => {
             <div className="text-center">
               <div className="bg-gray-50 p-4 rounded-lg mb-2">
                 <div className="flex justify-center">
-                  <button className="bg-white text-gray-400 p-1 rounded-full relative shadow">
+                  <button className="bg-white text-gray-700 p-1 rounded-full relative shadow">
                     <BellIcon className="h-6 w-6" />
                     <NotificationBadge count={5} />
                   </button>
                 </div>
               </div>
-              <p className="text-sm text-gray-600">Light Theme</p>
+              <p className="text-sm text-gray-700">Light Theme</p>
             </div>
 
             {/* Dark Theme */}
@@ -149,20 +149,20 @@ const NotificationDemo = () => {
                   </button>
                 </div>
               </div>
-              <p className="text-sm text-gray-600">Dark Theme</p>
+              <p className="text-sm text-gray-700">Dark Theme</p>
             </div>
 
             {/* With Hover */}
             <div className="text-center">
               <div className="bg-gray-50 p-4 rounded-lg mb-2">
                 <div className="flex justify-center">
-                  <button className="bg-gray-100 text-gray-500 p-1 rounded-full relative transform scale-110 shadow-lg">
+                  <button className="bg-gray-100 text-gray-700 p-1 rounded-full relative transform scale-110 shadow-lg">
                     <BellIcon className="h-6 w-6 animate-wiggle" />
                     <NotificationBadge count={5} />
                   </button>
                 </div>
               </div>
-              <p className="text-sm text-gray-600">Hover State</p>
+              <p className="text-sm text-gray-700">Hover State</p>
             </div>
           </div>
         </div>

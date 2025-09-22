@@ -50,7 +50,7 @@ export default function VerifyEmailSent() {
               <h2 className="text-3xl font-extrabold text-gray-900">
                 Check your email
               </h2>
-              <p className="mt-2 text-sm text-gray-600">
+              <p className="mt-2 text-sm text-gray-700">
                 We've sent you a verification link at your email address.
                 Please click the link to verify your account and continue.
               </p>
@@ -70,7 +70,7 @@ export default function VerifyEmailSent() {
             </div>
 
             <div className="text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-700">
                 Didn't receive the email?{' '}
                 <button
                   onClick={handleResendEmail}
@@ -84,7 +84,7 @@ export default function VerifyEmailSent() {
             <div className="text-center">
               <Link
                 to="/sign-in"
-                className="text-sm text-gray-600 hover:text-gray-500"
+                className="text-sm text-gray-700 hover:text-gray-700"
               >
                 Back to sign in
               </Link>

@@ -139,7 +139,7 @@ const Announcements = () => {
         return {
           bg: 'bg-gray-50',
           border: 'border-gray-200',
-          icon: 'text-gray-600',
+          icon: 'text-gray-700',
           text: 'text-gray-900',
           badge: 'bg-gray-100 text-gray-800',
         };
@@ -167,7 +167,7 @@ const Announcements = () => {
         <div className="md:flex md:items-center md:justify-between mb-8">
           <div className="flex-1 min-w-0">
             <h1 className="text-3xl font-bold text-gray-900">Announcements</h1>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-700">
               Stay updated with the latest platform news and updates
             </p>
           </div>
@@ -199,7 +199,7 @@ const Announcements = () => {
         {/* Filters */}
         <div className="mb-6">
           <div className="flex items-center space-x-2">
-            <FunnelIcon className="h-5 w-5 text-gray-400" />
+            <FunnelIcon className="h-5 w-5 text-gray-700" />
             <div className="flex flex-wrap gap-2">
               {['all', 'unread', 'urgent', 'high', 'normal', 'low'].map((filterOption) => (
                 <button
@@ -227,9 +227,9 @@ const Announcements = () => {
         <div className="space-y-4">
           {announcements.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <BellIcon className="mx-auto h-12 w-12 text-gray-400" />
+              <BellIcon className="mx-auto h-12 w-12 text-gray-700" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No announcements</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 {filter === 'unread' 
                   ? 'You\'re all caught up! No unread announcements.'
                   : 'No announcements to display at this time.'}
@@ -274,7 +274,7 @@ const Announcements = () => {
                               </span>
                             )}
                           </div>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-700">
                             {format(new Date(announcement.createdAt), 'MMM d, yyyy')}
                           </span>
                         </div>
@@ -307,7 +307,7 @@ const Announcements = () => {
                             {announcement.tags.map((tag, index) => (
                               <span
                                 key={index}
-                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600"
+                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700"
                               >
                                 #{tag}
                               </span>
@@ -317,7 +317,7 @@ const Announcements = () => {
                         
                         {/* Expiry indicator */}
                         {announcement.expiresAt && (
-                          <div className="mt-2 text-xs text-gray-500">
+                          <div className="mt-2 text-xs text-gray-700">
                             Expires: {format(new Date(announcement.expiresAt), 'MMM d, yyyy')}
                           </div>
                         )}

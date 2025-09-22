@@ -44,7 +44,7 @@ export default function ProfileRouter() {
                 <h3 className="mt-4 text-lg font-medium text-gray-900">
                   VA Account Detected
                 </h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-gray-700">
                   This is E-Systems Management for businesses only. Virtual Assistant accounts should use Linkage VA Hub.
                 </p>
                 <div className="mt-6">
@@ -82,7 +82,7 @@ export default function ProfileRouter() {
                 <h3 className="mt-4 text-lg font-medium text-gray-900">
                   Business Account Detected
                 </h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-gray-700">
                   This is Linkage VA Hub for Virtual Assistants only. Business accounts should use E-Systems Management to hire VAs.
                 </p>
                 <div className="mt-6">

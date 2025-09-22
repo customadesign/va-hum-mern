@@ -177,15 +177,15 @@ const TrialPurchaseButton = ({ vaId, vaName }) => {
 
       {/* Features list */}
       <div className="mt-4 space-y-2">
-        <div className="flex items-center text-sm text-gray-600">
+        <div className="flex items-center text-sm text-gray-700">
           <CheckIcon className="h-4 w-4 mr-2 text-green-500" />
           <span>10 hours of dedicated VA service</span>
         </div>
-        <div className="flex items-center text-sm text-gray-600">
+        <div className="flex items-center text-sm text-gray-700">
           <CheckIcon className="h-4 w-4 mr-2 text-green-500" />
           <span>Professional virtual assistant support</span>
         </div>
-        <div className="flex items-center text-sm text-gray-600">
+        <div className="flex items-center text-sm text-gray-700">
           <CheckIcon className="h-4 w-4 mr-2 text-green-500" />
           <span>Time tracking and reporting</span>
         </div>
@@ -205,7 +205,7 @@ const TrialPurchaseButton = ({ vaId, vaName }) => {
               {/* Close button */}
               <button
                 onClick={() => setShowPaymentModal(false)}
-                className="absolute right-4 top-4 text-gray-400 hover:text-gray-500"
+                className="absolute right-4 top-4 text-gray-700 hover:text-gray-700"
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>
@@ -214,7 +214,7 @@ const TrialPurchaseButton = ({ vaId, vaName }) => {
                 <h3 className="text-lg font-semibold text-gray-900">
                   Complete Your Trial Purchase
                 </h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-gray-700">
                   Start your 10-hour trial with {vaName} for just $100
                 </p>
               </div>
@@ -247,12 +247,12 @@ const TrialPurchaseButton = ({ vaId, vaName }) => {
                             } ${processing ? 'opacity-50 cursor-not-allowed' : ''}`}
                           >
                             <div className="flex items-center">
-                              <CreditCardIcon className="h-5 w-5 mr-3 text-gray-400" />
+                              <CreditCardIcon className="h-5 w-5 mr-3 text-gray-700" />
                               <div className="text-left">
                                 <p className="text-sm font-medium text-gray-900">
                                   {method.brand} •••• {method.last4}
                                 </p>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-gray-700">
                                   Expires {method.exp_month}/{method.exp_year}
                                 </p>
                               </div>
@@ -272,7 +272,7 @@ const TrialPurchaseButton = ({ vaId, vaName }) => {
                           <div className="w-full border-t border-gray-300" />
                         </div>
                         <div className="relative flex justify-center text-sm">
-                          <span className="bg-white px-2 text-gray-500">or</span>
+                          <span className="bg-white px-2 text-gray-700">or</span>
                         </div>
                       </div>
                     </>
@@ -304,7 +304,7 @@ const TrialPurchaseButton = ({ vaId, vaName }) => {
               {/* Trial Details */}
               <div className="mt-6 bg-gray-50 rounded-lg p-4">
                 <h4 className="text-sm font-medium text-gray-900 mb-3">What you get:</h4>
-                <ul className="space-y-2 text-sm text-gray-600">
+                <ul className="space-y-2 text-sm text-gray-700">
                   <li className="flex items-start">
                     <CheckIcon className="h-4 w-4 mr-2 text-green-500 mt-0.5" />
                     <span>10 hours of professional VA services</span>

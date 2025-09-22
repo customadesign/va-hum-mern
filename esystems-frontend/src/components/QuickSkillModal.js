@@ -277,7 +277,7 @@ const QuickSkillModal = ({ skill, isOpen, onClose }) => {
                     ? 'bg-blue-600 text-white'
                     : completedSteps.includes(index)
                     ? 'bg-green-100 text-green-700'
-                    : 'bg-white text-gray-600 hover:bg-gray-100'
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 {completedSteps.includes(index) ? (
@@ -306,14 +306,14 @@ const QuickSkillModal = ({ skill, isOpen, onClose }) => {
                     </span>
                     {currentStepData.title}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">{currentStepData.content}</p>
+                  <p className="text-gray-700 leading-relaxed">{currentStepData.content}</p>
                 </div>
 
                 {/* Visual Placeholder */}
                 <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg h-48 flex items-center justify-center">
                   <div className="text-center">
-                    <BookOpenIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">Visual Guide: {currentStepData.visual}</p>
+                    <BookOpenIcon className="h-12 w-12 text-gray-700 mx-auto mb-2" />
+                    <p className="text-sm text-gray-700">Visual Guide: {currentStepData.visual}</p>
                   </div>
                 </div>
 
@@ -336,8 +336,8 @@ const QuickSkillModal = ({ skill, isOpen, onClose }) => {
                 {/* Timer */}
                 <div className="flex items-center justify-between p-3 bg-gray-100 rounded-lg">
                   <div className="flex items-center space-x-2">
-                    <ClockIcon className="h-5 w-5 text-gray-500" />
-                    <span className="text-sm text-gray-600">
+                    <ClockIcon className="h-5 w-5 text-gray-700" />
+                    <span className="text-sm text-gray-700">
                       Estimated time: {currentStepData.duration}
                     </span>
                   </div>
@@ -347,12 +347,12 @@ const QuickSkillModal = ({ skill, isOpen, onClose }) => {
                   >
                     {isPlaying ? (
                       <>
-                        <PauseIcon className="h-4 w-4 text-gray-600" />
+                        <PauseIcon className="h-4 w-4 text-gray-700" />
                         <span className="text-sm font-medium text-gray-700">Pause</span>
                       </>
                     ) : (
                       <>
-                        <PlayIcon className="h-4 w-4 text-gray-600" />
+                        <PlayIcon className="h-4 w-4 text-gray-700" />
                         <span className="text-sm font-medium text-gray-700">Start Timer</span>
                       </>
                     )}
@@ -369,7 +369,7 @@ const QuickSkillModal = ({ skill, isOpen, onClose }) => {
                   <TrophyIcon className="h-24 w-24 text-yellow-400 relative" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mt-6 mb-2">Skill Completed!</h3>
-                <p className="text-gray-600 mb-4">You've mastered {skillData.title}</p>
+                <p className="text-gray-700 mb-4">You've mastered {skillData.title}</p>
                 <div className="flex items-center space-x-4 mb-6">
                   <div className="flex items-center space-x-1">
                     <FireIcon className="h-5 w-5 text-orange-500" />
@@ -393,7 +393,7 @@ const QuickSkillModal = ({ skill, isOpen, onClose }) => {
             {/* Resources */}
             <div className="mb-6">
               <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                <ArrowDownTrayIcon className="h-5 w-5 mr-2 text-gray-500" />
+                <ArrowDownTrayIcon className="h-5 w-5 mr-2 text-gray-700" />
                 Quick Resources
               </h4>
               <div className="space-y-2">
@@ -403,10 +403,10 @@ const QuickSkillModal = ({ skill, isOpen, onClose }) => {
                     className="w-full flex items-center justify-between p-3 bg-white rounded-lg hover:shadow-md transition-shadow text-left"
                   >
                     <div className="flex items-center space-x-3">
-                      <DocumentDuplicateIcon className="h-5 w-5 text-gray-400" />
+                      <DocumentDuplicateIcon className="h-5 w-5 text-gray-700" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">{resource.name}</p>
-                        <p className="text-xs text-gray-500">{resource.format} • {resource.size}</p>
+                        <p className="text-xs text-gray-700">{resource.format} • {resource.size}</p>
                       </div>
                     </div>
                     <ArrowDownTrayIcon className="h-4 w-4 text-blue-600" />
@@ -418,7 +418,7 @@ const QuickSkillModal = ({ skill, isOpen, onClose }) => {
             {/* Related Skills */}
             <div>
               <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                <RocketLaunchIcon className="h-5 w-5 mr-2 text-gray-500" />
+                <RocketLaunchIcon className="h-5 w-5 mr-2 text-gray-700" />
                 Continue Learning
               </h4>
               <div className="space-y-2">
@@ -429,9 +429,9 @@ const QuickSkillModal = ({ skill, isOpen, onClose }) => {
                   >
                     <div>
                       <p className="text-sm font-medium text-gray-900">{skill.title}</p>
-                      <p className="text-xs text-gray-500">{skill.duration}</p>
+                      <p className="text-xs text-gray-700">{skill.duration}</p>
                     </div>
-                    <ChevronRightIcon className="h-4 w-4 text-gray-400" />
+                    <ChevronRightIcon className="h-4 w-4 text-gray-700" />
                   </button>
                 ))}
               </div>
@@ -453,7 +453,7 @@ const QuickSkillModal = ({ skill, isOpen, onClose }) => {
               disabled={currentStep === 0}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
                 currentStep === 0
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  ? 'bg-gray-200 text-gray-700 cursor-not-allowed'
                   : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
             >

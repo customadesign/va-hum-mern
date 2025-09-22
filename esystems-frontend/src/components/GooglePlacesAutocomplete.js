@@ -87,7 +87,7 @@ const GooglePlacesAutocomplete = ({
       loadingElement={
         <div className="flex items-center justify-center p-2">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-sm text-gray-500">Loading Google Maps...</span>
+          <span className="ml-2 text-sm text-gray-700">Loading Google Maps...</span>
         </div>
       }
     >
@@ -102,7 +102,7 @@ const GooglePlacesAutocomplete = ({
         >
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MapPinIcon className="h-5 w-5 text-gray-400" />
+              <MapPinIcon className="h-5 w-5 text-gray-700" />
             </div>
             <input
               type="text"
@@ -113,12 +113,12 @@ const GooglePlacesAutocomplete = ({
             />
             {isLoaded && (
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-700" />
               </div>
             )}
           </div>
         </Autocomplete>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-gray-700">
           Powered by Google Maps - Start typing to search for your office location
         </p>
       </div>

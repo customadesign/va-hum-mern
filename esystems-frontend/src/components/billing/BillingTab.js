@@ -61,7 +61,7 @@ const BillingTab = () => {
         <div className="px-4 py-5 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium text-gray-900 flex items-center">
-              <CreditCardIcon className="h-5 w-5 mr-2 text-gray-500" />
+              <CreditCardIcon className="h-5 w-5 mr-2 text-gray-700" />
               Payment Methods
             </h3>
             {!showAddPaymentForm && (
@@ -94,9 +94,9 @@ const BillingTab = () => {
                 </div>
               ) : paymentMethods.length === 0 ? (
                 <div className="text-center py-8">
-                  <CreditCardIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <CreditCardIcon className="mx-auto h-12 w-12 text-gray-700" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900">No payment methods</h3>
-                  <p className="mt-1 text-sm text-gray-500">Add a payment method to purchase VA trials.</p>
+                  <p className="mt-1 text-sm text-gray-700">Add a payment method to purchase VA trials.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -106,12 +106,12 @@ const BillingTab = () => {
                       className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
                     >
                       <div className="flex items-center">
-                        <CreditCardIcon className="h-5 w-5 mr-3 text-gray-400" />
+                        <CreditCardIcon className="h-5 w-5 mr-3 text-gray-700" />
                         <div>
                           <p className="text-sm font-medium text-gray-900">
                             {method.brand} •••• {method.last4}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-700">
                             Expires {method.exp_month}/{method.exp_year}
                           </p>
                         </div>
@@ -144,7 +144,7 @@ const BillingTab = () => {
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg font-medium text-gray-900 flex items-center mb-4">
-              <ClockIcon className="h-5 w-5 mr-2 text-gray-500" />
+              <ClockIcon className="h-5 w-5 mr-2 text-gray-700" />
               Active Trials
             </h3>
             <div className="space-y-4">
@@ -159,10 +159,10 @@ const BillingTab = () => {
                         </h4>
                       </div>
                       <div className="mt-2 space-y-1">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-700">
                           <span className="font-medium">{trial.hoursRemaining?.toFixed(1) || 0}</span> hours remaining of 10 hours
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-700">
                           Expires: {trial.expiresAt ? format(new Date(trial.expiresAt), 'MMM dd, yyyy') : 'N/A'}
                         </p>
                       </div>
@@ -193,34 +193,34 @@ const BillingTab = () => {
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <h3 className="text-lg font-medium text-gray-900 flex items-center mb-4">
-            <ShoppingBagIcon className="h-5 w-5 mr-2 text-gray-500" />
+            <ShoppingBagIcon className="h-5 w-5 mr-2 text-gray-700" />
             Purchase History
           </h3>
           
           {purchaseHistory.length === 0 ? (
             <div className="text-center py-8">
-              <ShoppingBagIcon className="mx-auto h-12 w-12 text-gray-400" />
+              <ShoppingBagIcon className="mx-auto h-12 w-12 text-gray-700" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No purchases yet</h3>
-              <p className="mt-1 text-sm text-gray-500">Your trial purchases will appear here.</p>
+              <p className="mt-1 text-sm text-gray-700">Your trial purchases will appear here.</p>
             </div>
           ) : (
             <div className="overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       VA
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Type
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Amount
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Status
                     </th>
                   </tr>
@@ -234,12 +234,12 @@ const BillingTab = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {purchase.vaName || 'N/A'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                         10 Hour Trial
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <span className="flex items-center">
-                          <CurrencyDollarIcon className="h-4 w-4 mr-1 text-gray-400" />
+                          <CurrencyDollarIcon className="h-4 w-4 mr-1 text-gray-700" />
                           {(purchase.amount / 100).toFixed(2)}
                         </span>
                       </td>

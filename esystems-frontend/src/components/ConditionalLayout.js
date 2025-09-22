@@ -19,7 +19,7 @@ export default function ConditionalLayout() {
         </div>
         <footer className="bg-gray-50 border-t border-gray-200 py-4">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+            <div className="flex items-center justify-center space-x-2 text-sm text-gray-700">
               <span>Powered by</span>
               <Link to="/" className="flex items-center hover:text-gray-700">
                 <img

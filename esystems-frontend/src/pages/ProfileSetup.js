@@ -67,7 +67,7 @@ export default function ProfileSetup() {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Welcome to Linkage VA Hub!
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-gray-700">
             Let's create your Virtual Assistant profile
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function ProfileSetup() {
                 <h3 className="mt-4 text-lg font-medium text-gray-900">
                   Create Your Professional Profile
                 </h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-gray-700">
                   Showcase your skills and connect with employers looking for talented Virtual Assistants
                 </p>
               </div>
@@ -114,12 +114,12 @@ export default function ProfileSetup() {
                   <div className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Looking to hire VAs?</span>
+                  <span className="px-2 bg-white text-gray-700">Looking to hire VAs?</span>
                 </div>
               </div>
 
               <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-700">
                   Visit <a href="#" className="font-medium text-blue-600 hover:text-blue-500">E-Systems Management</a> to post jobs and hire talented professionals.
                 </p>
               </div>

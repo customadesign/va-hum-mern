@@ -64,7 +64,7 @@ export default function Analytics() {
             <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl">
               Analytics Dashboard
             </h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-700 mt-1">
               Track your {isVA ? 'profile performance and client interactions' : 'hiring activity and VA connections'}
             </p>
           </div>
@@ -80,7 +80,7 @@ export default function Analytics() {
                   <EyeIcon className="h-8 w-8 text-blue-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Profile Views</p>
+                  <p className="text-sm font-medium text-gray-700">Profile Views</p>
                   <p className="text-2xl font-semibold text-gray-900">
                     {dashboardAnalytics?.profileViews || 0}
                   </p>
@@ -96,7 +96,7 @@ export default function Analytics() {
                 <ChatBubbleLeftRightIcon className="h-8 w-8 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Active Conversations</p>
+                <p className="text-sm font-medium text-gray-700">Active Conversations</p>
                 <p className="text-2xl font-semibold text-gray-900">
                   {dashboardAnalytics?.activeConversations || 0}
                 </p>
@@ -115,7 +115,7 @@ export default function Analytics() {
                 )}
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">
+                <p className="text-sm font-medium text-gray-700">
                   {isVA ? 'Total Earnings' : 'VAs Contacted'}
                 </p>
                 <p className="text-2xl font-semibold text-gray-900">
@@ -135,7 +135,7 @@ export default function Analytics() {
                 <ChartBarIcon className="h-8 w-8 text-indigo-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">
+                <p className="text-sm font-medium text-gray-700">
                   {isVA ? 'Employers Worked With' : 'Active Projects'}
                 </p>
                 <p className="text-2xl font-semibold text-gray-900">
@@ -155,7 +155,7 @@ export default function Analytics() {
                 <ClockIcon className="h-8 w-8 text-yellow-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">
+                <p className="text-sm font-medium text-gray-700">
                   {isVA ? 'Average Rating' : 'Avg Response Time'}
                 </p>
                 <p className="text-2xl font-semibold text-gray-900">
@@ -175,7 +175,7 @@ export default function Analytics() {
                 <ArrowTrendingUpIcon className="h-8 w-8 text-red-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">
+                <p className="text-sm font-medium text-gray-700">
                   {isVA ? 'Response Time' : 'Total Spent'}
                 </p>
                 <p className="text-2xl font-semibold text-gray-900">
@@ -198,7 +198,7 @@ export default function Analytics() {
               <div className="space-y-3">
                 {profileViews.recentViews?.map((day, index) => (
                   <div key={index} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">{day.date}</span>
+                    <span className="text-sm text-gray-700">{day.date}</span>
                     <div className="flex items-center space-x-2">
                       <div className="w-20 bg-gray-200 rounded-full h-2">
                         <div 
@@ -215,8 +215,8 @@ export default function Analytics() {
               </div>
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">This week: {profileViews.thisWeek}</span>
-                  <span className="text-gray-500">This month: {profileViews.thisMonth}</span>
+                  <span className="text-gray-700">This week: {profileViews.thisWeek}</span>
+                  <span className="text-gray-700">This month: {profileViews.thisMonth}</span>
                 </div>
               </div>
             </div>
@@ -228,19 +228,19 @@ export default function Analytics() {
               <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
               <div className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Total Conversations</span>
+                  <span className="text-sm text-gray-700">Total Conversations</span>
                   <span className="text-sm font-medium text-gray-900">
                     {conversations.totalConversations}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Unread Messages</span>
+                  <span className="text-sm text-gray-700">Unread Messages</span>
                   <span className="text-sm font-medium text-gray-900">
                     {conversations.unreadMessages}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Average Response Time</span>
+                  <span className="text-sm text-gray-700">Average Response Time</span>
                   <span className="text-sm font-medium text-gray-900">
                     {conversations.averageResponseTime}
                   </span>
@@ -252,14 +252,14 @@ export default function Analytics() {
                 <div className="space-y-2">
                   {conversations.recentActivity?.slice(0, 5).map((activity, index) => (
                     <div key={index} className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">
+                      <span className="text-gray-700">
                         {new Date(activity.date).toLocaleDateString()}
                       </span>
                       <div className="flex space-x-4">
-                        <span className="text-gray-500">
+                        <span className="text-gray-700">
                           {activity.conversations} conversations
                         </span>
-                        <span className="text-gray-500">
+                        <span className="text-gray-700">
                           {activity.messages} messages
                         </span>
                       </div>

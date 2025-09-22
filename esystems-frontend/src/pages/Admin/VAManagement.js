@@ -173,7 +173,7 @@ export default function VAManagement() {
         <div className="text-center">
           <XCircleIcon className="mx-auto h-12 w-12 text-red-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">Error loading VAs</h3>
-          <p className="mt-1 text-sm text-gray-500">{error.message}</p>
+          <p className="mt-1 text-sm text-gray-700">{error.message}</p>
         </div>
       </div>
     );
@@ -204,7 +204,7 @@ export default function VAManagement() {
               <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
                 VA Management
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Manage all Virtual Assistants on the platform
               </p>
             </div>
@@ -226,7 +226,7 @@ export default function VAManagement() {
               <div className="flex-1">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-700" />
                   </div>
                   <input
                     type="text"
@@ -292,13 +292,13 @@ export default function VAManagement() {
             {isLoading ? (
               <div className="p-6 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-                <p className="mt-2 text-sm text-gray-500">Loading VAs...</p>
+                <p className="mt-2 text-sm text-gray-700">Loading VAs...</p>
               </div>
             ) : vasData?.data?.length === 0 ? (
               <div className="p-6 text-center">
-                <UsersIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <UsersIcon className="mx-auto h-12 w-12 text-gray-700" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">No VAs found</h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-700">
                   {search || status !== 'all' ? 'Try adjusting your search or filters.' : 'No VAs have been registered yet.'}
                 </p>
               </div>
@@ -307,7 +307,7 @@ export default function VAManagement() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                         <input
                           type="checkbox"
                           checked={selectedVAs.length === vasData?.data?.length}
@@ -315,22 +315,22 @@ export default function VAManagement() {
                           className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                         />
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                         VA
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                         Contact
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                         Skills
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                         Joined
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -353,19 +353,19 @@ export default function VAManagement() {
                                 <img className="h-10 w-10 rounded-full" src={va.avatar} alt="" />
                               ) : (
                                 <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                                  <UsersIcon className="h-6 w-6 text-gray-600" />
+                                  <UsersIcon className="h-6 w-6 text-gray-700" />
                                 </div>
                               )}
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">{va.name}</div>
-                              <div className="text-sm text-gray-500">{va.location}</div>
+                              <div className="text-sm text-gray-700">{va.location}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">{va.user?.email}</div>
-                          <div className="text-sm text-gray-500">{va.phone}</div>
+                          <div className="text-sm text-gray-700">{va.phone}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <select
@@ -389,13 +389,13 @@ export default function VAManagement() {
                               </span>
                             ))}
                             {va.skills?.length > 3 && (
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-gray-700">
                                 +{va.skills.length - 3} more
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                           {new Date(va.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -468,7 +468,7 @@ export default function VAManagement() {
                     <button
                       onClick={() => setPage(page - 1)}
                       disabled={page === 1}
-                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Previous
                     </button>
@@ -479,7 +479,7 @@ export default function VAManagement() {
                         className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                           pageNum === page
                             ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                         }`}
                       >
                         {pageNum}
@@ -488,7 +488,7 @@ export default function VAManagement() {
                     <button
                       onClick={() => setPage(page + 1)}
                       disabled={page === vasData.pagination.pages}
-                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Next
                     </button>

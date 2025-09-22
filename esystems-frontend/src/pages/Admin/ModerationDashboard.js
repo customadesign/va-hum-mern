@@ -135,7 +135,7 @@ export default function ModerationDashboard() {
       case 'low':
         return 'text-blue-600 bg-blue-100';
       default:
-        return 'text-gray-600 bg-gray-100';
+        return 'text-gray-700 bg-gray-100';
     }
   };
 
@@ -156,7 +156,7 @@ export default function ModerationDashboard() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Moderation Dashboard</h1>
-        <p className="mt-2 text-gray-600">Review and moderate flagged content</p>
+        <p className="mt-2 text-gray-700">Review and moderate flagged content</p>
       </div>
 
       {/* Statistics Overview */}
@@ -166,7 +166,7 @@ export default function ModerationDashboard() {
             <div className="flex items-center">
               <FlagIcon className="h-10 w-10 text-red-500" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Flags</p>
+                <p className="text-sm font-medium text-gray-700">Total Flags</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.overview?.totalFlags || 0}
                 </p>
@@ -178,7 +178,7 @@ export default function ModerationDashboard() {
             <div className="flex items-center">
               <ClockIcon className="h-10 w-10 text-yellow-500" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Pending Review</p>
+                <p className="text-sm font-medium text-gray-700">Pending Review</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.overview?.pendingReview || 0}
                 </p>
@@ -190,7 +190,7 @@ export default function ModerationDashboard() {
             <div className="flex items-center">
               <CheckCircleIcon className="h-10 w-10 text-green-500" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Approved</p>
+                <p className="text-sm font-medium text-gray-700">Approved</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.overview?.approvedContent || 0}
                 </p>
@@ -202,7 +202,7 @@ export default function ModerationDashboard() {
             <div className="flex items-center">
               <XCircleIcon className="h-10 w-10 text-red-500" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Removed</p>
+                <p className="text-sm font-medium text-gray-700">Removed</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.overview?.removedContent || 0}
                 </p>
@@ -220,7 +220,7 @@ export default function ModerationDashboard() {
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'queue'
                 ? 'border-indigo-500 text-indigo-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
             Moderation Queue
@@ -230,7 +230,7 @@ export default function ModerationDashboard() {
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'stats'
                 ? 'border-indigo-500 text-indigo-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
             Statistics
@@ -320,7 +320,7 @@ export default function ModerationDashboard() {
                           <div className="ml-3 flex-1">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center">
-                                <Icon className="h-5 w-5 text-gray-400 mr-2" />
+                                <Icon className="h-5 w-5 text-gray-700 mr-2" />
                                 <p className="text-sm font-medium text-gray-900">
                                   {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
                                 </p>
@@ -332,20 +332,20 @@ export default function ModerationDashboard() {
                                   </span>
                                 )}
                               </div>
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-gray-700">
                                 {new Date(item.flaggedAt).toLocaleString()}
                               </p>
                             </div>
 
                             <div className="mt-2">
-                              <p className="text-sm text-gray-600">
+                              <p className="text-sm text-gray-700">
                                 {getContentPreview(item)}
                               </p>
                             </div>
 
                             {item.flags && item.flags[0]?.details && (
                               <div className="mt-2">
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-gray-700">
                                   Details: {item.flags[0].details}
                                 </p>
                               </div>
@@ -387,8 +387,8 @@ export default function ModerationDashboard() {
 
               {(!queue?.items || queue.items.length === 0) && (
                 <div className="text-center py-12">
-                  <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <p className="mt-2 text-sm text-gray-500">No items in moderation queue</p>
+                  <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-gray-700" />
+                  <p className="mt-2 text-sm text-gray-700">No items in moderation queue</p>
                 </div>
               )}
             </div>
@@ -404,7 +404,7 @@ export default function ModerationDashboard() {
             <div className="space-y-3">
               {stats.topViolations?.map((violation) => (
                 <div key={violation._id} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">{violation._id}</span>
+                  <span className="text-sm text-gray-700">{violation._id}</span>
                   <div className="flex items-center">
                     <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
                       <div
@@ -428,13 +428,13 @@ export default function ModerationDashboard() {
             <h3 className="text-lg font-medium text-gray-900 mb-4">Response Times</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Average Response Time</p>
+                <p className="text-sm text-gray-700">Average Response Time</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.responseTime?.average || 'N/A'}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Median Response Time</p>
+                <p className="text-sm text-gray-700">Median Response Time</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.responseTime?.median || 'N/A'}
                 </p>
@@ -446,7 +446,7 @@ export default function ModerationDashboard() {
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-lg shadow p-6">
               <ExclamationTriangleIcon className="h-8 w-8 text-yellow-500 mb-2" />
-              <p className="text-sm text-gray-500">Warnings Issued</p>
+              <p className="text-sm text-gray-700">Warnings Issued</p>
               <p className="text-xl font-bold text-gray-900">
                 {stats.overview?.warningsIssued || 0}
               </p>
@@ -454,7 +454,7 @@ export default function ModerationDashboard() {
 
             <div className="bg-white rounded-lg shadow p-6">
               <XCircleIcon className="h-8 w-8 text-red-500 mb-2" />
-              <p className="text-sm text-gray-500">Account Suspensions</p>
+              <p className="text-sm text-gray-700">Account Suspensions</p>
               <p className="text-xl font-bold text-gray-900">
                 {stats.overview?.suspensions || 0}
               </p>
@@ -462,7 +462,7 @@ export default function ModerationDashboard() {
 
             <div className="bg-white rounded-lg shadow p-6">
               <ChartBarIcon className="h-8 w-8 text-indigo-500 mb-2" />
-              <p className="text-sm text-gray-500">Review Rate</p>
+              <p className="text-sm text-gray-700">Review Rate</p>
               <p className="text-xl font-bold text-gray-900">
                 {stats.overview?.totalFlags > 0
                   ? Math.round(((stats.overview.approvedContent + stats.overview.removedContent) / stats.overview.totalFlags) * 100)

@@ -73,7 +73,7 @@ export default function EmailVerification() {
                 <h2 className="mt-6 text-2xl font-bold text-gray-900">
                   Verifying your email...
                 </h2>
-                <p className="mt-2 text-sm text-gray-600">
+                <p className="mt-2 text-sm text-gray-700">
                   Please wait while we verify your email address.
                 </p>
               </>
@@ -87,13 +87,13 @@ export default function EmailVerification() {
                 <h2 className="mt-6 text-2xl font-bold text-gray-900">
                   Email Verified Successfully!
                 </h2>
-                <p className="mt-2 text-sm text-gray-600">
+                <p className="mt-2 text-sm text-gray-700">
                   Your email has been verified. Redirecting you to your dashboard...
                 </p>
                 <div className="mt-6">
                   <Link
                     to="/dashboard"
-                    className="text-gray-600 hover:text-gray-500 font-medium"
+                    className="text-gray-700 hover:text-gray-700 font-medium"
                   >
                     Go to Dashboard
                   </Link>
@@ -109,7 +109,7 @@ export default function EmailVerification() {
                 <h2 className="mt-6 text-2xl font-bold text-gray-900">
                   Verification Failed
                 </h2>
-                <p className="mt-2 text-sm text-gray-600">
+                <p className="mt-2 text-sm text-gray-700">
                   {error}
                 </p>
                 <div className="mt-6 space-y-3">
@@ -124,7 +124,7 @@ export default function EmailVerification() {
                   <div>
                     <Link
                       to="/sign-up"
-                      className="text-gray-600 hover:text-gray-500 font-medium text-sm"
+                      className="text-gray-700 hover:text-gray-700 font-medium text-sm"
                     >
                       Create a new account
                     </Link>

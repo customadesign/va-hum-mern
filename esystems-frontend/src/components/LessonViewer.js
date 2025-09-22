@@ -198,13 +198,13 @@ const LessonViewer = ({ lesson, onClose }) => {
           <div className="flex items-center space-x-4">
             <button
               onClick={onClose || (() => navigate('/community'))}
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-gray-700 hover:text-white transition-colors"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
             <div>
               <h1 className="text-white font-semibold text-lg">{lessonData.title}</h1>
-              <div className="flex items-center space-x-4 text-sm text-gray-400">
+              <div className="flex items-center space-x-4 text-sm text-gray-700">
                 <span>{lessonData.instructor.name}</span>
                 <span>•</span>
                 <span>{lessonData.duration}</span>
@@ -216,7 +216,7 @@ const LessonViewer = ({ lesson, onClose }) => {
           <div className="flex items-center space-x-3">
             <button
               onClick={handleBookmark}
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-gray-700 hover:text-white transition-colors"
             >
               {isBookmarked ? (
                 <BookmarkIconSolid className="h-5 w-5 text-blue-500" />
@@ -293,7 +293,7 @@ const LessonViewer = ({ lesson, onClose }) => {
 
               {/* Progress Bar */}
               <div className="flex-1 flex items-center space-x-2">
-                <span className="text-xs text-gray-400">{formatTime(currentTime)}</span>
+                <span className="text-xs text-gray-700">{formatTime(currentTime)}</span>
                 <input
                   type="range"
                   min="0"
@@ -302,7 +302,7 @@ const LessonViewer = ({ lesson, onClose }) => {
                   onChange={handleProgressChange}
                   className="flex-1 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer"
                 />
-                <span className="text-xs text-gray-400">{formatTime(duration)}</span>
+                <span className="text-xs text-gray-700">{formatTime(duration)}</span>
               </div>
 
               {/* Volume Control */}
@@ -367,7 +367,7 @@ const LessonViewer = ({ lesson, onClose }) => {
                 className={`flex-1 px-4 py-3 text-sm font-medium capitalize transition-colors ${
                   activeTab === tab
                     ? 'text-blue-400 border-b-2 border-blue-400'
-                    : 'text-gray-400 hover:text-white'
+                    : 'text-gray-700 hover:text-white'
                 }`}
               >
                 {tab}
@@ -385,7 +385,7 @@ const LessonViewer = ({ lesson, onClose }) => {
                   <div className="h-12 w-12 bg-gray-700 rounded-full"></div>
                   <div>
                     <h3 className="text-white font-medium">{lessonData.instructor.name}</h3>
-                    <p className="text-sm text-gray-400">{lessonData.instructor.title}</p>
+                    <p className="text-sm text-gray-700">{lessonData.instructor.title}</p>
                     <div className="flex items-center space-x-2 mt-1">
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (
@@ -394,12 +394,12 @@ const LessonViewer = ({ lesson, onClose }) => {
                             className={`h-4 w-4 ${
                               i < Math.floor(lessonData.instructor.rating)
                                 ? 'text-yellow-400'
-                                : 'text-gray-600'
+                                : 'text-gray-700'
                             }`}
                           />
                         ))}
                       </div>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-gray-700">
                         {lessonData.instructor.rating} ({lessonData.instructor.students} students)
                       </span>
                     </div>
@@ -409,7 +409,7 @@ const LessonViewer = ({ lesson, onClose }) => {
                 {/* Lesson Description */}
                 <div>
                   <h4 className="text-white font-medium mb-2">About this lesson</h4>
-                  <p className="text-gray-400 text-sm leading-relaxed">
+                  <p className="text-gray-700 text-sm leading-relaxed">
                     Learn how to leverage AI tools to analyze social media performance and create 
                     data-driven strategies. This comprehensive guide covers everything from setting 
                     up analytics dashboards to generating actionable insights using artificial intelligence.
@@ -427,7 +427,7 @@ const LessonViewer = ({ lesson, onClose }) => {
                       'Create professional client reports',
                       'Develop data-driven strategies'
                     ].map((item, index) => (
-                      <li key={index} className="flex items-start text-sm text-gray-400">
+                      <li key={index} className="flex items-start text-sm text-gray-700">
                         <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
                         {item}
                       </li>
@@ -446,7 +446,7 @@ const LessonViewer = ({ lesson, onClose }) => {
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-gray-300">{lesson.title}</span>
-                          <span className="text-xs text-gray-500">{lesson.duration}</span>
+                          <span className="text-xs text-gray-700">{lesson.duration}</span>
                         </div>
                       </button>
                     ))}
@@ -479,15 +479,15 @@ const LessonViewer = ({ lesson, onClose }) => {
                               {isCompleted ? (
                                 <CheckCircleIconSolid className="h-5 w-5 text-green-500" />
                               ) : (
-                                <span className="text-sm text-gray-400">{index + 1}</span>
+                                <span className="text-sm text-gray-700">{index + 1}</span>
                               )}
                             </div>
                             <div>
                               <h5 className="text-sm font-medium text-white">{chapter.title}</h5>
-                              <p className="text-xs text-gray-400">{chapter.duration}</p>
+                              <p className="text-xs text-gray-700">{chapter.duration}</p>
                             </div>
                           </div>
-                          <ChevronRightIcon className="h-4 w-4 text-gray-500" />
+                          <ChevronRightIcon className="h-4 w-4 text-gray-700" />
                         </div>
                       </button>
                     );
@@ -501,7 +501,7 @@ const LessonViewer = ({ lesson, onClose }) => {
               <div className="p-6">
                 <div className="mb-4">
                   <h3 className="text-white font-semibold mb-2">Interactive Practice</h3>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-gray-700 text-sm">
                     Practice what you've learned with our interactive tools.
                   </p>
                 </div>
@@ -511,7 +511,7 @@ const LessonViewer = ({ lesson, onClose }) => {
                   <div>
                     <div className="mb-4">
                       <h4 className="text-gray-300 text-sm font-medium mb-2">Code Editor</h4>
-                      <p className="text-gray-500 text-xs mb-3">
+                      <p className="text-gray-700 text-xs mb-3">
                         Write and test your code in real-time
                       </p>
                     </div>
@@ -532,7 +532,7 @@ console.log(calculateSum(5, 3));`}
                   <div>
                     <div className="mb-4">
                       <h4 className="text-gray-300 text-sm font-medium mb-2">Design Canvas</h4>
-                      <p className="text-gray-500 text-xs mb-3">
+                      <p className="text-gray-700 text-xs mb-3">
                         Create and experiment with design elements
                       </p>
                     </div>
@@ -543,9 +543,9 @@ console.log(calculateSum(5, 3));`}
                   </div>
                 ) : (
                   <div className="bg-gray-800 rounded-lg p-6 text-center">
-                    <CodeBracketIcon className="h-12 w-12 text-gray-600 mx-auto mb-3" />
+                    <CodeBracketIcon className="h-12 w-12 text-gray-700 mx-auto mb-3" />
                     <h4 className="text-gray-300 font-medium mb-2">Practice Exercises</h4>
-                    <p className="text-gray-500 text-sm mb-4">
+                    <p className="text-gray-700 text-sm mb-4">
                       Interactive exercises for this lesson are coming soon!
                     </p>
                     <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
@@ -567,7 +567,7 @@ console.log(calculateSum(5, 3));`}
                           {question.options.map((option, optIndex) => (
                             <label
                               key={optIndex}
-                              className="flex items-center space-x-2 text-gray-400 hover:text-gray-300 cursor-pointer"
+                              className="flex items-center space-x-2 text-gray-700 hover:text-gray-300 cursor-pointer"
                             >
                               <input
                                 type="radio"
@@ -598,10 +598,10 @@ console.log(calculateSum(5, 3));`}
                       className="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
                     >
                       <div className="flex items-center space-x-3">
-                        <DocumentTextIcon className="h-5 w-5 text-gray-400" />
+                        <DocumentTextIcon className="h-5 w-5 text-gray-700" />
                         <div>
                           <h5 className="text-sm font-medium text-white">{resource.title}</h5>
-                          <p className="text-xs text-gray-400">{resource.type.toUpperCase()} • {resource.size}</p>
+                          <p className="text-xs text-gray-700">{resource.type.toUpperCase()} • {resource.size}</p>
                         </div>
                       </div>
                       <button className="text-blue-400 hover:text-blue-300">
@@ -619,7 +619,7 @@ console.log(calculateSum(5, 3));`}
                 <div className="space-y-4">
                   {lessonData.transcript.map((entry, index) => (
                     <div key={index} className="flex space-x-3">
-                      <span className="text-xs text-gray-500 font-mono">{entry.time}</span>
+                      <span className="text-xs text-gray-700 font-mono">{entry.time}</span>
                       <p className="text-sm text-gray-300 leading-relaxed">{entry.text}</p>
                     </div>
                   ))}
@@ -679,7 +679,7 @@ console.log(calculateSum(5, 3));`}
                             <div className="h-8 w-8 bg-gray-700 rounded-full"></div>
                             <span className="text-sm font-medium text-white">{comment.user}</span>
                           </div>
-                          <span className="text-xs text-gray-500">{comment.time}</span>
+                          <span className="text-xs text-gray-700">{comment.time}</span>
                         </div>
                         <p className="text-sm text-gray-300">{comment.comment}</p>
                       </div>
@@ -693,7 +693,7 @@ console.log(calculateSum(5, 3));`}
           {/* Navigation Footer */}
           <div className="border-t border-gray-700 p-4">
             <div className="flex items-center justify-between">
-              <button className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors">
+              <button className="flex items-center space-x-2 text-gray-700 hover:text-white transition-colors">
                 <ArrowLeftIcon className="h-4 w-4" />
                 <span className="text-sm">Previous</span>
               </button>

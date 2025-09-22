@@ -70,13 +70,13 @@ export default function Home() {
                   <div className="mt-5 sm:mt-8 flex justify-center lg:justify-start">
                     <div className="rounded-md shadow">
                       <Link
-                        to="/register"
+                        to="/about"
                         className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white md:py-4 md:text-lg md:px-10"
                         style={{backgroundColor: '#2173b8'}}
                         onMouseEnter={(e) => e.target.style.backgroundColor = '#1e40af'}
                         onMouseLeave={(e) => e.target.style.backgroundColor = '#2173b8'}
                       >
-                        Register as VA
+                        How It Works
                       </Link>
                     </div>
                   </div>

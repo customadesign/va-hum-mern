@@ -26,26 +26,27 @@ export default function Conversations() {
   // Sample conversations for demonstration when no real conversations exist
   const getSampleConversations = () => {
     if (user.profile?.va) {
-      // Sample conversations for VAs
+      // Sample conversations for VAs (from E Systems Admin)
       return [
         {
           _id: 'sample-1',
-          participants: [user.id, 'business-1'],
+          participants: [user.id, 'esystems-admin'],
           business: {
-            _id: 'business-1',
-            email: 'contact@techcorp.com',
+            _id: 'esystems-admin',
+            email: 'admin@esystems.local',
+            admin: true,
             profile: {
-              name: 'TechCorp Solutions',
-              company: 'TechCorp Solutions',
+              name: 'E Systems Admin',
+              company: 'E Systems',
               avatar: null,
-              hero: 'Leading technology consulting firm'
+              hero: 'Platform Administration'
             }
           },
           messages: [
             {
               _id: 'msg-1',
-              sender: 'business-1',
-              content: 'Hi! I saw your profile and I\'m impressed with your skills. We have a project that might be a perfect fit for you.',
+              sender: 'esystems-admin',
+              content: 'Welcome to your E Systems Inbox! This is where you\'ll receive platform updates and client inquiries.',
               createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
             },
             {
@@ -56,34 +57,35 @@ export default function Conversations() {
             },
             {
               _id: 'msg-3',
-              sender: 'business-1',
-              content: 'We need help with social media management and content creation for our new product launch. The project would run for 3 months.',
+              sender: 'esystems-admin',
+              content: 'Please complete your profile to improve visibility with businesses.',
               createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000) // 1 hour ago
             }
           ],
-          lastMessage: 'We need help with social media management and content creation for our new product launch. The project would run for 3 months.',
+          lastMessage: 'Please complete your profile to improve visibility with businesses.',
           lastMessageAt: new Date(Date.now() - 1 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 1, business: 0 }
         },
         {
           _id: 'sample-2',
-          participants: [user.id, 'business-2'],
+          participants: [user.id, 'esystems-admin-2'],
           business: {
-            _id: 'business-2',
-            email: 'hiring@creativestudio.com',
+            _id: 'esystems-admin-2',
+            email: 'admin@esystems.local',
+            admin: true,
             profile: {
-              name: 'Creative Studio',
-              company: 'Creative Studio',
+              name: 'E Systems Admin',
+              company: 'E Systems',
               avatar: null,
-              hero: 'Digital marketing and design agency'
+              hero: 'Platform Administration'
             }
           },
           messages: [
             {
               _id: 'msg-4',
-              sender: 'business-2',
-              content: 'Hello! Are you available for a long-term virtual assistant position?',
+              sender: 'esystems-admin-2',
+              content: 'Remember to respond to messages within 24 hours to maintain a professional reputation.',
               createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000) // 6 hours ago
             },
             {
@@ -93,22 +95,23 @@ export default function Conversations() {
               createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000) // 5 hours ago
             }
           ],
-          lastMessage: 'Hi there! Yes, I\'m currently available. What does the position involve?',
+          lastMessage: 'Remember to respond to messages within 24 hours to maintain a professional reputation.',
           lastMessageAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 0, business: 1 }
         },
         {
           _id: 'sample-3',
-          participants: [user.id, 'business-3'],
+          participants: [user.id, 'esystems-admin-3'],
           business: {
-            _id: 'business-3',
-            email: 'team@startupventure.io',
+            _id: 'esystems-admin-3',
+            email: 'admin@esystems.local',
+            admin: true,
             profile: {
-              name: 'Startup Venture',
-              company: 'Startup Venture',
+              name: 'E Systems Admin',
+              company: 'E Systems',
               avatar: null,
-              hero: 'Fast-growing SaaS startup'
+              hero: 'Platform Administration'
             }
           },
           messages: [
@@ -192,11 +195,12 @@ export default function Conversations() {
   const displayConversations = conversations?.length > 0 ? conversations : getSampleConversations();
 
   const getOtherParticipant = (conversation) => {
-    if (user.profile?.va) {
-      return conversation.business;
-    } else {
-      return conversation.va;
-    }
+    // Prefer admin participant when present (E Systems admin messaging)
+    if (conversation?.business?.admin) return conversation.business;
+    if (conversation?.va?.admin) return conversation.va;
+    // Fallback to role-based other participant
+    if (user.profile?.va) return conversation.business;
+    return conversation.va;
   };
 
   const getUnreadCount = (conversation) => {
@@ -236,7 +240,7 @@ export default function Conversations() {
                     </span>
                   )}
                 </h1>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-700">
                   {displayConversations?.length || 0} conversation{displayConversations?.length !== 1 && 's'}
                   {(!conversations || conversations.length === 0) && displayConversations?.length > 0 && (
                     <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
@@ -249,9 +253,9 @@ export default function Conversations() {
               <div className="overflow-y-auto h-full pb-20">
                 {displayConversations?.length === 0 ? (
                   <div className="text-center py-12 px-4">
-                    <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-700" />
                     <h3 className="mt-2 text-sm font-medium text-gray-900">No messages yet</h3>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-gray-700">
                       {user.profile?.va 
                         ? 'When businesses contact you, messages will appear here.'
                         : 'Start a conversation with a VA to begin messaging.'}
@@ -283,7 +287,7 @@ export default function Conversations() {
                                   />
                                 ) : (
                                   <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
-                                    <UserCircleIcon className="h-8 w-8 text-gray-500" />
+                                    <UserCircleIcon className="h-8 w-8 text-gray-700" />
                                   </div>
                                 )}
                                 {conversation.status === 'active' && unreadCount > 0 && (
@@ -296,10 +300,15 @@ export default function Conversations() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center space-x-2">
+                                    {/* Robust name fallback incl. admin label */}
                                     <p className={`text-sm font-medium ${
                                       unreadCount > 0 ? 'text-gray-900' : 'text-gray-700'
                                     }`}>
-                                      {otherParticipant?.profile?.name || otherParticipant?.profile?.company || 'Unknown User'}
+                                      {otherParticipant?.profile?.name 
+                                        || otherParticipant?.name 
+                                        || otherParticipant?.profile?.company 
+                                        || otherParticipant?.email 
+                                        || (otherParticipant?.admin ? 'E Systems Admin' : 'Unknown User')}
                                       {otherParticipant?.admin && (
                                         <CheckBadgeIcon className="inline h-4 w-4 text-purple-600 ml-1" />
                                       )}
@@ -311,7 +320,7 @@ export default function Conversations() {
                                     )}
                                   </div>
                                   <p className={`text-xs ${
-                                    unreadCount > 0 ? 'text-blue-600 font-medium' : 'text-gray-500'
+                                    unreadCount > 0 ? 'text-blue-600 font-medium' : 'text-gray-700'
                                   }`}>
                                     {conversation.lastMessageAt &&
                                       formatDistanceToNow(new Date(conversation.lastMessageAt), {
@@ -327,17 +336,30 @@ export default function Conversations() {
                                   </div>
                                 )}
                                 
-                                {lastMessage && (
+                                  {lastMessage && (
                                   <div className="mt-1 flex items-center">
+                                    {/* Normalize sender id to detect 'You:' */}
                                     <p className={`text-sm truncate ${
-                                      unreadCount > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'
+                                      unreadCount > 0 ? 'text-gray-900 font-medium' : 'text-gray-700'
                                     }`}>
-                                      {lastMessage.sender === user.id && (
-                                        <span className="text-gray-400">You: </span>
+                                      {(() => {
+                                        const myId = (user && (user.id || user._id)) || null;
+                                        const senderId = typeof lastMessage.sender === 'string' 
+                                          ? lastMessage.sender 
+                                          : (lastMessage.sender?._id || lastMessage.sender?.id);
+                                        return myId && senderId === myId;
+                                      })() && (
+                                        <span className="text-gray-700">You: </span>
                                       )}
                                       {lastMessage.content}
                                     </p>
-                                    {lastMessage.sender === user.id && lastMessage.read && (
+                                    {(() => {
+                                      const myId = (user && (user.id || user._id)) || null;
+                                      const senderId = typeof lastMessage.sender === 'string' 
+                                        ? lastMessage.sender 
+                                        : (lastMessage.sender?._id || lastMessage.sender?.id);
+                                      return myId && senderId === myId && lastMessage.read;
+                                    })() && (
                                       <CheckIcon className="ml-1 h-4 w-4 text-blue-600 flex-shrink-0" />
                                     )}
                                   </div>
@@ -362,9 +384,9 @@ export default function Conversations() {
             {/* Main Content - Select a conversation prompt */}
             <div className="flex-1 hidden md:flex items-center justify-center bg-gray-50">
               <div className="text-center">
-                <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-700" />
                 <h3 className="mt-4 text-lg font-medium text-gray-900">Select a conversation</h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-gray-700">
                   Choose a conversation from the list to start messaging
                 </p>
               </div>
