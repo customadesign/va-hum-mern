@@ -20,9 +20,9 @@ services:
       - key: JWT_EXPIRE
         value: 30d
       - key: CLIENT_URL
-        value: https://esystems-frontend.onrender.com # Update after frontend deploys
+        value: https://esystems-management-hub.onrender.com # Update after frontend deploys
       - key: ESYSTEMS_CLIENT_URL
-        value: https://esystems-frontend.onrender.com
+        value: https://esystems-management-hub.onrender.com
       - key: SERVER_URL
         value: https://esystems-backend-api.onrender.com
       - key: PORT
@@ -34,12 +34,12 @@ services:
 
   # E-Systems Frontend Static Site
   - type: web
-    name: esystems-frontend
+    name: esystems-management-hub
     runtime: static
     repo: https://github.com/customadesign/va-hum-mern
     buildCommand: |
       cd esystems-frontend && npm install --legacy-peer-deps &&
-      npm run build
+      REACT_APP_BRAND=esystems REACT_APP_IS_ESYSTEMS=true npm run build
     staticPublishPath: esystems-frontend/build
     routes:
       - type: rewrite
@@ -50,3 +50,5 @@ services:
         value: https://linkage-va-hub-api.onrender.com/api # Shared backend with public sharing
       - key: REACT_APP_BRAND
         value: esystems
+      - key: REACT_APP_IS_ESYSTEMS
+        value: true
