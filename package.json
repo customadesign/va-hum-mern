@@ -4,8 +4,8 @@
   "description": "Linkage VA Hub - MERN Stack Implementation",
   "main": "index.js",
   "scripts": {
-    "preinstall": "npm config set legacy-peer-deps true",
-    "postinstall": "echo 'Skipping postinstall - dependencies are in subdirectories'",
+    "preinstall": "echo 'Setting npm config...' && npm config set legacy-peer-deps true",
+    "postinstall": "echo 'Root dependencies installed'",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd backend && npm run dev",
     "client": "cd frontend && npm start",

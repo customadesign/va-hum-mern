@@ -38,8 +38,9 @@ services:
     name: linkage-va-hub
     runtime: node
     repo: https://github.com/customadesign/va-hum-mern
-    buildCommand: cd frontend && npm install --legacy-peer-deps && npm run build
-    startCommand: cd frontend && npm run serve
+    rootDir: frontend
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    startCommand: npm run serve
     envVars:
       - key: REACT_APP_API_URL
         value: https://linkage-va-hub-api.onrender.com/api # Update after backend deploys
