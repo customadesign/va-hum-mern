@@ -9,7 +9,7 @@
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd backend && npm run dev",
     "client": "cd frontend && npm start",
-    "build": "cd frontend && npm install --legacy-peer-deps && npm run build",
+    "build": "npm config set legacy-peer-deps true && cd frontend && npm install && npm run build",
     "install-all": "rm -f package-lock.json && npm install --legacy-peer-deps && cd backend && npm install && cd ../frontend && rm -f package-lock.json && npm install --legacy-peer-deps",
     "setup-mongodb": "node setup-mongodb.js",
     "test-mongodb": "node test-mongodb-connection.js",
