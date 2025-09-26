@@ -1,0 +1,159 @@
+/* Header Alignment Fix - Comprehensive solution for Ant Design conflicts */
+
+/* Force all header action items to align properly */
+.admin-header .ml-4.flex.items-center.h-full.md\:ml-6 > div {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  height: auto !important;
+}
+
+/* Universal fix for all header interactive elements */
+.admin-header button,
+.admin-header .ant-dropdown-trigger,
+.admin-header .ant-badge,
+.admin-header .theme-toggle-btn,
+.admin-header .notification-badge-bell,
+.admin-header .profile-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 32px !important;
+  vertical-align: middle !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+/* Fix theme toggle specific sizing */
+.admin-header .theme-toggle-btn {
+  min-width: auto !important;
+  padding: 2px 6px !important;
+}
+
+/* Fix notification badge positioning */
+.admin-header .notification-badge-container {
+  display: inline-flex !important;
+  height: 32px !important;
+  vertical-align: middle !important;
+}
+
+.admin-header .notification-badge-bell {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 4px !important;
+}
+
+/* Fix profile button and avatar sizing */
+.admin-header .profile-button {
+  width: 32px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+}
+
+.admin-header .profile-button .ant-avatar {
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 28px !important;
+  font-size: 14px !important;
+}
+
+/* Ensure all icons are consistently sized */
+.admin-header svg {
+  width: 20px !important;
+  height: 20px !important;
+  vertical-align: middle !important;
+}
+
+/* Override Ant Design Badge positioning */
+.admin-header .ant-badge {
+  display: inline-flex !important;
+  vertical-align: middle !important;
+  line-height: 1 !important;
+}
+
+.admin-header .ant-badge-count {
+  top: 2px !important;
+  right: 2px !important;
+  transform: none !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  line-height: 16px !important;
+  font-size: 10px !important;
+}
+
+/* Fix hover states */
+.admin-header button:hover {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+.dark .admin-header button:hover {
+  background-color: rgba(147, 197, 253, 0.1) !important;
+}
+
+/* Ensure flexbox doesn't break alignment */
+.admin-header .flex {
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Fix spacing between elements */
+.admin-header .space-x-3 > :not([hidden]) ~ :not([hidden]) {
+  margin-left: 8px !important;
+}
+
+/* Remove any transforms that might affect positioning */
+.admin-header .ant-badge,
+.admin-header .ant-dropdown-trigger,
+.admin-header button {
+  transform: none !important;
+}
+
+/* Ensure theme toggle container fits properly */
+.admin-header .theme-toggle-container {
+  width: 48px !important;
+  height: 24px !important;
+  margin: 0 !important;
+}
+
+/* Fix any z-index issues */
+.admin-header .ant-dropdown {
+  z-index: 1050 !important;
+}
+
+.admin-header .ant-tooltip {
+  z-index: 1060 !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .admin-header button,
+  .admin-header .ant-dropdown-trigger,
+  .admin-header .ant-badge,
+  .admin-header .theme-toggle-btn,
+  .admin-header .notification-badge-bell,
+  .admin-header .profile-button {
+    height: 28px !important;
+  }
+  
+  .admin-header .notification-badge-bell,
+  .admin-header .profile-button {
+    width: 28px !important;
+  }
+  
+  .admin-header .profile-button .ant-avatar {
+    width: 24px !important;
+    height: 24px !important;
+    line-height: 24px !important;
+    font-size: 12px !important;
+  }
+  
+  .admin-header svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  .admin-header .theme-toggle-container {
+    width: 44px !important;
+    height: 22px !important;
+  }
+}

@@ -1,0 +1,176 @@
+/* Global Settings Application Styles */
+
+/* Disable animations when setting is off */
+.no-animations * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Compact mode styles */
+.compact-mode {
+  /* Reduce padding and margins */
+  --spacing-xs: 0.125rem;
+  --spacing-sm: 0.25rem;
+  --spacing-md: 0.5rem;
+  --spacing-lg: 0.75rem;
+  --spacing-xl: 1rem;
+}
+
+.compact-mode .p-6 {
+  padding: 1rem !important;
+}
+
+.compact-mode .p-4 {
+  padding: 0.75rem !important;
+}
+
+.compact-mode .py-4 {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
+.compact-mode .py-2 {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+.compact-mode .space-y-6 > * + * {
+  margin-top: 1rem !important;
+}
+
+.compact-mode .space-y-4 > * + * {
+  margin-top: 0.75rem !important;
+}
+
+.compact-mode .text-2xl {
+  font-size: 1.25rem !important;
+  line-height: 1.75rem !important;
+}
+
+.compact-mode .text-xl {
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+}
+
+.compact-mode .text-lg {
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+}
+
+.compact-mode .h-12 {
+  height: 2.5rem !important;
+}
+
+.compact-mode .h-10 {
+  height: 2rem !important;
+}
+
+.compact-mode .h-8 {
+  height: 1.75rem !important;
+}
+
+.compact-mode .h-6 {
+  height: 1.25rem !important;
+}
+
+.compact-mode .w-12 {
+  width: 2.5rem !important;
+}
+
+.compact-mode .w-10 {
+  width: 2rem !important;
+}
+
+.compact-mode .w-8 {
+  width: 1.75rem !important;
+}
+
+.compact-mode .w-6 {
+  width: 1.25rem !important;
+}
+
+/* Dark mode override for light theme setting */
+html:not(.dark) {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+/* Language-specific styles */
+html[lang="ar"],
+html[lang="he"] {
+  direction: rtl;
+}
+
+html[lang="ar"] body,
+html[lang="he"] body {
+  text-align: right;
+}
+
+/* RTL adjustments */
+html[dir="rtl"] .ml-3 {
+  margin-left: 0;
+  margin-right: 0.75rem;
+}
+
+html[dir="rtl"] .mr-2 {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+html[dir="rtl"] .left-0 {
+  left: auto;
+  right: 0;
+}
+
+html[dir="rtl"] .right-0 {
+  right: auto;
+  left: 0;
+}
+
+html[dir="rtl"] .translate-x-6 {
+  transform: translateX(-1.5rem);
+}
+
+html[dir="rtl"] .translate-x-0 {
+  transform: translateX(0);
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .no-animations * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .border-gray-700 {
+    border-color: #4a5568 !important;
+  }
+  
+  .bg-gray-800 {
+    background-color: #1a202c !important;
+  }
+  
+  .text-gray-300 {
+    color: #e2e8f0 !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .compact-mode * {
+    padding: 0.25rem !important;
+    margin: 0.25rem !important;
+  }
+}

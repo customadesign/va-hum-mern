@@ -1,0 +1,78 @@
+{
+  "name": "linkage-va-hub-admin",
+  "version": "1.0.0",
+  "private": true,
+  "proxy": "http://localhost:8000",
+  "homepage": ".",
+  "dependencies": {
+    "@ant-design/icons": "^6.0.1",
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.0.18",
+    "@supabase/supabase-js": "^2.57.4",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "@tanstack/react-query": "^5.85.9",
+    "ajv": "^8.17.1",
+    "ajv-keywords": "^5.1.0",
+    "antd": "^5.27.3",
+    "axios": "^1.6.2",
+    "chart.js": "^4.4.1",
+    "date-fns": "^2.30.0",
+    "dayjs": "^1.11.18",
+    "formik": "^2.4.5",
+    "framer-motion": "^12.23.12",
+    "i18next": "^25.5.2",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.30.1",
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.2.0",
+    "react-helmet-async": "^2.0.4",
+    "react-i18next": "^15.7.3",
+    "react-quill": "^2.0.0",
+    "react-responsive": "^10.0.1",
+    "react-router-dom": "^6.20.1",
+    "react-scripts": "5.0.1",
+    "react-select": "^5.8.0",
+    "react-toastify": "^9.1.3",
+    "recharts": "^3.1.2",
+    "serve": "^14.2.1",
+    "socket.io-client": "^4.8.1",
+    "tailwindcss": "^3.3.6",
+    "yup": "^1.3.3"
+  },
+  "scripts": {
+    "start": "PORT=4000 react-scripts start",
+    "build": "react-scripts build",
+    "serve": "serve -s build -p 10000",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "autoprefixer": "^10.4.16",
+    "playwright": "^1.55.0",
+    "postcss": "^8.4.32"
+  }
+}

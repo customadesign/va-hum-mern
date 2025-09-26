@@ -1,0 +1,16 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "settings": "設定",
+    "language": "言語"
+  },
+  "settings": {
+    "title": "設定",
+    "display": {
+      "title": "表示設定",
+      "language": "言語"
+    }
+  }
+}
