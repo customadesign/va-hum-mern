@@ -128,7 +128,10 @@ const corsOptions = {
         'https://admin-frontend-zbi8.onrender.com'  // New admin frontend URL
       ].filter(Boolean); // Remove undefined values
       
+      console.log('CORS check - Origin:', origin, 'Allowed origins:', allowedOrigins);
+      
       if (allowedOrigins.includes(origin)) {
+        console.log('CORS allowed for origin:', origin);
         callback(null, true);
       } else {
         console.log('CORS blocked origin:', origin);
