@@ -23,7 +23,8 @@ export default function ProfileSetup() {
   // Auto-create VA profile since this is VA Hub only
   const handleCreateVAProfile = async () => {
     setIsCreating(true);
-    
+    console.log('Creating VA profile and redirecting to /va/profile');
+
     // Set user type for branding context
     setBrandingTheme('va');
     
