@@ -3177,7 +3177,7 @@ export default function VAProfile() {
             </section>
 
             {/* Submit Button */}
-            <div className="flex justify-end mt-8 mb-24 mr-4 sm:mr-6 lg:mr-0">
+            <div className="flex justify-end mt-8 mb-40 mr-4 sm:mr-6 lg:mr-0">
               <button
                 type="submit"
                 disabled={updateProfileMutation.isLoading}
