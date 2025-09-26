@@ -27,8 +27,8 @@ export default function Dashboard() {
   });
 
   // Extract profile based on branding context
-  const profile = branding.isESystemsMode 
-    ? profileData?.data?.business || null
+  const profile = branding.isESystemsMode
+    ? profileData?.data || null
     : profileData?.data?.va || null;
 
   // Fetch analytics data (for regular users)
