@@ -3177,11 +3177,11 @@ export default function VAProfile() {
             </section>
 
             {/* Submit Button */}
-            <div className="flex justify-end mt-8 mb-16 mr-4 sm:mr-6 lg:mr-0">
+            <div className="flex justify-end mt-8 mb-24 mr-4 sm:mr-6 lg:mr-0">
               <button
                 type="submit"
                 disabled={updateProfileMutation.isLoading}
-                className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
+                className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#2663eb] hover:bg-[#1e4fc4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2663eb] disabled:opacity-50"
               >
                 {updateProfileMutation.isLoading
                   ? "Updating..."
