@@ -61,6 +61,7 @@ docs/
 *.env*
 !.env.example
 !.env.esystems.example
+!.env.production
 cookies.txt
 test-*.js
 debug-*.js
