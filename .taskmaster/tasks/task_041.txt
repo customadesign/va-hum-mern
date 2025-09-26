@@ -1,0 +1,21 @@
+# Task ID: 41
+# Title: Clerk Production Configuration (Linkage + E‑Systems)
+# Status: in-progress
+# Dependencies: None
+# Priority: high
+# Description: Configure Clerk for both Linkage and E‑Systems production deployments.
+# Details:
+- Add allowed origins/redirects:
+  - https://linkage-va-hub.onrender.com/*
+  - https://linkage-va-hub-api.onrender.com/*
+  - https://esystems-frontend.onrender.com/* (if deploying E‑Systems)
+- Copy keys and set in Render (frontend + backend):
+  - CLERK_PUBLISHABLE_KEY=pk_* (no trailing $)
+  - CLERK_SECRET_KEY=sk_*
+  - CLERK_FRONTEND_API=https://<your-subdomain>.clerk.accounts.dev
+  - CLERK_JWKS_URL=https://<your-subdomain>.clerk.accounts.dev/.well-known/jwks.json
+- Ensure test/live keys are consistently used across services.
+
+# Test Strategy:
+- Visit backend /api/health/auth → clerk.configured = true
+- Frontends /sign-in render without publishableKey error

@@ -73,6 +73,15 @@
     "@types/react-dom": "^18.2.17",
     "autoprefixer": "^10.4.16",
     "playwright": "^1.55.0",
-    "postcss": "^8.4.32"
+    "postcss": "^8.4.32",
+    "typescript": "^4.9.5"
+  },
+  "overrides": {
+    "typescript": "^4.9.5"
+  },
+  "resolutions": {
+    "typescript": "^4.9.5",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17"
   }
 }

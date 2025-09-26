@@ -1,0 +1,22 @@
+# Task ID: 45
+# Title: (Optional) Deploy Separate E‑Systems Backend API
+# Status: pending
+# Dependencies: 41, 42, 44
+# Priority: low
+# Description: Create a dedicated backend service for E‑Systems if not sharing the main API.
+# Details:
+- Create Render Web Service (root: esystems-backend)
+- Build: npm install; Start: npm start
+- Env:
+  - NODE_ENV=production
+  - PORT=8000
+  - ESYSTEMS_MODE=true
+  - MONGODB_URI=<atlas-uri>
+  - CLIENT_URL=https://esystems-frontend.onrender.com
+  - ESYSTEMS_CLIENT_URL=https://esystems-frontend.onrender.com
+  - JWT_SECRET=<generate>, JWT_EXPIRE=30d
+  - CLERK_SECRET_KEY, CLERK_PUBLISHABLE_KEY (same keys)
+  - CLERK_FRONTEND_API, CLERK_JWKS_URL
+
+# Test Strategy:
+- Visit https://<esys-api>.onrender.com/api/health → healthy

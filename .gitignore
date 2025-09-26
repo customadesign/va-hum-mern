@@ -1,0 +1,98 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Production builds
+/frontend/build
+/backend/dist
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Testing
+/coverage
+
+# Misc
+.eslintcache
+.npm
+.cache/
+
+logs
+dev-debug.log
+# Dependency directories
+# Environment variables
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/
+
+# Documentation files
+*.md
+README.md
+docs/
+
+# Sensitive and test files
+*.env*
+!.env.example
+!.env.esystems.example
+cookies.txt
+test-*.js
+debug-*.js
+fix-*.js
+create-*.js
+uploads/
+playwright-report/
+test-results/
+screenshots/
+temp-*/
+Debugging/
+Disc Test/
+
+# Backend specific
+backend/uploads/
+backend/cookies.txt
+backend/test-*.js
+backend/debug-*.js
+backend/fix-*.js
+backend/create-*.js
+backend/eng.traineddata
+backend/services/
+backend/scripts/*.js
+!backend/scripts/ensure-uploads-dir.js
+
+# Frontend specific
+frontend/build/
+admin-frontend/build/
+esystems-frontend/build/
+
+# Test files
+tests/
+__tests__/
+*.test.js
+*.spec.js 
