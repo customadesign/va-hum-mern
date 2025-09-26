@@ -88,13 +88,13 @@ export default function Layout() {
         {({ open }) => (
           <>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between h-[136px]">
+              <div className="flex justify-between h-20">
                 <div className="flex">
                   <div className="flex-shrink-0 flex items-center">
                     <Link to="/" className="flex items-center">
                       <img
                         className={classNames(
-                          "h-[104px] w-auto",
+                          "h-16 w-auto",
                           branding.isESystemsMode && "brightness-0 invert"
                         )}
                         src={branding.logoUrl || branding.logo}
