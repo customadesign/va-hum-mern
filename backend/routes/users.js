@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const Business = require('../models/Business');
+const VA = require('../models/VA');
 // HYBRID AUTH: Support both Clerk and legacy JWT during migration
 const { protect } = require('../middleware/hybridAuth');
+const { calculateCompletionPercentage, getMissingFields } = require('../middleware/profileCompletion');
 
 // @route   GET /api/users/profile
 // @desc    Get current user profile
@@ -25,9 +28,37 @@ router.get('/profile', protect, async (req, res) => {
       .populate('referredBy', 'email referralCode')
       .populate('referrals', 'email createdAt');
 
+    // Calculate profile completion based on VA or Business profile
+    let profileCompletion = null;
+
+    if (user.va) {
+      const vaProfile = user.va;
+      const percentage = calculateCompletionPercentage(vaProfile, 'va');
+      const missingFields = getMissingFields(vaProfile, 'va');
+
+      profileCompletion = {
+        percentage,
+        userType: 'va',
+        isComplete: percentage >= 80,
+        missingFields
+      };
+    } else if (user.business) {
+      const businessProfile = user.business;
+      const percentage = calculateCompletionPercentage(businessProfile, 'business');
+      const missingFields = getMissingFields(businessProfile, 'business');
+
+      profileCompletion = {
+        percentage,
+        userType: 'business',
+        isComplete: percentage >= 80,
+        missingFields
+      };
+    }
+
     res.json({
       success: true,
-      data: user
+      data: user,
+      profileCompletion
     });
   } catch (err) {
     console.error(err);

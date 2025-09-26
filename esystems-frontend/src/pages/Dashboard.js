@@ -23,9 +23,12 @@ export default function Dashboard() {
   });
 
   // Extract profile based on branding context
-  const profile = branding.isESystemsMode 
+  const profile = branding.isESystemsMode
     ? profileData?.data?.business || null
     : profileData?.data?.va || null;
+
+  // Get profile completion from API response if available
+  const apiProfileCompletion = profileData?.profileCompletion;
 
   // Fetch analytics data
   const { data: analytics } = useQuery({
@@ -69,6 +72,17 @@ export default function Dashboard() {
 
   // Calculate profile completion percentage based on user type
   const profileCompletion = useMemo(() => {
+    // Prioritize API response if available
+    if (apiProfileCompletion) {
+      console.log('Using API profile completion:', apiProfileCompletion);
+      return {
+        percentage: apiProfileCompletion.percentage || 0,
+        isComplete: apiProfileCompletion.isComplete || false,
+        missingFields: apiProfileCompletion.missingFields || []
+      };
+    }
+
+    // Fallback to client-side calculation if API doesn't provide it
     if (!profile) return { percentage: 0, isComplete: false, missingFields: [] };
 
     // Debug logging for profile
@@ -174,7 +188,7 @@ export default function Dashboard() {
       isComplete: percentage >= 100,
       missingFields
     };
-  }, [profile, branding.isESystemsMode]);
+  }, [profile, branding.isESystemsMode, apiProfileCompletion]);
 
   // Show loading spinner while branding context is loading
   if (brandingLoading || !branding) {
