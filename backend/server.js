@@ -124,7 +124,8 @@ const corsOptions = {
         'https://esystems-management-hub.onrender.com',
         'https://linkage-va-hub-api.onrender.com',
         'https://esystems-management-hub-api.onrender.com',
-        'https://admin-3pxa.onrender.com'  // Admin frontend URL
+        'https://admin-3pxa.onrender.com',  // Old admin frontend URL
+        'https://admin-frontend-zbi8.onrender.com'  // New admin frontend URL
       ].filter(Boolean); // Remove undefined values
       
       if (allowedOrigins.includes(origin)) {
