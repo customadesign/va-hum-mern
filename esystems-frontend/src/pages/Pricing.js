@@ -104,7 +104,7 @@ export default function Pricing() {
               <p className="mt-6 max-w-2xl mx-auto text-lg" style={{ color: '#374151' }}>
                 No hidden fees. No setup costs. No surprises. Just exceptional virtual assistants at a rate that works for your business.
               </p>
-              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="mt-10 flex justify-center">
                 <Link
                   to="/register"
                   className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-white transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
@@ -114,15 +114,6 @@ export default function Pricing() {
                 >
                   Get Started Today
                   <ArrowRightIcon className="ml-2 h-5 w-5" />
-                </Link>
-                <Link
-                  to="/how-it-works"
-                  className="inline-flex items-center px-8 py-4 border-2 text-lg font-medium rounded-lg bg-white transition-colors duration-200"
-                  style={{ borderColor: '#09006e', color: '#09006e' }}
-                  onMouseEnter={(e) => { e.target.style.backgroundColor = '#f0f9ff'; }}
-                  onMouseLeave={(e) => { e.target.style.backgroundColor = 'white'; }}
-                >
-                  Learn How It Works
                 </Link>
               </div>
             </div>
@@ -298,17 +289,12 @@ export default function Pricing() {
                     </div>
                   </div>
                 </div>
-                <div className="bg-white rounded-xl shadow-xl p-6 border-4 relative transform scale-105" style={{ borderColor: '#ef8f00' }}>
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="inline-block px-4 py-1 text-sm font-bold text-white rounded-full" style={{ backgroundColor: '#ef8f00' }}>
-                      MOST POPULAR
-                    </span>
-                  </div>
+                <div className="bg-white rounded-xl shadow-lg p-6 border-2" style={{ borderColor: '#09006e' }}>
                   <h3 className="text-lg font-bold text-center mb-4" style={{ color: '#09006e' }}>
                     Full-Time (40 hrs/week)
                   </h3>
                   <div className="text-center">
-                    <div className="text-5xl font-extrabold mb-2" style={{ color: '#09006e' }}>
+                    <div className="text-4xl font-extrabold mb-2" style={{ color: '#09006e' }}>
                       $1,600
                     </div>
                     <div className="text-sm" style={{ color: '#374151' }}>per month</div>
