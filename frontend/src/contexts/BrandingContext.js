@@ -27,8 +27,8 @@ export const BrandingProvider = ({ children }) => {
   
   const [branding, setBranding] = useState({
     name: isESystemsEnv ? 'E-Systems Management' : 'Linkage VA Hub',
-    logo: isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/68d664aaf838e20caa4c61a7.png',
-    logoUrl: isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/68d664aaf838e20caa4c61a7.png',
+    logo: isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/68d7075cfb09760d8bbd35f8.png',
+    logoUrl: isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/68d7075cfb09760d8bbd35f8.png',
     primaryColor: '#1f2937',
     accentColor: '#3b82f6',
     allowVARegistration: !isESystemsEnv,
@@ -50,8 +50,8 @@ export const BrandingProvider = ({ children }) => {
       ...prev,
       // Keep the system branding based on environment only
       name: isESystemsEnv ? 'E-Systems Management' : 'Linkage VA Hub',
-      logo: isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/68d664aaf838e20caa4c61a7.png',
-      logoUrl: isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/68d664aaf838e20caa4c61a7.png',
+      logo: isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/68d7075cfb09760d8bbd35f8.png',
+      logoUrl: isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/68d7075cfb09760d8bbd35f8.png',
       allowVARegistration: !isESystemsEnv,
       // Update userType based on actual user role
       userType: user?.role || 'va',
@@ -63,8 +63,8 @@ export const BrandingProvider = ({ children }) => {
     const fetchBranding = async () => {
       try {
         const response = await api.get('/system/branding');
-        const environmentLogo = isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/68d664aaf838e20caa4c61a7.png';
-        
+        const environmentLogo = isESystemsEnv ? 'https://storage.googleapis.com/msgsndr/dXPpkZ3hX5PCKayZrLsI/media/66fb8d59595de9f3ad14ac4c.png' : 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/68d7075cfb09760d8bbd35f8.png';
+
         setBranding(prev => ({
           ...response.data.data,
           // Keep userType based on actual user role, not system mode
