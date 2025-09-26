@@ -1,0 +1,494 @@
+const mongoose = require('mongoose');
+
+const businessSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    unique: true
+  },
+  contactName: {
+    type: String,
+    required: [true, 'Please provide contact name'],
+    trim: true
+  },
+  company: {
+    type: String,
+    required: [true, 'Please provide company name'],
+    trim: true
+  },
+  bio: {
+    type: String,
+    required: [true, 'Please provide company bio']
+  },
+  website: {
+    type: String,
+    trim: true
+  },
+  contactRole: {
+    type: String,
+    trim: true
+  },
+  email: {
+    type: String,
+    trim: true,
+    lowercase: true
+  },
+  phone: {
+    type: String,
+    trim: true
+  },
+  streetAddress: {
+    type: String,
+    trim: true
+  },
+  city: {
+    type: String,
+    trim: true
+  },
+  state: {
+    type: String,
+    trim: true
+  },
+  postalCode: {
+    type: String,
+    trim: true
+  },
+  country: {
+    type: String,
+    trim: true
+  },
+  vaNotifications: {
+    type: String,
+    enum: ['no', 'daily', 'weekly'],
+    default: 'no'
+  },
+  invisible: {
+    type: Boolean,
+    default: false
+  },
+  status: {
+    type: String,
+    enum: ['approved', 'rejected', 'suspended'],
+    default: 'approved'
+  },
+  surveyRequestNotifications: {
+    type: Boolean,
+    default: true
+  },
+  // Email notification preferences
+  emailNotifications: {
+    newMessages: {
+      type: Boolean,
+      default: true
+    },
+    vaApplications: {
+      type: Boolean,
+      default: true
+    },
+    vaMatches: {
+      type: Boolean,
+      default: true
+    },
+    platformUpdates: {
+      type: Boolean,
+      default: false
+    },
+    marketingEmails: {
+      type: Boolean,
+      default: false
+    },
+    weeklyDigest: {
+      type: Boolean,
+      default: true
+    }
+  },
+  // Communication preferences
+  communicationPreferences: {
+    preferredContactMethod: {
+      type: String,
+      enum: ['email', 'phone', 'platform', 'any'],
+      default: 'email'
+    },
+    responseTime: {
+      type: String,
+      enum: ['immediate', 'within-24h', 'within-48h', 'within-week'],
+      default: 'within-24h'
+    },
+    availableForInterviews: {
+      type: Boolean,
+      default: true
+    },
+    allowDirectMessages: {
+      type: Boolean,
+      default: true
+    },
+    autoReplyEnabled: {
+      type: Boolean,
+      default: false
+    },
+    autoReplyMessage: {
+      type: String,
+      trim: true
+    }
+  },
+  // Privacy preferences
+  privacySettings: {
+    showEmail: {
+      type: Boolean,
+      default: false
+    },
+    showPhone: {
+      type: Boolean,
+      default: false
+    },
+    showLocation: {
+      type: Boolean,
+      default: true
+    },
+    showCompanySize: {
+      type: Boolean,
+      default: true
+    },
+    allowAnalytics: {
+      type: Boolean,
+      default: true
+    }
+  },
+  avatar: {
+    type: String // URL to avatar image
+  },
+  conversationsCount: {
+    type: Number,
+    default: 0
+  },
+  // LinkedIn-like company fields
+  companySize: {
+    type: String,
+    enum: ['1-10', '11-50', '51-200', '201-500', '501-1000', '1001-5000', '5001-10000', '10000+'],
+    trim: true
+  },
+  industry: {
+    type: String,
+    trim: true
+  },
+  foundedYear: {
+    type: Number,
+    min: 1800,
+    max: new Date().getFullYear()
+  },
+  employeeCount: {
+    type: Number,
+    min: 0
+  },
+  specialties: [{
+    type: String,
+    trim: true
+  }],
+  companyCulture: {
+    type: String,
+    trim: true
+  },
+  benefits: [{
+    type: String,
+    trim: true
+  }],
+  workEnvironment: {
+    type: String,
+    enum: ['remote', 'hybrid', 'onsite', 'flexible'],
+    trim: true
+  },
+  headquartersLocation: {
+    type: String,
+    trim: true
+  },
+  // Social media links
+  linkedin: {
+    type: String,
+    trim: true
+  },
+  facebook: {
+    type: String,
+    trim: true
+  },
+  twitter: {
+    type: String,
+    trim: true
+  },
+  instagram: {
+    type: String,
+    trim: true
+  },
+  youtube: {
+    type: String,
+    trim: true
+  },
+  // Additional professional information
+  certifications: [{
+    type: String,
+    trim: true
+  }],
+  awards: [{
+    type: String,
+    trim: true
+  }],
+  companyValues: [{
+    type: String,
+    trim: true
+  }],
+  workingHours: {
+    type: String,
+    trim: true
+  },
+  languages: [{
+    type: String,
+    trim: true
+  }],
+  missionStatement: {
+    type: String,
+    trim: true
+  },
+  vaRequirements: {
+    type: String,
+    trim: true
+  },
+  // Billing Information
+  billing: {
+    // Stripe customer ID for payment processing
+    stripeCustomerId: {
+      type: String,
+      trim: true
+    },
+    // Payment method details
+    paymentMethod: {
+      type: {
+        type: String,
+        enum: ['card', 'bank_account', 'paypal', 'other'],
+        default: 'card'
+      },
+      last4: String,
+      brand: String, // For cards: visa, mastercard, amex, etc.
+      expiryMonth: Number,
+      expiryYear: Number,
+      isDefault: {
+        type: Boolean,
+        default: true
+      },
+      addedAt: {
+        type: Date,
+        default: Date.now
+      }
+    },
+    // Billing address
+    billingAddress: {
+      line1: String,
+      line2: String,
+      city: String,
+      state: String,
+      postalCode: String,
+      country: String
+    },
+    // Subscription details
+    subscription: {
+      planId: String,
+      planName: String,
+      status: {
+        type: String,
+        enum: ['active', 'inactive', 'past_due', 'canceled', 'trialing'],
+        default: 'inactive'
+      },
+      currentPeriodStart: Date,
+      currentPeriodEnd: Date,
+      cancelAtPeriodEnd: {
+        type: Boolean,
+        default: false
+      },
+      trialEndDate: Date,
+      monthlyAmount: Number,
+      currency: {
+        type: String,
+        default: 'USD'
+      }
+    },
+    // Billing settings
+    settings: {
+      autoCharge: {
+        type: Boolean,
+        default: true
+      },
+      invoiceEmail: String,
+      taxExempt: {
+        type: Boolean,
+        default: false
+      },
+      taxId: String,
+      preferredPaymentDay: {
+        type: Number,
+        min: 1,
+        max: 28
+      }
+    },
+    // Current balance and credits
+    balance: {
+      type: Number,
+      default: 0
+    },
+    credits: {
+      type: Number,
+      default: 0
+    },
+    // Last payment info
+    lastPayment: {
+      amount: Number,
+      date: Date,
+      status: String,
+      invoiceId: String
+    }
+  },
+  // Billing history (references to BillingHistory model)
+  billingHistory: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'BillingHistory'
+  }],
+  // API Keys for business account
+  apiKeys: [{
+    id: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    key: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    lastUsed: {
+      type: Date,
+      default: null
+    },
+    active: {
+      type: Boolean,
+      default: true
+    }
+  }],
+  // Email and phone verification status
+  emailVerified: {
+    type: Boolean,
+    default: false
+  },
+  phoneVerified: {
+    type: Boolean,
+    default: false
+  },
+  // System timezone and language preferences
+  timezone: {
+    type: String,
+    default: 'America/New_York'
+  },
+  language: {
+    type: String,
+    default: 'en'
+  }
+}, {
+  timestamps: true
+});
+
+// Index for searching
+businessSchema.index({ company: 'text', bio: 'text' });
+businessSchema.index({ invisible: 1 });
+
+// Virtual for completion percentage
+businessSchema.virtual('completionPercentage').get(function() {
+  let score = 0;
+  const requiredFields = [
+    'contactName', 'company', 'bio', 'website', 'contactRole',
+    'email', 'phone', 'avatar'
+  ];
+  
+  const professionalFields = [
+    'companySize', 'industry', 'foundedYear', 'specialties',
+    'companyCulture', 'workEnvironment', 'headquartersLocation',
+    'missionStatement', 'vaRequirements'
+  ];
+  
+  const locationFields = [
+    'streetAddress', 'city', 'state', 'postalCode', 'country'
+  ];
+  
+  const socialFields = [
+    'linkedin', 'facebook', 'twitter', 'instagram'
+  ];
+  
+  // Required fields are worth more (60% of total)
+  const requiredWeight = 60;
+  const professionalWeight = 25;
+  const locationWeight = 10;
+  const socialWeight = 5;
+  
+  // Calculate required fields score
+  let requiredScore = 0;
+  requiredFields.forEach(field => {
+    if (this[field] && (Array.isArray(this[field]) ? this[field].length > 0 : true)) {
+      requiredScore += requiredWeight / requiredFields.length;
+    }
+  });
+  
+  // Calculate professional fields score
+  let professionalScore = 0;
+  professionalFields.forEach(field => {
+    if (this[field] && (Array.isArray(this[field]) ? this[field].length > 0 : true)) {
+      professionalScore += professionalWeight / professionalFields.length;
+    }
+  });
+  
+  // Calculate location fields score (at least 3 fields needed)
+  let locationScore = 0;
+  let locationFieldsCompleted = 0;
+  locationFields.forEach(field => {
+    if (this[field]) {
+      locationFieldsCompleted++;
+    }
+  });
+  if (locationFieldsCompleted >= 3) {
+    locationScore = locationWeight;
+  } else {
+    locationScore = (locationFieldsCompleted / 3) * locationWeight;
+  }
+  
+  // Calculate social fields score (at least 1 social link)
+  let socialScore = 0;
+  let socialFieldsCompleted = 0;
+  socialFields.forEach(field => {
+    if (this[field]) {
+      socialFieldsCompleted++;
+    }
+  });
+  if (socialFieldsCompleted >= 1) {
+    socialScore = socialWeight;
+  }
+  
+  const totalScore = requiredScore + professionalScore + locationScore + socialScore;
+  return Math.round(totalScore);
+});
+
+// Virtual for full address
+businessSchema.virtual('fullAddress').get(function() {
+  const parts = [];
+  if (this.streetAddress) parts.push(this.streetAddress);
+  if (this.city) parts.push(this.city);
+  if (this.state) parts.push(this.state);
+  if (this.postalCode) parts.push(this.postalCode);
+  if (this.country) parts.push(this.country);
+  
+  return parts.join(', ');
+});
+
+module.exports = mongoose.model('Business', businessSchema);
