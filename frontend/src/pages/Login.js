@@ -105,7 +105,7 @@ export default function Login() {
           <div>
             <img
               className="mx-auto h-24 w-auto object-contain"
-              src={branding.logoUrl}
+              src="https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/688ab56f0299a1fefc1986e5.png"
               alt={branding.name}
             />
             <h2 className="mt-6 text-center text-3xl font-extrabold" style={{color: '#1f2937'}}>
