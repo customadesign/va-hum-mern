@@ -19,6 +19,7 @@ export default function Dashboard() {
         const response = await api.get('/profile/business');
         return response.data || { data: { business: null } };
       } else {
+        // Always use /users/profile endpoint which returns profile completion data
         const response = await api.get('/users/profile');
         return response.data;
       }
@@ -30,6 +31,9 @@ export default function Dashboard() {
   const profile = branding.isESystemsMode
     ? profileData?.data || null
     : profileData?.data?.va || null;
+
+  // Get profile completion from API response if available (prioritize backend calculation)
+  const apiProfileCompletion = profileData?.profileCompletion;
 
   // Fetch analytics data (for regular users)
   const { data: analytics } = useQuery({
@@ -83,11 +87,23 @@ export default function Dashboard() {
 
   // Calculate profile completion percentage based on user type
   const profileCompletion = useMemo(() => {
+    // Prioritize backend-calculated profile completion if available
+    if (apiProfileCompletion) {
+      console.log('Using API profile completion:', apiProfileCompletion);
+      return {
+        percentage: apiProfileCompletion.percentage || 0,
+        isComplete: apiProfileCompletion.isComplete || false,
+        missingFields: apiProfileCompletion.missingFields || []
+      };
+    }
+
+    // Fallback to local calculation if API data not available
     if (!profile) return { percentage: 0, isComplete: false, missingFields: [] };
 
     // Debug logging for profile
     console.log('Profile Data:', profile);
     console.log('Is E-Systems Mode:', branding.isESystemsMode);
+    console.log('Using fallback local profile completion calculation');
 
     let requiredFields = [];
 
@@ -178,7 +194,7 @@ export default function Dashboard() {
       isComplete: percentage >= 100,
       missingFields
     };
-  }, [profile, branding.isESystemsMode]);
+  }, [apiProfileCompletion, profile, branding.isESystemsMode]);
 
   // Show loading spinner while branding context is loading
   if (brandingLoading || !branding) {
