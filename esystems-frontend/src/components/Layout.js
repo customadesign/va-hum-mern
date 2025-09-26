@@ -32,6 +32,7 @@ export default function Layout() {
   const navigation = [
     { name: 'Home', href: '/', current: false },
     { name: 'How It Works', href: '/how-it-works', current: false },
+    { name: 'Pricing', href: '/pricing', current: false },
     { name: 'Virtual Assistants', href: '/vas', current: false },
     ...(!branding.isESystemsMode ? [{ name: 'Community', href: '/community', current: false }] : []),
     { name: 'About', href: '/about', current: false },
