@@ -280,11 +280,27 @@ export default function ConversationDetail() {
   }, [conversation?.messages]);
 
   const getOtherParticipant = () => {
+    // Check if the conversation has a system user participant
+    if (conversation?.participants) {
+      const systemUser = conversation.participants.find(p => 
+        p.email === 'system@linkagevahub.com' || p.name === 'Linkage Admin'
+      );
+      if (systemUser) {
+        return systemUser;
+      }
+    }
+    
+    // Fallback to original logic
     if (user.profile?.va) {
       return conversation?.business;
     } else {
       return conversation?.va;
     }
+  };
+
+  // Check if the other participant is the system user
+  const isSystemUser = (participant) => {
+    return participant?.email === 'system@linkagevahub.com' || participant?.name === 'Linkage Admin';
   };
 
   const formatMessageTime = (date) => {
@@ -368,13 +384,19 @@ export default function ConversationDetail() {
                 
                 <div>
                   <h1 className="text-lg font-medium text-gray-900 flex items-center">
-                    {otherParticipant?.profile?.name || otherParticipant?.profile?.company || 'Unknown User'}
+                    {isSystemUser(otherParticipant) 
+                      ? 'Linkage Admin' 
+                      : (otherParticipant?.profile?.name || otherParticipant?.profile?.company || 'Unknown User')
+                    }
                     {otherParticipant?.admin && (
                       <CheckBadgeIcon className="h-5 w-5 text-purple-600 ml-1" />
                     )}
                   </h1>
                   <p className="text-sm text-gray-500">
-                    {otherParticipant?.profile?.hero || otherParticipant?.email}
+                    {isSystemUser(otherParticipant) 
+                      ? 'system@linkagevahub.com' 
+                      : (otherParticipant?.profile?.hero || otherParticipant?.email)
+                    }
                   </p>
                 </div>
               </div>

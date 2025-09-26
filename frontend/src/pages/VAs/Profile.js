@@ -1498,9 +1498,9 @@ export default function VAProfile() {
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image file size must be less than 5MB");
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image file size must be less than 10MB");
       return;
     }
 
@@ -1547,9 +1547,9 @@ export default function VAProfile() {
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image file size must be less than 5MB");
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image file size must be less than 10MB");
       return;
     }
 
@@ -1626,11 +1626,11 @@ export default function VAProfile() {
       return;
     }
 
-    // Validate file size (max 500MB)
-    if (file.size > 500 * 1024 * 1024) {
-      toast.error("Video file size must be less than 500MB");
-      return;
-    }
+        // Validate file size (max 1GB)
+        if (file.size > 1024 * 1024 * 1024) {
+          toast.error("Video file size must be less than 1GB");
+          return;
+        }
 
     setUploadingVideo(true);
     setVideoProgress(0);

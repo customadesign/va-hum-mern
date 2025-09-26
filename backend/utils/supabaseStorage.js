@@ -7,12 +7,12 @@ const supabase = require('../config/supabase');
 const BUCKET_CONFIG = {
   'profile-images': {
     allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'],
-    maxSize: 5 * 1024 * 1024, // 5MB
+    maxSize: 10 * 1024 * 1024, // 10MB
     folders: ['avatars', 'covers', 'admin-avatars', 'business-logos']
   },
   'va-videos': {
     allowedTypes: ['video/mp4', 'video/webm', 'video/mov', 'video/avi', 'video/quicktime'],
-    maxSize: 100 * 1024 * 1024, // 100MB
+    maxSize: 1024 * 1024 * 1024, // 1GB
     folders: ['introductions', 'portfolio', 'demos']
   },
   'business-assets': {
@@ -83,7 +83,7 @@ const uploadAdminFiles = createBucketUploader('admin-uploads');
 const uploadSupabase = multer({
   storage: storage,
   limits: {
-    fileSize: 500 * 1024 * 1024 // 500MB limit
+    fileSize: 1024 * 1024 * 1024 // 1GB limit
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = {
