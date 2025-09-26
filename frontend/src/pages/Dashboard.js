@@ -148,9 +148,15 @@ export default function Dashboard() {
         }},
         { field: 'email', weight: 10, check: () => profile.email?.trim() && profile.email.includes('@') },
         { field: 'specialties', weight: 15, check: () => profile.specialties?.length > 0 || profile.specialtyIds?.length > 0 },
-        { field: 'roleType', weight: 5, check: () => Object.values(profile.roleType || {}).some(Boolean) },
-        { field: 'roleLevel', weight: 5, check: () => Object.values(profile.roleLevel || {}).some(Boolean) },
-        
+        { field: 'roleType', weight: 5, check: () => {
+          // roleType is an ObjectId reference that gets populated - just check if it exists
+          return !!(profile.roleType && (typeof profile.roleType === 'string' || profile.roleType._id));
+        }},
+        { field: 'roleLevel', weight: 5, check: () => {
+          // roleLevel is an ObjectId reference that gets populated - just check if it exists
+          return !!(profile.roleLevel && (typeof profile.roleLevel === 'string' || profile.roleLevel._id));
+        }},
+
         // Enhanced fields (medium weight)
         { field: 'hourlyRate', weight: 10, check: () => Number(profile.preferredMinHourlyRate) > 0 && Number(profile.preferredMaxHourlyRate) > 0 && Number(profile.preferredMaxHourlyRate) >= Number(profile.preferredMinHourlyRate) },
         { field: 'phone', weight: 5, check: () => profile.phone?.trim() && profile.phone.length >= 10 },
