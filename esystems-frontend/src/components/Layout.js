@@ -97,7 +97,7 @@ export default function Layout() {
                           branding.isESystemsMode
                             ? "bg-primary-800 text-white hover:text-gray-200 focus:ring-offset-primary-700 focus:ring-white"
                             : "bg-gray-100 text-gray-700 hover:text-gray-700 focus:ring-offset-2 focus:ring-gray-500",
-                          "p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 relative transition-all duration-200",
+                          "p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200",
                           isHoveringBell ? "transform scale-110" : "transform scale-100"
                         )}
                       >
