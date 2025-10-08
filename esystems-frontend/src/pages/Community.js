@@ -5,8 +5,6 @@ import { useBranding } from '../contexts/BrandingContext';
 import { useAuth } from '../contexts/AuthContext';
 import LessonViewer from '../components/LessonViewer';
 import QuickSkillModal from '../components/QuickSkillModal';
-import VideoSDKMeeting from '../components/VideoSDKMeeting';
-import { useVideoSDK } from '../hooks/useVideoSDK';
 import {
   AcademicCapIcon,
   CodeBracketIcon,
@@ -500,7 +498,6 @@ export default function Community() {
   const { branding, loading: brandingLoading } = useBranding();
   const { user, loading: authLoading } = useAuth();
   const { lessonId } = useParams();
-  const { createAndJoinMeeting, isLoading: videosdkLoading, error: videosdkError } = useVideoSDK();
   const navigate = useNavigate();
   const [timeToNext, setTimeToNext] = useState('');
   const [selectedLesson, setSelectedLesson] = useState(null);
@@ -512,10 +509,6 @@ export default function Community() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
-  
-  // VideoSDK meeting state
-  const [showVideoSDKMeeting, setShowVideoSDKMeeting] = useState(false);
-  const [videosdkConfig, setVideosdkConfig] = useState(null);
 
   // ALL HOOKS MUST BE CALLED FIRST - Check if accessing a specific lesson via URL
   useEffect(() => {
@@ -639,32 +632,6 @@ export default function Community() {
   const handleCloseQuickSkill = () => {
     setShowQuickSkillModal(false);
     setSelectedQuickSkill(null);
-  };
-
-  // Handler for joining training (creating and joining VideoSDK meeting)
-  const handleJoinTraining = async (training) => {
-    try {
-      const trainingData = {
-        title: training.title,
-        description: training.description,
-        duration: 60, // 1 hour default
-        userName: user?.profile?.name || user?.name || 'Participant',
-        participantName: user?.profile?.name || user?.name || 'Participant'
-      };
-
-      const result = await createAndJoinMeeting(trainingData);
-      setVideosdkConfig(result.meetingConfig);
-      setShowVideoSDKMeeting(true);
-    } catch (error) {
-      console.error('Failed to join training:', error);
-      // You could add a toast notification here
-    }
-  };
-
-  // Handler for leaving meeting
-  const handleLeaveMeeting = () => {
-    setShowVideoSDKMeeting(false);
-    setVideosdkConfig(null);
   };
 
   // Filter and search courses
@@ -1385,47 +1352,6 @@ export default function Community() {
               onClose={handleCloseQuickSkill}
             />
           </Suspense>
-        )}
-
-        {/* VideoSDK Meeting Modal */}
-        {showVideoSDKMeeting && videosdkConfig && (
-          <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-              <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={handleLeaveMeeting}></div>
-              
-              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      Live Training Session
-                    </h3>
-                    <button
-                      onClick={handleLeaveMeeting}
-                      className="bg-gray-200 rounded-md p-2 inline-flex items-center justify-center text-gray-700 hover:text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-                    >
-                      <span className="sr-only">Close</span>
-                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                  
-                  {videosdkError && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                      <p className="font-bold">Error joining meeting:</p>
-                      <p>{videosdkError}</p>
-                    </div>
-                  )}
-                  
-                  <VideoSDKMeeting
-                    meetingConfig={videosdkConfig}
-                    onLeave={handleLeaveMeeting}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
         )}
       </>
     );
