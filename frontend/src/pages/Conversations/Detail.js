@@ -112,70 +112,70 @@ export default function ConversationDetail() {
       return [
         {
           _id: 'sample-1',
-          participants: [user.id, 'business-1'],
+          participants: [user.id, 'admin-1'],
           business: {
-            _id: 'business-1',
-            email: 'contact@techcorp.com',
+            _id: 'admin-1',
+            email: 'support@linkage.com',
             profile: {
-              name: 'TechCorp Solutions',
-              company: 'TechCorp Solutions',
+              name: 'Linkage Admin',
+              company: 'Linkage',
               avatar: null,
-              hero: 'Leading technology consulting firm'
+              hero: 'Linkage Support Team'
             }
           },
           messages: [
             {
               _id: 'msg-1',
-              sender: 'business-1',
-              content: 'Hi! I saw your profile and I\'m impressed with your skills. We have a project that might be a perfect fit for you.',
+              sender: 'admin-1',
+              content: 'Welcome to Linkage! We\'re here to help you connect with great business opportunities. Feel free to reach out if you have any questions.',
               createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
             },
             {
               _id: 'msg-2',
               sender: user.id,
-              content: 'Thank you for reaching out! I\'d love to hear more about the project. What kind of work are you looking for?',
+              content: 'Thank you! I appreciate the warm welcome. I\'m excited to get started.',
               createdAt: new Date(Date.now() - 1.5 * 60 * 60 * 1000) // 1.5 hours ago
             },
             {
               _id: 'msg-3',
-              sender: 'business-1',
-              content: 'We need help with social media management and content creation for our new product launch. The project would run for 3 months.',
+              sender: 'admin-1',
+              content: 'That\'s great to hear! Make sure to keep your profile updated with your latest skills and experience. This helps businesses find you more easily.',
               createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000) // 1 hour ago
             }
           ],
-          lastMessage: 'We need help with social media management and content creation for our new product launch. The project would run for 3 months.',
+          lastMessage: 'That\'s great to hear! Make sure to keep your profile updated with your latest skills and experience. This helps businesses find you more easily.',
           lastMessageAt: new Date(Date.now() - 1 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 1, business: 0 }
         },
         {
           _id: 'sample-2',
-          participants: [user.id, 'business-2'],
+          participants: [user.id, 'admin-2'],
           business: {
-            _id: 'business-2',
-            email: 'hiring@creativestudio.com',
+            _id: 'admin-2',
+            email: 'support@linkage.com',
             profile: {
-              name: 'Creative Studio',
-              company: 'Creative Studio',
+              name: 'Linkage Admin',
+              company: 'Linkage',
               avatar: null,
-              hero: 'Digital marketing and design agency'
+              hero: 'Linkage Support Team'
             }
           },
           messages: [
             {
               _id: 'msg-4',
-              sender: 'business-2',
-              content: 'Hello! Are you available for a long-term virtual assistant position?',
+              sender: 'admin-2',
+              content: 'Quick tip: Responding promptly to business inquiries increases your chances of landing great projects!',
               createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000) // 6 hours ago
             },
             {
               _id: 'msg-5',
               sender: user.id,
-              content: 'Hi there! Yes, I\'m currently available. What does the position involve?',
+              content: 'Thanks for the advice! I\'ll make sure to check my messages regularly.',
               createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000) // 5 hours ago
             }
           ],
-          lastMessage: 'Hi there! Yes, I\'m currently available. What does the position involve?',
+          lastMessage: 'Thanks for the advice! I\'ll make sure to check my messages regularly.',
           lastMessageAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 0, business: 1 }
