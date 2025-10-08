@@ -77,126 +77,21 @@ export default function Conversations() {
       return [
         {
           _id: 'sample-1',
-          participants: [user.id, 'business-1'],
+          participants: [user.id, 'admin-1'],
           business: {
-            _id: 'business-1',
-            email: 'contact@techcorp.com',
+            _id: 'admin-1',
+            email: 'admin@linkage.ph',
             profile: {
-              name: 'TechCorp Solutions',
-              company: 'TechCorp Solutions',
+              name: 'Linkage Admin',
+              company: 'Linkage VA Hub',
               avatar: null,
-              hero: 'Leading technology consulting firm'
+              hero: 'Official Linkage VA Hub Administration'
             }
           },
           messages: [
             {
               _id: 'msg-1',
-              sender: 'business-1',
-              content: 'Hi! I saw your profile and I\'m impressed with your skills. We have a project that might be a perfect fit for you.',
-              createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
-            },
-            {
-              _id: 'msg-2',
-              sender: user.id,
-              content: 'Thank you for reaching out! I\'d love to hear more about the project. What kind of work are you looking for?',
-              createdAt: new Date(Date.now() - 1.5 * 60 * 60 * 1000) // 1.5 hours ago
-            },
-            {
-              _id: 'msg-3',
-              sender: 'business-1',
-              content: 'We need help with social media management and content creation for our new product launch. The project would run for 3 months.',
-              createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000) // 1 hour ago
-            }
-          ],
-          lastMessage: 'We need help with social media management and content creation for our new product launch. The project would run for 3 months.',
-          lastMessageAt: new Date(Date.now() - 1 * 60 * 60 * 1000),
-          status: 'active',
-          unreadCount: { va: 1, business: 0 }
-        },
-        {
-          _id: 'sample-2',
-          participants: [user.id, 'business-2'],
-          business: {
-            _id: 'business-2',
-            email: 'hiring@creativestudio.com',
-            profile: {
-              name: 'Creative Studio',
-              company: 'Creative Studio',
-              avatar: null,
-              hero: 'Digital marketing and design agency'
-            }
-          },
-          messages: [
-            {
-              _id: 'msg-4',
-              sender: 'business-2',
-              content: 'Hello! Are you available for a long-term virtual assistant position?',
-              createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000) // 6 hours ago
-            },
-            {
-              _id: 'msg-5',
-              sender: user.id,
-              content: 'Hi there! Yes, I\'m currently available. What does the position involve?',
-              createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000) // 5 hours ago
-            }
-          ],
-          lastMessage: 'Hi there! Yes, I\'m currently available. What does the position involve?',
-          lastMessageAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
-          status: 'active',
-          unreadCount: { va: 0, business: 1 }
-        },
-        {
-          _id: 'sample-3',
-          participants: [user.id, 'business-3'],
-          business: {
-            _id: 'business-3',
-            email: 'team@startupventure.io',
-            profile: {
-              name: 'Startup Venture',
-              company: 'Startup Venture',
-              avatar: null,
-              hero: 'Fast-growing SaaS startup'
-            }
-          },
-          messages: [
-            {
-              _id: 'msg-6',
-              sender: user.id,
-              content: 'Thank you for the opportunity! I\'m excited to get started on the project.',
-              createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000) // 1 day ago
-            }
-          ],
-          lastMessage: 'Thank you for the opportunity! I\'m excited to get started on the project.',
-          lastMessageAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-          status: 'active',
-          unreadCount: { va: 0, business: 0 }
-        }
-      ];
-    } else {
-      // Sample conversations for businesses
-      return [
-        {
-          _id: 'sample-1',
-          participants: [user.id, 'va-1'],
-          va: {
-            _id: 'va-1',
-            email: 'sarah.johnson@email.com',
-            profile: {
-              name: 'Sarah Johnson',
-              avatar: null,
-              hero: 'Experienced Virtual Assistant specializing in social media & admin support'
-            }
-          },
-          messages: [
-            {
-              _id: 'msg-1',
-              sender: user.id,
-              content: 'Hi Sarah! I reviewed your profile and I think you\'d be a great fit for our social media management needs.',
-              createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000) // 3 hours ago
-            },
-            {
-              _id: 'msg-2',
-              sender: 'va-1',
+              sender: 'admin-1',
               content: 'Thank you for reaching out! I\'d love to learn more about your requirements and how I can help.',
               createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
             }
@@ -204,29 +99,90 @@ export default function Conversations() {
           lastMessage: 'Thank you for reaching out! I\'d love to learn more about your requirements and how I can help.',
           lastMessageAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
           status: 'active',
+          unreadCount: { va: 1, business: 0 }
+        },
+        {
+          _id: 'sample-2',
+          participants: [user.id, 'admin-2'],
+          business: {
+            _id: 'admin-2',
+            email: 'support@linkage.ph',
+            profile: {
+              name: 'Linkage Admin',
+              company: 'Linkage VA Hub',
+              avatar: null,
+              hero: 'Official Linkage VA Hub Administration'
+            }
+          },
+          messages: [
+            {
+              _id: 'msg-2',
+              sender: 'admin-2',
+              content: 'I saw your job posting and I believe my skills in virtual assistance would be a great match for your needs.',
+              createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000) // 8 hours ago
+            }
+          ],
+          lastMessage: 'I saw your job posting and I believe my skills in virtual assistance would be a great match for your needs.',
+          lastMessageAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
+          status: 'active',
+          unreadCount: { va: 0, business: 1 }
+        }
+      ];
+    } else {
+      // Sample conversations for businesses
+      return [
+        {
+          _id: 'sample-1',
+          participants: [user.id, 'admin-1'],
+          va: {
+            _id: 'admin-1',
+            email: 'admin@linkage.com',
+            profile: {
+              name: 'Linkage Admin',
+              avatar: null,
+              hero: 'Linkage Support Team'
+            }
+          },
+          messages: [
+            {
+              _id: 'msg-1',
+              sender: user.id,
+              content: 'Hello! I\'d like to learn more about posting a job and finding the right virtual assistant.',
+              createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000) // 3 hours ago
+            },
+            {
+              _id: 'msg-2',
+              sender: 'admin-1',
+              content: 'Welcome to Linkage! We\'re here to help you find the perfect virtual assistant for your business needs. Feel free to ask any questions!',
+              createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+            }
+          ],
+          lastMessage: 'Welcome to Linkage! We\'re here to help you find the perfect virtual assistant for your business needs. Feel free to ask any questions!',
+          lastMessageAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+          status: 'active',
           unreadCount: { va: 0, business: 1 }
         },
         {
           _id: 'sample-2',
-          participants: [user.id, 'va-2'],
+          participants: [user.id, 'admin-2'],
           va: {
-            _id: 'va-2',
-            email: 'mike.chen@email.com',
+            _id: 'admin-2',
+            email: 'support@linkage.com',
             profile: {
-              name: 'Mike Chen',
+              name: 'Linkage Admin',
               avatar: null,
-              hero: 'Data entry specialist and customer service expert'
+              hero: 'Linkage Support Team'
             }
           },
           messages: [
             {
               _id: 'msg-3',
-              sender: 'va-2',
-              content: 'I saw your job posting and I believe my skills align perfectly with what you\'re looking for.',
+              sender: 'admin-2',
+              content: 'Thank you for joining Linkage! If you have any questions about finding virtual assistants or posting jobs, we\'re here to assist.',
               createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000) // 8 hours ago
             }
           ],
-          lastMessage: 'I saw your job posting and I believe my skills align perfectly with what you\'re looking for.',
+          lastMessage: 'Thank you for joining Linkage! If you have any questions about finding virtual assistants or posting jobs, we\'re here to assist.',
           lastMessageAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 1, business: 1 }

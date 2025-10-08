@@ -15,6 +15,7 @@ import {
   SparklesIcon
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+import SafeHtml from '../components/SafeHtml';
 
 const Announcements = () => {
   const { user } = useAuth();
@@ -280,19 +281,16 @@ const Announcements = () => {
                         </div>
                         
                         {/* Content preview or full content */}
-                        <div className={`mt-2 text-sm ${styles.text} opacity-90`}>
-                          {isExpanded ? (
-                            <div dangerouslySetInnerHTML={{ __html: announcement.content }} />
-                          ) : (
-                            <div 
-                              dangerouslySetInnerHTML={{ 
-                                __html: announcement.content.length > 150 
-                                  ? announcement.content.substring(0, 150) + '...' 
-                                  : announcement.content 
-                              }} 
-                            />
-                          )}
-                        </div>
+                        <SafeHtml
+                          className={`mt-2 text-sm ${styles.text} opacity-90`}
+                          html={
+                            isExpanded
+                              ? announcement.content
+                              : (announcement.content.length > 150
+                                  ? announcement.content.substring(0, 150) + '...'
+                                  : announcement.content)
+                          }
+                        />
                         
                         {/* Expand/Collapse indicator */}
                         {announcement.content.length > 150 && (

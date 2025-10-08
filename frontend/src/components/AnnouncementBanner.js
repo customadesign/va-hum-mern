@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import { XMarkIcon, SpeakerWaveIcon, ExclamationTriangleIcon, InformationCircleIcon, BellIcon } from '@heroicons/react/24/outline';
 import { SparklesIcon } from '@heroicons/react/24/solid';
+import SafeHtml from './SafeHtml';
 
 const AnnouncementBanner = () => {
   const { user } = useAuth();
@@ -164,9 +165,9 @@ const AnnouncementBanner = () => {
                   </div>
                   
                   {/* Message content with HTML support */}
-                  <div 
+                  <SafeHtml
                     className={`text-sm ${styles.textColor} opacity-90 leading-relaxed`}
-                    dangerouslySetInnerHTML={{ __html: currentAnnouncement.content }}
+                    html={currentAnnouncement.content}
                   />
                   
                   {/* Additional announcements indicator */}

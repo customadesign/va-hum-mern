@@ -24,6 +24,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import '../styles/quill-custom.css';
 import { adminAPI } from '../services/api';
+import SafeHtml from '../components/SafeHtml';
 
 const AnnouncementManagement = () => {
   const { t } = useTranslation();
@@ -602,9 +603,10 @@ const AnnouncementManagement = () => {
                       <div className="text-sm font-medium text-admin-900 mb-1">
                         {announcement.title}
                       </div>
-                      <div className="text-sm text-admin-500 line-clamp-2">
-                        {stripHtml(announcement.content)}
-                      </div>
+                      <SafeHtml
+                        className="text-sm text-admin-500 line-clamp-2"
+                        html={announcement.content}
+                      />
                     </div>
                   </td>
                   <td className="admin-table-cell">

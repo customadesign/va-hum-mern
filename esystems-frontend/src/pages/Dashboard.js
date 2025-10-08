@@ -6,6 +6,7 @@ import { useBranding } from '../contexts/BrandingContext';
 import { useQuery } from 'react-query';
 import api, { announcementAPI } from '../services/api';
 import AnnouncementBanner from '../components/AnnouncementBanner';
+import SafeHtml from '../components/SafeHtml';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -463,13 +464,13 @@ export default function Dashboard() {
                           {new Date(announcement.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <div 
+                      <SafeHtml
                         className="mt-1 text-sm opacity-90"
-                        dangerouslySetInnerHTML={{ 
-                          __html: announcement.content.length > 150 
-                            ? announcement.content.substring(0, 150) + '...' 
-                            : announcement.content 
-                        }}
+                        html={
+                          announcement.content.length > 150
+                            ? announcement.content.substring(0, 150) + '...'
+                            : announcement.content
+                        }
                       />
                     </div>
                   </div>

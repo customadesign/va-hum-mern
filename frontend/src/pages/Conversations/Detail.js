@@ -212,56 +212,56 @@ export default function ConversationDetail() {
       return [
         {
           _id: 'sample-1',
-          participants: [user.id, 'va-1'],
+          participants: [user.id, 'admin-1'],
           va: {
-            _id: 'va-1',
-            email: 'sarah.johnson@email.com',
+            _id: 'admin-1',
+            email: 'admin@linkage.com',
             profile: {
-              name: 'Sarah Johnson',
+              name: 'Linkage Admin',
               avatar: null,
-              hero: 'Experienced Virtual Assistant specializing in social media & admin support'
+              hero: 'Linkage Support Team'
             }
           },
           messages: [
             {
               _id: 'msg-1',
               sender: user.id,
-              content: 'Hi Sarah! I reviewed your profile and I think you\'d be a great fit for our social media management needs.',
+              content: 'Hello! I\'d like to learn more about posting a job and finding the right virtual assistant.',
               createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000) // 3 hours ago
             },
             {
               _id: 'msg-2',
-              sender: 'va-1',
-              content: 'Thank you for reaching out! I\'d love to learn more about your requirements and how I can help.',
+              sender: 'admin-1',
+              content: 'Welcome to Linkage! We\'re here to help you find the perfect virtual assistant for your business needs. Feel free to ask any questions!',
               createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
             }
           ],
-          lastMessage: 'Thank you for reaching out! I\'d love to learn more about your requirements and how I can help.',
+          lastMessage: 'Welcome to Linkage! We\'re here to help you find the perfect virtual assistant for your business needs. Feel free to ask any questions!',
           lastMessageAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 0, business: 1 }
         },
         {
           _id: 'sample-2',
-          participants: [user.id, 'va-2'],
+          participants: [user.id, 'admin-2'],
           va: {
-            _id: 'va-2',
-            email: 'mike.chen@email.com',
+            _id: 'admin-2',
+            email: 'support@linkage.com',
             profile: {
-              name: 'Mike Chen',
+              name: 'Linkage Admin',
               avatar: null,
-              hero: 'Data entry specialist and customer service expert'
+              hero: 'Linkage Support Team'
             }
           },
           messages: [
             {
               _id: 'msg-3',
-              sender: 'va-2',
-              content: 'I saw your job posting and I believe my skills align perfectly with what you\'re looking for.',
+              sender: 'admin-2',
+              content: 'Thank you for joining Linkage! If you have any questions about finding virtual assistants or posting jobs, we\'re here to assist.',
               createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000) // 8 hours ago
             }
           ],
-          lastMessage: 'I saw your job posting and I believe my skills align perfectly with what you\'re looking for.',
+          lastMessage: 'Thank you for joining Linkage! If you have any questions about finding virtual assistants or posting jobs, we\'re here to assist.',
           lastMessageAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 1, business: 1 }
