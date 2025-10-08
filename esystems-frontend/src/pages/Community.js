@@ -1263,26 +1263,8 @@ export default function Community() {
                             {upcomingTrainings[0].date.toLocaleDateString()} at {upcomingTrainings[0].time}
                           </div>
                         </div>
-                        <div className="flex items-center justify-between mt-4 text-sm">
+                        <div className="mt-4 text-sm">
                           <span>{upcomingTrainings[0].attendees} registered</span>
-                          <button 
-                            onClick={() => handleJoinTraining(upcomingTrainings[0])}
-                            disabled={videosdkLoading}
-                            className={`bg-white text-blue-600 px-4 py-2 rounded-md font-medium transition-colors ${
-                              videosdkLoading 
-                                ? 'opacity-50 cursor-not-allowed' 
-                                : 'hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-                            }`}
-                          >
-                            {videosdkLoading ? (
-                              <div className="flex items-center">
-                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-2"></div>
-                                Creating...
-                              </div>
-                            ) : (
-                              'Join Training'
-                            )}
-                          </button>
                         </div>
                       </div>
                     )}
