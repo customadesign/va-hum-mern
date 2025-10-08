@@ -24,13 +24,6 @@ const {
   submitQuiz,
   submitAssignment
 } = require('../controllers/lessonController');
-const {
-  createMeeting,
-  getMeeting, 
-  generateToken,
-  listMeetings,
-  validateApiKey
-} = require('../controllers/videoSDKController');
 
 
 
@@ -65,13 +58,6 @@ router.delete('/lessons/:id', protect, authorize('va'), deleteLesson);
 router.put('/lessons/:id/progress', protect, updateProgress);
 router.post('/lessons/:id/quiz', protect, submitQuiz);
 router.post('/lessons/:id/assignment', protect, submitAssignment);
-
-// VideoSDK routes
-router.post('/videosdk/meeting', protect, authorize('va'), createMeeting);
-router.get('/videosdk/meeting/:roomId', protect, getMeeting);
-router.post('/videosdk/token', protect, generateToken);
-router.get('/videosdk/meetings', protect, listMeetings);
-router.get('/videosdk/validate', protect, validateApiKey);
 
 
 module.exports = router;

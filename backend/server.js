@@ -47,7 +47,6 @@ const locationRoutes = require('./routes/locations');
 const adminRoutes = require('./routes/admin');
 const shortUrlRoutes = require('./routes/shortUrls');
 const courseRoutes = require('./routes/courses');
-const videosdkRoutes = require('./routes/videosdk');
 const analyticsRoutes = require('./routes/analytics');
 const fileRoutes = require('./routes/files');
 const profileRoutes = require('./routes/profile');
@@ -290,7 +289,6 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/shorturls', shortUrlRoutes);
 app.use('/s', shortUrlRoutes); // Public short URL redirects
 app.use('/api/courses', courseRoutes);
-app.use('/api/videosdk', videosdkRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/files', fileRoutes); // File management routes
 app.use('/api/profile', profileRoutes); // User profile management routes

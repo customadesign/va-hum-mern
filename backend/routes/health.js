@@ -65,7 +65,6 @@ router.get('/', async (req, res) => {
         hybridAuthentication: false,
         dualBrandSupport: true,
         linkedinOAuth: authChecks.linkedinConfigured,
-        videoSDK: !!process.env.VIDEOSDK_API_KEY,
         supabaseStorage: !!process.env.SUPABASE_URL,
         awsS3Fallback: !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY)
       }
