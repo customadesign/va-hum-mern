@@ -70,10 +70,27 @@ export default function Conversations() {
     return response.data.data;
   });
 
+  // Fetch profile completion to gate default messages for VAs
+  const { data: profileData } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      const response = await api.get('/users/profile');
+      return response.data; // expects { profileCompletion, data: { va|business } }
+    },
+    enabled: !!user
+  });
+
+  const isVA = !!user?.profile?.va;
+  const profileCompletionPct = profileData?.profileCompletion?.percentage ?? 0;
+
   // Sample conversations for demonstration when no real conversations exist
   const getSampleConversations = () => {
     if (user.profile?.va) {
-      // Sample conversations for VAs
+      // Gate VA default messages until profile completion >= 80%
+      if (profileCompletionPct < 80) {
+        return [];
+      }
+      // Once 80%+, show the EXACT two Linkage Admin default messages now used elsewhere
       return [
         {
           _id: 'sample-1',
@@ -92,40 +109,39 @@ export default function Conversations() {
             {
               _id: 'msg-1',
               sender: 'admin-1',
-              content: 'Thank you for reaching out! I\'d love to learn more about your requirements and how I can help.',
+              content: 'Welcome to Linkage! We\'re here to help you find the perfect virtual assistant for your business needs. Feel free to ask any questions!',
               createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
             }
           ],
-          lastMessage: 'Thank you for reaching out! I\'d love to learn more about your requirements and how I can help.',
+          lastMessage: 'Welcome to Linkage! We\'re here to help you find the perfect virtual assistant for your business needs. Feel free to ask any questions!',
           lastMessageAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
           status: 'active',
-          unreadCount: { va: 1, business: 0 }
+          unreadCount: { va: 0, business: 1 }
         },
         {
           _id: 'sample-2',
           participants: [user.id, 'admin-2'],
           business: {
             _id: 'admin-2',
-            email: 'support@linkage.ph',
+            email: 'support@linkage.com',
             profile: {
               name: 'Linkage Admin',
-              company: 'Linkage VA Hub',
               avatar: null,
-              hero: 'Official Linkage VA Hub Administration'
+              hero: 'Linkage Support Team'
             }
           },
           messages: [
             {
-              _id: 'msg-2',
+              _id: 'msg-3',
               sender: 'admin-2',
-              content: 'I saw your job posting and I believe my skills in virtual assistance would be a great match for your needs.',
+              content: 'Thank you for joining Linkage! If you have any questions about finding virtual assistants or posting jobs, we\'re here to assist.',
               createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000) // 8 hours ago
             }
           ],
-          lastMessage: 'I saw your job posting and I believe my skills in virtual assistance would be a great match for your needs.',
+          lastMessage: 'Thank you for joining Linkage! If you have any questions about finding virtual assistants or posting jobs, we\'re here to assist.',
           lastMessageAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
           status: 'active',
-          unreadCount: { va: 0, business: 1 }
+          unreadCount: { va: 1, business: 1 }
         }
       ];
     } else {
