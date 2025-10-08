@@ -13,6 +13,53 @@ import {
   CheckIcon
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
+import SafeHtml from '../../components/SafeHtml';
+import { DEFAULT_SYSTEM_HTML } from '../../constants/systemHtml';
+
+// Strip HTML tags for safe preview display
+function stripHtml(input) {
+  if (!input) return '';
+  return input.replace(/<[^>]*>/g, '');
+}
+
+// Allowlist sanitizer for the system nudge (keep only <a> and enforce safe attrs)
+function sanitizeSystemHtml(html) {
+  try {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = html || '';
+    const nodes = tpl.content.querySelectorAll('*');
+    nodes.forEach((el) => {
+      const tag = el.tagName.toUpperCase();
+      if (tag !== 'A') {
+        const text = document.createTextNode(el.textContent || '');
+        el.replaceWith(text);
+        return;
+      }
+      const a = el;
+      const href = a.getAttribute('href') || '';
+      const safeHref =
+        href.startsWith('/') ||
+        href.startsWith('http://') ||
+        href.startsWith('https://') ||
+        href.startsWith('mailto:')
+          ? href
+          : '#';
+      a.setAttribute('href', safeHref);
+      a.setAttribute('rel', 'noopener noreferrer');
+      a.setAttribute('target', safeHref.startsWith('/') ? '_self' : '_blank');
+      const existingClass = a.getAttribute('class') || '';
+      a.setAttribute('class', (existingClass + ' text-blue-600 underline').trim());
+      Array.from(a.attributes).forEach((attr) => {
+        if (!['href', 'rel', 'target', 'class'].includes(attr.name)) {
+          a.removeAttribute(attr.name);
+        }
+      });
+    });
+    return tpl.innerHTML;
+  } catch {
+    return stripHtml(html || '');
+  }
+}
 
 export default function Conversations() {
   const { branding } = useBranding();
@@ -247,6 +294,10 @@ export default function Conversations() {
               </div>
 
               <div className="overflow-y-auto h-full pb-20">
+                {/* Mobile-only system nudge */}
+                <div className="md:hidden px-6 py-3 border-b border-gray-200 bg-white">
+                  <SafeHtml html={DEFAULT_SYSTEM_HTML} />
+                </div>
                 {displayConversations?.length === 0 ? (
                   <div className="text-center py-12 px-4">
                     <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
@@ -264,11 +315,25 @@ export default function Conversations() {
                       const unreadCount = getUnreadCount(conversation);
                       const lastMessage = conversation.messages?.[conversation.messages.length - 1];
                       const isIntercepted = conversation.isIntercepted;
-                      
+                      // Prefer system/override sender label when present
+                      const label =
+                        lastMessage?.displayedSenderName ||
+                        otherParticipant?.profile?.name ||
+                        otherParticipant?.profile?.company ||
+                        otherParticipant?.displayName ||
+                        otherParticipant?.name ||
+                        'Unknown User';
+                      // Safe preview text (avoid rendering raw HTML from system messages)
+                      const previewText = stripHtml(lastMessage?.content || lastMessage?.bodyHtml || '');
+                      // Prefer sanitized HTML for preview when available
+                      const lastBodyHtml = lastMessage?.bodyHtmlSafe || lastMessage?.bodyHtml;
+                      // Detect virtual default system conversation injected by API
+                      const isSystemVirtual = conversation.isSystemConversation === true || conversation._id === 'system-default';
+                      const toHref = isSystemVirtual ? '/dashboard' : `/conversations/${conversation._id}`;
                       return (
                         <li key={conversation._id}>
                           <Link
-                            to={`/conversations/${conversation._id}`}
+                            to={toHref}
                             className={`block px-6 py-4 hover:bg-gray-50 transition-colors ${
                               unreadCount > 0 ? 'bg-blue-50' : ''
                             } ${isIntercepted && user.admin ? 'border-l-4 border-orange-400' : ''}`}
@@ -299,7 +364,7 @@ export default function Conversations() {
                                     <p className={`text-sm font-medium ${
                                       unreadCount > 0 ? 'text-gray-900' : 'text-gray-700'
                                     }`}>
-                                      {otherParticipant?.profile?.name || otherParticipant?.profile?.company || 'Unknown User'}
+                                      {label}
                                       {otherParticipant?.admin && (
                                         <CheckBadgeIcon className="inline h-4 w-4 text-purple-600 ml-1" />
                                       )}
@@ -328,17 +393,25 @@ export default function Conversations() {
                                 )}
                                 
                                 {lastMessage && (
-                                  <div className="mt-1 flex items-center">
-                                    <p className={`text-sm truncate ${
-                                      unreadCount > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'
-                                    }`}>
-                                      {lastMessage.sender === user.id && (
-                                        <span className="text-gray-400">You: </span>
-                                      )}
-                                      {lastMessage.content}
-                                    </p>
-                                    {lastMessage.sender === user.id && lastMessage.read && (
-                                      <CheckIcon className="ml-1 h-4 w-4 text-blue-600 flex-shrink-0" />
+                                  <div className="mt-1">
+                                    {lastBodyHtml ? (
+                                      <div
+                                        className={`text-sm ${unreadCount > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'} truncate`}
+                                      >
+                                        <SafeHtml html={lastBodyHtml} />
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center">
+                                        <p className={`text-sm truncate ${unreadCount > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
+                                          {lastMessage.sender === user.id && (
+                                            <span className="text-gray-400">You: </span>
+                                          )}
+                                          {previewText || 'Attachment'}
+                                        </p>
+                                        {lastMessage.sender === user.id && lastMessage.read && (
+                                          <CheckIcon className="ml-1 h-4 w-4 text-blue-600 flex-shrink-0" />
+                                        )}
+                                      </div>
                                     )}
                                   </div>
                                 )}
@@ -361,7 +434,11 @@ export default function Conversations() {
 
             {/* Main Content - Select a conversation prompt */}
             <div className="flex-1 hidden md:flex items-center justify-center bg-gray-50">
-              <div className="text-center">
+              <div className="text-center max-w-md px-6">
+                {/* Default system nudge */}
+                <div className="mb-6 text-left bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                  <SafeHtml html={DEFAULT_SYSTEM_HTML} />
+                </div>
                 <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-4 text-lg font-medium text-gray-900">Select a conversation</h3>
                 <p className="mt-2 text-sm text-gray-500">

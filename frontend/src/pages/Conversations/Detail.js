@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
@@ -16,6 +16,47 @@ import {
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-toastify';
+import SafeHtml from '../../components/SafeHtml';
+import { initSocket, joinConversation, leaveConversation, typingStart, typingStop } from '../../services/socket';
+
+// Allowlist sanitizer for controlled system HTML: keep only <a> with safe attributes
+function sanitizeSystemHtml(html) {
+  try {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = html || '';
+    const nodes = tpl.content.querySelectorAll('*');
+    nodes.forEach((el) => {
+      const tag = el.tagName.toUpperCase();
+      if (tag !== 'A') {
+        const text = document.createTextNode(el.textContent || '');
+        el.replaceWith(text);
+        return;
+      }
+      const a = el;
+      const href = a.getAttribute('href') || '';
+      const safeHref =
+        href.startsWith('/') ||
+        href.startsWith('http://') ||
+        href.startsWith('https://') ||
+        href.startsWith('mailto:')
+          ? href
+          : '#';
+      a.setAttribute('href', safeHref);
+      a.setAttribute('rel', 'noopener noreferrer');
+      a.setAttribute('target', safeHref.startsWith('/') ? '_self' : '_blank');
+      const existingClass = a.getAttribute('class') || '';
+      a.setAttribute('class', (existingClass + ' text-blue-600 underline').trim());
+      Array.from(a.attributes).forEach((attr) => {
+        if (!['href', 'rel', 'target', 'class'].includes(attr.name)) {
+          a.removeAttribute(attr.name);
+        }
+      });
+    });
+    return tpl.innerHTML;
+  } catch {
+    return (html || '').replace(/<[^>]*>/g, '');
+  }
+}
 
 export default function ConversationDetail() {
   const { id } = useParams();
@@ -26,6 +67,22 @@ export default function ConversationDetail() {
   const messagesEndRef = useRef(null);
   const [message, setMessage] = useState('');
   const [showOptions, setShowOptions] = useState(false);
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const typingTimerRef = useRef(null);
+  const typingActiveRef = useRef(false);
+
+  // Intercept clicks on <a> inside sanitized message HTML and route internally
+  const onMessageHtmlClick = useCallback((e) => {
+    const target = e.target;
+    if (target && target.tagName === 'A') {
+      const href = target.getAttribute('href') || '';
+      if (href.startsWith('/')) {
+        e.preventDefault();
+        e.stopPropagation();
+        navigate(href);
+      }
+    }
+  }, [navigate]);
 
   const { data: conversation, isLoading } = useQuery(
     ['conversation', id],
@@ -231,19 +288,54 @@ export default function ConversationDetail() {
       return response.data.data;
     },
     {
+      onMutate: async (messageText) => {
+        // Cancel any outgoing refetches
+        await queryClient.cancelQueries(['conversation', id]);
+
+        // Snapshot the previous value
+        const previous = queryClient.getQueryData(['conversation', id]);
+
+        // Optimistically update to the new value
+        const tempId = 'temp-' + Date.now();
+        const optimisticMsg = {
+          _id: tempId,
+          sender: user?.id || user?._id,
+          content: messageText,
+          createdAt: new Date().toISOString(),
+          status: 'sending'
+        };
+
+        if (previous) {
+          const updated = {
+            ...previous,
+            messages: [...(previous.messages || []), optimisticMsg],
+            lastMessage: messageText,
+            lastMessageAt: new Date().toISOString()
+          };
+          queryClient.setQueryData(['conversation', id], updated);
+        }
+
+        // Return a context with the previous data to roll back if needed
+        return { previous };
+      },
+      onError: (_err, _vars, context) => {
+        if (context?.previous) {
+          queryClient.setQueryData(['conversation', id], context.previous);
+        }
+        toast.error('Failed to send message');
+      },
+      onSettled: () => {
+        // Always refetch after error or success
+        queryClient.invalidateQueries(['conversation', id]);
+      },
       onSuccess: (newMessage) => {
         if (id.startsWith('sample-')) {
           // For sample conversations, show a demo message
           toast.info('This is a demo conversation. In a real conversation, your message would be sent.');
           setMessage('');
         } else {
-          queryClient.invalidateQueries(['conversation', id]);
-          queryClient.invalidateQueries('conversations');
           setMessage('');
         }
-      },
-      onError: (error) => {
-        toast.error(error.response?.data?.error || 'Failed to send message');
       }
     }
   );
@@ -326,6 +418,48 @@ export default function ConversationDetail() {
     return groups;
   };
 
+  // Initialize socket and join conversation room, handle typing status updates
+  useEffect(() => {
+    const socket = initSocket();
+    joinConversation(id);
+
+    const handleTypingStatus = (payload) => {
+      try {
+        const { conversationId, userId: typerId, isTyping } = payload || {};
+        const currentUserId = user?.id || user?._id;
+        if (!conversationId || conversationId !== id) return;
+        if (typerId && currentUserId && typerId.toString() === currentUserId.toString()) return;
+        setIsOtherTyping(!!isTyping);
+      } catch (e) {
+        // no-op
+      }
+    };
+
+    socket.on('typing_status', handleTypingStatus);
+
+    return () => {
+      socket.off('typing_status', handleTypingStatus);
+      leaveConversation(id);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, user?.id, user?._id]);
+
+  const emitTyping = () => {
+    const currentUserId = user?.id || user?._id;
+    if (!currentUserId) return;
+    if (!typingActiveRef.current) {
+      typingActiveRef.current = true;
+      typingStart(id, currentUserId);
+    }
+    if (typingTimerRef.current) {
+      clearTimeout(typingTimerRef.current);
+    }
+    typingTimerRef.current = setTimeout(() => {
+      typingActiveRef.current = false;
+      typingStop(id, currentUserId);
+    }, 1200);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -366,6 +500,7 @@ export default function ConversationDetail() {
                 <Link
                   to="/conversations"
                   className="text-gray-400 hover:text-gray-500"
+                  data-testid="back-to-list"
                 >
                   <ArrowLeftIcon className="h-5 w-5" />
                 </Link>
@@ -405,6 +540,7 @@ export default function ConversationDetail() {
                 <button
                   onClick={() => setShowOptions(!showOptions)}
                   className="text-gray-400 hover:text-gray-500"
+                  data-testid="options-toggle"
                 >
                   <EllipsisVerticalIcon className="h-6 w-6" />
                 </button>
@@ -415,6 +551,7 @@ export default function ConversationDetail() {
                       <button
                         onClick={() => archiveConversationMutation.mutate()}
                         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                        data-testid="archive-conversation"
                       >
                         <ArchiveBoxIcon className="h-4 w-4 mr-3" />
                         Archive conversation
@@ -481,7 +618,13 @@ export default function ConversationDetail() {
                                 ? 'bg-blue-600 text-white' 
                                 : 'bg-white text-gray-900 shadow-sm'
                             }`}>
-                              <p className="text-sm">{msg.content}</p>
+                              {msg.bodyHtml || msg.bodyHtmlSafe ? (
+                                <div className="text-sm">
+                                  <SafeHtml html={msg.bodyHtmlSafe || msg.bodyHtml} />
+                                </div>
+                              ) : (
+                                <p className="text-sm">{msg.content}</p>
+                              )}
                             </div>
                             <p className="text-xs text-gray-500 mt-1">
                               {formatMessageTime(msg.createdAt)}
@@ -495,6 +638,12 @@ export default function ConversationDetail() {
                 </div>
               </div>
             ))}
+            {/* Typing indicator */}
+            {isOtherTyping && (
+              <div className="mt-2 text-xs text-gray-500 italic">
+                Typing...
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
         </div>
@@ -507,8 +656,15 @@ export default function ConversationDetail() {
                 <textarea
                   rows={1}
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) => {
+                    setMessage(e.target.value);
+                    emitTyping();
+                  }}
                   onKeyDown={(e) => {
+                    // Emit typing for normal keystrokes
+                    if (!(e.key === 'Enter' && !e.shiftKey)) {
+                      emitTyping();
+                    }
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
                       handleSendMessage(e);
