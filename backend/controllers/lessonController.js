@@ -2,7 +2,6 @@ const Course = require('../models/Course');
 const Lesson = require('../models/Lesson');
 const Enrollment = require('../models/Enrollment');
 const Progress = require('../models/Progress');
-const { videoSDKClient } = require('../utils/videosdk');
 
 // @desc    Get lessons for a course
 // @route   GET /api/courses/:courseId/lessons
