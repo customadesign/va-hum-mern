@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
@@ -70,6 +70,7 @@ export default function ConversationDetail() {
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const typingTimerRef = useRef(null);
   const typingActiveRef = useRef(false);
+  const userId = user?.id || user?._id;
 
   // Intercept clicks on <a> inside sanitized message HTML and route internally
   const onMessageHtmlClick = useCallback((e) => {
@@ -84,53 +85,40 @@ export default function ConversationDetail() {
     }
   }, [navigate]);
 
-  const { data: conversation, isLoading, error } = useQuery(
-    ['conversation', id],
-    async () => {
-      // Check if this is a sample conversation ID
-      if (id.startsWith('sample-')) {
-        return getSampleConversation(id);
-      }
-      try {
-        const response = await api.get(`/conversations/${id}`);
-        return response.data.data;
-      } catch (err) {
-        // Check if this is a gating error
-        if (err.response?.status === 403 && err.response?.data?.gated) {
-          // Redirect to conversations list where gated view will show
-          toast.info('Please complete your profile to access messages');
-          navigate('/conversations');
-          throw err;
-        }
-        throw err;
-      }
-    },
-    {
-      refetchInterval: id.startsWith('sample-') ? false : 5000, // Don't poll for sample conversations
-      retry: (failureCount, error) => {
-        // Don't retry on gating errors
-        if (error?.response?.status === 403 && error?.response?.data?.gated) {
-          return false;
-        }
-        return failureCount < 3;
-      }
-    }
+  const isSampleConversation = id.startsWith('sample-');
+  const isVA = Boolean(
+    user?.va ||
+    user?.role === 'va' ||
+    user?.profile?.type === 'va' ||
+    user?.profile?.va
   );
 
-  // Get sample conversation data by ID
-  const getSampleConversation = (sampleId) => {
-    const sampleConversations = getSampleConversations();
-    return sampleConversations.find(conv => conv._id === sampleId);
-  };
+  const { data: profileData, isLoading: isProfileLoading } = useQuery({
+    queryKey: ['profile', userId],
+    queryFn: async () => {
+      const response = await api.get('/users/profile');
+      return response.data;
+    },
+    enabled: Boolean(userId && isVA)
+  });
 
-  // Sample conversations helper function (same as in index.js)
-  const getSampleConversations = () => {
-    if (user.profile?.va) {
+  const profileCompletionPct = profileData?.profileCompletion?.percentage ?? 0;
+  const canViewSampleConversations = !isVA || profileCompletionPct >= 80;
+
+  const getSampleConversations = useCallback(() => {
+    if (!userId) {
+      return [];
+    }
+
+    if (isVA) {
+      if (!canViewSampleConversations) {
+        return [];
+      }
       // Sample conversations for VAs
       return [
         {
           _id: 'sample-1',
-          participants: [user.id, 'admin-1'],
+          participants: [userId, 'admin-1'],
           business: {
             _id: 'admin-1',
             email: 'support@linkage.com',
@@ -150,7 +138,7 @@ export default function ConversationDetail() {
             },
             {
               _id: 'msg-2',
-              sender: user.id,
+              sender: userId,
               content: 'Thank you! I appreciate the warm welcome. I\'m excited to get started.',
               createdAt: new Date(Date.now() - 1.5 * 60 * 60 * 1000) // 1.5 hours ago
             },
@@ -168,7 +156,7 @@ export default function ConversationDetail() {
         },
         {
           _id: 'sample-2',
-          participants: [user.id, 'admin-2'],
+          participants: [userId, 'admin-2'],
           business: {
             _id: 'admin-2',
             email: 'support@linkage.com',
@@ -188,7 +176,7 @@ export default function ConversationDetail() {
             },
             {
               _id: 'msg-5',
-              sender: user.id,
+              sender: userId,
               content: 'Thanks for the advice! I\'ll make sure to check my messages regularly.',
               createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000) // 5 hours ago
             }
@@ -200,7 +188,7 @@ export default function ConversationDetail() {
         },
         {
           _id: 'sample-3',
-          participants: [user.id, 'business-3'],
+          participants: [userId, 'business-3'],
           business: {
             _id: 'business-3',
             email: 'team@startupventure.io',
@@ -214,7 +202,7 @@ export default function ConversationDetail() {
           messages: [
             {
               _id: 'msg-6',
-              sender: user.id,
+              sender: userId,
               content: 'Thank you for the opportunity! I\'m excited to get started on the project.',
               createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000) // 1 day ago
             }
@@ -230,7 +218,7 @@ export default function ConversationDetail() {
       return [
         {
           _id: 'sample-1',
-          participants: [user.id, 'admin-1'],
+          participants: [userId, 'admin-1'],
           va: {
             _id: 'admin-1',
             email: 'admin@linkage.com',
@@ -243,7 +231,7 @@ export default function ConversationDetail() {
           messages: [
             {
               _id: 'msg-1',
-              sender: user.id,
+              sender: userId,
               content: 'Hello! I\'d like to learn more about posting a job and finding the right virtual assistant.',
               createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000) // 3 hours ago
             },
@@ -261,7 +249,7 @@ export default function ConversationDetail() {
         },
         {
           _id: 'sample-2',
-          participants: [user.id, 'admin-2'],
+          participants: [userId, 'admin-2'],
           va: {
             _id: 'admin-2',
             email: 'support@linkage.com',
@@ -286,16 +274,58 @@ export default function ConversationDetail() {
         }
       ];
     }
-  };
+  }, [userId, isVA, canViewSampleConversations]);
+
+  const sampleConversation = useMemo(() => {
+    if (!isSampleConversation) {
+      return null;
+    }
+    const samples = getSampleConversations();
+    return samples.find((conv) => conv._id === id) || null;
+  }, [id, isSampleConversation, getSampleConversations]);
+
+  const { data: apiConversation, isLoading: isConversationLoading } = useQuery(
+    ['conversation', id],
+    async () => {
+      try {
+        const response = await api.get(`/conversations/${id}`);
+        return response.data.data;
+      } catch (err) {
+        // Check if this is a gating error (for business users)
+        if (err.response?.status === 403 && err.response?.data?.gated) {
+          // Redirect to conversations list where gated view will show
+          toast.info('Please complete your profile to access messages');
+          navigate('/conversations');
+          throw err;
+        }
+        throw err;
+      }
+    },
+    {
+      enabled: !isSampleConversation,
+      refetchInterval: isSampleConversation ? false : 5000,
+      retry: (failureCount, error) => {
+        // Don't retry on gating errors
+        if (error?.response?.status === 403 && error?.response?.data?.gated) {
+          return false;
+        }
+        return failureCount < 3;
+      }
+    }
+  );
+
+  const conversation = isSampleConversation ? sampleConversation : apiConversation;
+  const isLoading = (!isSampleConversation && isConversationLoading) ||
+    (isSampleConversation && isVA && isProfileLoading);
 
   const sendMessageMutation = useMutation(
     async (messageText) => {
       // Handle sample conversation messages
-      if (id.startsWith('sample-')) {
+      if (isSampleConversation) {
         // Simulate sending a message in a sample conversation
         return {
           _id: 'new-msg-' + Date.now(),
-          sender: user.id,
+          sender: userId,
           content: messageText,
           createdAt: new Date()
         };
@@ -317,7 +347,7 @@ export default function ConversationDetail() {
         const tempId = 'temp-' + Date.now();
         const optimisticMsg = {
           _id: tempId,
-          sender: user?.id || user?._id,
+          sender: userId,
           content: messageText,
           createdAt: new Date().toISOString(),
           status: 'sending'
@@ -347,7 +377,7 @@ export default function ConversationDetail() {
         queryClient.invalidateQueries(['conversation', id]);
       },
       onSuccess: (newMessage) => {
-        if (id.startsWith('sample-')) {
+        if (isSampleConversation) {
           // For sample conversations, show a demo message
           toast.info('This is a demo conversation. In a real conversation, your message would be sent.');
           setMessage('');
@@ -401,7 +431,7 @@ export default function ConversationDetail() {
     }
     
     // Fallback to original logic
-    if (user.profile?.va) {
+    if (isVA) {
       return conversation?.business;
     } else {
       return conversation?.va;
@@ -438,13 +468,17 @@ export default function ConversationDetail() {
 
   // Initialize socket and join conversation room, handle typing status updates
   useEffect(() => {
+    if (isSampleConversation && isVA && !canViewSampleConversations) {
+      return undefined;
+    }
+
     const socket = initSocket();
     joinConversation(id);
 
     const handleTypingStatus = (payload) => {
       try {
         const { conversationId, userId: typerId, isTyping } = payload || {};
-        const currentUserId = user?.id || user?._id;
+        const currentUserId = userId;
         if (!conversationId || conversationId !== id) return;
         if (typerId && currentUserId && typerId.toString() === currentUserId.toString()) return;
         setIsOtherTyping(!!isTyping);
@@ -460,10 +494,10 @@ export default function ConversationDetail() {
       leaveConversation(id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, user?.id, user?._id]);
+  }, [id, userId, isSampleConversation, isVA, canViewSampleConversations]);
 
   const emitTyping = () => {
-    const currentUserId = user?.id || user?._id;
+    const currentUserId = userId;
     if (!currentUserId) return;
     if (!typingActiveRef.current) {
       typingActiveRef.current = true;
@@ -478,11 +512,70 @@ export default function ConversationDetail() {
     }, 1200);
   };
 
+  if (isSampleConversation && isVA && !isProfileLoading && !canViewSampleConversations) {
+    return (
+      <>
+        <Helmet>
+          <title>Complete Your Profile - {branding.name}</title>
+        </Helmet>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+          <div className="max-w-md w-full bg-white shadow-lg rounded-xl p-8 text-center">
+            <h1 className="text-xl font-semibold text-gray-900">Finish Your Profile to Unlock Demo Messages</h1>
+            <p className="mt-4 text-sm text-gray-600">
+              Demo conversations unlock once your virtual assistant profile is at least 80% complete.
+              Head back to your profile to finish the remaining sections and preview sample messages.
+            </p>
+            <div className="mt-6 flex flex-col space-y-3">
+              <Link
+                to="/profile-setup"
+                className="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Continue Profile Setup
+              </Link>
+              <Link
+                to="/conversations"
+                className="inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              >
+                Back to Messages
+              </Link>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
+    );
+  }
+
+  if (!conversation) {
+    return (
+      <>
+        <Helmet>
+          <title>Conversation Not Found - {branding.name}</title>
+        </Helmet>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+          <div className="max-w-md w-full bg-white shadow-lg rounded-xl p-8 text-center">
+            <h1 className="text-xl font-semibold text-gray-900">We couldn&apos;t find that conversation</h1>
+            <p className="mt-4 text-sm text-gray-600">
+              It may have been removed or you might not have access to view it. Please return to your messages and try again.
+            </p>
+            <div className="mt-6">
+              <Link
+                to="/conversations"
+                className="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Back to Messages
+              </Link>
+            </div>
+          </div>
+        </div>
+      </>
     );
   }
 
@@ -499,7 +592,7 @@ export default function ConversationDetail() {
 
       <div className="min-h-screen bg-gray-50 flex flex-col">
         {/* Demo Banner for Sample Conversations */}
-        {id.startsWith('sample-') && (
+        {isSampleConversation && (
           <div className="bg-blue-600 text-white py-2 px-4 text-center text-sm">
             <span className="inline-flex items-center">
               <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -601,7 +694,7 @@ export default function ConversationDetail() {
                 
                 <div className="space-y-3">
                   {messages.map((msg, idx) => {
-                    const isCurrentUser = msg.sender === user.id || msg.sender._id === user.id;
+                    const isCurrentUser = msg.sender === userId || msg.sender?._id === userId;
                     const showAvatar = idx === 0 || messages[idx - 1].sender !== msg.sender;
                     
                     return (
