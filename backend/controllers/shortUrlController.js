@@ -40,9 +40,8 @@ const createShortUrl = catchAsync(async (req, res) => {
     }
   } while (!(await ShortUrl.isCodeUnique(shortCode)));
 
-  // Create the short URL - redirect to frontend VA profile
-  const frontendHost = process.env.FRONTEND_URL || 'http://localhost:3000';
-  const originalUrl = `${frontendHost}/vas/${vaId}`;
+  // Store only the relative path - redirect URL will be constructed dynamically
+  const originalUrl = `/vas/${vaId}`;
   const shortUrl = new ShortUrl({
     originalUrl,
     shortCode,
@@ -98,9 +97,8 @@ const createPublicVAShortUrl = catchAsync(async (req, res) => {
     }
   } while (!(await ShortUrl.isCodeUnique(shortCode)));
 
-  // Create the short URL - redirect to frontend VA profile
-  const frontendHost = process.env.FRONTEND_URL || 'http://localhost:3000';
-  const originalUrl = `${frontendHost}/vas/${vaId}`;
+  // Store only the relative path - redirect URL will be constructed dynamically
+  const originalUrl = `/vas/${vaId}`;
   const shortUrl = new ShortUrl({
     originalUrl,
     shortCode,
@@ -144,9 +142,28 @@ const redirectShortUrl = catchAsync(async (req, res) => {
   shortUrl.clicks += 1;
   await shortUrl.save();
 
-  // Redirect to original URL with share parameter and shortlink tracking
+  // Dynamically construct the frontend URL based on the current request
+  // This ensures the redirect always uses the correct domain (production or local)
+  const protocol = req.protocol;
+  const host = req.get('host');
+  
+  // Determine the frontend host based on the API host
+  let frontendHost;
+  if (host.includes('linkage-va-hub-api.onrender.com')) {
+    // Production API -> Production Frontend
+    frontendHost = 'linkage-va-hub.onrender.com';
+  } else if (host.includes('localhost') || host.includes('127.0.0.1')) {
+    // Local API -> Local Frontend
+    frontendHost = 'localhost:3000';
+  } else {
+    // Fallback: use environment variable or default
+    frontendHost = process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || 'linkage-va-hub.onrender.com';
+  }
+  
+  // Construct redirect URL with share parameter and shortlink tracking
   const separator = shortUrl.originalUrl.includes('?') ? '&' : '?';
-  const redirectUrl = `${shortUrl.originalUrl}${separator}share=true&via=shortlink`;
+  const redirectUrl = `${protocol}://${frontendHost}${shortUrl.originalUrl}${separator}share=true&via=shortlink`;
+  
   res.redirect(redirectUrl);
 });
 
@@ -246,4 +263,4 @@ module.exports = {
   getUserShortUrls,
   deactivateShortUrl,
   reactivateShortUrl
-}; 
+};

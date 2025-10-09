@@ -44,6 +44,10 @@ const locationSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    streetAddressManual: {
+      type: String,
+      trim: true,
+    },
     postalCode: {
       type: String,
       trim: true,
@@ -65,9 +69,9 @@ const locationSchema = new mongoose.Schema(
 locationSchema.index({ city: 1, country: 1 });
 locationSchema.index({ countryCode: 1 });
 
-// Virtual for frontend compatibility
+// Virtual for frontend compatibility - prioritize manual entry over autocomplete
 locationSchema.virtual("street").get(function () {
-  return this.streetAddress;
+  return this.streetAddressManual || this.streetAddress;
 });
 
 locationSchema.virtual("province").get(function () {
@@ -76,6 +80,11 @@ locationSchema.virtual("province").get(function () {
 
 locationSchema.virtual("postal_code").get(function () {
   return this.postalCode;
+});
+
+// Virtual for getting the manually entered address specifically
+locationSchema.virtual("streetManual").get(function () {
+  return this.streetAddressManual;
 });
 
 // Ensure virtuals are included when converting to JSON

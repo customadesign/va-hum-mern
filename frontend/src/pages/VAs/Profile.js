@@ -714,7 +714,6 @@ const philippineLocations = {
       "Caingin",
       "Calero",
       "Caliligawan",
-      "Canalate",
       "Caniogan",
       "Capitol Village",
       "Dakila",
@@ -1273,6 +1272,7 @@ export default function VAProfile() {
       bio: isDefaultBio ? "" : (profile?.bio || ""),
       location: {
         street: profile?.location?.street || "",
+        streetManual: profile?.location?.streetManual || "",
         province: profile?.location?.province || profile?.location?.state || "", // Backward compatibility
         city: profile?.location?.city || "",
         barangay: profile?.location?.barangay || "",
@@ -1895,6 +1895,30 @@ export default function VAProfile() {
                           </div>
                           <p className="mt-1 text-xs text-gray-500">
                             Start typing to search for your address. Select from the dropdown to auto-fill province, city, barangay, and postal code.
+                          </p>
+                        </div>
+
+                        {/* Manual Street Address Input - Fallback */}
+                        <div>
+                          <label
+                            htmlFor="location.streetManual"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            Manual Street Address <span className="text-xs text-gray-500 font-normal">(Optional - if address not found above)</span>
+                          </label>
+                          <div className="mt-1">
+                            <input
+                              type="text"
+                              name="location.streetManual"
+                              id="location.streetManual"
+                              value={formik.values.location.streetManual}
+                              onChange={formik.handleChange}
+                              placeholder="Enter your street address manually..."
+                              className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
+                            />
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500">
+                            Use this field if your address cannot be found through the autocomplete above. This address will be used instead of the autocomplete selection.
                           </p>
                         </div>
 

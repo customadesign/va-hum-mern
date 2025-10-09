@@ -762,6 +762,7 @@ router.put('/me', protect, async (req, res) => {
             country: locationData.country || 'Philippines',
             countryCode: locationData.country_code || 'PH',
             streetAddress: locationData.street || locationData.streetAddress || '',
+            streetAddressManual: locationData.streetManual || '',
             postalCode: locationData.postal_code || locationData.postalCode || '',
             barangay: locationData.barangay || '',
             timeZone: 'Asia/Manila',
@@ -771,10 +772,19 @@ router.put('/me', protect, async (req, res) => {
         } else {
           // Update existing location with additional details if provided
           let locationUpdated = false;
-          if ((locationData.street || locationData.streetAddress) && !location.streetAddress) {
+          
+          // Always update streetAddress from autocomplete if provided
+          if (locationData.street || locationData.streetAddress) {
             location.streetAddress = locationData.street || locationData.streetAddress;
             locationUpdated = true;
           }
+          
+          // Always update manual street address if provided (takes precedence)
+          if (locationData.streetManual !== undefined) {
+            location.streetAddressManual = locationData.streetManual;
+            locationUpdated = true;
+          }
+          
           if ((locationData.postal_code || locationData.postalCode) && !location.postalCode) {
             location.postalCode = locationData.postal_code || locationData.postalCode;
             locationUpdated = true;

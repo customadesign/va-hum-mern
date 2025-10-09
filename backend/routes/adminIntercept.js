@@ -858,7 +858,7 @@ router.get('/check-messaging-eligibility/:vaId', optionalAuth, async (req, res) 
       actionRequired: {
         type: 'register',
         text: 'Register Your Business To Chat',
-        url: process.env.ESYSTEMS_FRONTEND_URL || 'http://localhost:3002/register'
+        url: process.env.ESYSTEMS_FRONTEND_URL || 'https://esystems-management-hub.onrender.com/sign-up'
       }
     };
 
@@ -887,7 +887,7 @@ router.get('/check-messaging-eligibility/:vaId', optionalAuth, async (req, res) 
               text: `Complete Your Profile To Chat (${response.profileCompletion}% complete)`,
               url: process.env.ESYSTEMS_FRONTEND_URL 
                 ? `${process.env.ESYSTEMS_FRONTEND_URL}/profile` 
-                : 'http://localhost:3002/profile'
+                : 'https://esystems-management-hub.onrender.com/profile'
             };
           }
         }
@@ -911,7 +911,7 @@ router.get('/check-messaging-eligibility/:vaId', optionalAuth, async (req, res) 
           text: 'Create a Business Profile To Chat',
           url: process.env.ESYSTEMS_FRONTEND_URL 
             ? `${process.env.ESYSTEMS_FRONTEND_URL}/register` 
-            : 'http://localhost:3002/register'
+            : 'https://esystems-management-hub.onrender.com/sign-up'
         };
       }
     }

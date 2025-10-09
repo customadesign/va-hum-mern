@@ -135,7 +135,7 @@ export default function Home() {
 
               <div className="mt-8 text-right">
                 <Link
-                  to="/vas"
+                  to="/community"
                   className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   style={{backgroundColor: '#2173b8'}}
                   onMouseEnter={(e) => e.target.style.backgroundColor = '#1e40af'}
