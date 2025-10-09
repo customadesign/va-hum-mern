@@ -25,34 +25,20 @@ export default function VerifyEmailSent() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div>
-            <img
-              className="mx-auto h-24 w-auto object-contain"
-              src={branding.logoUrl}
-              alt={branding.name}
-            />
+            <div className="text-center">
+              <img
+                className="mx-auto h-24 w-auto object-contain mb-6"
+                src="https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/67d446905106d57ab03054ed.png"
+                alt={branding.name}
+              />
+            </div>
             <div className="mt-6 text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                <svg
-                  className="w-8 h-8 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
-              </div>
               <h2 className="text-3xl font-extrabold text-gray-900">
                 Check your email
               </h2>
               <p className="mt-2 text-sm text-gray-600">
                 We've sent you a verification link at your email address.
-                Please click the link to verify your account and continue.
+                Please click link to verify your account and continue.
               </p>
             </div>
           </div>
