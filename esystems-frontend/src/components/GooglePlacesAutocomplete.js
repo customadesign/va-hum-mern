@@ -1,128 +1,168 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { LoadScript, Autocomplete } from '@react-google-maps/api';
-import { MapPinIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import React, { useEffect, useRef, useState } from 'react';
 
-const libraries = ['places'];
+const GOOGLE_MAPS_API_KEY = 'AIzaSyASgY24eTreJFqEFsSnRrNAMQNKg-dbmNs';
+
+// Load Google Maps script
+const loadGoogleMapsScript = () => {
+  return new Promise((resolve, reject) => {
+    // Check if already loaded
+    if (window.google && window.google.maps && window.google.maps.places) {
+      resolve();
+      return;
+    }
+
+    // Check if script is already being loaded
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+    if (existingScript) {
+      existingScript.addEventListener('load', resolve);
+      existingScript.addEventListener('error', reject);
+      return;
+    }
+
+    // Create and load script
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.addEventListener('load', resolve);
+    script.addEventListener('error', reject);
+    document.head.appendChild(script);
+  });
+};
 
 const GooglePlacesAutocomplete = ({ 
   onPlaceSelected, 
-  placeholder = "Search for your office address",
-  defaultValue = "",
-  apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'AIzaSyASgY24eTreJFqEFsSnRrNAMQNKg-dbmNs'
+  placeholder = "Enter your address",
+  className = "",
+  value = "",
+  name = "",
+  id = ""
 }) => {
-  const [autocomplete, setAutocomplete] = useState(null);
-  const [inputValue, setInputValue] = useState(defaultValue);
+  const inputRef = useRef(null);
+  const autocompleteRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [inputValue, setInputValue] = useState(value);
 
-  const onLoad = (autocompleteInstance) => {
-    setAutocomplete(autocompleteInstance);
-    setIsLoaded(true);
-  };
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
 
-  const onPlaceChanged = () => {
-    if (autocomplete !== null) {
-      const place = autocomplete.getPlace();
+  useEffect(() => {
+    loadGoogleMapsScript()
+      .then(() => {
+        setIsLoaded(true);
+      })
+      .catch((error) => {
+        console.error('Error loading Google Maps script:', error);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!isLoaded || !inputRef.current) return;
+
+    // Initialize Google Places Autocomplete
+    const options = {
+      componentRestrictions: { country: 'ph' }, // Restrict to Philippines
+      fields: ['address_components', 'formatted_address', 'geometry', 'name'],
+      types: ['address']
+    };
+
+    autocompleteRef.current = new window.google.maps.places.Autocomplete(
+      inputRef.current,
+      options
+    );
+
+    // Listen for place selection
+    autocompleteRef.current.addListener('place_changed', () => {
+      const place = autocompleteRef.current.getPlace();
       
-      if (place.address_components) {
-        const addressComponents = place.address_components;
-        const formattedAddress = place.formatted_address;
-        
-        // Parse address components
-        let streetNumber = '';
-        let streetName = '';
-        let city = '';
-        let state = '';
-        let country = '';
-        let postalCode = '';
-        
-        addressComponents.forEach(component => {
-          const types = component.types;
-          
-          if (types.includes('street_number')) {
-            streetNumber = component.long_name;
-          }
-          if (types.includes('route')) {
-            streetName = component.long_name;
-          }
-          if (types.includes('locality')) {
-            city = component.long_name;
-          }
-          if (types.includes('administrative_area_level_1')) {
-            state = component.long_name;
-          }
-          if (types.includes('country')) {
-            country = component.long_name;
-          }
-          if (types.includes('postal_code')) {
-            postalCode = component.long_name;
-          }
-        });
-        
-        const streetAddress = streetNumber && streetName 
-          ? `${streetNumber} ${streetName}` 
-          : streetName || '';
-        
-        // Call the parent callback with parsed data
-        onPlaceSelected({
-          streetAddress,
-          city,
-          state,
-          country,
-          postalCode,
-          formattedAddress,
-          placeId: place.place_id,
-          latitude: place.geometry?.location?.lat(),
-          longitude: place.geometry?.location?.lng()
-        });
-        
-        setInputValue(formattedAddress);
+      if (!place || !place.address_components) {
+        return;
       }
-    }
+
+      // Parse address components
+      const addressComponents = place.address_components;
+      const parsedAddress = {
+        street: '',
+        city: '',
+        province: '',
+        barangay: '',
+        postalCode: '',
+        country: 'Philippines',
+        formattedAddress: place.formatted_address || ''
+      };
+
+      // Extract components
+      addressComponents.forEach(component => {
+        const types = component.types;
+        
+        if (types.includes('street_number') || types.includes('route')) {
+          parsedAddress.street += (parsedAddress.street ? ' ' : '') + component.long_name;
+        }
+        
+        if (types.includes('sublocality') || types.includes('sublocality_level_1')) {
+          // Barangay is usually a sublocality in Philippines
+          parsedAddress.barangay = component.long_name;
+        }
+        
+        if (types.includes('locality') || types.includes('administrative_area_level_2')) {
+          parsedAddress.city = component.long_name;
+        }
+        
+        if (types.includes('administrative_area_level_1')) {
+          parsedAddress.province = component.long_name;
+        }
+        
+        if (types.includes('postal_code')) {
+          parsedAddress.postalCode = component.long_name;
+        }
+      });
+
+      // If street is empty, try to use the place name
+      if (!parsedAddress.street && place.name) {
+        parsedAddress.street = place.name;
+      }
+
+      // Update input value
+      setInputValue(place.formatted_address);
+
+      // Call the callback with parsed address
+      if (onPlaceSelected) {
+        onPlaceSelected(parsedAddress);
+      }
+    });
+
+    // Cleanup
+    return () => {
+      if (autocompleteRef.current) {
+        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      }
+    };
+  }, [isLoaded, onPlaceSelected]);
+
+  const handleChange = (e) => {
+    setInputValue(e.target.value);
   };
 
   return (
-    <LoadScript
-      googleMapsApiKey={apiKey}
-      libraries={libraries}
-      loadingElement={
-        <div className="flex items-center justify-center p-2">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-sm text-gray-700">Loading Google Maps...</span>
+    <div className="relative">
+      <input
+        ref={inputRef}
+        type="text"
+        value={inputValue}
+        onChange={handleChange}
+        placeholder={placeholder}
+        className={className}
+        name={name}
+        id={id}
+        autoComplete="off"
+      />
+      {!isLoaded && (
+        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+          <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full"></div>
         </div>
-      }
-    >
-      <div className="relative">
-        <Autocomplete
-          onLoad={onLoad}
-          onPlaceChanged={onPlaceChanged}
-          options={{
-            types: ['address'],
-            componentRestrictions: { country: ['us', 'ca', 'gb', 'au'] }, // You can remove this to allow all countries
-          }}
-        >
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MapPinIcon className="h-5 w-5 text-gray-700" />
-            </div>
-            <input
-              type="text"
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder={placeholder}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-            />
-            {isLoaded && (
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-700" />
-              </div>
-            )}
-          </div>
-        </Autocomplete>
-        <p className="mt-1 text-xs text-gray-700">
-          Powered by Google Maps - Start typing to search for your office location
-        </p>
-      </div>
-    </LoadScript>
+      )}
+    </div>
   );
 };
 

@@ -17,6 +17,7 @@ import {
 } from "@heroicons/react/24/outline";
 import ProfileCompletion from "../../components/ProfileCompletion";
 import DISCQuestionnaire from "../../components/DISCTest/DISCQuestionnaire";
+import GooglePlacesAutocomplete from "../../components/GooglePlacesAutocomplete";
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Name is required"),
@@ -1352,6 +1353,68 @@ export default function VAProfile() {
     formik.setFieldValue("location.barangay", "");
   };
 
+  // Handle Google Places selection
+  const handlePlaceSelected = (parsedAddress) => {
+    // Update street address
+    if (parsedAddress.street) {
+      formik.setFieldValue("location.street", parsedAddress.street);
+    }
+
+    // Update postal code
+    if (parsedAddress.postalCode) {
+      formik.setFieldValue("location.postal_code", parsedAddress.postalCode);
+    }
+
+    // Update province, city, and barangay if they exist
+    if (parsedAddress.province) {
+      const province = parsedAddress.province;
+      setSelectedProvince(province);
+      formik.setFieldValue("location.province", province);
+      
+      // Update available cities
+      const cities = getCitiesByProvince(province);
+      setAvailableCities(cities);
+
+      // If city is provided and exists in our data
+      if (parsedAddress.city) {
+        const matchingCity = cities.find(c => 
+          c.toLowerCase() === parsedAddress.city.toLowerCase() ||
+          parsedAddress.city.toLowerCase().includes(c.toLowerCase())
+        );
+        
+        if (matchingCity) {
+          setSelectedCity(matchingCity);
+          formik.setFieldValue("location.city", matchingCity);
+          
+          // Update available barangays
+          const barangays = getBarangaysByCity(province, matchingCity);
+          setAvailableBarangays(barangays);
+
+          // If barangay is provided and exists in our data
+          if (parsedAddress.barangay) {
+            const matchingBarangay = barangays.find(b => 
+              b.toLowerCase() === parsedAddress.barangay.toLowerCase() ||
+              parsedAddress.barangay.toLowerCase().includes(b.toLowerCase())
+            );
+            
+            if (matchingBarangay) {
+              formik.setFieldValue("location.barangay", matchingBarangay);
+            } else {
+              // If no exact match, clear barangay for user to select manually
+              formik.setFieldValue("location.barangay", "");
+            }
+          }
+        } else {
+          // If city doesn't match our data, clear city and barangay
+          setSelectedCity("");
+          formik.setFieldValue("location.city", "");
+          formik.setFieldValue("location.barangay", "");
+          setAvailableBarangays([]);
+        }
+      }
+    }
+  };
+
   // Initialize cascading dropdowns when profile loads
   React.useEffect(() => {
     if (profile?.location) {
@@ -1807,7 +1870,7 @@ export default function VAProfile() {
                     {/* Location */}
                     <div>
                       <div className="space-y-4">
-                        {/* Street Address */}
+                        {/* Street Address - Google Places Autocomplete */}
                         <div>
                           <label
                             htmlFor="location.street"
@@ -1816,16 +1879,18 @@ export default function VAProfile() {
                             Street Address
                           </label>
                           <div className="mt-1">
-                            <input
-                              type="text"
+                            <GooglePlacesAutocomplete
                               name="location.street"
                               id="location.street"
                               value={formik.values.location.street}
-                              onChange={formik.handleChange}
-                              placeholder="e.g. 123 Rizal Street, Barangay San Juan"
+                              onPlaceSelected={handlePlaceSelected}
+                              placeholder="Start typing your address..."
                               className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                             />
                           </div>
+                          <p className="mt-1 text-xs text-gray-500">
+                            Start typing to search for your address. Select from the dropdown to auto-fill province, city, barangay, and postal code.
+                          </p>
                         </div>
 
                         {/* Province */}
