@@ -16,12 +16,110 @@ import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 
 export default function Conversations() {
   const { branding } = useBranding();
-  const { user } = useAuth();
-  
+  const { user, isVA, isBusiness } = useAuth();
+
   const { data: conversations, isLoading } = useQuery('conversations', async () => {
     const response = await api.get('/conversations');
     return response.data.data;
   });
+
+  // Fetch profile data for completion check
+  const { data: profileData } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      const response = await api.get('/users/profile');
+      return response.data;
+    },
+    enabled: !!user && (isVA || isBusiness)
+  });
+
+  // Extract the appropriate profile from the response
+  const vaProfile = profileData?.data?.va || null;
+  const businessProfile = profileData?.data?.business || null;
+  const profile = isVA ? vaProfile : businessProfile;
+
+  // Calculate profile completion percentage
+  const profileCompletion = React.useMemo(() => {
+    if (!profile) return { percentage: 0, isComplete: false };
+
+    let requiredFields = [];
+
+    if (isVA) {
+      const isDefaultName = profile.name === profile.email?.split('@')[0];
+
+      requiredFields = [
+        { field: 'name', weight: 10, check: () => profile.name?.trim() && !isDefaultName && profile.name.length > 2 },
+        { field: 'hero', weight: 10, check: () => {
+          const heroValue = profile.hero || profile.heroStatement;
+          return heroValue?.trim() && heroValue.length > 10;
+        }},
+        { field: 'bio', weight: 15, check: () => profile.bio?.trim() && profile.bio.length >= 100 },
+        { field: 'location', weight: 10, check: () => {
+          if (profile.location) {
+            if (typeof profile.location === 'object' && profile.location !== null) {
+              const hasCity = profile.location.city?.trim();
+              const hasProvince = profile.location.province?.trim() || profile.location.state?.trim();
+              return !!(hasCity && hasProvince);
+            } else if (typeof profile.location === 'string') {
+              return true;
+            }
+          }
+          return !!(profile.city?.trim() && (profile.state?.trim() || profile.province?.trim()));
+        }},
+        { field: 'email', weight: 10, check: () => profile.email?.trim() && profile.email.includes('@') },
+        { field: 'specialties', weight: 15, check: () => profile.specialties?.length > 0 || profile.specialtyIds?.length > 0 },
+        { field: 'roleType', weight: 5, check: () => Object.values(profile.roleType || {}).some(Boolean) },
+        { field: 'roleLevel', weight: 5, check: () => Object.values(profile.roleLevel || {}).some(Boolean) },
+        { field: 'hourlyRate', weight: 10, check: () => Number(profile.preferredMinHourlyRate) > 0 && Number(profile.preferredMaxHourlyRate) > 0 && Number(profile.preferredMaxHourlyRate) >= Number(profile.preferredMinHourlyRate) },
+        { field: 'phone', weight: 5, check: () => profile.phone?.trim() && profile.phone.length >= 10 },
+        { field: 'onlinePresence', weight: 5, check: () => profile.website?.trim() || profile.linkedin?.trim() },
+        { field: 'discAssessment', weight: 10, check: () => profile.discAssessment?.primaryType }
+      ];
+    } else if (isBusiness) {
+      const requiredFieldsList = ['contactName', 'company', 'bio', 'industry', 'companySize', 'contactRole', 'email'];
+      const professionalFieldsList = ['missionStatement', 'companyCulture', 'workEnvironment', 'headquartersLocation'];
+      const socialFieldsList = ['linkedin', 'facebook', 'twitter', 'instagram'];
+      const arrayFieldsList = ['specialties', 'benefits', 'companyValues'];
+
+      const totalFields = requiredFieldsList.length + professionalFieldsList.length + arrayFieldsList.length + 1;
+      const fieldWeight = 100 / totalFields;
+
+      requiredFields = [
+        ...requiredFieldsList.map(field => ({
+          field,
+          weight: fieldWeight,
+          check: () => profile[field] && profile[field].toString().length > 0
+        })),
+        ...professionalFieldsList.map(field => ({
+          field,
+          weight: fieldWeight,
+          check: () => profile[field] && profile[field].length > 0
+        })),
+        ...arrayFieldsList.map(field => ({
+          field,
+          weight: fieldWeight,
+          check: () => profile[field] && Array.isArray(profile[field]) && profile[field].length > 0
+        })),
+        {
+          field: 'socialLinks',
+          weight: fieldWeight,
+          check: () => socialFieldsList.some(field => profile[field] && profile[field].length > 0)
+        }
+      ];
+    }
+
+    const totalWeight = requiredFields.reduce((sum, field) => sum + field.weight, 0);
+    const completedWeight = requiredFields.reduce((sum, field) => {
+      return sum + (field.check() ? field.weight : 0);
+    }, 0);
+
+    const percentage = Math.round((completedWeight / totalWeight) * 100);
+
+    return {
+      percentage,
+      isComplete: percentage >= 80
+    };
+  }, [profile, isVA, isBusiness]);
 
   // Sample conversations for demonstration when no real conversations exist
   const getSampleConversations = () => {
@@ -191,8 +289,10 @@ export default function Conversations() {
     }
   };
 
-  // Use sample conversations if no real conversations exist
-  const displayConversations = conversations?.length > 0 ? conversations : getSampleConversations();
+  // Use sample conversations if no real conversations exist AND profile is at least 80% complete
+  const displayConversations = conversations?.length > 0 
+    ? conversations 
+    : (profileCompletion.isComplete ? getSampleConversations() : []);
 
   const getOtherParticipant = (conversation) => {
     // Prefer admin participant when present (E Systems admin messaging)
@@ -249,17 +349,63 @@ export default function Conversations() {
                   )}
                 </p>
               </div>
+              
+              {/* Profile Completion Warning Banner */}
+              {!profileCompletion.isComplete && (
+                <div className="p-4 bg-yellow-50 border-b border-yellow-100">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-yellow-800">
+                        Profile Incomplete ({profileCompletion.percentage}%)
+                      </h3>
+                      <div className="mt-2 text-sm text-yellow-700">
+                        <p>Complete at least 80% of your profile to unlock full messaging features.</p>
+                      </div>
+                      <div className="mt-3">
+                        <Link
+                          to="/dashboard"
+                          className="text-sm font-medium text-yellow-800 hover:text-yellow-700"
+                        >
+                          Complete your profile →
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="overflow-y-auto h-full pb-20">
                 {displayConversations?.length === 0 ? (
                   <div className="text-center py-12 px-4">
                     <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-700" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No messages yet</h3>
-                    <p className="mt-1 text-sm text-gray-700">
-                      {user.profile?.va 
-                        ? 'When businesses contact you, messages will appear here.'
-                        : 'Start a conversation with a VA to begin messaging.'}
-                    </p>
+                    {!profileCompletion.isComplete ? (
+                      <>
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">Complete your profile to unlock messaging</h3>
+                        <p className="mt-1 text-sm text-gray-700">
+                          Your profile is {profileCompletion.percentage}% complete. You need at least 80% completion to access messages.
+                        </p>
+                        <Link
+                          to="/dashboard"
+                          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                          Complete Profile
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">No messages yet</h3>
+                        <p className="mt-1 text-sm text-gray-700">
+                          {user.profile?.va 
+                            ? 'When businesses contact you, messages will appear here.'
+                            : 'Start a conversation with a VA to begin messaging.'}
+                        </p>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <ul className="divide-y divide-gray-200">
