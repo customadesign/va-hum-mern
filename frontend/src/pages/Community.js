@@ -528,7 +528,7 @@ export default function Community() {
     <>
       <Helmet>
         <title>Virtual Assistant Jobs Webinar ₱999 | Get Hired Remotely</title>
-        <meta name="description" content="Join our PAID webinar (₱999) on the 30th of every month to learn how to qualify for remote VA roles starting at $4–$5 per hour, including bonuses and respectful raises in your first year. Register now." />
+        <meta name="description" content="Join our PAID webinar (₱999) on the 30th of every month to learn how to qualify for remote VA roles starting at $4–$5/hr, including bonuses and respectful raises in your first year. Register now." />
         <meta property="og:title" content="Virtual Assistant Jobs Webinar ₱999 | Get Hired Remotely" />
         <meta property="og:description" content="Join our live webinar on the 30th of every month to learn how to qualify for remote VA roles starting at $4–$5 per hour with bonuses and respectful raises in your first year. Register now." />
         <meta property="og:type" content="website" />
@@ -932,15 +932,15 @@ export default function Community() {
                             <div className="space-y-2">
                               <div className="flex justify-between items-center text-xs">
                                 <span className="text-gray-600">1-3 Months Experience</span>
-                                <span className="font-bold" style={{ color: '#3b82f6' }}>$4-5/hour</span>
+                                <span className="font-bold" style={{ color: '#3b82f6' }}>$4-$5/hour</span>
                               </div>
                               <div className="flex justify-between items-center text-xs">
                                 <span className="text-gray-600">6 Months - 1 Year Experience</span>
-                                <span className="font-bold" style={{ color: '#3b82f6' }}>$6-8/hour</span>
+                                <span className="font-bold" style={{ color: '#3b82f6' }}>$6/hour</span>
                               </div>
                               <div className="flex justify-between items-center text-xs">
                                 <span className="text-gray-600">Over 1 Year Experience</span>
-                                <span className="font-bold" style={{ color: '#3b82f6' }}>$10+/hour</span>
+                                <span className="font-bold" style={{ color: '#3b82f6' }}>$6-$7/hour</span>
                               </div>
                             </div>
                           </div>
@@ -1080,7 +1080,7 @@ export default function Community() {
                     <div className="text-center">
                       <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-1 transform transition-all duration-300 hover:scale-110" style={{
                         backgroundColor: '#2173b8',
-                        boxShadow: `0 0 30px rgba(38, 99, 235, 0.4)`
+                        boxShadow: `0 0 30px rgba(38, 99, 235, 0.3)`
                       }}>
                         <span className="text-2xl font-bold text-white">${selectedRate}</span>
                       </div>
