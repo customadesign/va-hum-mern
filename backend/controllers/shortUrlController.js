@@ -142,6 +142,24 @@ const redirectShortUrl = catchAsync(async (req, res) => {
   shortUrl.clicks += 1;
   await shortUrl.save();
 
+  // Handle both full URLs (legacy) and relative paths (new format)
+  let relativePath = shortUrl.originalUrl;
+  
+  // If originalUrl is a full URL, extract just the path
+  if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+    try {
+      const url = new URL(relativePath);
+      relativePath = url.pathname + url.search; // Extract path and query params
+    } catch (error) {
+      console.error('Error parsing originalUrl:', error);
+      // If parsing fails, try to extract path with regex
+      const pathMatch = relativePath.match(/\/vas\/[a-f0-9]{24}/);
+      if (pathMatch) {
+        relativePath = pathMatch[0];
+      }
+    }
+  }
+
   // Dynamically construct the frontend URL based on the current request
   // This ensures the redirect always uses the correct domain (production or local)
   const protocol = req.protocol;
@@ -161,8 +179,8 @@ const redirectShortUrl = catchAsync(async (req, res) => {
   }
   
   // Construct redirect URL with share parameter and shortlink tracking
-  const separator = shortUrl.originalUrl.includes('?') ? '&' : '?';
-  const redirectUrl = `${protocol}://${frontendHost}${shortUrl.originalUrl}${separator}share=true&via=shortlink`;
+  const separator = relativePath.includes('?') ? '&' : '?';
+  const redirectUrl = `${protocol}://${frontendHost}${relativePath}${separator}share=true&via=shortlink`;
   
   res.redirect(redirectUrl);
 });
