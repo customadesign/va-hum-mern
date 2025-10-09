@@ -7,7 +7,8 @@ const Notification = require('../models/Notification');
 // HYBRID AUTH: Support both Clerk and legacy JWT during migration
 const { protect } = require('../middleware/hybridAuth');
 const { sendEmail } = require('../utils/email');
-const { profileCompletionGate } = require('../middleware/profileCompletion');
+const { profileCompletionGate, calculateCompletionPercentage } = require('../middleware/profileCompletion');
+const Business = require('../models/Business');
 
 // @route   POST /api/messages
 // @desc    Send a message in a conversation (requires 80% profile completion)
@@ -124,6 +125,33 @@ router.post('/', protect, profileCompletionGate(80), [
 // @access  Private (conversation participants only)
 router.get('/:conversationId', protect, async (req, res) => {
   try {
+    // Check profile completion gating for business users (non-admin, non-VA)
+    if (!req.user.admin && !req.user.profile?.va && !req.user.va) {
+      // Business user - check profile completion
+      const business = await Business.findOne({ user: req.user._id });
+      
+      if (!business) {
+        return res.status(403).json({
+          success: false,
+          gated: true,
+          error: 'PROFILE_INCOMPLETE',
+          message: 'Please complete your profile to access messages'
+        });
+      }
+      
+      const completionPercentage = calculateCompletionPercentage(business, 'business');
+      
+      // Gate if profile completion is NOT greater than 80%
+      if (completionPercentage <= 80) {
+        return res.status(403).json({
+          success: false,
+          gated: true,
+          error: 'PROFILE_INCOMPLETE',
+          message: 'Please complete your profile to access messages'
+        });
+      }
+    }
+
     const { page = 1, limit = 50 } = req.query;
 
     // Get conversation to check permissions
@@ -182,6 +210,31 @@ router.get('/:conversationId', protect, async (req, res) => {
 // @access  Private (message recipient only)
 router.put('/:id/read', protect, async (req, res) => {
   try {
+    // Check profile completion gating for business users (non-admin, non-VA)
+    if (!req.user.admin && !req.user.profile?.va && !req.user.va) {
+      // Business user - check profile completion
+      const business = await Business.findOne({ user: req.user._id });
+      
+      if (!business) {
+        return res.status(403).json({
+          success: false,
+          gated: true,
+          error: 'PROFILE_INCOMPLETE'
+        });
+      }
+      
+      const completionPercentage = calculateCompletionPercentage(business, 'business');
+      
+      // Gate if profile completion is NOT greater than 80%
+      if (completionPercentage <= 80) {
+        return res.status(403).json({
+          success: false,
+          gated: true,
+          error: 'PROFILE_INCOMPLETE'
+        });
+      }
+    }
+
     const message = await Message.findById(req.params.id);
 
     if (!message) {

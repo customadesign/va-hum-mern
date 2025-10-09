@@ -167,7 +167,8 @@ const getMissingFields = (profile, userType) => {
 
 /**
  * Profile completion gate middleware
- * Ensures user has completed at least X% of their profile
+ * Ensures user has completed STRICTLY MORE THAN X% of their profile
+ * For 80% threshold: user must have > 80.0%, not >= 80.0%
  */
 const profileCompletionGate = (requiredPercentage = 80) => {
   return async (req, res, next) => {
@@ -213,14 +214,14 @@ const profileCompletionGate = (requiredPercentage = 80) => {
       // Calculate completion percentage
       const completionPercentage = calculateCompletionPercentage(profile, userType);
 
-      // Check if meets minimum requirement
-      if (completionPercentage < requiredPercentage) {
+      // Check if meets minimum requirement (STRICTLY greater than, not equal to)
+      if (completionPercentage <= requiredPercentage) {
         const missingFields = getMissingFields(profile, userType);
         
         return res.status(403).json({
           success: false,
           error: 'Incomplete profile',
-          message: `Your profile is ${completionPercentage}% complete. Please complete at least ${requiredPercentage}% to access this feature.`,
+          message: `Your profile is ${completionPercentage}% complete. Please complete more than ${requiredPercentage}% to access this feature.`,
           profileCompletion: completionPercentage,
           requiredCompletion: requiredPercentage,
           missingFields,

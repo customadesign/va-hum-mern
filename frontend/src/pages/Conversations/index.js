@@ -10,7 +10,8 @@ import {
   ChatBubbleLeftRightIcon,
   InboxIcon,
   UserCircleIcon,
-  CheckIcon
+  CheckIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 import SafeHtml from '../../components/SafeHtml';
@@ -65,10 +66,28 @@ export default function Conversations() {
   const { branding } = useBranding();
   const { user } = useAuth();
   
-  const { data: conversations, isLoading } = useQuery('conversations', async () => {
-    const response = await api.get('/conversations');
-    return response.data.data;
+  const { data: conversationsResponse, isLoading, error } = useQuery('conversations', async () => {
+    try {
+      const response = await api.get('/conversations');
+      return response.data;
+    } catch (err) {
+      // Check if this is a gating error
+      if (err.response?.status === 403 && err.response?.data?.gated) {
+        return {
+          success: false,
+          gated: true,
+          message: err.response.data.message,
+          profileCompletion: err.response.data.profileCompletion,
+          requiredCompletion: err.response.data.requiredCompletion
+        };
+      }
+      throw err;
+    }
   });
+
+  // Check if user is gated (profile completion <= 80%)
+  const isGated = conversationsResponse?.gated === true;
+  const conversations = conversationsResponse?.data || [];
 
   // Sample conversations for demonstration when no real conversations exist
   const getSampleConversations = () => {
@@ -191,8 +210,8 @@ export default function Conversations() {
     }
   };
 
-  // Use sample conversations if no real conversations exist
-  const displayConversations = conversations?.length > 0 ? conversations : getSampleConversations();
+  // Use sample conversations if no real conversations exist AND user is not gated
+  const displayConversations = !isGated && conversations?.length > 0 ? conversations : (!isGated ? getSampleConversations() : []);
 
   const getOtherParticipant = (conversation) => {
     if (user.profile?.va) {
@@ -215,6 +234,64 @@ export default function Conversations() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
+    );
+  }
+
+  // Render gated view if profile completion <= 80%
+  if (isGated) {
+    return (
+      <>
+        <Helmet>
+          <title>Messages - {branding.name}</title>
+        </Helmet>
+
+        <div className="min-h-screen bg-gray-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+              <div className="flex justify-center mb-6">
+                <div className="rounded-full bg-blue-100 p-4">
+                  <InboxIcon className="h-12 w-12 text-blue-600" />
+                </div>
+              </div>
+              
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Welcome to your messages
+              </h2>
+              
+              <p className="text-lg text-gray-700 mb-6">
+                To get started, visit your <Link to="/dashboard" className="text-blue-600 hover:text-blue-800 font-semibold underline">Dashboard</Link> to complete your profile and begin conversations.
+              </p>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                <div className="flex items-center justify-center mb-3">
+                  <ExclamationTriangleIcon className="h-6 w-6 text-blue-600 mr-2" />
+                  <h3 className="text-sm font-semibold text-gray-900">Profile Completion Required</h3>
+                </div>
+                <p className="text-sm text-gray-700 mb-4">
+                  Your profile is currently <span className="font-bold text-blue-600">{conversationsResponse?.profileCompletion || 0}%</span> complete. 
+                  You need more than <span className="font-bold">80%</span> completion to access messaging.
+                </p>
+                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div 
+                    className="bg-blue-600 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${conversationsResponse?.profileCompletion || 0}%` }}
+                  />
+                </div>
+              </div>
+
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                Complete Your Profile
+                <svg className="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </>
     );
   }
 

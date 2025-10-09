@@ -84,18 +84,36 @@ export default function ConversationDetail() {
     }
   }, [navigate]);
 
-  const { data: conversation, isLoading } = useQuery(
+  const { data: conversation, isLoading, error } = useQuery(
     ['conversation', id],
     async () => {
       // Check if this is a sample conversation ID
       if (id.startsWith('sample-')) {
         return getSampleConversation(id);
       }
-      const response = await api.get(`/conversations/${id}`);
-      return response.data.data;
+      try {
+        const response = await api.get(`/conversations/${id}`);
+        return response.data.data;
+      } catch (err) {
+        // Check if this is a gating error
+        if (err.response?.status === 403 && err.response?.data?.gated) {
+          // Redirect to conversations list where gated view will show
+          toast.info('Please complete your profile to access messages');
+          navigate('/conversations');
+          throw err;
+        }
+        throw err;
+      }
     },
     {
-      refetchInterval: id.startsWith('sample-') ? false : 5000 // Don't poll for sample conversations
+      refetchInterval: id.startsWith('sample-') ? false : 5000, // Don't poll for sample conversations
+      retry: (failureCount, error) => {
+        // Don't retry on gating errors
+        if (error?.response?.status === 403 && error?.response?.data?.gated) {
+          return false;
+        }
+        return failureCount < 3;
+      }
     }
   );
 
