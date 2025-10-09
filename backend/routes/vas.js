@@ -518,7 +518,7 @@ router.get('/:identifier', optionalAuth, async (req, res) => {
     let actionButton = {
       type: 'register', // 'register' or 'message'
       text: 'Register Your Business To Chat',
-      url: process.env.ESYSTEMS_FRONTEND_URL || 'http://localhost:3002/register'
+      url: process.env.ESYSTEMS_FRONTEND_URL || 'https://esystems-management-hub.onrender.com/sign-up'
     };
 
     if (canMessage) {
@@ -532,7 +532,7 @@ router.get('/:identifier', optionalAuth, async (req, res) => {
       actionButton = {
         type: 'complete_profile',
         text: 'Complete Your Profile To Chat (Currently ' + businessProfileCompletion + '% complete)',
-        url: process.env.ESYSTEMS_FRONTEND_URL ? `${process.env.ESYSTEMS_FRONTEND_URL}/profile` : 'http://localhost:3002/profile'
+        url: process.env.ESYSTEMS_FRONTEND_URL ? `${process.env.ESYSTEMS_FRONTEND_URL}/profile` : 'https://esystems-management-hub.onrender.com/profile'
       };
     }
 
