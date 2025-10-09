@@ -94,7 +94,7 @@ export default function Layout() {
                     <Link to="/" className="flex items-center">
                       <img
                         className={classNames(
-                          "h-[60px] w-auto",
+                          "h-[57px] w-auto",
                           branding.isESystemsMode && "brightness-0 invert"
                         )}
                         src={branding.logoUrl || branding.logo}
