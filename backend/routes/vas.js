@@ -1212,16 +1212,11 @@ router.post('/:id/avatar', protect, authorize('va'), handleUnifiedUpload('avatar
 // @route   POST /api/vas/:id/cover-image
 // @desc    Upload VA cover image
 // @access  Private (VA owner only)
-router.post('/:id/cover-image', protect, upload.single('coverImage'), async (req, res) => {
+router.post('/:id/cover-image', protect, handleUnifiedUpload('coverImage', 'covers'), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please upload a file'
-      });
-    }
-
     const va = await VA.findById(req.params.id);
+    const User = require('../models/User');
+    const File = require('../models/File');
 
     if (!va) {
       return res.status(404).json({
@@ -1238,9 +1233,57 @@ router.post('/:id/cover-image', protect, upload.single('coverImage'), async (req
       });
     }
 
-    // Update cover image URL
-    va.coverImage = `/uploads/${req.file.filename}`;
+    // Delete old cover if exists
+    if (va.coverImage && (va.coverImage.includes('/uploads/') || va.coverImage.includes('supabase'))) {
+      await deleteWithFallback({
+        provider: req.file.storageProvider,
+        url: va.coverImage,
+        bucket: req.file.bucket
+      });
+    }
+
+    // Update VA cover image
+    va.coverImage = req.file.path;
     await va.save();
+
+    // Also update the User model cover image
+    const user = await User.findById(va.user);
+    if (user) {
+      // Create or update file record
+      const file = await File.create({
+        filename: req.file.filename || req.file.originalname,
+        originalName: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        url: req.file.path,
+        bucket: req.file.bucket,
+        path: req.file.path,
+        storageProvider: req.file.storageProvider,
+        s3Key: req.file.s3Key,
+        uploadedBy: user._id,
+        category: 'profile',
+        fileType: 'image',
+        isPublic: true
+      });
+
+      // Delete old cover file if exists
+      if (user.coverImageFileId) {
+        const oldFile = await File.findById(user.coverImageFileId);
+        if (oldFile) {
+          await deleteWithFallback({
+            provider: oldFile.storageProvider || 'supabase',
+            url: oldFile.url,
+            bucket: oldFile.bucket,
+            key: oldFile.s3Key
+          });
+          await oldFile.softDelete();
+        }
+      }
+
+      user.coverImage = req.file.path;
+      user.coverImageFileId = file._id;
+      await user.save();
+    }
 
     res.json({
       success: true,
@@ -1248,11 +1291,22 @@ router.post('/:id/cover-image', protect, upload.single('coverImage'), async (req
         coverImage: va.coverImage
       }
     });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error('Cover image update error:', error);
+    
+    // Try to delete uploaded file if database save failed
+    if (req.file && req.file.path) {
+      await deleteWithFallback({
+        provider: req.file.storageProvider,
+        url: req.file.path,
+        bucket: req.file.bucket,
+        key: req.file.s3Key
+      });
+    }
+    
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      error: 'Failed to update cover image'
     });
   }
 });
@@ -1420,96 +1474,45 @@ router.get('/test-upload', async (req, res) => {
 // @route   POST /api/vas/me/upload
 // @desc    Upload image for VA profile (avatar or cover)
 // @access  Private (VA only)
-router.post('/me/upload', protect, async (req, res, next) => {
-  // Use Supabase if configured and either in production or forced
-  const forceSupabase = process.env.FORCE_SUPABASE === 'true';
-  if (useSupabase && supabase) {
-    console.log('Attempting Supabase upload...');
-    
-    // First try with Supabase
-    handleSupabaseUpload('image', 'avatars')(req, res, async (err) => {
-      if (err) {
-        console.error('Supabase upload failed, falling back to local storage:', err);
-        
-        // Fallback to local storage
-        upload.single('image')(req, res, function (uploadErr) {
-          if (uploadErr) {
-            console.error('Local upload also failed:', uploadErr);
-            return res.status(400).json({
-              success: false,
-              error: uploadErr.message || 'Failed to upload file'
-            });
-          }
-
-          if (!req.file) {
-            return res.status(400).json({
-              success: false,
-              error: 'Please upload a file'
-            });
-          }
-
-          const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
-          const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
-
-          console.log('Fallback: Image uploaded locally:', imageUrl);
-
-          res.json({
-            success: true,
-            url: imageUrl,
-            storage: 'local'
-          });
-        });
-        return;
-      }
-
-      if (!req.file) {
-        return; // Error already handled
-      }
-
-      try {
-        const imageUrl = req.file.path; // Supabase URL is in req.file.path
-        console.log('Image uploaded to Supabase:', imageUrl);
-
-        res.json({
-          success: true,
-          url: imageUrl,
-          storage: 'supabase'
-        });
-      } catch (error) {
-        console.error('Processing error:', error);
-        res.status(500).json({
-          success: false,
-          error: 'Failed to process uploaded file'
-        });
-      }
-    });
-  } else {
-    // Use local storage if Supabase not configured or not forced
-    upload.single('image')(req, res, function (err) {
-      if (err) {
-        console.error('Upload error:', err);
-        return res.status(400).json({
-          success: false,
-          error: err.message || 'Failed to upload file'
-        });
-      }
-
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          error: 'Please upload a file'
-        });
-      }
-
-      const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
-      const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
-
-      console.log('Image uploaded locally:', imageUrl);
-
-      res.json({
-        success: true,
-        url: imageUrl
+router.post('/me/upload', protect, handleUnifiedUpload('image', 'avatars'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please upload a file'
       });
+    }
+
+    const imageUrl = req.file.path; // URL from unified storage (Supabase or S3)
+    const storageType = req.file.storageProvider || 'supabase';
+    
+    console.log('Image uploaded successfully:', {
+      url: imageUrl,
+      storage: storageType,
+      originalName: req.file.originalname
+    });
+
+    res.json({
+      success: true,
+      url: imageUrl,
+      storage: storageType
+    });
+  } catch (error) {
+    console.error('Upload processing error:', error);
+    
+    // Try to delete uploaded file if processing failed
+    if (req.file && req.file.path) {
+      await deleteWithFallback({
+        provider: req.file.storageProvider,
+        url: req.file.path,
+        bucket: req.file.bucket,
+        key: req.file.s3Key
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: 'Failed to process uploaded file'
     });
   }
 });
@@ -1517,103 +1520,62 @@ router.post('/me/upload', protect, async (req, res, next) => {
 // @route   POST /api/vas/me/upload-video
 // @desc    Upload video for VA profile
 // @access  Private (VA only)
-router.post('/me/upload-video', protect, async (req, res, next) => {
-  // Use Supabase if configured and either in production or forced
-  const forceSupabase = process.env.FORCE_SUPABASE === 'true';
-  if (useSupabase && supabase) {
-    console.log('Attempting Supabase video upload...');
-    
-    handleSupabaseUpload('video', 'videos')(req, res, async (err) => {
-      if (err) {
-        console.error('Supabase video upload failed, falling back to local storage:', err);
-        
-        // Fallback to local storage
-        upload.single('video')(req, res, function (uploadErr) {
-          if (uploadErr) {
-            console.error('Local video upload also failed:', uploadErr);
-            return res.status(400).json({
-              success: false,
-              error: uploadErr.message || 'Failed to upload video'
-            });
-          }
-
-          if (!req.file) {
-            return res.status(400).json({
-              success: false,
-              error: 'Please upload a video file'
-            });
-          }
-
-          const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
-          const videoUrl = `${baseUrl}/uploads/${req.file.filename}`;
-
-          console.log('Fallback: Video uploaded locally:', videoUrl);
-
-          res.json({
-            success: true,
-            url: videoUrl,
-            storage: 'local'
-          });
-        });
-        return;
-      }
-
-      if (!req.file) {
-        return; // Error already handled
-      }
-
-      try {
-        const videoUrl = req.file.path; // Supabase URL is in req.file.path
-        console.log('Video uploaded to Supabase:', videoUrl);
-
-        res.json({
-          success: true,
-          url: videoUrl,
-          storage: 'supabase'
-        });
-      } catch (error) {
-        console.error('Processing error:', error);
-        res.status(500).json({
-          success: false,
-          error: 'Failed to process uploaded file'
-        });
-      }
-    });
-  } else {
-    // Use local storage if Supabase not configured or not forced
-    upload.single('video')(req, res, function (err) {
-      if (err) {
-        console.error('Upload error:', err);
-        return res.status(400).json({
-          success: false,
-          error: err.message || 'Failed to upload file'
-        });
-      }
-
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          error: 'Please upload a video file'
-        });
-      }
-
-      // Check file type
-      if (!req.file.mimetype.startsWith('video/')) {
-        return res.status(400).json({
-          success: false,
-          error: 'Please upload a valid video file'
-        });
-      }
-
-      const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
-      const videoUrl = `${baseUrl}/uploads/${req.file.filename}`;
-
-      console.log('Video uploaded locally:', videoUrl);
-
-      res.json({
-        success: true,
-        url: videoUrl
+router.post('/me/upload-video', protect, handleUnifiedUpload('video', 'introductions'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please upload a video file'
       });
+    }
+
+    // Validate video file type
+    if (!req.file.mimetype.startsWith('video/')) {
+      // Delete the uploaded file since it's invalid
+      await deleteWithFallback({
+        provider: req.file.storageProvider,
+        url: req.file.path,
+        bucket: req.file.bucket,
+        key: req.file.s3Key
+      });
+      
+      return res.status(400).json({
+        success: false,
+        error: 'Please upload a valid video file'
+      });
+    }
+
+    const videoUrl = req.file.path; // URL from unified storage (Supabase or S3)
+    const storageType = req.file.storageProvider || 'supabase';
+    
+    console.log('Video uploaded successfully:', {
+      url: videoUrl,
+      storage: storageType,
+      originalName: req.file.originalname,
+      size: `${(req.file.size / 1024 / 1024).toFixed(2)}MB`
+    });
+
+    res.json({
+      success: true,
+      url: videoUrl,
+      storage: storageType
+    });
+  } catch (error) {
+    console.error('Video upload processing error:', error);
+    
+    // Try to delete uploaded file if processing failed
+    if (req.file && req.file.path) {
+      await deleteWithFallback({
+        provider: req.file.storageProvider,
+        url: req.file.path,
+        bucket: req.file.bucket,
+        key: req.file.s3Key
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: 'Failed to process uploaded video'
     });
   }
 });

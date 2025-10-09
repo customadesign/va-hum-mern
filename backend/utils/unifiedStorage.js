@@ -42,7 +42,23 @@ const uploadWithFallback = async (file, folder) => {
   // Try Supabase first if configured
   if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
     try {
-      const bucket = process.env.SUPABASE_BUCKET || 'linkage-va-hub';
+      // Map folder to appropriate bucket
+      let bucket;
+      if (['avatars', 'covers', 'admin-avatars', 'business-logos'].includes(folder)) {
+        bucket = 'profile-images';
+      } else if (['introductions', 'portfolio', 'demos', 'videos'].includes(folder)) {
+        bucket = 'va-videos';
+      } else if (['logos', 'marketing', 'documents', 'branding'].includes(folder)) {
+        bucket = 'business-assets';
+      } else if (['system-assets', 'reports', 'backups', 'templates'].includes(folder)) {
+        bucket = 'admin-uploads';
+      } else {
+        // Fallback to profile-images for unknown folders
+        console.warn(`⚠️ Unknown folder '${folder}', defaulting to profile-images bucket`);
+        bucket = 'profile-images';
+      }
+      
+      console.log(`📦 Uploading to Supabase bucket: ${bucket}/${folder}`);
       const url = await uploadToSupabase(file, bucket, folder);
       return {
         provider: StorageProvider.SUPABASE,
