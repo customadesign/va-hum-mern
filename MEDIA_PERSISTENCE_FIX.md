@@ -3,6 +3,8 @@
 ## Problem Summary
 Profile images, cover images, and videos were not persisting after Render redeployments because they were being stored in Render's ephemeral `/uploads/` directory instead of Supabase Storage.
 
+**CRITICAL DISCOVERY**: The frontend was also **actively hiding** media from Supabase URLs due to inverted logic!
+
 ## Root Causes Identified
 
 ### 1. **Local Storage URLs in Database**
@@ -16,6 +18,14 @@ These files are stored on Render's filesystem which gets **wiped on every redepl
 - **Cover image route** (line 1215 in `vas.js`) was using old local storage handler
 - **Upload routes** had fallback logic that could result in local storage
 - **Bucket mapping** was using single bucket instead of appropriate buckets per media type
+
+### 3. **Frontend Display Bug (CRITICAL!)** 🚨
+The frontend in `Detail.js` had **inverted logic** that was **blocking Supabase URLs**:
+- **Lines 166-169**: Cover showed placeholder if URL contained 'supabase' ❌
+- **Lines 184-187**: Avatar showed placeholder if URL contained 'supabase' ❌  
+- **Lines 311-342**: Video only displayed if URL did NOT contain 'supabase' ❌
+
+This meant ANY media uploaded to Supabase was INVISIBLE on public profile pages!
 
 ## Fixes Applied
 
@@ -32,6 +42,15 @@ These files are stored on Render's filesystem which gets **wiped on every redepl
      - `introductions`, `videos` → `va-videos` bucket
      - `logos`, `marketing` → `business-assets` bucket
      - `system-assets`, `reports` → `admin-uploads` bucket
+
+### Frontend Code Changes
+
+3. **`frontend/src/pages/VAs/Detail.js`**:
+   - ✅ Removed inverted `!includes('supabase')` check from cover image (line 166)
+   - ✅ Removed inverted `!includes('supabase')` check from avatar (line 184)
+   - ✅ Removed conditional logic blocking Supabase videos (lines 311-342)
+   - ✅ Added proper error handlers with fallback for all media types
+   - ✅ Now displays ALL media regardless of URL source
 
 ## Required Render Environment Variables
 
