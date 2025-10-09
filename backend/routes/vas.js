@@ -12,8 +12,8 @@ const { protect, authorize, optionalAuth } = require('../middleware/hybridAuth')
 const { checkESystemsVAAccess } = require('../middleware/auth');
 // Use Supabase storage in production, local storage in development
 const isProduction = process.env.NODE_ENV === 'production';
-// Force local storage for development to avoid CORS issues
-const useSupabase = false; // Temporarily disabled for development
+// Use Supabase in production to ensure persistence across deployments
+const useSupabase = isProduction || process.env.FORCE_SUPABASE === 'true';
 
 // Import both upload utilities
 const localUpload = require('../utils/upload');
