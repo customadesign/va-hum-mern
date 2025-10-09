@@ -95,7 +95,7 @@ export default function VADetail() {
     setIsCreatingShare(true);
     try {
       // Use public API endpoint that doesn't require authentication
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://esystems-management-hub.onrender.com/api';
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://linkage-va-hub-api.onrender.com/api';
       const response = await fetch(`${apiUrl}/shorturls/vas/${id}`, {
         method: 'POST',
         headers: {
