@@ -1,0 +1,120 @@
+# Email Integration PRD — Linkage VA Hub MERN Stack
+
+Version: 1.0
+Owner: Platform
+Last Updated: 2025-09-28
+
+1) Overview
+The platform must send transactional and system emails from three brand identities using SendGrid SDK (@sendgrid/mail) with per-service environment variables on Render. The backend centralizes email sending and selects the “from” identity by context (VA, Business, Admin). No secrets are committed; all keys are in Render environment variables.
+
+2) Brand Sender Identities (Domains and From)
+- E‑Systems Brand (Business-facing)
+  - From: hello@esystemsmanagement.com
+  - Use case: All business-facing communications (on E‑Systems brand).
+- Linkage VA Hub Frontend (VA-facing)
+  - From: hello@linkagevahub.com
+  - Use case: All VA-facing communications (non E‑Systems brand).
+- Linkage VA Admin Frontend (Admin/system)
+  - From: noreply@admin.linkagevahub.com
+  - Use case: Admin/system notifications to administrators.
+
+3) Deliverables
+- Backend email sending via SendGrid SDK using existing scaffolding:
+  - utils/sendgrid.js – initialize and send (single-key per service).
+  - utils/email.js – brand-aware templates and SMTP fallback.
+  - config/emailDomains.js – canonical mapping from recipient context → sender.
+- Render env for each deployed service must include:
+  - SENDGRID_API_KEY
+  - EMAIL_FROM (brand-specific from address)
+  - Optional: EMAIL_FROM_NAME (defaults to brand name), SENDGRID_FROM_EMAIL/SENDGRID_FROM_NAME if used.
+- Domain authentication (SPF/DKIM) configured in SendGrid for:
+  - linkagevahub.com
+  - admin.linkagevahub.com
+  - esystemsmanagement.com
+- Tests and acceptance criteria verifying end-to-end sending and template correctness.
+
+4) Current Code Baseline (verified)
+- sendgrid.js: SendGrid initialization, per-request template application, brand categories.
+- email.js: Entry point for sending with brand-aware templates, calls sendgrid.js first, SMTP fallback.
+- emailDomains.js: Recipient-type → sender mapping (requires fixes/updates described below).
+
+5) Required Code Changes
+5.1) Fix typos and align senders in config/emailDomains.js
+- Correct “esystemsmanagment.com” → “esystemsmanagement.com”.
+- Set sender mappings:
+  - VA (recipient type): hello@linkagevahub.com, domain linkagevahub.com
+  - Business (recipient type): hello@esystemsmanagement.com, domain esystemsmanagement.com
+  - Admin (recipient type): noreply@admin.linkagevahub.com, domain admin.linkagevahub.com
+- Ensure getSenderForTemplate() covers Admin, VA, Business templates consistently with code.
+
+5.2) Sender selection and reply-to logic
+- Keep reply-to as support@… when from is hello@…, and skip reply-to for explicit noreply@ addresses or admin-invitation emails.
+- Categories in SendGrid should include brand domain (dash formatted), template name, and recipient type.
+
+5.3) Service-level key strategy
+- Each Render service (backend/admin/esystems) sets its own SENDGRID_API_KEY and EMAIL_FROM. Code uses a single SENDGRID_API_KEY variable per service. No multi-key switching inside a single process needed.
+- EMAIL_FROM must match the validated identity/sender in SendGrid for that service.
+
+6) Environment Variables (Render)
+For each service that sends email:
+- SENDGRID_API_KEY=“<service-specific key>”
+- EMAIL_FROM=“<brand from address>”
+- Optional (if used in code paths)
+  - EMAIL_FROM_NAME=“<Brand Name>”
+  - SENDGRID_FROM_EMAIL and SENDGRID_FROM_NAME (if code references them)
+
+Brand mapping:
+- E‑Systems service → EMAIL_FROM=hello@esystemsmanagement.com
+- Linkage VA Hub (frontend server that sends, or the backend used by it) → EMAIL_FROM=hello@linkagevahub.com
+- Admin service → EMAIL_FROM=noreply@admin.linkagevahub.com
+
+7) Templates and Triggers (non-exhaustive)
+- welcome, reset-password, new-message, admin-invitation, system-notification
+- Hook points already present in:
+  - Password Reset flows
+  - Conversations/messages “new-message”
+  - Admin invitations
+  - System notifications and Stripe/billing notices (optionally extend to emit system notifications)
+
+8) Security, Compliance, and Deliverability
+- Do not commit API keys. All secrets live in Render env.
+- Enforce SPF/DKIM with SendGrid authenticated domains for the three senders.
+- DMARC records configured on domains.
+- Use noreply@admin.linkagevahub.com for admin/system to prevent unintended replies.
+- Log SendGrid message IDs for traceability (already present).
+- Consider bounce/suppression monitoring using SendGrid’s suppression API/events later.
+
+9) Observability
+- Log the final sender and category tags per email.
+- Optionally add a health endpoint to run testSendGridConfig (sandbox mode) in non-prod only.
+
+10) Acceptance Criteria
+- Each brand sends from the correct From address (verified via headers) and uses the appropriate template and branding.
+- All outbound emails sent via SendGrid with valid API key per service.
+- No secrets present in repository.
+- emailDomains.js contains corrected domain entries and admin sender “noreply@admin.linkagevahub.com”.
+- Reply-To behavior matches rules (support@ for hello@*, and none for noreply@ or admin-invitation).
+- SendGrid domains authenticated; sandbox test passes in non-prod.
+
+11) Test Plan
+- Unit tests: getSenderForTemplate() selection for va/business/admin contexts and template names.
+- Integration (non-sending): testSendGridConfig() in sandbox mode (non-prod).
+- End-to-end smoke (staging): trigger one email per brand; verify From, categories, and successful response.
+- Negative: missing SENDGRID_API_KEY returns controlled error; SMTP fallback remains functional if configured.
+
+12) Rollout Plan
+- Update emailDomains.js (typos, admin sender identity).
+- Set Render env vars for each service.
+- Deploy to staging; run smoke tests.
+- Verify deliverability and headers.
+- Promote to production.
+
+13) Risks & Mitigations
+- Risk: DKIM/SPF not complete → delayed/bounced mail. Mitigation: complete authenticated domains in SendGrid before sending.
+- Risk: Wrong service configured with wrong EMAIL_FROM → DMARC failure. Mitigation: validate From matches service’s authenticated sender.
+- Risk: Accidental secret commit. Mitigation: enforce .env in .gitignore and secrets in Render only.
+
+14) Backlog Items (for later phases)
+- Centralized email event tracking and dashboards (opens/clicks).
+- Bounce/suppression management hooks.
+- Templating system externalization (e.g., Handlebars/MJML or SendGrid dynamic templates).

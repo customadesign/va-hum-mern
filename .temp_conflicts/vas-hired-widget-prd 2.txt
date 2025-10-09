@@ -1,0 +1,1020 @@
+<context>
+# Overview
+The "VAs Hired" widget replaces the existing "Profile Views" dashboard card for E-Systems businesses. This feature provides businesses with a comprehensive view of their hired Virtual Assistants, enabling them to track active engagements, monitor inactive VAs, and review billing information. This is critical for businesses to manage their team effectively and understand their investment in virtual talent.
+
+## Problem Statement
+Currently, the E-Systems dashboard shows "Profile Views" which is not relevant for businesses looking to manage their hired VAs. Businesses need immediate visibility into:
+- Total VAs they've hired
+- Which VAs are currently active
+- Which VAs are inactive/past engagements
+- Financial overview of their VA spend
+
+## Value Proposition
+- **For Businesses**: Single dashboard view to monitor their VA workforce, track engagement status, and understand billing at a glance
+- **For Admins**: Ability to view and manage all business-VA engagements across the platform
+- **For the Platform**: Better engagement tracking and billing transparency leading to higher trust and retention
+
+# Core Features
+
+## 1. VAs Hired Dashboard Widget
+**What it does**: Displays a high-level count of total VAs hired with a breakdown of active vs inactive
+**Why it's important**: Provides immediate visibility into the business's VA workforce
+**How it works**:
+- Queries the Engagement model filtered by clientId (business user)
+- Aggregates counts by status (active, paused, past)
+- Displays total count with visual breakdown
+- Clickable to drill into detailed view
+
+## 2. Detailed Engagement View Page
+**What it does**: Shows a comprehensive list of all VAs hired by the business with filterable status tabs
+**Why it's important**: Businesses need to see details about each VA they've hired and their current status
+**How it works**:
+- Tab-based interface: All | Active | Inactive (paused/past)
+- Each VA card shows:
+  - VA name, avatar, and email
+  - Engagement status badge
+  - Contract details (start date, hours/week, rate if available)
+  - Total billing amount for this VA
+  - Quick actions (view profile, view messages, manage engagement)
+
+## 3. Billing Summary Integration
+**What it does**: Shows financial information for each VA engagement
+**Why it's important**: Businesses need transparency on what they're spending on each VA
+**How it works**:
+- Links Engagement model with Billing model
+- Aggregates payment records by VA engagement
+- Displays total billed amount per VA
+- Shows currency and payment history link
+
+## 4. Admin Panel Integration
+**What it does**: Allows admins to view and manage all business-VA engagements platform-wide
+**Why it's important**: Admin oversight is necessary for platform health and dispute resolution
+**How it works**:
+- Admin can view all engagements system-wide
+- Filter by business, VA, status, date range
+- Ability to modify engagement status
+- View billing information for any engagement
+- NEW: Admin Frontend → Backend → E‑Systems Frontend coordination
+  - Admin Frontend never talks directly to the E‑Systems Frontend. The backend is the single source of truth.
+  - Admin actions (create/update engagement, change status, correct data) write to the backend (Engagement/Billing models).
+  - The backend updates caches and emits real-time “engagement summary updated” events (Socket.io) to affected business channels.
+  - The E‑Systems Frontend (business app) consumes:
+    - REST: GET /api/engagements/summary (dashboard widget), GET /api/engagements (detail list)
+    - Real-time: subscribes to “engagements:summary:update:{businessId}” to refresh widget data
+  - Cache invalidation: Admin writes trigger cache bust for keys like engagement:summary:${businessId}
+  - Security: Admin endpoints require admin role; business endpoints restricted to that business
+
+## 5. Hired VAs Profile Dropdown Menu
+**What it does**: Adds a "Hired VAs" option in the user profile dropdown menu for quick access
+**Why it's important**: Provides immediate navigation to hired VAs from anywhere in the application
+**How it works**:
+- Profile dropdown in header shows "Hired VAs" option
+- Clicking navigates to the detailed engagements page
+- Shows count badge if there are active VAs (e.g., "Hired VAs (3)")
+- Available only for business users
+- Consistent with existing dropdown menu items (Profile, Settings, etc.)
+
+## 6. Save VA Feature (Favorites/Bookmarks)
+**What it does**: Allows businesses to save/bookmark VAs they're interested in for later review
+**Why it's important**: Businesses often browse multiple VAs before making hiring decisions - need way to track interesting candidates
+**How it works**:
+- "Save" button appears on VA profile pages when viewed by logged-in business users
+- If not logged in, clicking "Save" redirects to sign-in page with return URL
+- Saved VAs accessible via "Saved VAs" tab under profile dropdown menu
+- Saved VAs page shows:
+  - List of all saved VAs with cards similar to engagement view
+  - "Unsave" button to remove from list
+  - Quick actions: View Profile, Send Message
+  - Date saved timestamp
+- Uses SavedVA model (already exists in backend)
+- Real-time updates - save/unsave reflects immediately
+
+# User Experience
+
+## User Personas
+
+### Business Owner (Primary User)
+- **Needs**: Quick overview of VA team, ability to track who's active, manage relationships
+- **Pain Points**: Currently no way to see hired VAs at a glance
+- **Goals**: Efficiently manage VA workforce, understand costs, maintain active relationships
+
+### Platform Administrator
+- **Needs**: Oversight of all engagements, ability to troubleshoot billing issues
+- **Pain Points**: No centralized view of all business-VA relationships
+- **Goals**: Ensure healthy engagements, resolve disputes, maintain billing accuracy
+
+## Key User Flows
+
+### Flow 1: Business Checks VA Team Status
+1. Business logs into E-Systems dashboard
+2. Sees "VAs Hired" widget showing count (e.g., "5 VAs Hired: 3 Active, 2 Inactive")
+3. Clicks on widget to see detailed view
+4. Views list of all VAs with status filters
+5. Can drill into individual VA details or start a conversation
+
+### Flow 2: Business Reviews Billing for a VA
+1. From VAs Hired detailed view
+2. Sees total billed amount on each VA card
+3. Clicks "View Billing Details"
+4. Sees itemized payment history for that specific VA
+5. Can download invoice or payment receipts
+
+### Flow 3: Admin Monitors Platform Engagements
+1. Admin accesses admin panel
+2. Navigates to "Engagements" section
+3. Sees dashboard with:
+   - Total active engagements across platform
+   - Recent engagement activity
+   - Flagged issues or paused engagements
+4. Can filter by business or VA
+5. Can view/edit engagement details
+
+### Flow 4: Business Saves Interesting VAs
+1. Business browses VA profiles on E-Systems
+2. Finds a VA they're interested in
+3. Clicks "Save" button on VA profile
+4. If not logged in:
+   - System shows "Please sign in to save VAs"
+   - Redirects to /sign-in with returnUrl parameter
+   - After login, automatically saves VA and returns to profile
+5. If logged in:
+   - VA is immediately added to Saved VAs
+   - "Save" button changes to "Saved" with checkmark
+   - Toast notification: "VA saved successfully"
+6. To view saved VAs:
+   - Click profile dropdown in header
+   - Select "Saved VAs" option
+   - See list of all saved VAs with ability to unsave
+
+### Flow 5: Quick Access to Hired VAs via Profile Menu
+1. Business clicks profile dropdown in header (any page)
+2. Sees "Hired VAs (3)" option showing count of active VAs
+3. Clicks option to navigate directly to hired VAs page
+4. No need to go through dashboard first
+
+## UI/UX Considerations
+
+### Dashboard Widget Design
+- **Visual Hierarchy**: Total count prominent, breakdown secondary
+- **Color Coding**: Active (green), Paused (yellow), Past (gray)
+- **Interactivity**: Entire card is clickable, hover shows tooltip with details
+- **Responsive**: Card layout adapts for mobile (stacks on small screens)
+- **Loading States**: Skeleton loader while data fetches
+- **Empty State**: "No VAs hired yet" with CTA to browse VAs
+
+### Detailed View Page Design
+- **Tab Navigation**: Clear active/inactive separation
+- **Card-Based Layout**: Each VA as a card with avatar, name, and key info
+- **Search & Filter**: Search by name, filter by date range
+- **Sorting**: Sort by hire date, billing amount, status
+- **Pagination**: Load 20 VAs per page with infinite scroll option
+- **Mobile Responsive**: Cards stack vertically on mobile
+
+### Admin Panel Integration
+- **Consistent Design**: Match existing admin panel styling
+- **Data Table**: Use existing table components for engagement list
+- **Bulk Actions**: Select multiple engagements for status updates
+- **Export Functionality**: Download engagement data as CSV
+
+### Profile Dropdown Menu Enhancement
+- **Position**: "Hired VAs" appears after "Dashboard" in dropdown
+- **Badge**: Show active count in badge (e.g., "3")
+- **Icon**: Use team/users icon to distinguish from other menu items
+- **Conditional**: Only show for business users (hide for VAs)
+
+### Save VA Feature Design
+- **Button Placement**: Top-right corner of VA profile page, next to "Contact" button
+- **Button States**:
+  - Unsaved: "Save VA" with bookmark icon (outline)
+  - Saved: "Saved" with bookmark icon (filled) + checkmark
+  - Hover unsaved: Show tooltip "Save this VA to review later"
+- **Saved VAs Page**:
+  - Grid/list toggle view option
+  - Sort by: Recently saved, Name (A-Z), Specialty
+  - Search bar to filter saved VAs
+  - Bulk actions: Unsave multiple VAs
+- **Empty State**: "No saved VAs yet. Browse VAs and click Save to add them here"
+- **Authentication Gate**:
+  - Show "Save" button to all users
+  - On click, check authentication
+  - If not logged in, show modal: "Sign in to save VAs" with Sign In / Register buttons
+  - Pass current VA profile URL as returnUrl for redirect after login
+</context>
+
+<PRD>
+# Technical Architecture
+
+## System Components
+
+### Frontend Components (React)
+```
+esystems-frontend/src/
+├── components/
+│   ├── dashboard/
+│   │   ├── VAsHiredWidget.js          # Dashboard card component
+│   │   └── VAsHiredWidget.css
+│   ├── engagements/
+│   │   ├── EngagementsList.js         # Main list view
+│   │   ├── EngagementCard.js          # Individual VA card
+│   │   ├── EngagementDetail.js        # Detailed engagement view
+│   │   ├── EngagementFilters.js       # Filter & search component
+│   │   └── BillingSummary.js          # Billing display component
+│   ├── savedVAs/
+│   │   ├── SavedVAsList.js            # Saved VAs list view
+│   │   ├── SavedVACard.js             # Individual saved VA card
+│   │   └── SaveButton.js              # Reusable save/unsave button
+│   ├── layout/
+│   │   └── ProfileDropdown.js         # Enhanced with Hired VAs + Saved VAs links
+│   └── common/
+│       ├── StatusBadge.js             # Reusable status badge
+│       ├── EmptyState.js              # No data state
+│       └── AuthGate.js                # Redirect to login if not authenticated
+├── pages/
+│   ├── Dashboard.js                    # Update to use VAsHiredWidget
+│   ├── EngagementsPage.js             # New full page view (Hired VAs)
+│   ├── SavedVAsPage.js                # New saved VAs page
+│   ├── VAs/
+│   │   ├── Profile.js                 # Update to include Save button
+│   │   └── Detail.js                  # Update to include Save button
+│   └── Admin/
+│       └── EngagementsManagement.js   # Admin engagement view
+├── services/
+│   ├── engagementAPI.js               # API client for engagements
+│   └── savedVAAPI.js                  # API client for saved VAs
+└── hooks/
+    ├── useEngagements.js              # React Query hook
+    ├── useEngagementBilling.js        # Billing data hook
+    └── useSavedVAs.js                 # React Query hook for saved VAs
+```
+
+> Note: Platform administration primarily lives in the dedicated Admin Frontend (separate app). Any “Admin” pages inside esystems-frontend should be avoided or limited to read-only diagnostics. Authoritative admin CRUD flows should be implemented in the Admin Frontend.
+
+// NEW: Admin Frontend Components (React)
+```
+admin-frontend/src/
+├── pages/Engagements/
+│   ├── EngagementsManagement.js       # Platform-wide list with filters (business, VA, status, date)
+│   ├── EngagementEditModal.js         # Create/update engagement
+│   ├── EngagementStatusActions.js     # Quick status updates (considering|active|paused|past)
+│   └── EngagementAnalytics.js         # Admin analytics & health indicators
+├── services/engagementsAdminAPI.js    # Admin-scoped API client
+├── hooks/useAdminEngagements.js       # React Query for admin datasets
+└── components/common/AdminGuard.js    # Only allow admin users
+```
+
+### Backend Components (Node.js/Express)
+```
+backend/
+├── routes/
+│   ├── engagements.js                 # Engagement CRUD routes
+│   ├── savedVAs.js                    # Already exists - enhance if needed
+│   └── admin/
+│       └── engagements.js             # Admin engagement routes
+├── controllers/
+│   ├── engagementController.js        # Business-facing logic
+│   ├── adminEngagementController.js   # Admin-facing logic
+│   └── savedVAController.js           # Already exists - enhance if needed
+├── models/
+│   ├── Engagement.js                  # Already exists (enhance)
+│   ├── Billing.js                     # Already exists (enhance)
+│   └── SavedVA.js                     # Already exists - verify structure
+├── middleware/
+│   ├── isBusinessUser.js              # Verify business role
+│   ├── canManageEngagement.js         # Permission check
+│   └── requireAuth.js                 # Require authentication for save actions
+└── realtime/
+    └── socket.js                      # Socket.io namespace & rooms (e.g., `engagements:summary:update:{businessId}`)
+```
+
+- Events/notifications
+  - Socket namespace: /engagements
+  - Rooms by businessId: “business:{businessId}”
+  - Event: “engagements:summary:update:{businessId}” payload { total, active, inactive, totalSpent, currency }
+  - Emitted after admin writes (create/update/delete) and after billing reconciliation
+- Cache management
+  - Invalidate Redis keys engagement:summary:${businessId} on admin writes and billing updates
+
+## Data Models
+
+### Engagement Model (Enhanced)
+```javascript
+{
+  clientId: ObjectId,              // Reference to Business User
+  vaId: ObjectId,                  // Reference to VA User
+  status: String,                  // considering|active|paused|past
+  contract: {
+    startDate: Date,
+    endDate: Date,
+    hoursPerWeek: Number,
+    rate: Number,                  // Hourly rate (optional)
+    currency: String               // USD|PHP|EUR|GBP|CAD|AUD
+  },
+  notes: String,
+  tags: [String],
+  lastActivityAt: Date,
+  createdBy: ObjectId,
+  updatedBy: ObjectId,
+  timestamps: true
+}
+```
+
+### Billing Aggregation (New Virtual Field)
+```javascript
+// Virtual field on Engagement for total billing
+engagementSchema.virtual('totalBilled').get(async function() {
+  // Aggregate from Billing.payments where engagement matches
+  // Return sum of payment amounts
+});
+```
+
+### SavedVA Model (Existing - Verify Structure)
+```javascript
+{
+  business: ObjectId,              // Reference to Business User
+  va: ObjectId,                    // Reference to VA User
+  notes: String,                   // Optional notes about this VA
+  tags: [String],                  // Optional tags for organization
+  savedAt: Date,                   // Timestamp when saved
+  lastViewed: Date,               // Track when business last viewed this VA
+  timestamps: true
+}
+
+// Indexes
+savedVASchema.index({ business: 1, va: 1 }, { unique: true }); // Prevent duplicates
+savedVASchema.index({ business: 1, savedAt: -1 }); // For listing
+```
+
+### Analytics Aggregation (Enhancement)
+```javascript
+// New analytics endpoint returns:
+{
+  totalVAsHired: Number,
+  activeVAs: Number,
+  inactiveVAs: Number,
+  totalSpent: Number,
+  averageHoursPerWeek: Number,
+  recentEngagements: [Engagement]
+}
+```
+
+## APIs and Integrations
+
+### Business Endpoints
+```
+GET  /api/engagements              # Get all engagements for logged-in business
+GET  /api/engagements/:id          # Get specific engagement details
+POST /api/engagements              # Create new engagement (admin creates)
+PUT  /api/engagements/:id          # Update engagement (limited fields)
+DELETE /api/engagements/:id        # Soft delete (admin only)
+
+GET  /api/engagements/summary      # Dashboard widget data
+GET  /api/engagements/:id/billing  # Billing details for engagement
+```
+
+### Admin Endpoints
+```
+GET    /api/admin/engagements            # Get all engagements (with filters)
+POST   /api/admin/engagements            # Create engagement
+PUT    /api/admin/engagements/:id        # Full update capability
+DELETE /api/admin/engagements/:id        # Permanent delete
+PATCH  /api/admin/engagements/:id/status # Quick status update
+GET    /api/admin/engagements/analytics  # Platform-wide analytics
+```
+
+### Real-time Updates (Socket.io)
+- Namespace: /engagements
+- Rooms: business:{businessId}
+- Event names:
+  - engagements:summary:update:{businessId} – emitted after admin write or billing update
+- Client (E‑Systems Frontend) behavior:
+  - On receiving event, invalidate local react-query cache for ['engagements','summary'] and refetch
+  - If disconnected, fall back to periodic polling
+
+### Cache Invalidation Contract
+- Redis keys: engagement:summary:${businessId}
+- Invalidation triggers:
+  - Admin creates/updates/deletes engagements
+  - Admin changes status (considering|active|paused|past)
+  - Billing reconciliation for any engagement of that business
+- TTL: 5 minutes (recomputed on next read)
+
+### Request/Response Examples
+
+**GET /api/engagements/summary**
+```json
+Response 200:
+{
+  "success": true,
+  "data": {
+    "total": 5,
+    "active": 3,
+    "inactive": 2,
+    "totalSpent": 15000.00,
+    "currency": "USD"
+  }
+}
+```
+
+**GET /api/engagements?status=active**
+```json
+Response 200:
+{
+  "success": true,
+  "data": [
+    {
+      "id": "eng_123",
+      "va": {
+        "id": "va_456",
+        "name": "Maria Santos",
+        "avatar": "https://...",
+        "email": "maria@example.com"
+      },
+      "status": "active",
+      "contract": {
+        "startDate": "2025-01-01",
+        "hoursPerWeek": 40,
+        "rate": 15,
+        "currency": "USD"
+      },
+      "totalBilled": 2400.00,
+      "lastActivityAt": "2025-09-27T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 3
+  }
+}
+```
+
+**POST /api/saved-vas**
+```json
+Request Body:
+{
+  "vaId": "va_456"
+}
+
+Response 201:
+{
+  "success": true,
+  "message": "VA saved successfully",
+  "data": {
+    "id": "saved_789",
+    "business": "biz_123",
+    "va": {
+      "id": "va_456",
+      "name": "Maria Santos",
+      "avatar": "https://..."
+    },
+    "savedAt": "2025-09-27T10:00:00Z"
+  }
+}
+
+Response 401 (not authenticated):
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "You must be logged in to save VAs",
+    "redirectTo": "/sign-in"
+  }
+}
+
+Response 409 (already saved):
+{
+  "success": false,
+  "error": {
+    "code": "ALREADY_SAVED",
+    "message": "This VA is already in your saved list"
+  }
+}
+```
+
+**GET /api/saved-vas**
+```json
+Response 200:
+{
+  "success": true,
+  "data": [
+    {
+      "id": "saved_789",
+      "va": {
+        "id": "va_456",
+        "name": "Maria Santos",
+        "avatar": "https://...",
+        "email": "maria@example.com",
+        "specialties": ["Executive Assistant", "Customer Service"],
+        "location": "Manila, Philippines"
+      },
+      "savedAt": "2025-09-27T10:00:00Z",
+      "lastViewed": "2025-09-27T11:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 5
+  }
+}
+```
+
+**GET /api/saved-vas/check/:vaId**
+```json
+Response 200:
+{
+  "success": true,
+  "isSaved": true,
+  "savedAt": "2025-09-27T10:00:00Z"
+}
+```
+
+## Infrastructure Requirements
+
+### Database
+- MongoDB indexes on Engagement model:
+  - `{ clientId: 1, status: 1 }` - For business dashboard queries
+  - `{ vaId: 1, status: 1 }` - For VA-side queries (future)
+  - `{ status: 1, lastActivityAt: -1 }` - For admin monitoring
+
+### Caching Strategy
+- Redis cache for engagement summary data (5 min TTL)
+- Cache key: `engagement:summary:${businessId}`
+- Invalidate on engagement status changes
+- NEW: Invalidate also on admin CRUD endpoints and billing updates; emit socket event “engagements:summary:update:{businessId}” to prompt live refresh in E‑Systems Frontend
+
+### Performance Considerations
+- Limit detailed view to 20 engagements per page
+- Use MongoDB aggregation pipeline for billing calculations
+- Lazy load billing details (don't fetch on list view)
+
+# Development Roadmap
+
+## Phase 1: MVP Foundation (Core Dashboard Widget)
+**Goal**: Replace Profile Views with basic VAs Hired widget
+
+### Tasks:
+1. **Backend Foundation**
+   - Create `/api/engagements/summary` endpoint
+   - Return counts by status for logged-in business
+   - Add proper authentication middleware
+
+2. **Frontend Dashboard Widget**
+   - Create `VAsHiredWidget` component
+   - Replace "Profile Views" card in Dashboard.js
+   - Show total count with active/inactive breakdown
+   - Add loading and empty states
+   - Make card clickable (stub link for now)
+
+3. **Basic Styling**
+   - Match existing dashboard card design
+   - Add status color coding (green/gray)
+   - Responsive layout
+
+4. **Admin Coordination (Phase 1a)**
+   - In Admin Frontend, ensure all engagement writes go through admin endpoints
+   - Backend emits socket events and invalidates caches on admin writes
+   - E‑Systems Frontend subscribes to summary update events for the current business
+
+**Deliverable**: Functional dashboard widget showing engagement counts with live updates after admin changes
+
+## Phase 2: Detailed Engagement View
+**Goal**: Full page view of all hired VAs with details
+
+### Tasks:
+1. **Backend Detailed Endpoints**
+   - Create `/api/engagements` GET endpoint with pagination
+   - Add status filter query parameter
+   - Populate VA details (name, avatar, email)
+   - Calculate basic billing totals
+
+2. **Frontend List Page**
+   - Create `EngagementsPage.js` route
+   - Create `EngagementsList.js` component
+   - Create `EngagementCard.js` component
+   - Implement tab navigation (All | Active | Inactive)
+   - Add search functionality
+   - Add pagination
+
+3. **VA Card Details**
+   - Display VA avatar, name, email
+   - Show engagement status badge
+   - Display contract start date and hours/week
+   - Show total billed amount (if available)
+   - Add "View Profile" and "Message" buttons
+
+4. **Admin Coordination**
+   - When admin changes engagement status/data, list reflects changes within 5 seconds via socket invalidation + refetch
+
+**Deliverable**: Full-featured engagements list page accessible from dashboard
+
+## Phase 3: Billing Integration
+**Goal**: Show detailed billing information per VA
+
+### Tasks:
+1. **Backend Billing Aggregation**
+   - Create `/api/engagements/:id/billing` endpoint
+   - Aggregate payments from Billing model
+   - Group by date/period
+   - Calculate totals and averages
+
+2. **Frontend Billing Components**
+   - Create `BillingSummary.js` component
+   - Display on engagement detail view or modal
+   - Show payment history table
+   - Add export/download functionality
+
+3. **Billing Widget Integration**
+   - Add billing badge to engagement cards
+   - Add "View Billing" action button
+   - Handle zero billing state
+
+**Deliverable**: Complete billing transparency for each VA engagement
+
+## Phase 4: Admin Panel Integration
+**Goal**: Admin can view and manage all engagements
+
+### Tasks:
+1. **Backend Admin Endpoints**
+   - Create `/api/admin/engagements` GET endpoint
+   - Add filters: business, VA, status, date range
+   - Implement admin-only middleware
+   - Create admin update/delete endpoints
+
+2. **Frontend Admin View**
+   - Create `EngagementsManagement.js` admin page
+   - Add to admin navigation
+   - Implement data table with filters
+   - Add edit/delete actions
+   - Add platform-wide analytics dashboard
+
+3. **Admin Actions**
+   - Modal for editing engagement status
+   - Quick status change buttons
+   - Confirmation dialogs for destructive actions
+   - Activity log view
+
+**Deliverable**: Admin has full oversight and control of engagements
+
+## Phase 5: Navigation Enhancements & Save VA Feature
+**Goal**: Add quick access navigation and VA bookmarking functionality
+
+### Tasks:
+1. **Profile Dropdown Enhancement**
+   - Add "Hired VAs" link to profile dropdown menu
+   - Show active count badge next to link
+   - Add appropriate icon (team/users icon)
+   - Update Layout component to include enhanced dropdown
+
+2. **Save VA Feature - Backend**
+   - Verify SavedVA model exists and has correct structure
+   - Create/enhance `/api/saved-vas` endpoints (list, create, delete, check)
+   - Add authentication middleware to protect save actions
+   - Implement duplicate prevention (unique index on business+va)
+
+3. **Save VA Feature - Frontend**
+   - Create `SaveButton.js` reusable component
+   - Add Save button to VA profile pages
+   - Implement authentication gate (redirect to login if not authenticated)
+   - Pass returnUrl for post-login redirect
+   - Create `SavedVAsPage.js` for viewing saved VAs
+   - Add "Saved VAs" link to profile dropdown
+   - Implement real-time save/unsave updates
+
+4. **UX Polish**
+   - Toast notifications for save/unsave actions
+   - Loading states on Save button
+   - Empty state for no saved VAs
+   - Confirmation dialog for unsave action
+
+**Deliverable**: Businesses can save VAs they're interested in and quickly access both hired and saved VAs
+
+## Phase 6: Advanced Features & Polish
+**Goal**: Improve UX and add nice-to-have features
+
+### Tasks:
+1. **Advanced Filtering**
+   - Date range filter for engagements and saved VAs
+   - Sort options (hire date, billing, name, save date)
+   - Saved filter preferences
+
+2. **Notifications**
+   - Email business when VA engagement status changes
+   - Notify when billing reaches threshold
+   - Alert for inactive VAs
+   - Notify when saved VA updates their profile
+
+3. **Reporting**
+   - Export engagements list as CSV
+   - Export saved VAs list as CSV
+   - Monthly billing reports
+   - Engagement timeline visualization
+
+4. **Performance Optimization**
+   - Implement Redis caching
+   - Add skeleton loaders
+   - Optimize database queries
+
+**Deliverable**: Production-ready, polished feature with all enhancements
+
+# Logical Dependency Chain
+
+## Critical Path (Must build in order):
+
+1. **Database & API Foundation** (Phase 1)
+   - Engagement model verification/enhancement
+   - Summary API endpoint
+   - Authentication middleware
+   → *Why first*: Everything depends on data access
+
+2. **Dashboard Widget** (Phase 1)
+   - Simple widget component
+   - Integration with Dashboard
+   → *Why second*: Provides immediate visible value, validates API
+
+3. **Detailed List View** (Phase 2)
+   - Full engagements API with pagination
+   - List page with cards
+   - Tab navigation
+   → *Why third*: Natural drill-down from widget, core functionality
+
+4. **Billing Integration** (Phase 3)
+   - Billing aggregation logic
+   - Display on engagement cards
+   → *Why fourth*: Adds business value, requires existing engagement display
+
+5. **Admin Panel** (Phase 4)
+   - Admin endpoints (can reuse business endpoints)
+   - Admin UI page
+   → *Why fifth*: Builds on existing views, admin features need working business side
+
+6. **Navigation & Save VA** (Phase 5)
+   - Profile dropdown enhancement
+   - Save VA feature (backend + frontend)
+   → *Why sixth*: Independent feature, can work parallel to phases 3-4
+
+7. **Polish & Optimization** (Phase 6)
+   - Enhancements, notifications, reports
+   → *Why last*: Nice-to-haves, can be iterative
+
+## Parallel Work Opportunities:
+- While backend builds APIs, frontend can build with mock data
+- Billing integration (Phase 3) can start once engagement list (Phase 2) structure is defined
+- Admin panel (Phase 4) can be developed parallel to billing (Phase 3)
+- Save VA feature (Phase 5) is completely independent - can start anytime after Phase 1
+- Profile dropdown enhancement (Phase 5) can be done anytime after Phase 2
+
+# Risks and Mitigations
+
+## Technical Challenges
+
+### Risk: Billing aggregation performance
+**Impact**: High - slow queries could timeout on dashboard
+**Mitigation**:
+- Use MongoDB aggregation pipeline (not application-level loops)
+- Implement Redis caching for summary data
+- Add database indexes on Billing.payments
+- Consider pre-calculated totals updated on payment
+
+### Risk: Missing engagement data
+**Impact**: Medium - If Engagement model isn't populated, widget shows zero
+**Mitigation**:
+- Create migration script to populate engagements from conversations
+- Admin tool to manually create engagements
+- Handle empty state gracefully with CTA to contact admin
+
+### Risk: Permission model complexity
+**Impact**: Medium - Business should only see their engagements
+**Mitigation**:
+- Add proper middleware: `isBusinessUser` and `canViewEngagement`
+- Test with different user roles
+- Audit log all access attempts
+
+### Risk: Save VA without authentication
+**Impact**: Medium - Users might not realize they need to log in
+**Mitigation**:
+- Show Save button to all users (don't hide it)
+- On click, check authentication state
+- If not logged in, show friendly modal with login/register options
+- Preserve context with returnUrl so they return to VA profile after login
+- Clear messaging: "Sign in to save VAs for later"
+
+## Scoping & MVP Decisions
+
+### What's in MVP (Phases 1-2):
+- ✅ Dashboard widget with counts
+- ✅ Detailed list view with basic info
+- ✅ Status filtering
+- ✅ Basic styling matching existing dashboard
+- ✅ Profile dropdown link to Hired VAs (quick add in Phase 2)
+
+### What's in Extended MVP (Phase 5):
+- ✅ Save VA feature (high value, independent)
+- ✅ Saved VAs page
+- ✅ Authentication gate for save actions
+
+### What's NOT in MVP (Phases 3-4, 6):
+- ❌ Detailed billing breakdown
+- ❌ Admin panel integration
+- ❌ Advanced filtering/sorting
+- ❌ Notifications/reports
+- ❌ Export functionality
+
+### Why this MVP scope:
+- Gets visible feature to users quickly
+- Validates engagement model and API design
+- Low risk, high value
+- Can iterate based on user feedback
+
+## Data Quality Concerns
+
+### Risk: Incomplete engagement records
+**Impact**: High - Business expects to see all their VAs
+**Mitigation**:
+- Define clear engagement creation triggers (admin action, payment, conversation)
+- Provide admin UI to manually add missing engagements
+- Run data audit script before launch
+
+### Risk: Billing amounts don't match external records
+**Impact**: High - Loss of trust if numbers are wrong
+**Mitigation**:
+- Sync with Stripe as source of truth
+- Add reconciliation tool in admin panel
+- Show "estimated" badge if calculated vs. "confirmed" if from Stripe
+
+# Appendix
+
+## Research Findings
+
+### Existing Engagement Model Analysis
+- ✅ Engagement model already exists with core fields
+- ✅ Has status enum (considering, active, paused, past)
+- ✅ Has contract details (rate, hours, dates)
+- ⚠️ Missing: Direct link to Billing records
+- ⚠️ Unclear: Who creates engagements? Manual admin process?
+
+### Billing Model Analysis
+- ✅ Billing model tracks payments per business
+- ✅ Has Stripe integration
+- ⚠️ Payments array not explicitly linked to specific VA/engagement
+- 💡 May need to enhance Billing.payments with engagementId field
+
+### Dashboard Current State
+- 4 widgets: Announcements, Profile Completion, Active Conversations, Profile Views
+- Profile Views (lines 315-344) uses `/api/analytics/dashboard`
+- Existing pattern: Widget card → Link to detailed page
+- Current blue color scheme maintained in E-Systems
+
+## Technical Specifications
+
+### Authentication Requirements
+```javascript
+// Middleware stack for business endpoints
+router.get('/api/engagements',
+  authenticate,           // Verify JWT token
+  isBusinessUser,        // Check role === 'business'
+  engagementController.list
+);
+
+// Admin endpoints need admin role
+router.get('/api/admin/engagements',
+  authenticate,
+  isAdmin,
+  adminEngagementController.list
+);
+```
+
+### Error Handling
+```javascript
+// Standardized error responses
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "You do not have permission to view this engagement"
+  }
+}
+
+// HTTP Status Codes
+200 - Success
+201 - Created (new engagement)
+400 - Bad Request (validation error)
+401 - Unauthorized (not logged in)
+403 - Forbidden (wrong permissions)
+404 - Not Found (engagement doesn't exist)
+500 - Server Error
+```
+
+### Testing Strategy
+- Unit tests for engagement controller methods
+- Integration tests for API endpoints
+- E2E tests for dashboard widget → detailed view flow
+- Manual testing with admin and business users
+- Test empty states, error states, loading states
+
+## Design Mockup References
+*Note: Actual designs should match existing E-Systems blue theme*
+
+### Dashboard Widget
+```
+┌─────────────────────────────────────┐
+│ 📊  VAs Hired                      │
+│                                     │
+│     5 VAs Hired                     │
+│     3 Active • 2 Inactive           │
+│                                     │
+│ View all engagements →              │
+└─────────────────────────────────────┘
+```
+
+### Detailed Page
+```
+VAs Hired
+[All] [Active (3)] [Inactive (2)]
+
+┌─────────────────────────────────────┐
+│ 👤 Maria Santos                     │
+│ maria@example.com                   │
+│ ● Active                            │
+│ Started: Jan 1, 2025 • 40 hrs/week │
+│ Total Billed: $2,400                │
+│ [View Profile] [Message]            │
+└─────────────────────────────────────┘
+```
+
+## Acceptance Criteria
+
+### Phase 1 (MVP):
+- [ ] Dashboard shows "VAs Hired" widget instead of "Profile Views"
+- [ ] Widget displays correct count of engagements
+- [ ] Active/Inactive breakdown is accurate
+- [ ] Widget is clickable
+- [ ] Loading state shows while fetching data
+- [ ] Empty state shows "No VAs hired yet"
+- [ ] Widget matches existing dashboard card styling
+- [ ] NEW: Admin→Backend changes (create/update/status) propagate to E‑Systems widget within ≤5s via event-driven cache invalidation
+
+### Phase 2:
+- [ ] Detailed page shows list of all VAs
+- [ ] Each VA card shows: name, avatar, status, start date
+- [ ] Tab filtering works (All, Active, Inactive)
+- [ ] Search by VA name works
+- [ ] Pagination works correctly
+- [ ] Mobile responsive layout
+- [ ] NEW: Admin→Backend changes reflected in list within ≤5s via event-driven refresh; no direct FE→FE communication
+
+### Phase 3:
+- [ ] Total billed amount shows on each VA card
+- [ ] Billing detail view shows payment history
+- [ ] Currency is displayed correctly
+- [ ] Zero billing state handled gracefully
+
+### Phase 4:
+- [ ] Admin can view all engagements platform-wide
+- [ ] Admin can filter by business, VA, status
+- [ ] Admin can update engagement status
+- [ ] Admin sees platform-wide analytics
+- [ ] Permissions are properly enforced
+
+### Phase 5:
+- [ ] Profile dropdown shows "Hired VAs" link with count badge
+- [ ] Save button appears on VA profile pages
+- [ ] Save button shows correct state (saved/unsaved)
+- [ ] Clicking Save when not logged in redirects to sign-in
+- [ ] returnUrl works correctly - user returns to VA profile after login
+- [ ] Saved VAs page shows list of all saved VAs
+- [ ] Unsave button works correctly
+- [ ] Empty state shows when no VAs saved
+- [ ] Profile dropdown shows "Saved VAs" link
+- [ ] Toast notifications appear for save/unsave actions
+- [ ] Real-time updates when saving/unsaving
+
+### Admin/E‑Systems Coordination (General):
+- [ ] All admin operations are performed in the Admin Frontend and persist via backend APIs
+- [ ] E‑Systems Frontend consumes only backend APIs and real-time events (no FE→FE coupling)
+- [ ] Cache invalidation and socket events are emitted on admin writes and billing updates
+- [ ] Security: Admin endpoints require admin role; business endpoints are restricted to the authenticated business
+
+## Future Considerations
+
+### V2 Features (Post-Launch):
+- VA-side view of their engagements
+- Engagement contracts with e-signatures
+- Automated status changes based on activity
+- Integration with time tracking tools
+- Invoicing and billing automation
+- Performance reviews and ratings
+- Engagement renewal reminders
+- Notes on saved VAs (why they were saved)
+- Tags for organizing saved VAs
+- Share saved VAs with team members
+- Saved VA collections/folders
+- Email reminders to follow up with saved VAs
+- Track when saved VAs update their profiles
+
+### Scalability Considerations:
+- Businesses with 100+ VAs need virtual scrolling
+- Consider read replicas for analytics queries
+- Implement proper database sharding strategy
+- Add full-text search for large engagement lists
+</PRD>

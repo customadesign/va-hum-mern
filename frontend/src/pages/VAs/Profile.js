@@ -33,7 +33,7 @@ const validationSchema = Yup.object({
   }),
   email: Yup.string().email("Invalid email").required("Email is required"),
   phone: Yup.string(),
-  website: Yup.string().url("Must be a valid URL"),
+  website: Yup.string(),
   meta: Yup.string(),
   instagram: Yup.string(),
   linkedin: Yup.string(),
@@ -2326,7 +2326,7 @@ export default function VAProfile() {
                         <button
                           type="button"
                           onClick={() => videoInputRef.current?.click()}
-                          className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          className="inline-flex items-center px-8 py-4 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
                           <ArrowUpTrayIcon className="-ml-1 mr-3 h-6 w-6" />
                           Upload Video Introduction
@@ -2597,11 +2597,23 @@ export default function VAProfile() {
                                     . This will be displayed on your public profile
                                     to help businesses understand your working style.
                                   </p>
-                                  <div className="grid grid-cols-2 gap-2 text-xs">
-                                    <div>Dominance: {formik.values.discDominance}%</div>
-                                    <div>Influence: {formik.values.discInfluence}%</div>
-                                    <div>Steadiness: {formik.values.discSteadiness}%</div>
-                                    <div>Conscientiousness: {formik.values.discConscientiousness}%</div>
+                                  <div className="grid grid-cols-2 gap-3 text-xs">
+                                    <div className="bg-white rounded px-2 py-1.5">
+                                      <div className="font-medium text-gray-700">Dominance</div>
+                                      <div className="text-base font-semibold text-red-600">{formik.values.discDominance}%</div>
+                                    </div>
+                                    <div className="bg-white rounded px-2 py-1.5">
+                                      <div className="font-medium text-gray-700">Influence</div>
+                                      <div className="text-base font-semibold text-yellow-600">{formik.values.discInfluence}%</div>
+                                    </div>
+                                    <div className="bg-white rounded px-2 py-1.5">
+                                      <div className="font-medium text-gray-700">Steadiness</div>
+                                      <div className="text-base font-semibold text-green-600">{formik.values.discSteadiness}%</div>
+                                    </div>
+                                    <div className="bg-white rounded px-2 py-1.5">
+                                      <div className="font-medium text-gray-700">Conscientiousness</div>
+                                      <div className="text-base font-semibold text-blue-600">{formik.values.discConscientiousness}%</div>
+                                    </div>
                                   </div>
                                 </div>
                                 <button
