@@ -528,9 +528,9 @@ export default function Community() {
     <>
       <Helmet>
         <title>Virtual Assistant Jobs Webinar ₱999 | Get Hired Remotely</title>
-        <meta name="description" content="Join our PAID webinar (₱999) on the 30th of every month to learn how to qualify for remote VA roles starting at $4–$5 per hour, including bonuses and respectful raises within your first year. Register now." />
+        <meta name="description" content="Join our PAID webinar (₱999) on the 30th of every month to learn how to qualify for remote VA roles starting at $4–$5 per hour, including bonuses and respectful raises in your first year. Register now." />
         <meta property="og:title" content="Virtual Assistant Jobs Webinar ₱999 | Get Hired Remotely" />
-        <meta property="og:description" content="Join our PAID webinar (₱999) on the 30th of every month to learn how to qualify for remote VA roles starting at $4–$5 per hour with bonuses and respectful raises in your first year. Register now." />
+        <meta property="og:description" content="Join our live webinar on the 30th of every month to learn how to qualify for remote VA roles starting at $4–$5 per hour with bonuses and respectful raises in your first year. Register now." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="/community" />
         <meta property="og:image" content="/images/community-invite-poster.svg" />
@@ -931,15 +931,15 @@ export default function Community() {
                             <h4 className="font-semibold text-sm mb-2" style={{ color: '#1f2937' }}>Your Earning Potential:</h4>
                             <div className="space-y-2">
                               <div className="flex justify-between items-center text-xs">
-                                <span className="text-gray-600">Starting Rate (Month 1-3)</span>
+                                <span className="text-gray-600">1-3 Months Experience</span>
                                 <span className="font-bold" style={{ color: '#3b82f6' }}>$4-5/hour</span>
                               </div>
                               <div className="flex justify-between items-center text-xs">
-                                <span className="text-gray-600">With Experience (Month 4-6)</span>
+                                <span className="text-gray-600">6 Months - 1 Year Experience</span>
                                 <span className="font-bold" style={{ color: '#3b82f6' }}>$6-8/hour</span>
                               </div>
                               <div className="flex justify-between items-center text-xs">
-                                <span className="text-gray-600">Specialist VAs (6+ months)</span>
+                                <span className="text-gray-600">Over 1 Year Experience</span>
                                 <span className="font-bold" style={{ color: '#3b82f6' }}>$10+/hour</span>
                               </div>
                             </div>
@@ -969,7 +969,7 @@ export default function Community() {
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 text-white rounded-full p-2" style={{ backgroundColor: '#2173b8' }}>
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div className="flex-1">
@@ -1131,7 +1131,7 @@ export default function Community() {
                 </div>
 
                 {/* Dynamic Earnings Display */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center p-4 rounded-xl transition-all duration-300 hover:scale-105" style={{ backgroundColor: '#f8f9fa' }}>
                     <div className="text-lg font-bold" style={{ color: '#2173b8' }}>₱{earnings.hourly.toLocaleString()}</div>
                     <div className="text-xs text-gray-600">per hour</div>
@@ -1158,12 +1158,12 @@ export default function Community() {
                   <div className="bg-gradient-to-r from-green-400 to-green-500 rounded-xl p-4 text-white text-center transform transition-all hover:scale-105">
                     <div className="text-2xl mb-2">🎁</div>
                     <h4 className="font-bold text-lg mb-1">+ 100% of Bonuses</h4>
-                    <p className="text-sm opacity-90">Clients often give ₱2,000-₱10,000+ bonuses</p>
+                    <p className="text-sm text-white opacity-90">Clients often give ₱2,000-₱10,000+ bonuses</p>
                   </div>
                   <div className="bg-gradient-to-r from-blue-400 to-blue-500 rounded-xl p-4 text-white text-center transform transition-all hover:scale-105">
                     <div className="text-2xl mb-2">📈</div>
                     <h4 className="font-bold text-lg mb-1">+ 100% of Raises</h4>
-                    <p className="text-sm opacity-90">Rate increases to ${selectedRate + 2}-${selectedRate + 5}/hour common</p>
+                    <p className="text-sm text-white opacity-90">Rate increases to ${selectedRate + 2}-${selectedRate + 5}/hour common</p>
                   </div>
                 </div>
               </div>
@@ -1239,7 +1239,7 @@ export default function Community() {
                              background: 'linear-gradient(90deg, #2173b8 0%, #3b82f6 100%)'
                            }}>
                         <span className="text-xs text-white font-extrabold">
-                          above minimum wage!
+                          {((earnings.monthly - 13420) / 13420 * 100).toFixed(1)}% above minimum wage!
                         </span>
                       </div>
                     </div>
@@ -1287,7 +1287,7 @@ export default function Community() {
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-lg" style={{ color: '#10b981' }}>{bonus.amount}</p>
-                          <p className="text-xs text-gray-500">100% yours</p>
+                          <p className="text-sm text-gray-500">100% yours</p>
                         </div>
                       </div>
                     ))}
@@ -1606,7 +1606,7 @@ export default function Community() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-gray-900 flex items-center">
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="#2173b8" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
                   Live Training Schedule
                 </h3>
