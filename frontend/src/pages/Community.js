@@ -276,6 +276,20 @@ export default function Community() {
 
   // Benefit cards expansion state
   const [expandedBenefit, setExpandedBenefit] = useState(null);
+  
+  // Update to handle multiple expanded benefits
+  const [expandedBenefits, setExpandedBenefits] = useState({
+    priority: false,
+    earnings: false,
+    investment: false
+  });
+  
+  const toggleBenefit = (benefit) => {
+    setExpandedBenefits(prev => ({
+      ...prev,
+      [benefit]: !prev[benefit]
+    }));
+  };
 
   // Interactive rate calculator state
   const [selectedRate, setSelectedRate] = useState(5); // Default to $5/hour
@@ -494,7 +508,7 @@ export default function Community() {
     "@context": "https://schema.org",
     "@type": "Event",
     name: "Virtual Assistant Jobs Webinar",
-    description: "Live webinar teaching how to qualify for remote VA roles starting at $4–$5 per hour, including bonuses and respectful raises within your first year.",
+    description: "Live webinar teaching how to qualify for remote VA roles starting at $4–$5/hr, including bonuses and respectful raises within your first year.",
     startDate: nextWebinarDate?.toISOString(),
     endDate: nextWebinarDate ? new Date(nextWebinarDate.getTime() + CONFIG.SESSION_DURATION_MINUTES * 60_000).toISOString() : null,
     eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
@@ -832,10 +846,10 @@ export default function Community() {
               {/* Priority Access Card */}
               <div
                 className={`rounded-xl border transform transition-all cursor-pointer ${
-                  expandedBenefit === 'priority' ? 'sm:col-span-3' : 'priority-glow'
+                  expandedBenefits.priority ? 'sm:col-span-3' : 'priority-glow'
                 }`}
                 style={{ backgroundColor: '#e4effe', borderColor: '#2173b8' }}
-                onClick={() => setExpandedBenefit(expandedBenefit === 'priority' ? null : 'priority')}
+                onClick={() => toggleBenefit('priority')}
               >
                 <div className="p-4">
                   <div className="flex items-start space-x-3">
@@ -852,7 +866,7 @@ export default function Community() {
                         </span>
                       </div>
                       <p className="text-xs text-gray-700 mt-1">First in line for Linkage's job opportunities</p>
-                      {expandedBenefit === 'priority' && (
+                      {expandedBenefits.priority && (
                         <div className="mt-4 space-y-3 animate-fadeIn">
                           <div className="rounded-lg p-3" style={{ backgroundColor: '#f8f9fa' }}>
                             <h4 className="font-semibold text-sm mb-2" style={{ color: '#2173b8' }}>What Priority Access Means for You:</h4>
@@ -896,10 +910,10 @@ export default function Community() {
               {/* $4+/Hour Card */}
               <div
                 className={`rounded-xl border transform transition-all cursor-pointer ${
-                  expandedBenefit === 'earnings' ? 'sm:col-span-3' : 'hover:scale-105'
-                } ${expandedBenefit === 'priority' ? 'hidden' : ''}`}
+                  expandedBenefits.earnings ? 'sm:col-span-3' : 'hover:scale-105'
+                }`}
                 style={{ backgroundColor: '#f3f4f6', borderColor: '#6b7280' }}
-                onClick={() => setExpandedBenefit(expandedBenefit === 'earnings' ? null : 'earnings')}
+                onClick={() => toggleBenefit('earnings')}
               >
                 <div className="p-4">
                   <div className="flex items-start space-x-3">
@@ -911,7 +925,7 @@ export default function Community() {
                     <div className="flex-1">
                       <h3 className="font-bold text-gray-900 text-sm">$4+/Hour</h3>
                       <p className="text-xs text-gray-700 mt-1">Minimum rate with potential for higher pay</p>
-                      {expandedBenefit === 'earnings' && (
+                      {expandedBenefits.earnings && (
                         <div className="mt-4 space-y-3 animate-fadeIn">
                           <div className="rounded-lg p-3" style={{ backgroundColor: '#f8f9fa' }}>
                             <h4 className="font-semibold text-sm mb-2" style={{ color: '#1f2937' }}>Your Earning Potential:</h4>
@@ -946,10 +960,10 @@ export default function Community() {
               {/* ₱999 Investment Card */}
               <div
                 className={`rounded-xl border transform transition-all cursor-pointer ${
-                  expandedBenefit === 'investment' ? 'sm:col-span-3' : 'hover:scale-105'
-                } ${expandedBenefit === 'priority' || expandedBenefit === 'earnings' ? 'hidden' : ''}`}
+                  expandedBenefits.investment ? 'sm:col-span-3' : 'hover:scale-105'
+                }`}
                 style={{ backgroundColor: '#e4effe', borderColor: '#2173b8' }}
-                onClick={() => setExpandedBenefit(expandedBenefit === 'investment' ? null : 'investment')}
+                onClick={() => toggleBenefit('investment')}
               >
                 <div className="p-4">
                   <div className="flex items-start space-x-3">
@@ -961,7 +975,7 @@ export default function Community() {
                     <div className="flex-1">
                       <h3 className="font-bold text-gray-900 text-sm">₱999 Investment</h3>
                       <p className="text-xs text-gray-700 mt-1">3-week professional training program</p>
-                      {expandedBenefit === 'investment' && (
+                      {expandedBenefits.investment && (
                         <div className="mt-4 space-y-3 animate-fadeIn">
                           <div className="rounded-lg p-3" style={{ backgroundColor: '#f8f9fa' }}>
                             <h4 className="font-semibold text-sm mb-2" style={{ color: '#2173b8' }}>Your ₱999 Investment Includes:</h4>
@@ -1022,12 +1036,12 @@ export default function Community() {
                     🚀 GAME CHANGER: You Keep 100% of Everything!
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div className="bg-white bg-opacity-20 rounded-xl p-4 backdrop-blur-sm">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                       <div className="text-3xl mb-2">🎁</div>
                       <h3 className="font-bold text-white text-lg mb-1">100% of All Bonuses</h3>
                       <p className="text-white text-sm opacity-90">Every bonus your client pays goes directly to YOU</p>
                     </div>
-                    <div className="bg-white bg-opacity-20 rounded-xl p-4 backdrop-blur-sm">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                       <div className="text-3xl mb-2">📈</div>
                       <h3 className="font-bold text-white text-lg mb-1">100% of All Raises</h3>
                       <p className="text-white text-sm opacity-90">When clients increase your rate, you keep every peso</p>
@@ -1316,15 +1330,15 @@ export default function Community() {
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-white">
                     <div className="bg-white bg-opacity-20 rounded-lg p-3">
-                      <p className="font-bold text-lg">Started at $5/hour</p>
+                      <p className="font-semibold text-lg">Started at $5/hour</p>
                       <p className="text-sm">₱{Math.round(5 * 56 * 40 * 4.3).toLocaleString()}/month</p>
                     </div>
                     <div className="bg-white bg-opacity-20 rounded-lg p-3">
-                      <p className="font-bold text-lg">Got raises to $9/hour</p>
+                      <p className="font-semibold text-lg">Got raises to $9/hour</p>
                       <p className="text-sm">₱{Math.round(9 * 56 * 40 * 4.3).toLocaleString()}/month</p>
                     </div>
                     <div className="bg-white bg-opacity-20 rounded-lg p-3">
-                      <p className="font-bold text-lg">Plus ₱25,000 in bonuses</p>
+                      <p className="font-semibold text-lg">Plus ₱25,000 in bonuses</p>
                       <p className="text-sm">Throughout the year</p>
                     </div>
                   </div>
@@ -1510,7 +1524,7 @@ export default function Community() {
                 </p>
                 <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-bold rounded-full shadow-lg animate-pulse">
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                    <path fillRule="evenodd" d="M10 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                   </svg>
                   Your Global Career Starts in 20 Days
                 </div>
@@ -1819,7 +1833,7 @@ export default function Community() {
               onClick={() => track('webinar_register_cta_click', { source: 'community_page_final_cta' })}
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012 2h2a2 2 0 012-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
               </svg>
               Reserve Your Seat Now
             </a>
