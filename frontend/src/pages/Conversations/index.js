@@ -80,12 +80,17 @@ export default function Conversations() {
     enabled: !!user
   });
 
-  const isVA = !!user?.profile?.va;
+  const isVA = Boolean(
+    user?.va ||
+    user?.role === 'va' ||
+    user?.profile?.type === 'va' ||
+    user?.profile?.va
+  );
   const profileCompletionPct = profileData?.profileCompletion?.percentage ?? 0;
 
   // Sample conversations for demonstration when no real conversations exist
   const getSampleConversations = () => {
-    if (user.profile?.va) {
+    if (isVA) {
       // Gate VA default messages until profile completion >= 80%
       if (profileCompletionPct < 80) {
         return [];
@@ -211,7 +216,7 @@ export default function Conversations() {
   const displayConversations = conversations?.length > 0 ? conversations : getSampleConversations();
 
   const getOtherParticipant = (conversation) => {
-    if (user.profile?.va) {
+    if (isVA) {
       return conversation.business;
     } else {
       return conversation.va;
@@ -219,7 +224,7 @@ export default function Conversations() {
   };
 
   const getUnreadCount = (conversation) => {
-    if (user.profile?.va) {
+    if (isVA) {
       return conversation.unreadCount?.va || 0;
     } else {
       return conversation.unreadCount?.business || 0;
@@ -275,7 +280,7 @@ export default function Conversations() {
                     <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
                     <h3 className="mt-2 text-sm font-medium text-gray-900">No messages yet</h3>
                     <p className="mt-1 text-sm text-gray-500">
-                      {user.profile?.va 
+                      {isVA 
                         ? 'When businesses contact you, messages will appear here.'
                         : 'Start a conversation with a VA to begin messaging.'}
                     </p>
