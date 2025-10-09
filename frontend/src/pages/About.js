@@ -2,9 +2,11 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { useBranding } from '../contexts/BrandingContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function About() {
   const { branding, loading: brandingLoading } = useBranding();
+  const { user } = useAuth();
   
   // Show loading spinner while branding context is loading
   if (brandingLoading || !branding) {
@@ -14,6 +16,9 @@ export default function About() {
       </div>
     );
   }
+  
+  // Determine redirect destination based on authentication status
+  const getStartedDestination = user ? '/dashboard' : '/sign-up';
   
   return (
     <>
@@ -123,7 +128,7 @@ export default function About() {
             {/* Get Started Button */}
             <div className="mt-12 text-center">
               <Link
-                to="/sign-up"
+                to={getStartedDestination}
                 className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-semibold rounded-lg text-white transform transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 style={{ backgroundColor: '#2273b8' }}
               >
