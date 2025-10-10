@@ -16,6 +16,7 @@ import {
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 import SafeHtml from '../../components/SafeHtml';
 import { DEFAULT_SYSTEM_HTML } from '../../constants/systemHtml';
+import useProfileCompletion from '../../hooks/useProfileCompletion';
 
 // Strip HTML tags for safe preview display
 function stripHtml(input) {
@@ -85,15 +86,8 @@ export default function Conversations() {
     }
   });
 
-  // Fetch profile completion to gate default messages for VAs
-  const { data: profileData } = useQuery({
-    queryKey: ['profile', user?.id],
-    queryFn: async () => {
-      const response = await api.get('/users/profile');
-      return response.data; // expects { profileCompletion, data: { va|business } }
-    },
-    enabled: !!user
-  });
+  // Unified profile completion (shared source of truth)
+  const { percent: completionPercent } = useProfileCompletion();
 
   const isVA = Boolean(
     user?.va ||
@@ -101,7 +95,7 @@ export default function Conversations() {
     user?.profile?.type === 'va' ||
     user?.profile?.va
   );
-  const profileCompletionPct = profileData?.profileCompletion?.percentage ?? 0;
+  const profileCompletionPct = Math.round(completionPercent || 0);
 
   // Check if user is gated (profile completion <= 80%)
   const isGated = conversationsResponse?.gated === true;
@@ -289,13 +283,13 @@ export default function Conversations() {
                   <h3 className="text-sm font-semibold text-gray-900">Profile Completion Required</h3>
                 </div>
                 <p className="text-sm text-gray-700 mb-4">
-                  Your profile is currently <span className="font-bold text-blue-600">{conversationsResponse?.profileCompletion || 0}%</span> complete. 
+                  Your profile is currently <span className="font-bold text-blue-600">{profileCompletionPct || 0}%</span> complete. 
                   You need more than <span className="font-bold">80%</span> completion to access messaging.
                 </p>
                 <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                   <div 
                     className="bg-blue-600 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${conversationsResponse?.profileCompletion || 0}%` }}
+                    style={{ width: `${profileCompletionPct || 0}%` }}
                   />
                 </div>
               </div>
