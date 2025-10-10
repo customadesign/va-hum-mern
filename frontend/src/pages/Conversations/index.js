@@ -16,7 +16,7 @@ import {
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 import SafeHtml from '../../components/SafeHtml';
 import { DEFAULT_SYSTEM_HTML } from '../../constants/systemHtml';
-import useProfileCompletion from '../../hooks/useProfileCompletion';
+import useProfileCompletion, { PROFILE_GATE_THRESHOLD } from '../../hooks/useProfileCompletion';
 
 // Strip HTML tags for safe preview display
 function stripHtml(input) {
@@ -67,27 +67,35 @@ export default function Conversations() {
   const { branding } = useBranding();
   const { user } = useAuth();
   
-  const { data: conversationsResponse, isLoading, error } = useQuery('conversations', async () => {
-    try {
-      const response = await api.get('/conversations');
-      return response.data;
-    } catch (err) {
-      // Check if this is a gating error
-      if (err.response?.status === 403 && err.response?.data?.gated) {
-        return {
-          success: false,
-          gated: true,
-          message: err.response.data.message,
-          profileCompletion: err.response.data.profileCompletion,
-          requiredCompletion: err.response.data.requiredCompletion
-        };
-      }
-      throw err;
-    }
-  });
+  // Unified, normalized percent and eligibility (0–100 scale) with shared threshold
+  const { percent: completionPercent, eligible } = useProfileCompletion();
 
-  // Unified profile completion (shared source of truth)
-  const { percent: completionPercent } = useProfileCompletion();
+  // Fetch conversations only when eligible to avoid gating race and to auto-unlock
+  const {
+    data: conversationsResponse,
+    isLoading: conversationsLoading,
+    error
+  } = useQuery(
+    ['conversations', user?.id],
+    async () => {
+      try {
+        const response = await api.get('/conversations');
+        return response.data;
+      } catch (err) {
+        // If backend still replies 403 while client is eligible, proceed with empty list instead of gating
+        if (eligible && err.response?.status === 403) {
+          return { success: true, data: [] };
+        }
+        throw err;
+      }
+    },
+    {
+      enabled: !!user && eligible,
+      staleTime: 0,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true
+    }
+  );
 
   const isVA = Boolean(
     user?.va ||
@@ -97,15 +105,13 @@ export default function Conversations() {
   );
   const profileCompletionPct = Math.round(completionPercent || 0);
 
-  // Check if user is gated (profile completion <= 80%)
-  const isGated = conversationsResponse?.gated === true;
   const conversations = conversationsResponse?.data || [];
 
   // Sample conversations for demonstration when no real conversations exist
   const getSampleConversations = () => {
     if (isVA) {
-      // Gate VA default messages until profile completion >= 80%
-      if (profileCompletionPct < 80) {
+      // Gate VA default messages until eligible
+      if (!eligible) {
         return [];
       }
       // Once 80%+, show the EXACT two Linkage Admin default messages now used elsewhere
@@ -225,8 +231,10 @@ export default function Conversations() {
     }
   };
 
-  // Use sample conversations if no real conversations exist AND user is not gated
-  const displayConversations = !isGated && conversations?.length > 0 ? conversations : (!isGated ? getSampleConversations() : []);
+  // Use sample conversations if there are no real ones (only when eligible)
+  const displayConversations = eligible
+    ? (conversations?.length > 0 ? conversations : getSampleConversations())
+    : [];
 
   const getOtherParticipant = (conversation) => {
     if (isVA) {
@@ -244,7 +252,7 @@ export default function Conversations() {
     }
   };
 
-  if (isLoading) {
+  if (eligible && conversationsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
@@ -252,8 +260,8 @@ export default function Conversations() {
     );
   }
 
-  // Render gated view if profile completion <= 80%
-  if (isGated) {
+  // Render gated view until eligible (percent >= threshold)
+  if (!eligible) {
     return (
       <>
         <Helmet>
@@ -284,7 +292,7 @@ export default function Conversations() {
                 </div>
                 <p className="text-sm text-gray-700 mb-4">
                   Your profile is currently <span className="font-bold text-blue-600">{profileCompletionPct || 0}%</span> complete. 
-                  You need more than <span className="font-bold">80%</span> completion to access messaging.
+                  You need <span className="font-bold">{PROFILE_GATE_THRESHOLD}%</span> or higher completion to access messaging.
                 </p>
                 <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                   <div 
@@ -342,10 +350,12 @@ export default function Conversations() {
               </div>
 
               <div className="overflow-y-auto h-full pb-20">
-                {/* Mobile-only system nudge */}
-                <div className="md:hidden px-6 py-3 border-b border-gray-200 bg-white">
-                  <SafeHtml html={DEFAULT_SYSTEM_HTML} />
-                </div>
+                {/* Mobile-only system nudge - show only when not eligible */}
+                {!eligible && (
+                  <div className="md:hidden px-6 py-3 border-b border-gray-200 bg-white">
+                    <SafeHtml html={DEFAULT_SYSTEM_HTML} />
+                  </div>
+                )}
                 {displayConversations?.length === 0 ? (
                   <div className="text-center py-12 px-4">
                     <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />

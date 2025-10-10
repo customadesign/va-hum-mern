@@ -4,6 +4,18 @@ import { useAuth } from '../contexts/AuthContext';
 import { useBranding } from '../contexts/BrandingContext';
 import api from '../services/api';
 
+// Shared threshold for unlocking messaging and other gates
+export const PROFILE_GATE_THRESHOLD = 80;
+
+// Normalize any API value to 0–100 scale and clamp/round
+export function toPercent100(p) {
+  const n = Number(p);
+  if (Number.isNaN(n) || n == null) return 0;
+  // Handle 0–1 range (e.g., 0.91 => 91)
+  const raw = n <= 1 ? n * 100 : n;
+  return Math.max(0, Math.min(100, Math.round(raw)));
+}
+
 /**
  * Normalize missingFields to an array<string>
  */
@@ -111,7 +123,7 @@ export function useProfileCompletion(options = {}) {
     queryKey: ['profile-completion', user?.id, branding?.isESystemsMode],
     queryFn: async ({ signal }) => {
       if (!user) {
-        return { percent: 0, source: 'none', lastUpdated: Date.now(), missingFields: [] };
+        return { percent: 0, source: 'none', lastUpdated: Date.now(), missingFields: [], eligible: false };
       }
 
       // Concurrent requests with graceful failure
@@ -127,17 +139,17 @@ export function useProfileCompletion(options = {}) {
 
       // Extract explicit API completion
       const explicitRaw = completionRes?.data?.profileCompletion || completionRes?.data?.completion || null;
-      const explicitPct = Math.round(Number(
+      const explicitPct = toPercent100(
         typeof explicitRaw?.percentage === 'number' ? explicitRaw.percentage : explicitRaw?.percentage
-      ) || 0);
+      );
       const explicitMissing = explicitRaw ? normalizeMissingFields(explicitRaw.missingFields) : [];
 
       // Extract from profile payloads
       const profileData = profileRes?.data || {};
       const userLevelRaw = profileData?.user?.profileCompletion || profileData?.profileCompletion || null;
-      const userLevelPct = Math.round(Number(
+      const userLevelPct = toPercent100(
         typeof userLevelRaw?.percentage === 'number' ? userLevelRaw.percentage : userLevelRaw?.percentage
-      ) || 0);
+      );
       const userLevelMissing = userLevelRaw ? normalizeMissingFields(userLevelRaw.missingFields) : [];
 
       // Concrete profile for local calculation
@@ -153,7 +165,7 @@ export function useProfileCompletion(options = {}) {
       const localCalc = branding?.isESystemsMode
         ? computeLocalBusiness(businessProfile)
         : computeLocalVA(vaProfile);
-      const localPct = localCalc.percentage || 0;
+      const localPct = toPercent100(localCalc.percentage || 0);
 
       const candidates = [
         { label: 'api', value: explicitPct, missing: explicitMissing },
@@ -179,20 +191,26 @@ export function useProfileCompletion(options = {}) {
         localStorage.setItem(cacheAtKey, String(Date.now()));
       }
 
+      const percent100 = toPercent100(best.value || 0);
+      const eligible = percent100 >= PROFILE_GATE_THRESHOLD;
+
       return {
-        percent: Math.round(best.value || 0),
+        percent: percent100,
         source: best.label,
         lastUpdated: best.label === 'cached' ? cachedAt : Date.now(),
         missingFields: best.missing || [],
+        eligible
       };
     },
     enabled: !!user,
-    staleTime: options.staleTime ?? 4000,
-    refetchInterval: options.refetchInterval ?? 5000,
+    staleTime: options.staleTime ?? 0,
+    refetchInterval: options.refetchInterval ?? 4000,
     refetchOnWindowFocus: options.refetchOnWindowFocus ?? true,
+    refetchOnReconnect: options.refetchOnReconnect ?? true,
+    refetchOnMount: options.refetchOnMount ?? 'always',
   });
 
-  const data = query.data ?? { percent: 0, source: 'none', lastUpdated: 0, missingFields: [] };
+  const data = query.data ?? { percent: 0, source: 'none', lastUpdated: 0, missingFields: [], eligible: false };
 
   return useMemo(() => ({
     percent: data.percent,
@@ -200,8 +218,9 @@ export function useProfileCompletion(options = {}) {
     isLoading: query.isLoading,
     error: query.error ?? null,
     lastUpdated: data.lastUpdated,
-    missingFields: data.missingFields
-  }), [data.percent, data.source, query.isLoading, query.error, data.lastUpdated, data.missingFields]);
+    missingFields: data.missingFields,
+    eligible: data.eligible
+  }), [data.percent, data.source, query.isLoading, query.error, data.lastUpdated, data.missingFields, data.eligible]);
 }
 
 export default useProfileCompletion;
