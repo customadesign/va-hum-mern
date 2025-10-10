@@ -493,10 +493,12 @@ export default function Conversations() {
             {/* Main Content - Select a conversation prompt */}
             <div className="flex-1 hidden md:flex items-center justify-center bg-gray-50">
               <div className="text-center max-w-md px-6">
-                {/* Default system nudge */}
-                <div className="mb-6 text-left bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-                  <SafeHtml html={DEFAULT_SYSTEM_HTML} />
-                </div>
+                {/* Default system nudge - only when not eligible */}
+                {!eligible && (
+                  <div className="mb-6 text-left bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                    <SafeHtml html={DEFAULT_SYSTEM_HTML} />
+                  </div>
+                )}
                 <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-4 text-lg font-medium text-gray-900">Select a conversation</h3>
                 <p className="mt-2 text-sm text-gray-500">
