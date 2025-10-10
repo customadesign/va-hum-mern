@@ -34,7 +34,23 @@ export default function Dashboard() {
     : profileData?.data?.va || null;
 
   // Get profile completion from API response if available (prioritize backend calculation)
-  const apiProfileCompletion = profileData?.profileCompletion;
+  // Normalize both shapes: { profileCompletion } or { completion } or user.profileCompletion
+  const apiProfileCompletionRaw = profileData?.profileCompletion || profileData?.completion || profileData?.user?.profileCompletion;
+  const apiProfileCompletion = useMemo(() => {
+    if (!apiProfileCompletionRaw) return null;
+    const percentage = typeof apiProfileCompletionRaw.percentage === 'number'
+      ? apiProfileCompletionRaw.percentage
+      : Number(apiProfileCompletionRaw.percentage) || 0;
+    let missingFields = apiProfileCompletionRaw.missingFields;
+    // Backend sometimes returns an object grouped by categories; flatten it to an array
+    if (missingFields && !Array.isArray(missingFields) && typeof missingFields === 'object') {
+      missingFields = Object.values(missingFields).flat();
+    }
+    const isComplete = typeof apiProfileCompletionRaw.isComplete === 'boolean'
+      ? apiProfileCompletionRaw.isComplete
+      : percentage >= 80;
+    return { percentage, isComplete, missingFields: Array.isArray(missingFields) ? missingFields : [] };
+  }, [apiProfileCompletionRaw]);
 
   // Fetch analytics data (for regular users)
   const { data: analytics } = useQuery({

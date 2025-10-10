@@ -23,8 +23,23 @@ const ProfileCompletion = ({ className = '', showInFooter = false }) => {
   const businessProfile = profileData?.data?.business || null;
   const profile = isVA ? vaProfile : businessProfile;
 
-  // Get backend-calculated profile completion if available
-  const apiProfileCompletion = profileData?.profileCompletion;
+  // Normalize backend-calculated profile completion (supports {profileCompletion}, {completion}, or user.profileCompletion)
+  const apiProfileCompletionRaw = profileData?.profileCompletion || profileData?.completion || profileData?.user?.profileCompletion;
+  const apiProfileCompletion = useMemo(() => {
+    if (!apiProfileCompletionRaw) return null;
+    const percentage = typeof apiProfileCompletionRaw.percentage === 'number'
+      ? apiProfileCompletionRaw.percentage
+      : Number(apiProfileCompletionRaw.percentage) || 0;
+    let missingFields = apiProfileCompletionRaw.missingFields;
+    // Backend may return categorized object; flatten to an array
+    if (missingFields && !Array.isArray(missingFields) && typeof missingFields === 'object') {
+      missingFields = Object.values(missingFields).flat();
+    }
+    const isComplete = typeof apiProfileCompletionRaw.isComplete === 'boolean'
+      ? apiProfileCompletionRaw.isComplete
+      : percentage >= 80;
+    return { percentage, isComplete, missingFields: Array.isArray(missingFields) ? missingFields : [] };
+  }, [apiProfileCompletionRaw]);
 
   // Calculate profile completion percentage based on user type
   const profileCompletion = useMemo(() => {
