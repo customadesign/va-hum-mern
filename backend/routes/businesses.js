@@ -5,6 +5,7 @@ const Business = require('../models/Business');
 const User = require('../models/User');
 // HYBRID AUTH: Support both Clerk and legacy JWT during migration
 const { protect, authorize, optionalAuth } = require('../middleware/hybridAuth');
+const { calculateCompletionPercentage, getMissingFields } = require('../middleware/profileCompletion');
 // Use unified storage handler
 const { handleUnifiedUpload, deleteWithFallback } = require('../utils/unifiedStorage');
 // For now, just use local upload until Supabase is configured
@@ -89,9 +90,21 @@ router.get('/me', protect, async (req, res) => {
       });
     }
 
+    // Calculate profile completion
+    const percentage = calculateCompletionPercentage(business, 'business');
+    const missingFields = getMissingFields(business, 'business');
+
+    const profileCompletion = {
+      percentage,
+      userType: 'business',
+      isComplete: percentage >= 80,
+      missingFields
+    };
+
     res.json({
       success: true,
-      data: business
+      data: business,
+      profileCompletion
     });
   } catch (err) {
     console.error(err);
@@ -253,9 +266,21 @@ router.put('/me', protect, async (req, res) => {
     console.log('Business after save - Benefits:', business.benefits);
     console.log('Business after save - Company Values:', business.companyValues);
 
+    // Calculate profile completion
+    const percentage = calculateCompletionPercentage(business, 'business');
+    const missingFields = getMissingFields(business, 'business');
+
+    const profileCompletion = {
+      percentage,
+      userType: 'business',
+      isComplete: percentage >= 80,
+      missingFields
+    };
+
     res.json({
       success: true,
-      data: business
+      data: business,
+      profileCompletion
     });
   } catch (err) {
     console.error(err);

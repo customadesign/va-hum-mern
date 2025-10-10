@@ -197,6 +197,7 @@ export default function BusinessProfile() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries('businessProfile');
+        queryClient.invalidateQueries(['profile', user?.id]);
         toast.success('Profile updated successfully');
       },
       onError: (error) => {

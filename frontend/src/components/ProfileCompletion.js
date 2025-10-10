@@ -23,8 +23,23 @@ const ProfileCompletion = ({ className = '', showInFooter = false }) => {
   const businessProfile = profileData?.data?.business || null;
   const profile = isVA ? vaProfile : businessProfile;
 
+  // Get backend-calculated profile completion if available
+  const apiProfileCompletion = profileData?.profileCompletion;
+
   // Calculate profile completion percentage based on user type
   const profileCompletion = useMemo(() => {
+    // Prioritize backend-calculated profile completion if available
+    if (apiProfileCompletion) {
+      console.log('ProfileCompletion - Using backend calculation:', apiProfileCompletion);
+      return {
+        percentage: apiProfileCompletion.percentage || 0,
+        isComplete: apiProfileCompletion.isComplete || false,
+        missingFields: apiProfileCompletion.missingFields || []
+      };
+    }
+
+    // Fallback to local calculation if API data not available
+    console.log('ProfileCompletion - Using local calculation fallback');
     if (!profile) return { percentage: 0, isComplete: false, missingFields: [] };
 
     // Debug logging for VA profile
@@ -153,7 +168,7 @@ const ProfileCompletion = ({ className = '', showInFooter = false }) => {
       isComplete: percentage >= 100,
       missingFields
     };
-  }, [profile, isVA]);
+  }, [apiProfileCompletion, profile, isVA, isBusiness]);
 
   // Early returns after all hooks are called
   // Only show for VAs and Businesses
@@ -297,19 +312,19 @@ const ProfileCompletion = ({ className = '', showInFooter = false }) => {
           }`}>
             <strong>Still needed:</strong> {
               profileCompletion.missingFields.slice(0, 3).map((field, index) => (
-                <span key={field.field}>
-                  {field.field === 'name' ? 'Full Name' :
-                   field.field === 'hero' ? 'Hero Statement' :
-                   field.field === 'bio' ? 'Bio (100+ chars)' :
-                   field.field === 'location' ? 'Location' :
-                   field.field === 'specialties' ? 'Specialties' :
-                   field.field === 'hourlyRate' ? 'Hourly Rate' :
-                   field.field === 'roleType' ? 'Role Type' :
-                   field.field === 'roleLevel' ? 'Experience Level' :
-                   field.field === 'phone' ? 'Phone' :
-                   field.field === 'onlinePresence' ? 'Website/LinkedIn' :
-                   field.field === 'discAssessment' ? 'DISC Assessment' :
-                   field.field
+                <span key={field.field || field}>
+                  {(field.field || field) === 'name' ? 'Full Name' :
+                   (field.field || field) === 'hero' ? 'Hero Statement' :
+                   (field.field || field) === 'bio' ? 'Bio (100+ chars)' :
+                   (field.field || field) === 'location' ? 'Location' :
+                   (field.field || field) === 'specialties' ? 'Specialties' :
+                   (field.field || field) === 'hourlyRate' ? 'Hourly Rate' :
+                   (field.field || field) === 'roleType' ? 'Role Type' :
+                   (field.field || field) === 'roleLevel' ? 'Experience Level' :
+                   (field.field || field) === 'phone' ? 'Phone' :
+                   (field.field || field) === 'onlinePresence' ? 'Website/LinkedIn' :
+                   (field.field || field) === 'discAssessment' ? 'DISC Assessment' :
+                   (field.field || field)
                   }
                   {index < Math.min(profileCompletion.missingFields.length - 1, 2) ? ', ' : ''}
                 </span>

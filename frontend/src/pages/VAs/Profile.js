@@ -1249,6 +1249,7 @@ export default function VAProfile() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries("vaProfile");
+        queryClient.invalidateQueries(["profile", user?.id]);
         toast.success("Profile updated successfully");
       },
       onError: (error) => {

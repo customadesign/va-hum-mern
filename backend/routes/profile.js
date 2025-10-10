@@ -7,7 +7,7 @@ const File = require('../models/File');
 const { protect } = require('../middleware/auth');
 const { handleUnifiedUpload, deleteWithFallback, uploadWithFallback } = require('../utils/unifiedStorage');
 const { uploadLimiter } = require('../middleware/rateLimiter');
-const { getProfileCompletionStatus } = require('../middleware/profileCompletion');
+const { getProfileCompletionStatus, calculateCompletionPercentage, getMissingFields } = require('../middleware/profileCompletion');
 
 // @route   GET /api/profile
 // @desc    Get current user's profile
@@ -632,9 +632,21 @@ router.get('/business', protect, async (req, res) => {
       });
     }
 
+    // Calculate profile completion
+    const percentage = calculateCompletionPercentage(user.business, 'business');
+    const missingFields = getMissingFields(user.business, 'business');
+
+    const profileCompletion = {
+      percentage,
+      userType: 'business',
+      isComplete: percentage >= 80,
+      missingFields
+    };
+
     res.json({
       success: true,
-      data: user.business
+      data: user.business,
+      profileCompletion
     });
   } catch (error) {
     console.error('Get business profile error:', error);
@@ -702,9 +714,21 @@ router.put('/business',
 
       await user.business.save();
 
+      // Calculate profile completion
+      const percentage = calculateCompletionPercentage(user.business, 'business');
+      const missingFields = getMissingFields(user.business, 'business');
+
+      const profileCompletion = {
+        percentage,
+        userType: 'business',
+        isComplete: percentage >= 80,
+        missingFields
+      };
+
       res.json({
         success: true,
-        data: user.business
+        data: user.business,
+        profileCompletion
       });
     } catch (error) {
       console.error('Update business profile error:', error);

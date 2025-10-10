@@ -10,6 +10,7 @@ const RoleType = require('../models/RoleType');
 // HYBRID AUTH: Support both Clerk and legacy JWT during migration
 const { protect, authorize, optionalAuth } = require('../middleware/hybridAuth');
 const { checkESystemsVAAccess } = require('../middleware/auth');
+const { calculateCompletionPercentage, getMissingFields } = require('../middleware/profileCompletion');
 // Use Supabase storage in production, local storage in development
 const isProduction = process.env.NODE_ENV === 'production';
 // Use Supabase in production to ensure persistence across deployments
@@ -428,9 +429,21 @@ router.get('/me', protect, async (req, res) => {
       roleLevel: transformedVA.roleLevel
     });
 
+    // Calculate profile completion
+    const percentage = calculateCompletionPercentage(va, 'va');
+    const missingFields = getMissingFields(va, 'va');
+
+    const profileCompletion = {
+      percentage,
+      userType: 'va',
+      isComplete: percentage >= 80,
+      missingFields
+    };
+
     res.json({
       success: true,
-      data: transformedVA
+      data: transformedVA,
+      profileCompletion
     });
   } catch (err) {
     console.error('GET /api/vas/me error:', {
@@ -1057,10 +1070,22 @@ router.put('/me', protect, async (req, res) => {
       }
     };
 
+    // Calculate profile completion
+    const percentage = calculateCompletionPercentage(populatedVA, 'va');
+    const missingFields = getMissingFields(populatedVA, 'va');
+
+    const profileCompletion = {
+      percentage,
+      userType: 'va',
+      isComplete: percentage >= 80,
+      missingFields
+    };
+
     console.log('VA profile updated successfully:', va._id);
     res.json({
       success: true,
-      data: transformedVA
+      data: transformedVA,
+      profileCompletion
     });
   } catch (err) {
     console.error('PUT /api/vas/me error:', {
