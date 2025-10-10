@@ -133,11 +133,19 @@ export default function Conversations() {
             {
               _id: 'msg-1',
               sender: 'admin-1',
-              content: 'Welcome to Linkage! We\'re here to help you find the perfect virtual assistant for your business needs. Feel free to ask any questions!',
+              content:
+                'Thank you for joining Linkage VA Hub! 🎉\n' +
+                'We’re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services.\n' +
+                'If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.',
+              bodyHtml:
+                '<p>Thank you for joining <strong>Linkage VA Hub</strong>! 🎉</p>' +
+                '<p>We’re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services.</p>' +
+                '<p>If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.</p>',
               createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
             }
           ],
-          lastMessage: 'Welcome to Linkage! We\'re here to help you find the perfect virtual assistant for your business needs. Feel free to ask any questions!',
+          lastMessage:
+            'Thank you for joining Linkage VA Hub! 🎉 We’re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services. If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.',
           lastMessageAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 0, business: 1 }
@@ -158,11 +166,19 @@ export default function Conversations() {
             {
               _id: 'msg-3',
               sender: 'admin-2',
-              content: 'Thank you for joining Linkage! If you have any questions about finding virtual assistants or posting jobs, we\'re here to assist.',
+              content:
+                'Welcome to Linkage VA Hub! 🎉\n' +
+                'We’re thrilled to have you on board. Keep an eye out for messages from business owners who may be interested in contracting your services.\n' +
+                'To increase your chances of landing job opportunities, join our community, it’s where VAs get priority access to employment opportunities!',
+              bodyHtml:
+                '<p>Welcome to <strong>Linkage VA Hub</strong>! 🎉</p>' +
+                '<p>We’re thrilled to have you on board. Keep an eye out for messages from business owners who may be interested in contracting your services.</p>' +
+                '<p>To increase your chances of landing job opportunities, join our <a href="/community">community</a>, it’s where VAs get priority access to employment opportunities!</p>',
               createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000) // 8 hours ago
             }
           ],
-          lastMessage: 'Thank you for joining Linkage! If you have any questions about finding virtual assistants or posting jobs, we\'re here to assist.',
+          lastMessage:
+            'Welcome to Linkage VA Hub! 🎉 We’re thrilled to have you on board. Keep an eye out for messages from business owners who may be interested in contracting your services. To increase your chances of landing job opportunities, join our community, it’s where VAs get priority access to employment opportunities!',
           lastMessageAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 1, business: 1 }
@@ -193,11 +209,19 @@ export default function Conversations() {
             {
               _id: 'msg-2',
               sender: 'admin-1',
-              content: 'Welcome to Linkage! We\'re here to help you find the perfect virtual assistant for your business needs. Feel free to ask any questions!',
+              content:
+                'Thank you for joining Linkage VA Hub! 🎉\n' +
+                'We’re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services.\n' +
+                'If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.',
+              bodyHtml:
+                '<p>Thank you for joining <strong>Linkage VA Hub</strong>! 🎉</p>' +
+                '<p>We’re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services.</p>' +
+                '<p>If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.</p>',
               createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
             }
           ],
-          lastMessage: 'Welcome to Linkage! We\'re here to help you find the perfect virtual assistant for your business needs. Feel free to ask any questions!',
+          lastMessage:
+            'Thank you for joining Linkage VA Hub! 🎉 We’re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services. If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.',
           lastMessageAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 0, business: 1 }
@@ -218,11 +242,19 @@ export default function Conversations() {
             {
               _id: 'msg-3',
               sender: 'admin-2',
-              content: 'Thank you for joining Linkage! If you have any questions about finding virtual assistants or posting jobs, we\'re here to assist.',
+              content:
+                'Welcome to Linkage VA Hub! 🎉\n' +
+                'We’re thrilled to have you on board. Keep an eye out for messages from business owners who may be interested in contracting your services.\n' +
+                'To increase your chances of landing job opportunities, join our community, it’s where VAs get priority access to employment opportunities!',
+              bodyHtml:
+                '<p>Welcome to <strong>Linkage VA Hub</strong>! 🎉</p>' +
+                '<p>We’re thrilled to have you on board. Keep an eye out for messages from business owners who may be interested in contracting your services.</p>' +
+                '<p>To increase your chances of landing job opportunities, join our <a href="/community">community</a>, it’s where VAs get priority access to employment opportunities!</p>',
               createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000) // 8 hours ago
             }
           ],
-          lastMessage: 'Thank you for joining Linkage! If you have any questions about finding virtual assistants or posting jobs, we\'re here to assist.',
+          lastMessage:
+            'Welcome to Linkage VA Hub! 🎉 We’re thrilled to have you on board. Keep an eye out for messages from business owners who may be interested in contracting your services. To increase your chances of landing job opportunities, join our community, it’s where VAs get priority access to employment opportunities!',
           lastMessageAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 1, business: 1 }
