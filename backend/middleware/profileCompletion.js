@@ -39,69 +39,126 @@ const FIELD_WEIGHTS = {
  * Calculate profile completion percentage
  */
 const calculateCompletionPercentage = (profile, userType) => {
+  console.log('=== PROFILE COMPLETION CALCULATION START ===');
+  console.log('User Type:', userType);
+  console.log('Profile ID:', profile?._id);
+  
   const fields = REQUIRED_FIELDS[userType];
-  if (!fields) return 0;
+  if (!fields) {
+    console.log('ERROR: No fields defined for userType:', userType);
+    return 0;
+  }
 
   let totalScore = 0;
   let maxScore = 0;
 
   // Calculate basic fields score
   const basicFields = fields.basic;
+  console.log('\n--- BASIC FIELDS ---');
+  console.log('Fields to check:', basicFields);
+  
   const basicCompleted = basicFields.filter(field => {
     const value = getNestedValue(profile, field);
-    return value && value.toString().trim().length > 0;
+    const isComplete = value && value.toString().trim().length > 0;
+    console.log(`  ${field}: ${isComplete ? '✓' : '✗'} (value: ${value})`);
+    return isComplete;
   }).length;
-  totalScore += (basicCompleted / basicFields.length) * FIELD_WEIGHTS.basic;
+  
+  const basicPercentage = (basicCompleted / basicFields.length) * FIELD_WEIGHTS.basic;
+  totalScore += basicPercentage;
   maxScore += FIELD_WEIGHTS.basic;
+  console.log(`Basic score: ${basicCompleted}/${basicFields.length} = ${basicPercentage}/${FIELD_WEIGHTS.basic}`);
 
   // Calculate location fields score
   const locationFields = fields.location;
+  console.log('\n--- LOCATION FIELDS ---');
+  console.log('Fields to check:', locationFields);
+  
   const locationCompleted = locationFields.filter(field => {
     const value = getNestedValue(profile, field);
-    return value && value.toString().trim().length > 0;
+    const isComplete = value && value.toString().trim().length > 0;
+    console.log(`  ${field}: ${isComplete ? '✓' : '✗'} (value: ${value})`);
+    return isComplete;
   }).length;
-  totalScore += (locationCompleted / locationFields.length) * FIELD_WEIGHTS.location;
+  
+  const locationPercentage = (locationCompleted / locationFields.length) * FIELD_WEIGHTS.location;
+  totalScore += locationPercentage;
   maxScore += FIELD_WEIGHTS.location;
+  console.log(`Location score: ${locationCompleted}/${locationFields.length} = ${locationPercentage}/${FIELD_WEIGHTS.location}`);
 
   // Calculate company/professional fields score
   if (userType === 'business' && fields.company) {
     const companyFields = fields.company;
+    console.log('\n--- COMPANY FIELDS ---');
+    console.log('Fields to check:', companyFields);
+    
     const companyCompleted = companyFields.filter(field => {
       const value = getNestedValue(profile, field);
-      return value && value.toString().trim().length > 0;
+      const isComplete = value && value.toString().trim().length > 0;
+      console.log(`  ${field}: ${isComplete ? '✓' : '✗'} (value: ${value})`);
+      return isComplete;
     }).length;
-    totalScore += (companyCompleted / companyFields.length) * FIELD_WEIGHTS.company;
+    
+    const companyPercentage = (companyCompleted / companyFields.length) * FIELD_WEIGHTS.company;
+    totalScore += companyPercentage;
     maxScore += FIELD_WEIGHTS.company;
+    console.log(`Company score: ${companyCompleted}/${companyFields.length} = ${companyPercentage}/${FIELD_WEIGHTS.company}`);
   } else if (userType === 'va' && fields.professional) {
     const professionalFields = fields.professional;
+    console.log('\n--- PROFESSIONAL FIELDS ---');
+    console.log('Fields to check:', professionalFields);
+    
     const professionalCompleted = professionalFields.filter(field => {
       const value = getNestedValue(profile, field);
       if (field === 'skills' || field === 'experience') {
-        return Array.isArray(value) && value.length > 0;
+        const isComplete = Array.isArray(value) && value.length > 0;
+        console.log(`  ${field}: ${isComplete ? '✓' : '✗'} (array length: ${value?.length || 0})`);
+        return isComplete;
       }
-      return value && value.toString().trim().length > 0;
+      const isComplete = value && value.toString().trim().length > 0;
+      console.log(`  ${field}: ${isComplete ? '✓' : '✗'} (value: ${value})`);
+      return isComplete;
     }).length;
-    totalScore += (professionalCompleted / professionalFields.length) * FIELD_WEIGHTS.company;
+    
+    const professionalPercentage = (professionalCompleted / professionalFields.length) * FIELD_WEIGHTS.company;
+    totalScore += professionalPercentage;
     maxScore += FIELD_WEIGHTS.company;
+    console.log(`Professional score: ${professionalCompleted}/${professionalFields.length} = ${professionalPercentage}/${FIELD_WEIGHTS.company}`);
   }
 
   // Calculate optional fields score
   const optionalFields = fields.optional;
+  console.log('\n--- OPTIONAL FIELDS ---');
+  console.log('Fields to check:', optionalFields);
+  
   const optionalCompleted = optionalFields.filter(field => {
     const value = getNestedValue(profile, field);
     if (Array.isArray(value)) {
-      return value.length > 0;
+      const isComplete = value.length > 0;
+      console.log(`  ${field}: ${isComplete ? '✓' : '✗'} (array length: ${value.length})`);
+      return isComplete;
     }
-    return value && value.toString().trim().length > 0;
+    const isComplete = value && value.toString().trim().length > 0;
+    console.log(`  ${field}: ${isComplete ? '✓' : '✗'} (value: ${value})`);
+    return isComplete;
   }).length;
   
   // Optional fields contribute proportionally to their weight
   if (optionalFields.length > 0) {
-    totalScore += (optionalCompleted / optionalFields.length) * FIELD_WEIGHTS.optional;
+    const optionalPercentage = (optionalCompleted / optionalFields.length) * FIELD_WEIGHTS.optional;
+    totalScore += optionalPercentage;
     maxScore += FIELD_WEIGHTS.optional;
+    console.log(`Optional score: ${optionalCompleted}/${optionalFields.length} = ${optionalPercentage}/${FIELD_WEIGHTS.optional}`);
   }
 
-  return Math.round((totalScore / maxScore) * 100);
+  const finalPercentage = Math.round((totalScore / maxScore) * 100);
+  console.log('\n--- FINAL CALCULATION ---');
+  console.log(`Total Score: ${totalScore}`);
+  console.log(`Max Score: ${maxScore}`);
+  console.log(`Percentage: ${finalPercentage}%`);
+  console.log('=== PROFILE COMPLETION CALCULATION END ===\n');
+
+  return finalPercentage;
 };
 
 /**

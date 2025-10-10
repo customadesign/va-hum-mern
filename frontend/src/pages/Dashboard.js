@@ -90,13 +90,24 @@ export default function Dashboard() {
   const profileCompletion = useMemo(() => {
     // Prioritize backend-calculated profile completion if available
     if (apiProfileCompletion) {
+      console.log('=== DASHBOARD PROFILE COMPLETION ===');
       console.log('Using API profile completion:', apiProfileCompletion);
+      console.log('Percentage:', apiProfileCompletion.percentage);
+      console.log('Is Complete:', apiProfileCompletion.isComplete);
+      console.log('Missing Fields:', apiProfileCompletion.missingFields);
       return {
         percentage: apiProfileCompletion.percentage || 0,
         isComplete: apiProfileCompletion.isComplete || false,
         missingFields: apiProfileCompletion.missingFields || []
       };
     }
+
+    console.log('=== DASHBOARD PROFILE COMPLETION ===');
+    console.log('No API profile completion data available');
+    console.log('Profile Data:', profile);
+    console.log('Full profileData object:', profileData);
+    console.log('Is E-Systems Mode:', branding.isESystemsMode);
+    console.log('Using fallback local profile completion calculation');
 
     // Fallback to local calculation if API data not available
     if (!profile) return { percentage: 0, isComplete: false, missingFields: [] };
@@ -138,62 +149,135 @@ export default function Dashboard() {
 
       // VA profile completion logic
       requiredFields = [
-        // Essential fields (high weight)
-        { field: 'name', weight: 10, check: () => profile.name?.trim() && !isDefaultName && profile.name.length > 2 },
-        { field: 'hero', weight: 10, check: () => {
-          // Check if hero exists and has content (more than 10 chars)
-          const heroValue = profile.hero || profile.heroStatement;
-          return heroValue?.trim() && heroValue.length > 10;
-        }},
-        { field: 'bio', weight: 15, check: () => profile.bio?.trim() && profile.bio.length >= 100 },
-        { field: 'location', weight: 10, check: () => {
-          // Check both possible location structures
-          if (profile.location) {
-            // If location exists as an object or ID
-            if (typeof profile.location === 'object' && profile.location !== null) {
-              // Check for populated location with city and some province indicator
-              const hasCity = profile.location.city?.trim();
-              const hasProvince = profile.location.province?.trim() || profile.location.state?.trim();
-              return !!(hasCity && hasProvince);
-            } else if (typeof profile.location === 'string') {
-              // Location exists as an ID reference, consider it complete
-              return true;
-            }
-          }
-          // Fallback to direct fields on profile
-          return !!(profile.city?.trim() && (profile.state?.trim() || profile.province?.trim()));
-        }},
-        { field: 'email', weight: 10, check: () => profile.email?.trim() && profile.email.includes('@') },
-        { field: 'specialties', weight: 15, check: () => profile.specialties?.length > 0 || profile.specialtyIds?.length > 0 },
-        { field: 'roleType', weight: 5, check: () => {
-          // roleType is an ObjectId reference that gets populated - just check if it exists
-          return !!(profile.roleType && (typeof profile.roleType === 'string' || profile.roleType._id));
-        }},
-        { field: 'roleLevel', weight: 5, check: () => {
-          // roleLevel is an ObjectId reference that gets populated - just check if it exists
-          return !!(profile.roleLevel && (typeof profile.roleLevel === 'string' || profile.roleLevel._id));
-        }},
+        // Essential fields (high weight) - Must have for basic profile
+        { 
+          field: "name", 
+          weight: 10, 
+          check: () => profile.name?.trim() && !isDefaultName && profile.name.length > 2,
+          label: "Full Name"
+        },
+        { 
+          field: "hero", 
+          weight: 10, 
+          check: () => {
+            // Check if hero exists and has content (more than 10 chars)
+            const heroValue = profile.hero || profile.heroStatement;
+            return heroValue?.trim() && heroValue.length > 10;
+          },
+          label: "Hero Statement"
+        },
+        { 
+          field: "bio", 
+          weight: 15, 
+          check: () => profile.bio?.trim() && profile.bio.length >= 100,
+          label: "Bio (100+ chars)"
+        },
+        {
+          field: "location",
+          weight: 10,
+          check: () =>
+            {
+              // Check both possible location structures
+              if (profile.location) {
+                // If location exists as an object or ID
+                if (typeof profile.location === 'object' && profile.location !== null) {
+                  // Check for populated location with city and some province indicator
+                  const hasCity = profile.location.city?.trim();
+                  const hasProvince = profile.location.province?.trim() || profile.location.state?.trim();
+                  return !!(hasCity && hasProvince);
+                } else if (typeof profile.location === 'string') {
+                  // Location exists as an ID reference, consider it complete
+                  return true;
+                }
+              }
+              // Fallback to direct fields on profile
+              return !!(profile.city?.trim() && (profile.state?.trim() || profile.province?.trim()));
+            },
+          label: "Complete Location"
+        },
+        { 
+          field: "email", 
+          weight: 10, 
+          check: () => profile.email?.trim() && profile.email.includes('@'),
+          label: "Email Address"
+        },
+        {
+          field: "specialties",
+          weight: 15,
+          check: () => profile.specialties?.length > 0 || profile.specialtyIds?.length > 0,
+          label: "Specialties"
+        },
+        { 
+          field: "roleType", 
+          weight: 5, 
+          check: () => {
+            // roleType is an ObjectId reference that gets populated - just check if it exists
+            return !!(profile.roleType && (typeof profile.roleType === 'string' || profile.roleType._id));
+          },
+          label: "Role Type"
+        },
+        {
+          field: "roleLevel",
+          weight: 5,
+          check: () => {
+            // roleLevel is an ObjectId reference that gets populated - just check if it exists
+            return !!(profile.roleLevel && (typeof profile.roleLevel === 'string' || profile.roleLevel._id));
+          },
+          label: "Experience Level"
+        },
 
         // Enhanced fields (medium weight)
-        { field: 'hourlyRate', weight: 10, check: () => Number(profile.preferredMinHourlyRate) > 0 && Number(profile.preferredMaxHourlyRate) > 0 && Number(profile.preferredMaxHourlyRate) >= Number(profile.preferredMinHourlyRate) },
-        { field: 'phone', weight: 5, check: () => profile.phone?.trim() && profile.phone.length >= 10 },
-        { field: 'onlinePresence', weight: 5, check: () => profile.website?.trim() || profile.linkedin?.trim() },
-        { field: 'discAssessment', weight: 10, check: () => profile.discAssessment?.primaryType }
+        {
+          field: "hourlyRate",
+          weight: 10,
+          check: () =>
+            Number(profile.preferredMinHourlyRate) > 0 && 
+            Number(profile.preferredMaxHourlyRate) > 0 &&
+            Number(profile.preferredMaxHourlyRate) >= Number(profile.preferredMinHourlyRate),
+          label: "Hourly Rate Range"
+        },
+        { 
+          field: "phone", 
+          weight: 5, 
+          check: () => profile.phone?.trim() && profile.phone.length >= 10,
+          label: "Phone Number"
+        },
+        {
+          field: "onlinePresence",
+          weight: 5,
+          check: () => 
+            profile.website?.trim() || 
+            profile.linkedin?.trim() || 
+            profile.twitter?.trim() || 
+            profile.instagram?.trim(),
+          label: "Online Presence"
+        },
+        {
+          field: "discAssessment",
+          weight: 10,
+          check: () => profile.discAssessment?.primaryType,
+          label: "DISC Assessment"
+        }
       ];
     }
 
-    const totalWeight = requiredFields.reduce((sum, field) => sum + field.weight, 0);
+    const totalWeight = requiredFields.reduce(
+      (sum, field) => sum + field.weight,
+      0
+    );
     const completedWeight = requiredFields.reduce((sum, field) => {
       return sum + (field.check() ? field.weight : 0);
     }, 0);
 
     const percentage = Math.round((completedWeight / totalWeight) * 100);
-    const missingFields = requiredFields.filter(field => !field.check());
+    const missingFields = requiredFields.filter((field) => !field.check());
+    
+    console.log('Local calculation result:', { percentage, missingFields: missingFields.length });
 
     return {
       percentage,
-      isComplete: percentage >= 100,
-      missingFields
+      isComplete: percentage === 100,
+      missingFields,
     };
   }, [apiProfileCompletion, profile, branding.isESystemsMode]);
 
@@ -441,7 +525,7 @@ export default function Dashboard() {
                 <div className="flex items-center">
                   <div className="flex-shrink-0 rounded-lg p-3" style={{backgroundColor: '#eff6ff'}}>
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{color: '#3b82f6'}}>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a3 3 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
                   <div className="ml-5 w-0 flex-1">
@@ -531,7 +615,7 @@ export default function Dashboard() {
                   <div className="flex-shrink-0">
                     <div className="flex items-center justify-center h-10 w-10 rounded-md text-white" style={{backgroundColor: '#3b82f6'}}>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                       </svg>
                     </div>
                   </div>

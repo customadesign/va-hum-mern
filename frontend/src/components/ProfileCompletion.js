@@ -28,6 +28,13 @@ const ProfileCompletion = ({ className = '', showInFooter = false }) => {
 
   // Calculate profile completion percentage based on user type
   const profileCompletion = useMemo(() => {
+    console.log('=== PROFILE COMPLETION COMPONENT ===');
+    console.log('Raw profileData from API:', profileData);
+    console.log('apiProfileCompletion:', apiProfileCompletion);
+    console.log('profile:', profile);
+    console.log('isVA:', isVA);
+    console.log('isBusiness:', isBusiness);
+    
     // Prioritize backend-calculated profile completion if available
     if (apiProfileCompletion) {
       console.log('ProfileCompletion - Using backend calculation:', apiProfileCompletion);
