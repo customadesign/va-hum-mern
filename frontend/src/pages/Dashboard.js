@@ -16,13 +16,33 @@ export default function Dashboard() {
   const { data: profileData } = useQuery({
     queryKey: ['profile', user?.id, branding.isESystemsMode],
     queryFn: async () => {
+      // Also fetch the explicit completion endpoint and the VA profile as robust fallbacks
+      const completionReq = api.get('/profile/completion').catch(() => null);
+      const vaMeReq = api.get('/vas/me').catch(() => null);
       if (branding.isESystemsMode) {
-        const response = await api.get('/profile/business');
-        return response.data || { data: { business: null } };
+        const [profileRes, completionRes] = await Promise.all([
+          api.get('/profile/business'),
+          completionReq
+        ]);
+        const base = profileRes.data || { data: { business: null } };
+        const completionFromAPI =
+          completionRes?.data?.completion ||
+          completionRes?.data?.profileCompletion ||
+          null;
+        return { ...base, completionFromAPI };
       } else {
-        // Always use /users/profile endpoint which returns profile completion data
-        const response = await api.get('/users/profile');
-        return response.data;
+        const [profileRes, completionRes, vaMeRes] = await Promise.all([
+          api.get('/users/profile').catch(() => null),
+          completionReq,
+          vaMeReq
+        ]);
+        const base = profileRes?.data || {};
+        const completionFromAPI =
+          completionRes?.data?.completion ||
+          completionRes?.data?.profileCompletion ||
+          null;
+        const vaMe = vaMeRes?.data?.data || null;
+        return { ...base, completionFromAPI, vaMe };
       }
     },
     enabled: !!user && !brandingLoading
@@ -31,11 +51,15 @@ export default function Dashboard() {
   // Extract profile based on branding context
   const profile = branding.isESystemsMode
     ? profileData?.data || null
-    : profileData?.data?.va || null;
+    : (profileData?.data?.va || profileData?.vaMe || null);
 
   // Get profile completion from API response if available (prioritize backend calculation)
   // Normalize both shapes: { profileCompletion } or { completion } or user.profileCompletion
-  const apiProfileCompletionRaw = profileData?.profileCompletion || profileData?.completion || profileData?.user?.profileCompletion;
+  const apiProfileCompletionRaw =
+    profileData?.profileCompletion ||
+    profileData?.completion ||
+    profileData?.user?.profileCompletion ||
+    profileData?.completionFromAPI;
   const apiProfileCompletion = useMemo(() => {
     if (!apiProfileCompletionRaw) return null;
     const percentage = typeof apiProfileCompletionRaw.percentage === 'number'
@@ -104,14 +128,15 @@ export default function Dashboard() {
 
   // Calculate profile completion percentage based on user type
   const profileCompletion = useMemo(() => {
-    // Prioritize backend-calculated profile completion if available
+    // Consider both API and local calculations, then choose the best (highest non-zero)
+    let apiSelected = null;
     if (apiProfileCompletion) {
       console.log('=== DASHBOARD PROFILE COMPLETION ===');
       console.log('Using API profile completion:', apiProfileCompletion);
       console.log('Percentage:', apiProfileCompletion.percentage);
       console.log('Is Complete:', apiProfileCompletion.isComplete);
       console.log('Missing Fields:', apiProfileCompletion.missingFields);
-      return {
+      apiSelected = {
         percentage: apiProfileCompletion.percentage || 0,
         isComplete: apiProfileCompletion.isComplete || false,
         missingFields: apiProfileCompletion.missingFields || []
@@ -119,182 +144,192 @@ export default function Dashboard() {
     }
 
     console.log('=== DASHBOARD PROFILE COMPLETION ===');
-    console.log('No API profile completion data available');
     console.log('Profile Data:', profile);
     console.log('Full profileData object:', profileData);
     console.log('Is E-Systems Mode:', branding.isESystemsMode);
     console.log('Using fallback local profile completion calculation');
 
-    // Fallback to local calculation if API data not available
-    if (!profile) return { percentage: 0, isComplete: false, missingFields: [] };
+    // Local calculation (fallback or cross-check)
+    const localSelected = {
+      percentage: 0,
+      isComplete: false,
+      missingFields: []
+    };
+    if (!apiSelected) {
+      // Fallback to local calculation if API data not available
+      if (!profile) return localSelected;
+      
+      // Debug logging for profile
+      console.log('Profile Data:', profile);
+      console.log('Is E-Systems Mode:', branding.isESystemsMode);
+      console.log('Using fallback local profile completion calculation');
 
-    // Debug logging for profile
-    console.log('Profile Data:', profile);
-    console.log('Is E-Systems Mode:', branding.isESystemsMode);
-    console.log('Using fallback local profile completion calculation');
+      let requiredFields = [];
 
-    let requiredFields = [];
-
-    if (branding.isESystemsMode) {
-      // Business profile completion logic
-      requiredFields = [
-        { field: 'contactName', weight: 15, check: () => profile.contactName?.trim() && profile.contactName.length > 2 },
-        { field: 'company', weight: 15, check: () => profile.company?.trim() && profile.company.length > 2 },
-        { field: 'bio', weight: 15, check: () => profile.bio?.trim() && profile.bio.length >= 50 },
-        { field: 'email', weight: 10, check: () => profile.email?.trim() && profile.email.includes('@') },
-        { field: 'phone', weight: 10, check: () => profile.phone?.trim() && profile.phone.length >= 10 },
-        { field: 'industry', weight: 10, check: () => profile.industry?.trim() },
-        { field: 'employeeCount', weight: 5, check: () => Number(profile.employeeCount) > 0 },
-        { field: 'website', weight: 10, check: () => profile.website?.trim() },
-        { field: 'location', weight: 10, check: () => {
-          if (profile.location) {
-            if (typeof profile.location === 'object' && profile.location !== null) {
-              const hasCity = profile.location.city?.trim();
-              const hasProvince = profile.location.province?.trim() || profile.location.state?.trim();
-              return !!(hasCity && hasProvince);
-            } else if (typeof profile.location === 'string') {
-              return true;
-            }
-          }
-          return !!(profile.city?.trim() && (profile.state?.trim() || profile.province?.trim()));
-        }}
-      ];
-    } else {
-      // Check if name is just the email prefix (default value)
-      const isDefaultName = profile.name === profile.email?.split('@')[0];
-
-      // VA profile completion logic
-      requiredFields = [
-        // Essential fields (high weight) - Must have for basic profile
-        { 
-          field: "name", 
-          weight: 10, 
-          check: () => profile.name?.trim() && !isDefaultName && profile.name.length > 2,
-          label: "Full Name"
-        },
-        { 
-          field: "hero", 
-          weight: 10, 
-          check: () => {
-            // Check if hero exists and has content (more than 10 chars)
-            const heroValue = profile.hero || profile.heroStatement;
-            return heroValue?.trim() && heroValue.length > 10;
-          },
-          label: "Hero Statement"
-        },
-        { 
-          field: "bio", 
-          weight: 15, 
-          check: () => profile.bio?.trim() && profile.bio.length >= 100,
-          label: "Bio (100+ chars)"
-        },
-        {
-          field: "location",
-          weight: 10,
-          check: () =>
-            {
-              // Check both possible location structures
-              if (profile.location) {
-                // If location exists as an object or ID
-                if (typeof profile.location === 'object' && profile.location !== null) {
-                  // Check for populated location with city and some province indicator
-                  const hasCity = profile.location.city?.trim();
-                  const hasProvince = profile.location.province?.trim() || profile.location.state?.trim();
-                  return !!(hasCity && hasProvince);
-                } else if (typeof profile.location === 'string') {
-                  // Location exists as an ID reference, consider it complete
-                  return true;
-                }
+      if (branding.isESystemsMode) {
+        // Business profile completion logic
+        requiredFields = [
+          { field: 'contactName', weight: 15, check: () => profile.contactName?.trim() && profile.contactName.length > 2 },
+          { field: 'company', weight: 15, check: () => profile.company?.trim() && profile.company.length > 2 },
+          { field: 'bio', weight: 15, check: () => profile.bio?.trim() && profile.bio.length >= 50 },
+          { field: 'email', weight: 10, check: () => profile.email?.trim() && profile.email.includes('@') },
+          { field: 'phone', weight: 10, check: () => profile.phone?.trim() && profile.phone.length >= 10 },
+          { field: 'industry', weight: 10, check: () => profile.industry?.trim() },
+          { field: 'employeeCount', weight: 5, check: () => Number(profile.employeeCount) > 0 },
+          { field: 'website', weight: 10, check: () => profile.website?.trim() },
+          { field: 'location', weight: 10, check: () => {
+            if (profile.location) {
+              if (typeof profile.location === 'object' && profile.location !== null) {
+                const hasCity = profile.location.city?.trim();
+                const hasProvince = profile.location.province?.trim() || profile.location.state?.trim();
+                return !!(hasCity && hasProvince);
+              } else if (typeof profile.location === 'string') {
+                return true;
               }
-              // Fallback to direct fields on profile
-              return !!(profile.city?.trim() && (profile.state?.trim() || profile.province?.trim()));
-            },
-          label: "Complete Location"
-        },
-        { 
-          field: "email", 
-          weight: 10, 
-          check: () => profile.email?.trim() && profile.email.includes('@'),
-          label: "Email Address"
-        },
-        {
-          field: "specialties",
-          weight: 15,
-          check: () => profile.specialties?.length > 0 || profile.specialtyIds?.length > 0,
-          label: "Specialties"
-        },
-        { 
-          field: "roleType", 
-          weight: 5, 
-          check: () => {
-            // roleType is an ObjectId reference that gets populated - just check if it exists
-            return !!(profile.roleType && (typeof profile.roleType === 'string' || profile.roleType._id));
-          },
-          label: "Role Type"
-        },
-        {
-          field: "roleLevel",
-          weight: 5,
-          check: () => {
-            // roleLevel is an ObjectId reference that gets populated - just check if it exists
-            return !!(profile.roleLevel && (typeof profile.roleLevel === 'string' || profile.roleLevel._id));
-          },
-          label: "Experience Level"
-        },
+            }
+            return !!(profile.city?.trim() && (profile.state?.trim() || profile.province?.trim()));
+          }}
+        ];
+      } else {
+        // Check if name is just the email prefix (default value)
+        const isDefaultName = profile.name === profile.email?.split('@')[0];
 
-        // Enhanced fields (medium weight)
-        {
-          field: "hourlyRate",
-          weight: 10,
-          check: () =>
-            Number(profile.preferredMinHourlyRate) > 0 && 
-            Number(profile.preferredMaxHourlyRate) > 0 &&
-            Number(profile.preferredMaxHourlyRate) >= Number(profile.preferredMinHourlyRate),
-          label: "Hourly Rate Range"
-        },
-        { 
-          field: "phone", 
-          weight: 5, 
-          check: () => profile.phone?.trim() && profile.phone.length >= 10,
-          label: "Phone Number"
-        },
-        {
-          field: "onlinePresence",
-          weight: 5,
-          check: () => 
-            profile.website?.trim() || 
-            profile.linkedin?.trim() || 
-            profile.twitter?.trim() || 
-            profile.instagram?.trim(),
-          label: "Online Presence"
-        },
-        {
-          field: "discAssessment",
-          weight: 10,
-          check: () => profile.discAssessment?.primaryType,
-          label: "DISC Assessment"
-        }
-      ];
+        // VA profile completion logic
+        requiredFields = [
+          // Essential fields (high weight) - Must have for basic profile
+          { 
+            field: "name", 
+            weight: 10, 
+            check: () => profile.name?.trim() && !isDefaultName && profile.name.length > 2,
+            label: "Full Name"
+          },
+          { 
+            field: "hero", 
+            weight: 10, 
+            check: () => {
+              // Check if hero exists and has content (more than 10 chars)
+              const heroValue = profile.hero || profile.heroStatement;
+              return heroValue?.trim() && heroValue.length > 10;
+            },
+            label: "Hero Statement"
+          },
+          { 
+            field: "bio", 
+            weight: 15, 
+            check: () => profile.bio?.trim() && profile.bio.length >= 100,
+            label: "Bio (100+ chars)"
+          },
+          {
+            field: "location",
+            weight: 10,
+            check: () =>
+              {
+                // Check both possible location structures
+                if (profile.location) {
+                  // If location exists as an object or ID
+                  if (typeof profile.location === 'object' && profile.location !== null) {
+                    // Check for populated location with city and some province indicator
+                    const hasCity = profile.location.city?.trim();
+                    const hasProvince = profile.location.province?.trim() || profile.location.state?.trim();
+                    return !!(hasCity && hasProvince);
+                  } else if (typeof profile.location === 'string') {
+                    // Location exists as an ID reference, consider it complete
+                    return true;
+                  }
+                }
+                // Fallback to direct fields on profile
+                return !!(profile.city?.trim() && (profile.state?.trim() || profile.province?.trim()));
+              },
+            label: "Complete Location"
+          },
+          { 
+            field: "email", 
+            weight: 10, 
+            check: () => profile.email?.trim() && profile.email.includes('@'),
+            label: "Email Address"
+          },
+          {
+            field: "specialties",
+            weight: 15,
+            check: () => profile.specialties?.length > 0 || profile.specialtyIds?.length > 0,
+            label: "Specialties"
+          },
+          { 
+            field: "roleType", 
+            weight: 5, 
+            check: () => {
+              // roleType is an ObjectId reference that gets populated - just check if it exists
+              return !!(profile.roleType && (typeof profile.roleType === 'string' || profile.roleType._id));
+            },
+            label: "Role Type"
+          },
+          {
+            field: "roleLevel",
+            weight: 5,
+            check: () => {
+              // roleLevel is an ObjectId reference that gets populated - just check if it exists
+              return !!(profile.roleLevel && (typeof profile.roleLevel === 'string' || profile.roleLevel._id));
+            },
+            label: "Experience Level"
+          },
+
+          // Enhanced fields (medium weight)
+          {
+            field: "hourlyRate",
+            weight: 10,
+            check: () =>
+              Number(profile.preferredMinHourlyRate) > 0 && 
+              Number(profile.preferredMaxHourlyRate) > 0 &&
+              Number(profile.preferredMaxHourlyRate) >= Number(profile.preferredMinHourlyRate),
+            label: "Hourly Rate Range"
+          },
+          { 
+            field: "phone", 
+            weight: 5, 
+            check: () => profile.phone?.trim() && profile.phone.length >= 10,
+            label: "Phone Number"
+          },
+          {
+            field: "onlinePresence",
+            weight: 5,
+            check: () => 
+              profile.website?.trim() || 
+              profile.linkedin?.trim() || 
+              profile.twitter?.trim() || 
+              profile.instagram?.trim(),
+            label: "Online Presence"
+          },
+          {
+            field: "discAssessment",
+            weight: 10,
+            check: () => profile.discAssessment?.primaryType,
+            label: "DISC Assessment"
+          }
+        ];
+      }
+
+      const totalWeight = requiredFields.reduce(
+        (sum, field) => sum + field.weight,
+        0
+      );
+      const completedWeight = requiredFields.reduce((sum, field) => {
+        return sum + (field.check() ? field.weight : 0);
+      }, 0);
+
+      const percentage = Math.round((completedWeight / totalWeight) * 100);
+      const missingFields = requiredFields.filter((field) => !field.check());
+      
+      console.log('Local calculation result:', { percentage, missingFields: missingFields.length });
+
+      localSelected.percentage = percentage;
+      localSelected.isComplete = percentage === 100;
+      localSelected.missingFields = missingFields;
     }
 
-    const totalWeight = requiredFields.reduce(
-      (sum, field) => sum + field.weight,
-      0
-    );
-    const completedWeight = requiredFields.reduce((sum, field) => {
-      return sum + (field.check() ? field.weight : 0);
-    }, 0);
-
-    const percentage = Math.round((completedWeight / totalWeight) * 100);
-    const missingFields = requiredFields.filter((field) => !field.check());
-    
-    console.log('Local calculation result:', { percentage, missingFields: missingFields.length });
-
-    return {
-      percentage,
-      isComplete: percentage === 100,
-      missingFields,
-    };
+    // Prefer API result if present and not worse than local, otherwise use local
+    return (apiSelected && apiSelected.percentage >= (localSelected.percentage || 0))
+      ? apiSelected
+      : localSelected;
   }, [apiProfileCompletion, profile, branding.isESystemsMode]);
 
   // Show loading spinner while branding context is loading
@@ -541,7 +576,7 @@ export default function Dashboard() {
                 <div className="flex items-center">
                   <div className="flex-shrink-0 rounded-lg p-3" style={{backgroundColor: '#eff6ff'}}>
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{color: '#3b82f6'}}>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a3 3 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a3 3 0 002-2m0 0V5a2 2 0 012-2h3.5a1 1 0 01.8.4l2.5 6a1 1 0 01-.4 1.2H9m-3 7v1a2 2 0 01-2 2H5a2 2 0 01-2-2v-1m3 4h.01M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
                   <div className="ml-5 w-0 flex-1">
