@@ -17,6 +17,7 @@ import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 import SafeHtml from '../../components/SafeHtml';
 import { DEFAULT_SYSTEM_HTML } from '../../constants/systemHtml';
 import useProfileCompletion, { PROFILE_GATE_THRESHOLD } from '../../hooks/useProfileCompletion';
+import { toast } from 'react-toastify';
 
 // Strip HTML tags for safe preview display
 function stripHtml(input) {
@@ -63,8 +64,26 @@ function sanitizeSystemHtml(html) {
   }
 }
 
+// Demo archive simulation (persist across reloads)
+const DEMO_ARCHIVE_KEY = 'linkage_demo_archived_v1';
+function getDemoArchiveMap() {
+  try {
+    const raw = localStorage.getItem(DEMO_ARCHIVE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+function setDemoArchiveMap(map) {
+  try {
+    localStorage.setItem(DEMO_ARCHIVE_KEY, JSON.stringify(map));
+  } catch {
+    // no-op
+  }
+}
+
 // Unarchive button component with optimistic update
-function UnarchiveButton({ convId }) {
+function UnarchiveButton({ convId, userId }) {
   const queryClient = useQueryClient();
   const mutate = useMutation(
     async () => {
@@ -74,14 +93,14 @@ function UnarchiveButton({ convId }) {
     {
       onMutate: async () => {
         await Promise.all([
-          queryClient.cancelQueries(['conversations', 'archived']),
-          queryClient.cancelQueries(['conversations', 'active'])
+          queryClient.cancelQueries(['conversations', 'archived', userId]),
+          queryClient.cancelQueries(['conversations', 'active', userId])
         ]);
-        const prevArchived = queryClient.getQueryData(['conversations', 'archived']);
-        const prevActive = queryClient.getQueryData(['conversations', 'active']);
+        const prevArchived = queryClient.getQueryData(['conversations', 'archived', userId]);
+        const prevActive = queryClient.getQueryData(['conversations', 'active', userId]);
         // Optimistically remove from archived
         if (prevArchived?.data) {
-          queryClient.setQueryData(['conversations', 'archived'], {
+          queryClient.setQueryData(['conversations', 'archived', userId], {
             ...prevArchived,
             data: prevArchived.data.filter((c) => c._id !== convId)
           });
@@ -90,12 +109,13 @@ function UnarchiveButton({ convId }) {
       },
       onError: (_err, _vars, ctx) => {
         if (ctx?.prevArchived) {
-          queryClient.setQueryData(['conversations', 'archived'], ctx.prevArchived);
+          queryClient.setQueryData(['conversations', 'archived', userId], ctx.prevArchived);
         }
+        toast.error('Failed to unarchive conversation');
       },
       onSettled: () => {
-        queryClient.invalidateQueries(['conversations', 'archived']);
-        queryClient.invalidateQueries(['conversations', 'active']);
+        queryClient.invalidateQueries(['conversations', 'archived', userId]);
+        queryClient.invalidateQueries(['conversations', 'active', userId]);
       }
     }
   );
@@ -104,6 +124,19 @@ function UnarchiveButton({ convId }) {
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        // Demo simulation (no backend)
+        if (convId.startsWith('demo-')) {
+          const map = getDemoArchiveMap();
+          if (map[convId]) {
+            delete map[convId];
+            setDemoArchiveMap(map);
+          }
+          toast.success('Conversation restored to Inbox');
+          // Trigger list refresh and re-render
+          queryClient.invalidateQueries(['conversations', 'archived', userId]);
+          queryClient.invalidateQueries(['conversations', 'active', userId]);
+          return;
+        }
         mutate.mutate();
       }}
       className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
@@ -122,6 +155,7 @@ export default function Conversations() {
   const viewParam = (searchParams.get('view') || 'inbox').toLowerCase();
   const view = viewParam === 'archived' ? 'archived' : 'inbox';
   const statusParam = view === 'archived' ? 'archived' : 'active';
+  const userId = (user && (user.id || user._id)) || undefined;
 
   // Unified, normalized percent and eligibility (0–100 scale) with shared threshold
   const { percent: completionPercent, eligible } = useProfileCompletion();
@@ -177,13 +211,14 @@ export default function Conversations() {
 
   // Sample conversations for demonstration when no real conversations exist
   const getSampleConversations = () => {
+    const demoMap = getDemoArchiveMap();
     if (isVA) {
       // Gate VA default messages until eligible
       if (!eligible) {
         return [];
       }
       // Once 80%+, show the EXACT two Linkage Admin default messages now used elsewhere
-      return [
+      const base = [
         {
           _id: 'demo-1',
           participants: [user.id, 'admin-1'],
@@ -252,9 +287,10 @@ export default function Conversations() {
           unreadCount: { va: 1, business: 1 }
         }
       ];
+      return base.map((c) => ({ ...c, status: demoMap[c._id] ? 'archived' : 'active' }));
     } else {
       // Sample conversations for businesses
-      return [
+      const base = [
         {
           _id: 'demo-1',
           participants: [user.id, 'admin-1'],
@@ -308,12 +344,17 @@ export default function Conversations() {
           unreadCount: { va: 1, business: 1 }
         }
       ];
+      return base.map((c) => ({ ...c, status: demoMap[c._id] ? 'archived' : 'active' }));
     }
   };
 
-  // Use sample conversations if there are no real ones (only when eligible)
+  // Use sample conversations if there are no real ones (only when eligible), and filter by view
+  const sampleList = getSampleConversations();
+  const sampleFiltered = sampleList.filter((c) =>
+    view === 'archived' ? c.status === 'archived' : c.status !== 'archived'
+  );
   const displayConversations = eligible
-    ? (conversations?.length > 0 ? conversations : (view === 'inbox' ? getSampleConversations() : []))
+    ? (conversations?.length > 0 ? conversations : sampleFiltered)
     : [];
 
   const getOtherParticipant = (conversation) => {
@@ -535,7 +576,7 @@ export default function Conversations() {
                                     </p>
                                     {/* Unarchive control in Archived view */}
                                     {view === 'archived' && (
-                                      <UnarchiveButton convId={conversation._id} />
+                                      <UnarchiveButton convId={conversation._id} userId={userId} />
                                     )}
                                   </div>
                                 </div>

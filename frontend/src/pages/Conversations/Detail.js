@@ -58,6 +58,24 @@ function sanitizeSystemHtml(html) {
   }
 }
 
+// ===== Demo archive simulation (persist across reloads) =====
+const DEMO_ARCHIVE_KEY = 'linkage_demo_archived_v1';
+function getDemoArchiveMap() {
+  try {
+    const raw = localStorage.getItem(DEMO_ARCHIVE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+function setDemoArchiveMap(map) {
+  try {
+    localStorage.setItem(DEMO_ARCHIVE_KEY, JSON.stringify(map));
+  } catch {
+    // no-op
+  }
+}
+
 export default function ConversationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -81,6 +99,7 @@ export default function ConversationDetail() {
 
   // Demo conversations use demo-* slugs; never render route text in UI
   const isSampleConversation = id.startsWith('demo-');
+  const demoArchived = isSampleConversation ? Boolean(getDemoArchiveMap()[id]) : false;
   const isVA = Boolean(
     user?.va ||
     user?.role === 'va' ||
@@ -309,7 +328,9 @@ export default function ConversationDetail() {
     }
   );
 
-  const conversation = isSampleConversation ? sampleConversation : apiConversation;
+  const conversation = isSampleConversation
+    ? (sampleConversation ? { ...sampleConversation, status: demoArchived ? 'archived' : 'active' } : null)
+    : apiConversation;
   const isLoading = (!isSampleConversation && isConversationLoading) ||
     (isSampleConversation && isVA && isProfileLoading);
 
@@ -390,20 +411,20 @@ export default function ConversationDetail() {
     },
     {
       onMutate: async () => {
+        const uid = user?.id || user?._id;
         await Promise.all([
-          queryClient.cancelQueries(['conversations', 'active']),
-          queryClient.cancelQueries(['conversations', 'archived'])
+          queryClient.cancelQueries(['conversations', 'active', uid]),
+          queryClient.cancelQueries(['conversations', 'archived', uid])
         ]);
       },
       onSuccess: () => {
-        toast.success('Conversation archived');
-        // Refresh lists and send user back to Inbox
-        queryClient.invalidateQueries(['conversations', 'active']);
-        queryClient.invalidateQueries(['conversations', 'archived']);
-        navigate('/conversations');
+        const uid = user?.id || user?._id;
+        queryClient.invalidateQueries(['conversations', 'active', uid]);
+        queryClient.invalidateQueries(['conversations', 'archived', uid]);
+        navigate('/conversations?view=archived');
       },
       onError: (error) => {
-        toast.error(error.response?.data?.error || 'Failed to archive conversation');
+        toast.error(error?.response?.data?.error || error?.message || 'Failed to archive conversation');
       }
     }
   );
@@ -415,19 +436,20 @@ export default function ConversationDetail() {
     },
     {
       onMutate: async () => {
+        const uid = user?.id || user?._id;
         await Promise.all([
-          queryClient.cancelQueries(['conversations', 'active']),
-          queryClient.cancelQueries(['conversations', 'archived'])
+          queryClient.cancelQueries(['conversations', 'active', uid]),
+          queryClient.cancelQueries(['conversations', 'archived', uid])
         ]);
       },
       onSuccess: () => {
-        toast.success('Conversation restored to Inbox');
-        queryClient.invalidateQueries(['conversations', 'active']);
-        queryClient.invalidateQueries(['conversations', 'archived']);
+        const uid = user?.id || user?._id;
+        queryClient.invalidateQueries(['conversations', 'active', uid]);
+        queryClient.invalidateQueries(['conversations', 'archived', uid]);
         navigate('/conversations?view=inbox');
       },
       onError: (error) => {
-        toast.error(error.response?.data?.error || 'Failed to unarchive conversation');
+        toast.error(error?.response?.data?.error || error?.message || 'Failed to unarchive conversation');
       }
     }
   );
@@ -687,9 +709,28 @@ export default function ConversationDetail() {
                 {showOptions && (
                   <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
                     <div className="py-1">
-                      {conversation?.status === 'archived' ? (
+                      {(conversation?.status === 'archived') ? (
                         <button
-                          onClick={() => unarchiveConversationMutation.mutate()}
+                          onClick={() => {
+                            if (isSampleConversation) {
+                              // Demo simulation (client-only)
+                              const map = getDemoArchiveMap();
+                              if (map[id]) {
+                                delete map[id];
+                                setDemoArchiveMap(map);
+                              }
+                              const uid = user?.id || user?._id;
+                              toast.success('Conversation restored to Inbox');
+                              // Update cached detail and lists
+                              queryClient.setQueryData(['conversation', id], { ...(conversation || {}), status: 'active' });
+                              queryClient.invalidateQueries(['conversations', 'active', uid]);
+                              queryClient.invalidateQueries(['conversations', 'archived', uid]);
+                              setShowOptions(false);
+                              navigate('/conversations?view=inbox');
+                              return;
+                            }
+                            unarchiveConversationMutation.mutate();
+                          }}
                           className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                           data-testid="unarchive-conversation"
                         >
@@ -698,7 +739,24 @@ export default function ConversationDetail() {
                         </button>
                       ) : (
                         <button
-                          onClick={() => archiveConversationMutation.mutate()}
+                          onClick={() => {
+                            if (isSampleConversation) {
+                              // Demo simulation (client-only)
+                              const map = getDemoArchiveMap();
+                              map[id] = true;
+                              setDemoArchiveMap(map);
+                              const uid = user?.id || user?._id;
+                              toast.success('Conversation archived');
+                              // Update cached detail and lists
+                              queryClient.setQueryData(['conversation', id], { ...(conversation || {}), status: 'archived' });
+                              queryClient.invalidateQueries(['conversations', 'active', uid]);
+                              queryClient.invalidateQueries(['conversations', 'archived', uid]);
+                              setShowOptions(false);
+                              navigate('/conversations?view=archived');
+                              return;
+                            }
+                            archiveConversationMutation.mutate();
+                          }}
                           className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                           data-testid="archive-conversation"
                         >

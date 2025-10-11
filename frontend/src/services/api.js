@@ -1,14 +1,46 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Robust API base URL inference for multi-deploy (Render) with safe fallbacks
+function inferApiBase() {
+  try {
+    // Prefer explicit env var when provided
+    if (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim()) {
+      return process.env.REACT_APP_API_URL.trim();
+    }
+    // Server-side (SSR/Node scripts)
+    if (typeof window === 'undefined') {
+      return process.env.SERVER_API_URL || 'http://localhost:5000/api';
+    }
+    const { hostname, protocol } = window.location;
+    // Render mapped domains
+    if (hostname.includes('linkage-va-hub.onrender.com')) {
+      return 'https://linkage-va-hub-api.onrender.com/api';
+    }
+    if (hostname.includes('esystems-management-hub.onrender.com')) {
+      return 'https://esystems-management-hub-api.onrender.com/api';
+    }
+    // Same-origin reverse proxy (e.g., Nginx -> /api)
+    if (protocol === 'https:' || protocol === 'http:') {
+      return '/api';
+    }
+    // Local fallback
+    return 'http://localhost:5000/api';
+  } catch {
+    return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  }
+}
 
-// Create axios instance
+const API_URL = inferApiBase();
+
+// Create axios instance (send credentials + align CSRF header names with backend)
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
   withCredentials: true, // Always send cookies with requests
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-CSRF-Token',
 });
 
 // Global token getter function (set by auth context)

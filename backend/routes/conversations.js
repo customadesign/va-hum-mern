@@ -59,9 +59,16 @@ router.get('/', protect, async (req, res) => {
       query = { participants: req.user.id };
     }
 
-    // Apply status filter: default to active (Inbox), allow archived via ?status=archived
-    const desiredStatus = req.query.status === 'archived' ? 'archived' : 'active';
-    query.status = desiredStatus;
+    // Backward-compatible status filter:
+    // - status=archived -> only archived
+    // - status=active OR no status -> include status:'active' OR missing status (treat missing as active)
+    const rawStatus = (req.query.status || '').toLowerCase();
+    if (rawStatus === 'archived') {
+      query.status = 'archived';
+    } else {
+      // When no status or 'active', include docs with missing status for backward compatibility
+      query.$or = [{ status: 'active' }, { status: { $exists: false } }];
+    }
 
     const conversations = await Conversation.find(query)
       .populate('va', 'email profile')
