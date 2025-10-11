@@ -409,6 +409,125 @@ router.get('/unread/count', protect, async (req, res) => {
   }
 });
 
+// Get message counts for inbox and archived conversations
+router.get('/counts', protect, async (req, res) => {
+  try {
+    // Check profile completion gating for business users (non-admin, non-VA)
+    if (!req.user.admin && !req.user.profile?.va) {
+      // Business user - check profile completion
+      const business = await Business.findOne({ user: req.user._id });
+      
+      if (!business) {
+        return res.json({
+          success: true,
+          data: { 
+            inboxCount: 0,
+            archivedCount: 0,
+            totalUnread: 0,
+            gated: true
+          }
+        });
+      }
+      
+      const completionPercentage = calculateCompletionPercentage(business, 'business');
+      
+      // Gate if profile completion is NOT greater than 80%
+      if (completionPercentage <= 80) {
+        return res.json({
+          success: true,
+          data: { 
+            inboxCount: 0,
+            archivedCount: 0,
+            totalUnread: 0,
+            gated: true,
+            profileCompletion: completionPercentage
+          }
+        });
+      }
+    }
+
+    let baseQuery = {};
+    
+    // Admins can see all conversations
+    if (req.user.admin) {
+      baseQuery = {};
+    } else if (req.user.profile?.va) {
+      // VAs only see conversations where they are participants AND NOT intercepted
+      baseQuery = {
+        participants: req.user.id,
+        isIntercepted: { $ne: true }
+      };
+    } else {
+      // Business users see their conversations normally
+      baseQuery = { participants: req.user.id };
+    }
+
+    // Get counts for active (inbox) conversations
+    const inboxQuery = {
+      ...baseQuery,
+      $or: [{ status: 'active' }, { status: { $exists: false } }]
+    };
+
+    // Get counts for archived conversations
+    const archivedQuery = {
+      ...baseQuery,
+      status: 'archived'
+    };
+
+    const [inboxConversations, archivedConversations] = await Promise.all([
+      Conversation.find(inboxQuery).select('unreadCount va business'),
+      Conversation.find(archivedQuery).select('unreadCount va business')
+    ]);
+
+    let inboxCount = inboxConversations.length;
+    let archivedCount = archivedConversations.length;
+    let totalUnread = 0;
+
+    // Calculate unread counts
+    const allConversations = [...inboxConversations, ...archivedConversations];
+    
+    allConversations.forEach(conv => {
+      if (req.user.admin) {
+        // Admin counts unread from intercepted conversations
+        if (conv.isIntercepted) {
+          totalUnread += conv.unreadCount?.admin || 0;
+        } else {
+          // Admin also counts from direct conversations where they're the business
+          if (conv.business?.toString() === req.user.id) {
+            totalUnread += conv.unreadCount?.business || 0;
+          }
+        }
+      } else if (req.user.profile?.va) {
+        // VA counts unread from VA field
+        if (conv.va?.toString() === req.user.id) {
+          totalUnread += conv.unreadCount?.va || 0;
+        }
+      } else {
+        // Business user counts unread from business field
+        if (conv.business?.toString() === req.user.id) {
+          totalUnread += conv.unreadCount?.business || 0;
+        }
+      }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        inboxCount,
+        archivedCount,
+        totalUnread,
+        lastUpdated: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error getting message counts:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get message counts'
+    });
+  }
+});
+
 // Archive a conversation
 router.put('/:id/archive', protect, async (req, res) => {
   try {

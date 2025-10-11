@@ -15,8 +15,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 import SafeHtml from '../../components/SafeHtml';
+import MessageCounter from '../../components/MessageCounter';
 import { DEFAULT_SYSTEM_HTML } from '../../constants/systemHtml';
 import useProfileCompletion, { PROFILE_GATE_THRESHOLD } from '../../hooks/useProfileCompletion';
+import useMessageCounts from '../../hooks/useMessageCounts';
 import { toast } from 'react-toastify';
 
 // Strip HTML tags for safe preview display
@@ -85,6 +87,8 @@ function setDemoArchiveMap(map) {
 // Unarchive button component with optimistic update
 function UnarchiveButton({ convId, userId }) {
   const queryClient = useQueryClient();
+  const { moveToInbox } = useMessageCounts();
+  
   const mutate = useMutation(
     async () => {
       const res = await api.put(`/conversations/${convId}/unarchive`);
@@ -105,6 +109,8 @@ function UnarchiveButton({ convId, userId }) {
             data: prevArchived.data.filter((c) => c._id !== convId)
           });
         }
+        // Optimistically update message counts
+        moveToInbox();
         return { prevArchived, prevActive };
       },
       onError: (_err, _vars, ctx) => {
@@ -119,6 +125,7 @@ function UnarchiveButton({ convId, userId }) {
       }
     }
   );
+  
   return (
     <button
       onClick={(e) => {
@@ -132,9 +139,10 @@ function UnarchiveButton({ convId, userId }) {
             setDemoArchiveMap(map);
           }
           toast.success('Conversation restored to Inbox');
-          // Trigger list refresh and re-render
+          // Trigger list refresh and update counts
           queryClient.invalidateQueries(['conversations', 'archived', userId]);
           queryClient.invalidateQueries(['conversations', 'active', userId]);
+          moveToInbox();
           return;
         }
         mutate.mutate();
@@ -159,6 +167,9 @@ export default function Conversations() {
 
   // Unified, normalized percent and eligibility (0–100 scale) with shared threshold
   const { percent: completionPercent, eligible } = useProfileCompletion();
+  
+  // Get message counts for real-time updates
+  const { inboxCount, archivedCount, moveToArchived } = useMessageCounts();
 
   // Fetch Inbox (active) conversations
   const {
@@ -193,6 +204,47 @@ export default function Conversations() {
       staleTime: 0,
       refetchOnWindowFocus: true,
       refetchOnReconnect: true
+    }
+  );
+
+  // Archive conversation mutation with optimistic updates
+  const archiveMutation = useMutation(
+    async (convId) => {
+      const res = await api.put(`/conversations/${convId}/archive`);
+      return res.data.data;
+    },
+    {
+      onMutate: async (convId) => {
+        await Promise.all([
+          queryClient.cancelQueries(['conversations', 'active', userId]),
+          queryClient.cancelQueries(['conversations', 'archived', userId])
+        ]);
+        const prevActive = queryClient.getQueryData(['conversations', 'active', userId]);
+        const prevArchived = queryClient.getQueryData(['conversations', 'archived', userId]);
+        
+        // Optimistically move from active to archived
+        if (prevActive?.data) {
+          queryClient.setQueryData(['conversations', 'active', userId], {
+            ...prevActive,
+            data: prevActive.data.filter((c) => c._id !== convId)
+          });
+        }
+        
+        // Optimistically update message counts
+        moveToArchived();
+        
+        return { prevActive, prevArchived };
+      },
+      onError: (_err, _vars, ctx) => {
+        if (ctx?.prevActive) {
+          queryClient.setQueryData(['conversations', 'active', userId], ctx.prevActive);
+        }
+        toast.error('Failed to archive conversation');
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(['conversations', 'active', userId]);
+        queryClient.invalidateQueries(['conversations', 'archived', userId]);
+      }
     }
   );
 
@@ -452,32 +504,45 @@ export default function Conversations() {
             {/* Sidebar - Conversation List */}
             <div className="w-full md:w-96 bg-white border-r border-gray-200">
               <div className="p-6 border-b border-gray-200">
-                <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-                  <InboxIcon className="h-7 w-7 mr-2" />
-                  Messages
-                  {user.admin && (
-                    <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                      Admin View
-                    </span>
-                  )}
-                </h1>
+                <div className="flex items-center justify-between mb-4">
+                  <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+                    <InboxIcon className="h-7 w-7 mr-2" />
+                    Messages
+                    {user.admin && (
+                      <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        Admin View
+                      </span>
+                    )}
+                  </h1>
+                </div>
+                
+                {/* Message Counter */}
+                <div className="mb-4">
+                  <MessageCounter 
+                    compact={true}
+                    showLabels={false}
+                    showTotal={false}
+                    className="justify-start"
+                  />
+                </div>
+
                 {/* Tabs: Inbox / Archived */}
-                <div className="mt-3 flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
                   <button
                     className={`px-3 py-1.5 rounded-md text-sm ${view === 'inbox' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                     onClick={() => setSearchParams({ view: 'inbox' })}
                   >
-                    Inbox ({(activeResponse?.data?.length || 0)})
+                    Inbox ({inboxCount})
                   </button>
                   <button
                     className={`px-3 py-1.5 rounded-md text-sm ${view === 'archived' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                     onClick={() => setSearchParams({ view: 'archived' })}
                   >
-                    Archived ({(archivedResponse?.data?.length || 0)})
+                    Archived ({archivedCount})
                   </button>
                 </div>
                 <p className="mt-2 text-xs text-gray-500">
-                  {displayConversations?.length || 0} conversation{displayConversations?.length !== 1 && 's'} in {view}
+                  {conversations?.length || 0} conversation{conversations?.length !== 1 && 's'} in {view}
                 </p>
               </div>
 
@@ -488,7 +553,7 @@ export default function Conversations() {
                     <SafeHtml html={DEFAULT_SYSTEM_HTML} />
                   </div>
                 )}
-                {displayConversations?.length === 0 ? (
+                {conversations?.length === 0 ? (
                   <div className="text-center py-12 px-4">
                     <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
                     <h3 className="mt-2 text-sm font-medium text-gray-900">No messages yet</h3>
@@ -500,7 +565,7 @@ export default function Conversations() {
                   </div>
                 ) : (
                   <ul className="divide-y divide-gray-200">
-                    {displayConversations?.map((conversation) => {
+                    {conversations?.map((conversation) => {
                       const otherParticipant = getOtherParticipant(conversation);
                       const unreadCount = getUnreadCount(conversation);
                       const lastMessage = conversation.messages?.[conversation.messages.length - 1];
@@ -574,7 +639,20 @@ export default function Conversations() {
                                           addSuffix: true
                                         })}
                                     </p>
-                                    {/* Unarchive control in Archived view */}
+                                    {/* Archive/Unarchive controls */}
+                                    {view === 'inbox' && conversation.status === 'active' && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          archiveMutation.mutate(conversation._id);
+                                        }}
+                                        className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
+                                        title="Archive"
+                                      >
+                                        Archive
+                                      </button>
+                                    )}
                                     {view === 'archived' && (
                                       <UnarchiveButton convId={conversation._id} userId={userId} />
                                     )}

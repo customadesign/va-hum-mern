@@ -18,6 +18,7 @@ import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-toastify';
 import SafeHtml from '../../components/SafeHtml';
 import { initSocket, joinConversation, leaveConversation, typingStart, typingStop } from '../../services/socket';
+import useMessageCounts from '../../hooks/useMessageCounts';
 
 // Allowlist sanitizer for controlled system HTML: keep only <a> with safe attributes
 function sanitizeSystemHtml(html) {
@@ -89,6 +90,9 @@ export default function ConversationDetail() {
   const typingTimerRef = useRef(null);
   const typingActiveRef = useRef(false);
   const userId = user?.id || user?._id;
+  
+  // Use message counts for real-time updates
+  const { moveToArchived, moveToInbox, updateUnread } = useMessageCounts();
 
   // Back-compat: if legacy sample-* slug is visited, redirect to list to avoid raw text rendering
   useEffect(() => {
@@ -416,6 +420,8 @@ export default function ConversationDetail() {
           queryClient.cancelQueries(['conversations', 'active', uid]),
           queryClient.cancelQueries(['conversations', 'archived', uid])
         ]);
+        // Optimistically update message counts
+        moveToArchived();
       },
       onSuccess: () => {
         const uid = user?.id || user?._id;
@@ -441,6 +447,8 @@ export default function ConversationDetail() {
           queryClient.cancelQueries(['conversations', 'active', uid]),
           queryClient.cancelQueries(['conversations', 'archived', uid])
         ]);
+        // Optimistically update message counts
+        moveToInbox();
       },
       onSuccess: () => {
         const uid = user?.id || user?._id;
@@ -725,6 +733,8 @@ export default function ConversationDetail() {
                               queryClient.setQueryData(['conversation', id], { ...(conversation || {}), status: 'active' });
                               queryClient.invalidateQueries(['conversations', 'active', uid]);
                               queryClient.invalidateQueries(['conversations', 'archived', uid]);
+                              // Update message counts
+                              moveToInbox();
                               setShowOptions(false);
                               navigate('/conversations?view=inbox');
                               return;
@@ -751,6 +761,8 @@ export default function ConversationDetail() {
                               queryClient.setQueryData(['conversation', id], { ...(conversation || {}), status: 'archived' });
                               queryClient.invalidateQueries(['conversations', 'active', uid]);
                               queryClient.invalidateQueries(['conversations', 'archived', uid]);
+                              // Update message counts
+                              moveToArchived();
                               setShowOptions(false);
                               navigate('/conversations?view=archived');
                               return;
