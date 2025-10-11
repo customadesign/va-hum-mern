@@ -27,11 +27,18 @@ export default function ConversationDetail() {
   const [message, setMessage] = useState('');
   const [showOptions, setShowOptions] = useState(false);
 
+  // Back-compat: if a legacy sample-* path is hit, redirect to list to avoid any raw URL text rendering
+  useEffect(() => {
+    if (id && id.startsWith('sample-')) {
+      navigate('/conversations');
+    }
+  }, [id, navigate]);
+
   const { data: conversation, isLoading } = useQuery(
     ['conversation', id],
     async () => {
-      // Check if this is a sample conversation ID
-      if (id.startsWith('sample-')) {
+      // Check if this is a demo conversation ID
+      if (id.startsWith('demo-')) {
         return getSampleConversation(id);
       }
       const response = await api.get(`/conversations/${id}`);

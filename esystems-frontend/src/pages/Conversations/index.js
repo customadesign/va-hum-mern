@@ -127,7 +127,7 @@ export default function Conversations() {
       // Sample conversations for VAs (from E Systems Admin)
       return [
         {
-          _id: 'sample-1',
+          _id: 'demo-1',
           participants: [user.id, 'esystems-admin'],
           business: {
             _id: 'esystems-admin',
@@ -166,7 +166,7 @@ export default function Conversations() {
           unreadCount: { va: 1, business: 0 }
         },
         {
-          _id: 'sample-2',
+          _id: 'demo-2',
           participants: [user.id, 'esystems-admin-2'],
           business: {
             _id: 'esystems-admin-2',
@@ -199,7 +199,7 @@ export default function Conversations() {
           unreadCount: { va: 0, business: 1 }
         },
         {
-          _id: 'sample-3',
+          _id: 'demo-3',
           participants: [user.id, 'esystems-admin-3'],
           business: {
             _id: 'esystems-admin-3',
@@ -230,7 +230,7 @@ export default function Conversations() {
       // Sample conversations for businesses
       return [
         {
-          _id: 'sample-1',
+          _id: 'demo-1',
           participants: [user.id, 'va-1'],
           va: {
             _id: 'va-1',
@@ -261,7 +261,7 @@ export default function Conversations() {
           unreadCount: { va: 0, business: 1 }
         },
         {
-          _id: 'sample-2',
+          _id: 'demo-2',
           participants: [user.id, 'va-2'],
           va: {
             _id: 'va-2',
