@@ -72,20 +72,15 @@ export default function ConversationDetail() {
   const typingActiveRef = useRef(false);
   const userId = user?.id || user?._id;
 
-  // Intercept clicks on <a> inside sanitized message HTML and route internally
-  const onMessageHtmlClick = useCallback((e) => {
-    const target = e.target;
-    if (target && target.tagName === 'A') {
-      const href = target.getAttribute('href') || '';
-      if (href.startsWith('/')) {
-        e.preventDefault();
-        e.stopPropagation();
-        navigate(href);
-      }
+  // Back-compat: if legacy sample-* slug is visited, redirect to list to avoid raw text rendering
+  useEffect(() => {
+    if (id && id.startsWith('sample-')) {
+      navigate('/conversations');
     }
-  }, [navigate]);
+  }, [id, navigate]);
 
-  const isSampleConversation = id.startsWith('sample-');
+  // Demo conversations use demo-* slugs; never render route text in UI
+  const isSampleConversation = id.startsWith('demo-');
   const isVA = Boolean(
     user?.va ||
     user?.role === 'va' ||
@@ -117,7 +112,7 @@ export default function ConversationDetail() {
       // Sample conversations for VAs
       return [
         {
-          _id: 'sample-1',
+          _id: 'demo-1',
           participants: [userId, 'admin-1'],
           business: {
             _id: 'admin-1',
@@ -155,7 +150,7 @@ export default function ConversationDetail() {
           unreadCount: { va: 1, business: 0 }
         },
         {
-          _id: 'sample-2',
+          _id: 'demo-2',
           participants: [userId, 'admin-2'],
           business: {
             _id: 'admin-2',
@@ -187,7 +182,7 @@ export default function ConversationDetail() {
           unreadCount: { va: 0, business: 1 }
         },
         {
-          _id: 'sample-3',
+          _id: 'demo-3',
           participants: [userId, 'business-3'],
           business: {
             _id: 'business-3',
@@ -217,7 +212,7 @@ export default function ConversationDetail() {
       // Sample conversations for businesses
       return [
         {
-          _id: 'sample-1',
+          _id: 'demo-1',
           participants: [userId, 'admin-1'],
           va: {
             _id: 'admin-1',
@@ -248,7 +243,7 @@ export default function ConversationDetail() {
           unreadCount: { va: 0, business: 1 }
         },
         {
-          _id: 'sample-2',
+          _id: 'demo-2',
           participants: [userId, 'admin-2'],
           va: {
             _id: 'admin-2',
@@ -394,12 +389,45 @@ export default function ConversationDetail() {
       return response.data.data;
     },
     {
+      onMutate: async () => {
+        await Promise.all([
+          queryClient.cancelQueries(['conversations', 'active']),
+          queryClient.cancelQueries(['conversations', 'archived'])
+        ]);
+      },
       onSuccess: () => {
         toast.success('Conversation archived');
+        // Refresh lists and send user back to Inbox
+        queryClient.invalidateQueries(['conversations', 'active']);
+        queryClient.invalidateQueries(['conversations', 'archived']);
         navigate('/conversations');
       },
       onError: (error) => {
         toast.error(error.response?.data?.error || 'Failed to archive conversation');
+      }
+    }
+  );
+
+  const unarchiveConversationMutation = useMutation(
+    async () => {
+      const response = await api.put(`/conversations/${id}/unarchive`);
+      return response.data.data;
+    },
+    {
+      onMutate: async () => {
+        await Promise.all([
+          queryClient.cancelQueries(['conversations', 'active']),
+          queryClient.cancelQueries(['conversations', 'archived'])
+        ]);
+      },
+      onSuccess: () => {
+        toast.success('Conversation restored to Inbox');
+        queryClient.invalidateQueries(['conversations', 'active']);
+        queryClient.invalidateQueries(['conversations', 'archived']);
+        navigate('/conversations?view=inbox');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.error || 'Failed to unarchive conversation');
       }
     }
   );
@@ -659,14 +687,25 @@ export default function ConversationDetail() {
                 {showOptions && (
                   <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
                     <div className="py-1">
-                      <button
-                        onClick={() => archiveConversationMutation.mutate()}
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                        data-testid="archive-conversation"
-                      >
-                        <ArchiveBoxIcon className="h-4 w-4 mr-3" />
-                        Archive conversation
-                      </button>
+                      {conversation?.status === 'archived' ? (
+                        <button
+                          onClick={() => unarchiveConversationMutation.mutate()}
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                          data-testid="unarchive-conversation"
+                        >
+                          <ArchiveBoxIcon className="h-4 w-4 mr-3" />
+                          Unarchive conversation
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => archiveConversationMutation.mutate()}
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                          data-testid="archive-conversation"
+                        >
+                          <ArchiveBoxIcon className="h-4 w-4 mr-3" />
+                          Archive conversation
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}

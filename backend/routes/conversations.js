@@ -59,6 +59,10 @@ router.get('/', protect, async (req, res) => {
       query = { participants: req.user.id };
     }
 
+    // Apply status filter: default to active (Inbox), allow archived via ?status=archived
+    const desiredStatus = req.query.status === 'archived' ? 'archived' : 'active';
+    query.status = desiredStatus;
+
     const conversations = await Conversation.find(query)
       .populate('va', 'email profile')
       .populate('business', 'email profile') 
@@ -410,11 +414,14 @@ router.put('/:id/archive', protect, async (req, res) => {
       });
     }
 
-    // Check if user is participant or admin
-    if (!conversation.participants.includes(req.user.id) && !req.user.admin) {
+    // Check if user is participant or admin (normalize ObjectIds to strings)
+    const isParticipant = conversation.participants
+      .map((p) => p.toString())
+      .includes(req.user.id.toString());
+    if (!isParticipant && !req.user.admin) {
       return res.status(403).json({
         success: false,
-        error: 'Not protectorized to archive this conversation'
+        error: 'Not authorized to archive this conversation'
       });
     }
 
@@ -430,6 +437,45 @@ router.put('/:id/archive', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to archive conversation'
+    });
+  }
+});
+
+// Unarchive a conversation
+router.put('/:id/unarchive', protect, async (req, res) => {
+  try {
+    const conversation = await Conversation.findById(req.params.id);
+    
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        error: 'Conversation not found'
+      });
+    }
+
+    // Check if user is participant or admin (normalize ObjectIds to strings)
+    const isParticipant = conversation.participants
+      .map((p) => p.toString())
+      .includes(req.user.id.toString());
+    if (!isParticipant && !req.user.admin) {
+      return res.status(403).json({
+        success: false,
+        error: 'Not authorized to unarchive this conversation'
+      });
+    }
+
+    conversation.status = 'active';
+    await conversation.save();
+
+    res.json({
+      success: true,
+      data: conversation
+    });
+  } catch (error) {
+    console.error('Error unarchiving conversation:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to unarchive conversation'
     });
   }
 });

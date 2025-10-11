@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
-import { useQuery } from 'react-query';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import api from '../../services/api';
 import { formatDistanceToNow } from 'date-fns';
 import { useBranding } from '../../contexts/BrandingContext';
@@ -63,31 +63,96 @@ function sanitizeSystemHtml(html) {
   }
 }
 
+// Unarchive button component with optimistic update
+function UnarchiveButton({ convId }) {
+  const queryClient = useQueryClient();
+  const mutate = useMutation(
+    async () => {
+      const res = await api.put(`/conversations/${convId}/unarchive`);
+      return res.data.data;
+    },
+    {
+      onMutate: async () => {
+        await Promise.all([
+          queryClient.cancelQueries(['conversations', 'archived']),
+          queryClient.cancelQueries(['conversations', 'active'])
+        ]);
+        const prevArchived = queryClient.getQueryData(['conversations', 'archived']);
+        const prevActive = queryClient.getQueryData(['conversations', 'active']);
+        // Optimistically remove from archived
+        if (prevArchived?.data) {
+          queryClient.setQueryData(['conversations', 'archived'], {
+            ...prevArchived,
+            data: prevArchived.data.filter((c) => c._id !== convId)
+          });
+        }
+        return { prevArchived, prevActive };
+      },
+      onError: (_err, _vars, ctx) => {
+        if (ctx?.prevArchived) {
+          queryClient.setQueryData(['conversations', 'archived'], ctx.prevArchived);
+        }
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(['conversations', 'archived']);
+        queryClient.invalidateQueries(['conversations', 'active']);
+      }
+    }
+  );
+  return (
+    <button
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        mutate.mutate();
+      }}
+      className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
+      title="Unarchive"
+    >
+      Unarchive
+    </button>
+  );
+}
+
 export default function Conversations() {
   const { branding } = useBranding();
   const { user } = useAuth();
-  
+  const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const viewParam = (searchParams.get('view') || 'inbox').toLowerCase();
+  const view = viewParam === 'archived' ? 'archived' : 'inbox';
+  const statusParam = view === 'archived' ? 'archived' : 'active';
+
   // Unified, normalized percent and eligibility (0–100 scale) with shared threshold
   const { percent: completionPercent, eligible } = useProfileCompletion();
 
-  // Fetch conversations only when eligible to avoid gating race and to auto-unlock
+  // Fetch Inbox (active) conversations
   const {
-    data: conversationsResponse,
-    isLoading: conversationsLoading,
-    error
+    data: activeResponse,
+    isLoading: activeLoading
   } = useQuery(
-    ['conversations', user?.id],
+    ['conversations', 'active', user?.id],
     async () => {
-      try {
-        const response = await api.get('/conversations');
-        return response.data;
-      } catch (err) {
-        // If backend still replies 403 while client is eligible, proceed with empty list instead of gating
-        if (eligible && err.response?.status === 403) {
-          return { success: true, data: [] };
-        }
-        throw err;
-      }
+      const res = await api.get('/conversations', { params: { status: 'active' } });
+      return res.data;
+    },
+    {
+      enabled: !!user && eligible,
+      staleTime: 0,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true
+    }
+  );
+
+  // Fetch Archived conversations
+  const {
+    data: archivedResponse,
+    isLoading: archivedLoading
+  } = useQuery(
+    ['conversations', 'archived', user?.id],
+    async () => {
+      const res = await api.get('/conversations', { params: { status: 'archived' } });
+      return res.data;
     },
     {
       enabled: !!user && eligible,
@@ -105,7 +170,10 @@ export default function Conversations() {
   );
   const profileCompletionPct = Math.round(completionPercent || 0);
 
-  const conversations = conversationsResponse?.data || [];
+  const conversations =
+    view === 'archived'
+      ? archivedResponse?.data || []
+      : activeResponse?.data || [];
 
   // Sample conversations for demonstration when no real conversations exist
   const getSampleConversations = () => {
@@ -117,7 +185,7 @@ export default function Conversations() {
       // Once 80%+, show the EXACT two Linkage Admin default messages now used elsewhere
       return [
         {
-          _id: 'sample-1',
+          _id: 'demo-1',
           participants: [user.id, 'admin-1'],
           business: {
             _id: 'admin-1',
@@ -151,7 +219,7 @@ export default function Conversations() {
           unreadCount: { va: 0, business: 1 }
         },
         {
-          _id: 'sample-2',
+          _id: 'demo-2',
           participants: [user.id, 'admin-2'],
           business: {
             _id: 'admin-2',
@@ -188,7 +256,7 @@ export default function Conversations() {
       // Sample conversations for businesses
       return [
         {
-          _id: 'sample-1',
+          _id: 'demo-1',
           participants: [user.id, 'admin-1'],
           va: {
             _id: 'admin-1',
@@ -202,32 +270,20 @@ export default function Conversations() {
           messages: [
             {
               _id: 'msg-1',
-              sender: user.id,
-              content: 'Hello! I\'d like to learn more about posting a job and finding the right virtual assistant.',
-              createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000) // 3 hours ago
-            },
-            {
-              _id: 'msg-2',
               sender: 'admin-1',
               content:
                 'Thank you for joining Linkage VA Hub! 🎉\n' +
-                'We’re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services.\n' +
-                'If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.',
-              bodyHtml:
-                '<p>Thank you for joining <strong>Linkage VA Hub</strong>! 🎉</p>' +
-                '<p>We’re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services.</p>' +
-                '<p>If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.</p>',
+                'We’re excited to have you onboard. Keep an eye on your messages — you may hear from VAs soon.',
               createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
             }
           ],
-          lastMessage:
-            'Thank you for joining Linkage VA Hub! 🎉 We’re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services. If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.',
+          lastMessage: 'Thank you for joining Linkage VA Hub! 🎉 We’re excited to have you onboard. Keep an eye on your messages — you may hear from VAs soon.',
           lastMessageAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 0, business: 1 }
         },
         {
-          _id: 'sample-2',
+          _id: 'demo-2',
           participants: [user.id, 'admin-2'],
           va: {
             _id: 'admin-2',
@@ -242,19 +298,11 @@ export default function Conversations() {
             {
               _id: 'msg-3',
               sender: 'admin-2',
-              content:
-                'Welcome to Linkage VA Hub! 🎉\n' +
-                'We’re thrilled to have you on board. Keep an eye out for messages from business owners who may be interested in contracting your services.\n' +
-                'To increase your chances of landing job opportunities, join our community, it’s where VAs get priority access to employment opportunities!',
-              bodyHtml:
-                '<p>Welcome to <strong>Linkage VA Hub</strong>! 🎉</p>' +
-                '<p>We’re thrilled to have you on board. Keep an eye out for messages from business owners who may be interested in contracting your services.</p>' +
-                '<p>To increase your chances of landing job opportunities, join our <a href="/community">community</a>, it’s where VAs get priority access to employment opportunities!</p>',
+              content: 'Welcome! If you need help posting a role or contacting VAs, our team is here to assist.',
               createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000) // 8 hours ago
             }
           ],
-          lastMessage:
-            'Welcome to Linkage VA Hub! 🎉 We’re thrilled to have you on board. Keep an eye out for messages from business owners who may be interested in contracting your services. To increase your chances of landing job opportunities, join our community, it’s where VAs get priority access to employment opportunities!',
+          lastMessage: 'Welcome! If you need help posting a role or contacting VAs, our team is here to assist.',
           lastMessageAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 1, business: 1 }
@@ -265,7 +313,7 @@ export default function Conversations() {
 
   // Use sample conversations if there are no real ones (only when eligible)
   const displayConversations = eligible
-    ? (conversations?.length > 0 ? conversations : getSampleConversations())
+    ? (conversations?.length > 0 ? conversations : (view === 'inbox' ? getSampleConversations() : []))
     : [];
 
   const getOtherParticipant = (conversation) => {
@@ -284,6 +332,7 @@ export default function Conversations() {
     }
   };
 
+  const conversationsLoading = view === 'archived' ? archivedLoading : activeLoading;
   if (eligible && conversationsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -371,13 +420,23 @@ export default function Conversations() {
                     </span>
                   )}
                 </h1>
-                <p className="mt-1 text-sm text-gray-500">
-                  {displayConversations?.length || 0} conversation{displayConversations?.length !== 1 && 's'}
-                  {(!conversations || conversations.length === 0) && displayConversations?.length > 0 && (
-                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                      Demo
-                    </span>
-                  )}
+                {/* Tabs: Inbox / Archived */}
+                <div className="mt-3 flex items-center space-x-2">
+                  <button
+                    className={`px-3 py-1.5 rounded-md text-sm ${view === 'inbox' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    onClick={() => setSearchParams({ view: 'inbox' })}
+                  >
+                    Inbox ({(activeResponse?.data?.length || 0)})
+                  </button>
+                  <button
+                    className={`px-3 py-1.5 rounded-md text-sm ${view === 'archived' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    onClick={() => setSearchParams({ view: 'archived' })}
+                  >
+                    Archived ({(archivedResponse?.data?.length || 0)})
+                  </button>
+                </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  {displayConversations?.length || 0} conversation{displayConversations?.length !== 1 && 's'} in {view}
                 </p>
               </div>
 
@@ -465,14 +524,20 @@ export default function Conversations() {
                                       </span>
                                     )}
                                   </div>
-                                  <p className={`text-xs ${
-                                    unreadCount > 0 ? 'text-blue-600 font-medium' : 'text-gray-500'
-                                  }`}>
-                                    {conversation.lastMessageAt &&
-                                      formatDistanceToNow(new Date(conversation.lastMessageAt), {
-                                        addSuffix: true
-                                      })}
-                                  </p>
+                                  <div className="flex items-center space-x-2">
+                                    <p className={`text-xs ${
+                                      unreadCount > 0 ? 'text-blue-600 font-medium' : 'text-gray-500'
+                                    }`}>
+                                      {conversation.lastMessageAt &&
+                                        formatDistanceToNow(new Date(conversation.lastMessageAt), {
+                                          addSuffix: true
+                                        })}
+                                    </p>
+                                    {/* Unarchive control in Archived view */}
+                                    {view === 'archived' && (
+                                      <UnarchiveButton convId={conversation._id} />
+                                    )}
+                                  </div>
                                 </div>
                                 
                                 {/* Show original sender info for intercepted conversations */}
