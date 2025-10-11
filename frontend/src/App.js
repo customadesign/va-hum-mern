@@ -105,6 +105,7 @@ function App() {
                         
                         {/* Email Verification */}
                         <Route path="verify-email/:token" element={<EmailVerification />} />
+                        <Route path="confirm-email/:token" element={<EmailVerification />} /> {/* Backward compatibility */}
                         <Route path="verify-email-sent" element={<VerifyEmailSent />} />
                         
                         {/* OAuth Callbacks */}

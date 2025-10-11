@@ -103,7 +103,7 @@ router.post('/register', authLimiter, [
     // Send confirmation email
     // TODO: Configure email settings in production
     try {
-      const confirmUrl = `${process.env.CLIENT_URL}/confirm-email/${confirmToken}`;
+      const confirmUrl = `${process.env.CLIENT_URL}/verify-email/${confirmToken}`;
       await sendEmail({
         email: user.email,
         subject: 'Welcome to Linkage VA Hub - Please confirm your email',
@@ -534,10 +534,10 @@ router.get('/me', protect, async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/confirm-email/:token
-// @desc    Confirm email
+// @route   POST /api/auth/verify-email/:token
+// @desc    Verify email
 // @access  Public
-router.post('/confirm-email/:token', async (req, res) => {
+router.post('/verify-email/:token', async (req, res) => {
   try {
     const { token } = req.params;
 
@@ -581,6 +581,16 @@ router.post('/confirm-email/:token', async (req, res) => {
       error: 'Server error'
     });
   }
+});
+
+// @route   POST /api/auth/confirm-email/:token
+// @desc    Backward compatibility route for old email links
+// @access  Public
+router.post('/confirm-email/:token', async (req, res) => {
+  // Forward to verify-email endpoint
+  const { token } = req.params;
+  req.url = `/verify-email/${token}`;
+  return router.handle(req, res);
 });
 
 // @route   POST /api/auth/complete-profile
