@@ -93,15 +93,22 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Unauthorized - clean up tokens and redirect
       localStorage.removeItem('token');
-      
-      // Check if we're using Clerk (modern) or legacy auth
-      const isClerkAuth = !!getAuthToken;
-      if (isClerkAuth) {
-        // Redirect to Clerk sign-in
-        window.location.href = '/sign-in';
-      } else {
-        // Redirect to legacy login
-        window.location.href = '/login';
+      // Prefer legacy /login for Linkage FE and localhost; use /sign-in elsewhere
+      try {
+        const host =
+          typeof window !== 'undefined' && window.location && window.location.hostname
+            ? window.location.hostname
+            : '';
+        const preferLegacy =
+          host.includes('linkage-va-hub.onrender.com') ||
+          host.includes('localhost');
+        const redirectTo = preferLegacy ? '/login' : '/sign-in';
+        window.location.href = redirectTo;
+      } catch {
+        // Fallback to legacy login
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);

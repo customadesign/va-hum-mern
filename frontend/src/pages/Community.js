@@ -1522,7 +1522,7 @@ export default function Community() {
                 <p className="text-white/90 mb-4 text-lg">
                   Join thousands of successful VAs connecting with international clients daily
                 </p>
-                <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-bold rounded-full shadow-lg animate-pulse">
+                <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-bold rounded-full shadow-lg">
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                   </svg>
@@ -1751,7 +1751,7 @@ export default function Community() {
                 },
                 {
                   question: "Who is on the training team, and what are their roles?",
-                  answer: "The sessions are led by our expert team: Pat Murphy (Lead Trainer in Onboarding) guides the core training; Kristine Mae (Branding Coach) focuses on building your professional presence; and Brian Murphy (Chief of Operations and Human Resources) oversees operations and provides insights on career growth and client management."
+                  answer: "The sessions are led by our expert team: Pat Murphy (Lead Trainer in Onboarding) guides the core training, Kristine Mae (Branding Coach) focuses on building your professional presence, and Brian Murphy (Chief of Operations and Human Resources) oversees operations and provides insights on career growth and client management."
                 },
                 {
                   question: "What will I learn in the webinar?",
@@ -1767,15 +1767,15 @@ export default function Community() {
                 },
                 {
                   question: "How does this webinar help me start earning as a VA?",
-                  answer: "It provides actionable steps to build your skills, create a professional profile, and land clients—focusing on high-value abilities that can lead to soaring hourly rates. Many participants report starting freelance gigs within weeks, with ongoing community support."
+                  answer: "It provides actionable steps to build your skills, create a professional profile, and land clients, focusing on high-value abilities that can lead to soaring hourly rates. Many participants report starting freelance gigs within weeks, with ongoing community support."
                 },
                 {
                   question: "Am I able to start at a higher rate?",
-                  answer: "Absolutely you can, depending on the type of VA you are—different jobs and specialties pay different rates, and your experience also matters. Our training helps you identify and leverage high-paying niches to maximize your earning potential from the start."
+                  answer: "Absolutely you can, depending on the type of VA you are, different jobs and specialties pay different rates, and your experience also matters. Our training helps you identify and leverage high-paying niches to maximize your earning potential from the start."
                 },
                 {
                   question: "What is the minimum earning rate I can expect?",
-                  answer: "The $4 per hour rate is guaranteed 100%—that is our bare minimum when we advertise opportunities to our worldwide network of clients. This ensures you have a solid starting point, with potential to earn much more as you gain skills and experience."
+                  answer: "The $4 per hour rate is guaranteed 100%, that is our bare minimum when we advertise opportunities to our worldwide network of clients. This ensures you have a solid starting point, with potential to earn much more as you gain skills and experience."
                 },
                 {
                   question: "What is included in the ₱999 fee?",
@@ -1783,7 +1783,7 @@ export default function Community() {
                 },
                 {
                   question: "What is the refund policy?",
-                  answer: "There are absolutely no refunds for this webinar, as we stand behind its value—we feel that even your first day of training is well worth the 999 pesos you pay for this comprehensive 20-day program. We're confident you'll see immediate benefits from the skills and resources provided."
+                  answer: "There are absolutely no refunds for this webinar, as we stand behind its value, we feel that even your first day of training is well worth the 999 pesos you pay for this comprehensive 20-day program. We're confident you'll see immediate benefits from the skills and resources provided."
                 }
               ].map((faq, index) => (
                 <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
