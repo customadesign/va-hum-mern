@@ -174,7 +174,8 @@ export default function Conversations() {
   // Fetch Inbox (active) conversations
   const {
     data: activeResponse,
-    isLoading: activeLoading
+    isLoading: activeLoading,
+    error: activeError
   } = useQuery(
     ['conversations', 'active', user?.id],
     async () => {
@@ -185,14 +186,19 @@ export default function Conversations() {
       enabled: !!user && eligible,
       staleTime: 0,
       refetchOnWindowFocus: true,
-      refetchOnReconnect: true
+      refetchOnReconnect: true,
+      retry: 1,
+      onError: (error) => {
+        console.error('Failed to fetch active conversations:', error);
+      }
     }
   );
 
   // Fetch Archived conversations
   const {
     data: archivedResponse,
-    isLoading: archivedLoading
+    isLoading: archivedLoading,
+    error: archivedError
   } = useQuery(
     ['conversations', 'archived', user?.id],
     async () => {
@@ -203,7 +209,11 @@ export default function Conversations() {
       enabled: !!user && eligible,
       staleTime: 0,
       refetchOnWindowFocus: true,
-      refetchOnReconnect: true
+      refetchOnReconnect: true,
+      retry: 1,
+      onError: (error) => {
+        console.error('Failed to fetch archived conversations:', error);
+      }
     }
   );
 
@@ -256,10 +266,13 @@ export default function Conversations() {
   );
   const profileCompletionPct = Math.round(completionPercent || 0);
 
+  // Get real conversations from API responses
+  const realActiveConversations = activeResponse?.data || [];
+  const realArchivedConversations = archivedResponse?.data || [];
   const conversations =
     view === 'archived'
-      ? archivedResponse?.data || []
-      : activeResponse?.data || [];
+      ? realArchivedConversations
+      : realActiveConversations;
 
   // Sample conversations for demonstration when no real conversations exist
   const getSampleConversations = () => {
@@ -405,8 +418,14 @@ export default function Conversations() {
   const sampleFiltered = sampleList.filter((c) =>
     view === 'archived' ? c.status === 'archived' : c.status !== 'archived'
   );
+  
+  // Determine which conversations to display:
+  // 1. If not eligible, show empty array (gated view will render)
+  // 2. If eligible and we have real conversations, show them
+  // 3. If eligible but no real conversations (or error), show samples
+  const hasRealConversations = conversations && conversations.length > 0;
   const displayConversations = eligible
-    ? (conversations?.length > 0 ? conversations : sampleFiltered)
+    ? (hasRealConversations ? conversations : sampleFiltered)
     : [];
 
   const getOtherParticipant = (conversation) => {
@@ -542,7 +561,7 @@ export default function Conversations() {
                   </button>
                 </div>
                 <p className="mt-2 text-xs text-gray-500">
-                  {conversations?.length || 0} conversation{conversations?.length !== 1 && 's'} in {view}
+                  {displayConversations?.length || 0} conversation{displayConversations?.length !== 1 && 's'} in {view}
                 </p>
               </div>
 
@@ -553,7 +572,7 @@ export default function Conversations() {
                     <SafeHtml html={DEFAULT_SYSTEM_HTML} />
                   </div>
                 )}
-                {conversations?.length === 0 ? (
+                {displayConversations?.length === 0 ? (
                   <div className="text-center py-12 px-4">
                     <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
                     <h3 className="mt-2 text-sm font-medium text-gray-900">No messages yet</h3>
@@ -565,7 +584,7 @@ export default function Conversations() {
                   </div>
                 ) : (
                   <ul className="divide-y divide-gray-200">
-                    {conversations?.map((conversation) => {
+                    {displayConversations?.map((conversation) => {
                       const otherParticipant = getOtherParticipant(conversation);
                       const unreadCount = getUnreadCount(conversation);
                       const lastMessage = conversation.messages?.[conversation.messages.length - 1];

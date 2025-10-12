@@ -33,6 +33,11 @@ export function useMessageCounts(options = {}) {
     refetchOnWindowFocus: options.refetchOnWindowFocus ?? true,
     refetchOnReconnect: options.refetchOnReconnect ?? true,
     refetchOnMount: options.refetchOnMount ?? 'always',
+    retry: 2, // Retry failed requests up to 2 times
+    retryDelay: 1000, // Wait 1 second between retries
+    onError: (error) => {
+      console.error('Failed to fetch message counts:', error);
+    }
   });
 
   const data = query.data ?? { 
