@@ -526,16 +526,16 @@ export default function Conversations() {
                   />
                 </div>
 
-                {/* Tabs: Inbox / Archived */}
+                {/* Tabs: Inbox / Archived with real-time counts */}
                 <div className="flex items-center space-x-2">
                   <button
-                    className={`px-3 py-1.5 rounded-md text-sm ${view === 'inbox' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${view === 'inbox' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                     onClick={() => setSearchParams({ view: 'inbox' })}
                   >
                     Inbox ({inboxCount})
                   </button>
                   <button
-                    className={`px-3 py-1.5 rounded-md text-sm ${view === 'archived' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${view === 'archived' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                     onClick={() => setSearchParams({ view: 'archived' })}
                   >
                     Archived ({archivedCount})
