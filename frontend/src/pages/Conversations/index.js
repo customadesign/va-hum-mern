@@ -428,16 +428,17 @@ export default function Conversations() {
     ? (hasRealConversations ? conversations : sampleFiltered)
     : [];
 
-  // Calculate actual counts from conversation data (fallback if API counts fail)
-  // Use API counts if available, otherwise calculate from actual data
+  // Calculate actual counts from ALL conversation data (not just current view)
+  // This ensures both tabs always show correct counts regardless of which view is active
   const actualInboxCount = hasRealConversations 
     ? realActiveConversations.length 
-    : (eligible ? sampleFiltered.filter(c => c.status !== 'archived').length : 0);
+    : (eligible ? sampleList.filter(c => c.status !== 'archived').length : 0);
   const actualArchivedCount = hasRealConversations 
     ? realArchivedConversations.length 
-    : (eligible ? sampleFiltered.filter(c => c.status === 'archived').length : 0);
+    : (eligible ? sampleList.filter(c => c.status === 'archived').length : 0);
   
   // Use API counts if they're greater than 0, otherwise use calculated counts
+  // This provides resilient counts that work even when API fails
   const inboxCount = apiInboxCount > 0 ? apiInboxCount : actualInboxCount;
   const archivedCount = apiArchivedCount > 0 ? apiArchivedCount : actualArchivedCount;
 
