@@ -169,7 +169,7 @@ export default function Conversations() {
   const { percent: completionPercent, eligible } = useProfileCompletion();
   
   // Get message counts for real-time updates
-  const { inboxCount, archivedCount, moveToArchived } = useMessageCounts();
+  const { inboxCount: apiInboxCount, archivedCount: apiArchivedCount, moveToArchived } = useMessageCounts();
 
   // Fetch Inbox (active) conversations
   const {
@@ -427,6 +427,19 @@ export default function Conversations() {
   const displayConversations = eligible
     ? (hasRealConversations ? conversations : sampleFiltered)
     : [];
+
+  // Calculate actual counts from conversation data (fallback if API counts fail)
+  // Use API counts if available, otherwise calculate from actual data
+  const actualInboxCount = hasRealConversations 
+    ? realActiveConversations.length 
+    : (eligible ? sampleFiltered.filter(c => c.status !== 'archived').length : 0);
+  const actualArchivedCount = hasRealConversations 
+    ? realArchivedConversations.length 
+    : (eligible ? sampleFiltered.filter(c => c.status === 'archived').length : 0);
+  
+  // Use API counts if they're greater than 0, otherwise use calculated counts
+  const inboxCount = apiInboxCount > 0 ? apiInboxCount : actualInboxCount;
+  const archivedCount = apiArchivedCount > 0 ? apiArchivedCount : actualArchivedCount;
 
   const getOtherParticipant = (conversation) => {
     if (isVA) {
