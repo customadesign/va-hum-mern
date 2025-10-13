@@ -19,6 +19,7 @@ import { toast } from 'react-toastify';
 import SafeHtml from '../../components/SafeHtml';
 import { initSocket, joinConversation, leaveConversation, typingStart, typingStop } from '../../services/socket';
 import useMessageCounts from '../../hooks/useMessageCounts';
+import useProfileCompletion from '../../hooks/useProfileCompletion';
 
 // Allowlist sanitizer for controlled system HTML: keep only <a> with safe attributes
 function sanitizeSystemHtml(html) {
@@ -111,17 +112,10 @@ export default function ConversationDetail() {
     user?.profile?.va
   );
 
-  const { data: profileData, isLoading: isProfileLoading } = useQuery({
-    queryKey: ['profile', userId],
-    queryFn: async () => {
-      const response = await api.get('/users/profile');
-      return response.data;
-    },
-    enabled: Boolean(userId && isVA)
-  });
-
-  const profileCompletionPct = profileData?.profileCompletion?.percentage ?? 0;
-  const canViewSampleConversations = !isVA || profileCompletionPct >= 80;
+  // Use unified profile completion logic (same as conversations list)
+  const { percent: completionPercent, eligible } = useProfileCompletion();
+  const isProfileLoading = false;
+  const canViewSampleConversations = !isVA || eligible;
 
   const getSampleConversations = useCallback(() => {
     if (!userId) {
