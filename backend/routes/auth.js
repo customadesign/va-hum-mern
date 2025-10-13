@@ -577,7 +577,26 @@ router.post('/verify-email/:token', async (req, res) => {
     user.confirmationTokenExpire = undefined;
     await user.save();
 
-    res.json({ success: true, message: 'Email confirmed successfully' });
+    // Issue tokens on successful verification for immediate login
+    const token = user.getSignedJwtToken();
+    const refreshToken = user.getRefreshToken();
+    await user.save();
+    await user.populate(['va', 'business']);
+
+    res.json({ 
+      success: true, 
+      message: 'Email confirmed successfully',
+      token,
+      refreshToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        admin: user.admin,
+        referralCode: user.referralCode,
+        va: user.va,
+        business: user.business
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({
