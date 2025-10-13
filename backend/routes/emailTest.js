@@ -191,4 +191,72 @@ router.get('/domains', protect, authorize('admin'), async (req, res) => {
   }
 });
 
+// Small helper to call SendGrid Web API without adding new deps
+async function sgRequest(method, path, body) {
+  if (!process.env.SENDGRID_API_KEY) {
+    throw new Error('SENDGRID_API_KEY not configured');
+  }
+  const res = await fetch(`https://api.sendgrid.com/v3${path}` , {
+    method,
+    headers: {
+      'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const text = await res.text();
+  let json;
+  try { json = text ? JSON.parse(text) : null; } catch { json = { raw: text }; }
+  if (!res.ok) {
+    throw new Error(`SendGrid API ${method} ${path} failed: ${res.status} ${res.statusText} ${text}`);
+  }
+  return json;
+}
+
+// @route   GET /api/email-test/suppressions/inspect?email=addr
+// @desc    Inspect SendGrid suppression lists for a recipient
+// @access  Private/Admin
+router.get('/suppressions/inspect', protect, authorize('admin'), async (req, res) => {
+  try {
+    const email = (req.query.email || '').toString().trim();
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Query param email is required' });
+    }
+    const [bounces, blocks, spam, invalid] = await Promise.all([
+      sgRequest('GET', `/suppression/bounces?email=${encodeURIComponent(email)}`),
+      sgRequest('GET', `/suppression/blocks?email=${encodeURIComponent(email)}`),
+      sgRequest('GET', `/suppression/spam_reports?email=${encodeURIComponent(email)}`),
+      sgRequest('GET', `/suppression/invalid_emails?email=${encodeURIComponent(email)}`)
+    ]);
+    res.json({ success: true, data: { email, bounces, blocks, spam, invalid } });
+  } catch (error) {
+    console.error('Suppression inspect error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// @route   POST /api/email-test/suppressions/clear
+// @desc    Remove a recipient from SendGrid suppression lists
+// @access  Private/Admin
+router.post('/suppressions/clear', protect, authorize('admin'), async (req, res) => {
+  try {
+    const email = (req.body?.email || '').toString().trim();
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Email is required' });
+    }
+    const payload = { emails: [email] };
+    const results = {};
+    // Each returns 204 No Content on success
+    try { await sgRequest('DELETE', '/suppression/bounces', payload); results.bounces = 'cleared'; } catch (e) { results.bounces = `error: ${e.message}`; }
+    try { await sgRequest('DELETE', '/suppression/blocks', payload); results.blocks = 'cleared'; } catch (e) { results.blocks = `error: ${e.message}`; }
+    try { await sgRequest('DELETE', '/suppression/spam_reports', payload); results.spam = 'cleared'; } catch (e) { results.spam = `error: ${e.message}`; }
+    try { await sgRequest('DELETE', '/suppression/invalid_emails', payload); results.invalid = 'cleared'; } catch (e) { results.invalid = `error: ${e.message}`; }
+
+    res.json({ success: true, message: 'Suppression clear attempted', data: { email, results } });
+  } catch (error) {
+    console.error('Suppression clear error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;
