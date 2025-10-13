@@ -631,6 +631,46 @@ router.post('/resend-verification', protect, async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/resend-verification-public
+// @desc    Resend verification email by email address (unauthenticated)
+// @access  Public
+router.post('/resend-verification-public', async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      // Do not reveal whether email exists
+      return res.json({ success: true, message: 'If an account exists, a verification email has been sent' });
+    }
+
+    if (user.confirmedAt) {
+      return res.json({ success: true, message: 'Email already verified' });
+    }
+
+    const confirmToken = user.getConfirmationToken();
+    await user.save();
+
+    const confirmUrl = `${process.env.CLIENT_URL}/verify-email/${confirmToken}`;
+    await sendEmail({
+      email: user.email,
+      subject: 'Welcome to Linkage VA Hub - Please confirm your email',
+      template: 'welcome',
+      data: { confirmUrl },
+      userData: { role: 'va' },
+      forceSendGrid: true
+    });
+
+    return res.json({ success: true, message: 'Verification email resent' });
+  } catch (err) {
+    console.error('Public resend verification error:', err);
+    return res.status(500).json({ success: false, error: 'Failed to resend verification email' });
+  }
+});
+
 // @route   POST /api/auth/complete-profile
 // @desc    Complete user profile after registration
 // @access  Private

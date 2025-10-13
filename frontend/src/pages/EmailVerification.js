@@ -12,6 +12,8 @@ export default function EmailVerification() {
   const navigate = useNavigate();
   const { branding } = useBranding();
   const { login, resendVerificationEmail } = useAuth();
+  const [resendEmail, setResendEmail] = useState('');
+  const [sendingResend, setSendingResend] = useState(false);
   const [verifying, setVerifying] = useState(true);
   const [verified, setVerified] = useState(false);
   const [error, setError] = useState(null);
@@ -127,6 +129,39 @@ export default function EmailVerification() {
                     >
                       Resend verification email
                     </button>
+                  </div>
+                  <div className="pt-2">
+                    <div className="text-xs text-gray-500 mb-1">Not signed in? Enter your email to resend:</div>
+                    <div className="flex gap-2">
+                      <input
+                        type="email"
+                        value={resendEmail}
+                        onChange={(e) => setResendEmail(e.target.value)}
+                        placeholder="your@email.com"
+                        className="flex-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                      />
+                      <button
+                        onClick={async () => {
+                          if (!resendEmail) return;
+                          setSendingResend(true);
+                          try {
+                            await api.post('/auth/resend-verification-public', { email: resendEmail });
+                            // Success toast is not global here; show a basic alert/toast pattern
+                            // eslint-disable-next-line no-alert
+                            alert('If an account exists, a verification email has been sent.');
+                          } catch (e) {
+                            // eslint-disable-next-line no-alert
+                            alert('Failed to resend verification email.');
+                          } finally {
+                            setSendingResend(false);
+                          }
+                        }}
+                        disabled={sendingResend}
+                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60"
+                      >
+                        {sendingResend ? 'Sending…' : 'Resend'}
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <Link
