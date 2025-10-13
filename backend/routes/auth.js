@@ -656,25 +656,37 @@ router.post('/resend-verification', protect, async (req, res) => {
 // @access  Public
 router.post('/resend-verification-public', async (req, res) => {
   try {
+    console.log('🔄 Public resend verification request received:', { body: req.body, ip: req.ip });
+    
     const { email } = req.body || {};
     if (!email) {
+      console.log('❌ No email provided in request body');
       return res.status(400).json({ success: false, error: 'Email is required' });
     }
 
+    console.log('🔍 Looking for user with email:', email);
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
+      console.log('⚠️  User not found for email:', email);
       // Do not reveal whether email exists
       return res.json({ success: true, message: 'If an account exists, a verification email has been sent' });
     }
 
+    console.log('👤 User found:', { id: user._id, email: user.email, confirmedAt: user.confirmedAt });
+    
     if (user.confirmedAt) {
+      console.log('✅ User already verified');
       return res.json({ success: true, message: 'Email already verified' });
     }
 
+    console.log('🔑 Generating new confirmation token...');
     const confirmToken = user.getConfirmationToken();
     await user.save();
+    console.log('💾 Token saved to user document');
 
     const confirmUrl = `${process.env.CLIENT_URL}/verify-email/${confirmToken}`;
+    console.log('📧 Sending verification email to:', user.email, 'with URL:', confirmUrl);
+    
     await sendEmail({
       email: user.email,
       subject: 'Welcome to Linkage VA Hub - Please confirm your email',
@@ -684,9 +696,11 @@ router.post('/resend-verification-public', async (req, res) => {
       forceSendGrid: true
     });
 
+    console.log('✅ Verification email sent successfully to:', user.email);
     return res.json({ success: true, message: 'Verification email resent' });
   } catch (err) {
-    console.error('Public resend verification error:', err);
+    console.error('❌ Public resend verification error:', err);
+    console.error('Error stack:', err.stack);
     return res.status(500).json({ success: false, error: 'Failed to resend verification email' });
   }
 });
