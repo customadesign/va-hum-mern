@@ -39,7 +39,14 @@ export default function VAList() {
       return response.data;
     },
     {
-      keepPreviousData: true
+      keepPreviousData: true,
+      retry: 2,
+      retryDelay: 1000,
+      onError: (err) => {
+        console.error('Failed to fetch VAs:', err);
+        console.error('Error response:', err.response?.data);
+        console.error('Error status:', err.response?.status);
+      }
     }
   );
 
@@ -250,6 +257,17 @@ export default function VAList() {
           ) : error ? (
             <div className="text-center py-12">
               <p className="text-sm text-gray-500">Error loading VAs. Please try again.</p>
+              {error.response?.status && (
+                <p className="text-xs text-red-600 mt-2">
+                  Error {error.response.status}: {error.response?.data?.error || error.message}
+                </p>
+              )}
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Reload Page
+              </button>
             </div>
           ) : data?.data?.length === 0 ? (
             <div className="text-center py-12">
