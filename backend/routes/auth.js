@@ -79,10 +79,12 @@ router.post('/register', authLimiter, [
       });
     }
 
-    // Create user
+    // Create user with 'va' role by default for Linkage VA Hub
+    // Business users should register through E-Systems Management Hub
     user = await User.create({
       email,
-      password
+      password,
+      role: 'va' // Default to VA role for Linkage VA Hub registrations
     });
 
     // Handle referral

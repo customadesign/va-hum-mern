@@ -350,7 +350,7 @@ export default function Conversations() {
       ];
       return base.map((c) => ({ ...c, status: demoMap[c._id] ? 'archived' : 'active' }));
     } else {
-      // Sample conversations for businesses
+      // Sample conversations for businesses (same messages as VAs for consistency)
       const base = [
         {
           _id: 'demo-1',
@@ -369,12 +369,17 @@ export default function Conversations() {
               _id: 'msg-1',
               sender: 'admin-1',
               content:
-                'Thank you for joining Linkage VA Hub! 🎉\n' +
-                'We’re excited to have you onboard. Keep an eye on your messages — you may hear from VAs soon.',
+                'Thank you for joining Linkage VA Hub!\n' +
+                'We\'re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services.\n' +
+                'If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.',
+              bodyHtml:
+                '<p>Thank you for joining <strong>Linkage VA Hub</strong>!</p>' +
+                '<p>We\'re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services.</p>' +
+                '<p>If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.</p>',
               createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
             }
           ],
-          lastMessage: 'Thank you for joining Linkage VA Hub! 🎉 We’re excited to have you onboard. Keep an eye on your messages — you may hear from VAs soon.',
+          lastMessage: 'Thank you for joining Linkage VA Hub! We\'re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services. If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.',
           lastMessageAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 0, business: 1 }
@@ -393,13 +398,14 @@ export default function Conversations() {
           },
           messages: [
             {
-              _id: 'msg-3',
+              _id: 'msg-2',
               sender: 'admin-2',
-              content: 'Welcome! If you need help posting a role or contacting VAs, our team is here to assist.',
+              content: 'To increase your chances of landing job opportunities, join our community, it\'s where VAs and employers connect first!',
+              bodyHtml: '<p>To increase your chances of landing job opportunities, join our <a href="/community">community</a>, it\'s where VAs and employers connect first!</p>',
               createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000) // 8 hours ago
             }
           ],
-          lastMessage: 'Welcome! If you need help posting a role or contacting VAs, our team is here to assist.',
+          lastMessage: 'To increase your chances of landing job opportunities, join our community, it\'s where VAs and employers connect first!',
           lastMessageAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 1, business: 1 }
