@@ -1,18 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { toast } from 'react-toastify';
 import { useBranding } from '../contexts/BrandingContext';
-import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
 
 export default function VerifyEmailSent() {
   const { branding } = useBranding();
-  const { resendVerificationEmail } = useAuth();
+  const [resendEmail, setResendEmail] = useState('');
+  const [sendingResend, setSendingResend] = useState(false);
 
   const handleResendEmail = async () => {
+    if (!resendEmail || !resendEmail.includes('@')) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+    
+    setSendingResend(true);
     try {
-      await resendVerificationEmail();
+      await api.post('/auth/resend-verification-public', { email: resendEmail });
+      toast.success('Verification email sent! Please check your inbox.');
     } catch (error) {
-      // Error is handled in the context
+      console.error('Resend verification error:', error);
+      toast.error(error.response?.data?.error || 'Failed to send verification email');
+    } finally {
+      setSendingResend(false);
     }
   };
 
@@ -56,15 +68,25 @@ export default function VerifyEmailSent() {
             </div>
 
             <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Didn't receive the email?{' '}
+              <p className="text-sm text-gray-600 mb-2">
+                Didn't receive the email?
+              </p>
+              <div className="flex gap-2 max-w-sm mx-auto">
+                <input
+                  type="email"
+                  value={resendEmail}
+                  onChange={(e) => setResendEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="flex-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                />
                 <button
                   onClick={handleResendEmail}
-                  className="font-medium text-blue-600 hover:text-blue-500"
+                  disabled={sendingResend}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Resend verification email
+                  {sendingResend ? 'Sending...' : 'Resend'}
                 </button>
-              </p>
+              </div>
             </div>
 
             <div className="text-center">
