@@ -9,9 +9,9 @@ const emailDomains = {
       description: 'Emails sent to Virtual Assistants'
     },
     business: {
-      email: 'hello@esystemsmanagment.com',
+      email: 'hello@esystemsmanagement.com',
       name: 'E-Systems Management',
-      domain: 'esystemsmanagment.com',
+      domain: 'esystemsmanagement.com',
       description: 'Emails sent to Businesses'
     },
     admin: {
@@ -116,7 +116,6 @@ const getSenderForTemplate = (template, recipientEmail, userData = null) => {
 const validateSenderDomains = () => {
   const requiredDomains = [
     'linkagevahub.com',
-    'esystemsmanagment.com',
     'esystemsmanagement.com'
   ];
 

@@ -64,7 +64,7 @@ router.post('/send', protect, authorize('admin'), async (req, res) => {
       });
     }
 
-    // Test Business email (should use hello@esystemsmanagment.com)
+    // Test Business email (should use hello@esystemsmanagement.com)
     try {
       console.log('Testing Business email sender...');
       if (!skipActualSend) {
@@ -75,14 +75,14 @@ router.post('/send', protect, authorize('admin'), async (req, res) => {
       }
       testResults.push({
         type: 'business',
-        expectedSender: 'hello@esystemsmanagment.com',
+        expectedSender: 'hello@esystemsmanagement.com',
         status: 'success',
         message: 'Business email sender configured correctly'
       });
     } catch (error) {
       testResults.push({
         type: 'business',
-        expectedSender: 'hello@esystemsmanagment.com',
+        expectedSender: 'hello@esystemsmanagement.com',
         status: 'error',
         error: error.message
       });

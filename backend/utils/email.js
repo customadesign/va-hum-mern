@@ -22,7 +22,7 @@ const createTransporter = (senderConfig = null) => {
 const getEmailTemplates = (senderConfig) => {
   const brandName = senderConfig.name;
   const isVADomain = senderConfig.domain === 'linkagevahub.com';
-  const isBusinessDomain = senderConfig.domain === 'esystemsmanagment.com';
+  const isBusinessDomain = senderConfig.domain === 'esystemsmanagement.com';
   
   return {
     welcome: (data) => ({

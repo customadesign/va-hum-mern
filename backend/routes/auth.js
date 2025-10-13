@@ -110,7 +110,8 @@ router.post('/register', authLimiter, [
         email: user.email,
         subject: 'Welcome to Linkage VA Hub - Please confirm your email',
         template: 'welcome',
-        data: { confirmUrl }
+        data: { confirmUrl },
+        userData: { role: 'va' }
       });
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
@@ -593,6 +594,41 @@ router.post('/confirm-email/:token', async (req, res) => {
   const { token } = req.params;
   req.url = `/verify-email/${token}`;
   return router.handle(req, res);
+});
+
+// @route   POST /api/auth/resend-verification
+// @desc    Resend verification email for the logged-in user
+// @access  Private
+router.post('/resend-verification', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    // If already verified, return success (no email needed)
+    if (user.confirmedAt) {
+      return res.json({ success: true, message: 'Email already verified' });
+    }
+
+    // Generate a fresh confirmation token
+    const confirmToken = user.getConfirmationToken();
+    await user.save();
+
+    const confirmUrl = `${process.env.CLIENT_URL}/verify-email/${confirmToken}`;
+    await sendEmail({
+      email: user.email,
+      subject: 'Welcome to Linkage VA Hub - Please confirm your email',
+      template: 'welcome',
+      data: { confirmUrl },
+      userData: { role: 'va' }
+    });
+
+    return res.json({ success: true, message: 'Verification email resent' });
+  } catch (err) {
+    console.error('Resend verification error:', err);
+    return res.status(500).json({ success: false, error: 'Failed to resend verification email' });
+  }
 });
 
 // @route   POST /api/auth/complete-profile
