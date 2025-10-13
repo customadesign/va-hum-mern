@@ -11,7 +11,7 @@ export default function EmailVerification() {
   const { token } = useParams();
   const navigate = useNavigate();
   const { branding } = useBranding();
-  const { login } = useAuth();
+  const { login, resendVerificationEmail } = useAuth();
   const [verifying, setVerifying] = useState(true);
   const [verified, setVerified] = useState(false);
   const [error, setError] = useState(null);
@@ -114,6 +114,20 @@ export default function EmailVerification() {
                   {error}
                 </p>
                 <div className="mt-6 space-y-3">
+                  <div>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await resendVerificationEmail();
+                        } catch (e) {
+                          // toast handled in context
+                        }
+                      }}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      Resend verification email
+                    </button>
+                  </div>
                   <div>
                     <Link
                       to="/sign-in"
