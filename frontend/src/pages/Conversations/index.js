@@ -282,7 +282,7 @@ export default function Conversations() {
       if (!eligible) {
         return [];
       }
-      // Once 80%+, show the EXACT two Linkage Admin default messages now used elsewhere
+      // Default welcome messages for new VAs
       const base = [
         {
           _id: 'demo-1',
@@ -302,18 +302,18 @@ export default function Conversations() {
               _id: 'msg-1',
               sender: 'admin-1',
               content:
-                'Thank you for joining Linkage VA Hub! 🎉\n' +
-                'We’re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services.\n' +
+                'Thank you for joining Linkage VA Hub!\n' +
+                'We\'re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services.\n' +
                 'If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.',
               bodyHtml:
-                '<p>Thank you for joining <strong>Linkage VA Hub</strong>! 🎉</p>' +
-                '<p>We’re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services.</p>' +
+                '<p>Thank you for joining <strong>Linkage VA Hub</strong>!</p>' +
+                '<p>We\'re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services.</p>' +
                 '<p>If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.</p>',
               createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
             }
           ],
           lastMessage:
-            'Thank you for joining Linkage VA Hub! 🎉 We’re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services. If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.',
+            'Thank you for joining Linkage VA Hub! We\'re excited to have you onboard. Keep an eye on your inbox and messages, business owners may reach out soon with opportunities to contract your services. If you have any questions about your VA profile or upcoming job offers, our support team is always here to help.',
           lastMessageAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 0, business: 1 }
@@ -332,21 +332,17 @@ export default function Conversations() {
           },
           messages: [
             {
-              _id: 'msg-3',
+              _id: 'msg-2',
               sender: 'admin-2',
               content:
-                'Welcome to Linkage VA Hub! 🎉\n' +
-                'We’re thrilled to have you on board. Keep an eye out for messages from business owners who may be interested in contracting your services.\n' +
-                'To increase your chances of landing job opportunities, join our community, it’s where VAs get priority access to employment opportunities!',
+                'To increase your chances of landing job opportunities, join our community, it\'s where VAs and employers connect first!',
               bodyHtml:
-                '<p>Welcome to <strong>Linkage VA Hub</strong>! 🎉</p>' +
-                '<p>We’re thrilled to have you on board. Keep an eye out for messages from business owners who may be interested in contracting your services.</p>' +
-                '<p>To increase your chances of landing job opportunities, join our <a href="/community">community</a>, it’s where VAs get priority access to employment opportunities!</p>',
+                '<p>To increase your chances of landing job opportunities, join our <a href="/community">community</a>, it\'s where VAs and employers connect first!</p>',
               createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000) // 8 hours ago
             }
           ],
           lastMessage:
-            'Welcome to Linkage VA Hub! 🎉 We’re thrilled to have you on board. Keep an eye out for messages from business owners who may be interested in contracting your services. To increase your chances of landing job opportunities, join our community, it’s where VAs get priority access to employment opportunities!',
+            'To increase your chances of landing job opportunities, join our community, it\'s where VAs and employers connect first!',
           lastMessageAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
           status: 'active',
           unreadCount: { va: 1, business: 1 }
