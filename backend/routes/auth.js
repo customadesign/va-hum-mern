@@ -542,10 +542,10 @@ router.get('/me', protect, async (req, res) => {
 // @access  Public
 router.post('/verify-email/:token', async (req, res) => {
   try {
-    const { token } = req.params;
+    const { token: verifyToken } = req.params;
 
     // Primary path: sha256 hashed token lookup
-    const hashed = require('crypto').createHash('sha256').update(token).digest('hex');
+    const hashed = require('crypto').createHash('sha256').update(verifyToken).digest('hex');
     let user = await User.findOne({
       confirmationToken: hashed,
       confirmationTokenExpire: { $gt: Date.now() }
@@ -561,7 +561,7 @@ router.post('/verify-email/:token', async (req, res) => {
       }).limit(50);
 
       for (const candidate of candidates) {
-        if (await bcrypt.compare(token, candidate.confirmationToken)) {
+        if (await bcrypt.compare(verifyToken, candidate.confirmationToken)) {
           user = candidate;
           break;
         }
