@@ -1,12 +1,13 @@
 import React, { Fragment, useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, BellIcon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useBranding } from '../contexts/BrandingContext';
 import { useQuery } from 'react-query';
 import api from '../services/api';
+import { scrollToTop } from '../hooks/useScrollToTop';
 
 import { useNotifications } from '../hooks/useNotifications';
 import NotificationBadge from './NotificationBadge';
@@ -14,6 +15,25 @@ import NotificationBadge from './NotificationBadge';
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
+
+// Custom Link component that scrolls to top on click
+const ScrollToTopLink = ({ to, children, className, ...props }) => {
+  const handleClick = () => {
+    // Scroll to top with smooth behavior
+    scrollToTop();
+  };
+
+  return (
+    <Link 
+      to={to} 
+      className={className}
+      onClick={handleClick}
+      {...props}
+    >
+      {children}
+    </Link>
+  );
+};
 
 export default function Layout() {
   const { user, logout, isVA, isBusiness } = useAuth();
@@ -386,12 +406,12 @@ export default function Layout() {
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex justify-center md:order-2">
               <div className="flex space-x-6">
-                <Link to="/terms" className="text-white hover:text-gray-200 text-sm">
+                <ScrollToTopLink to="/terms" className="text-white hover:text-gray-200 text-sm">
                   Terms of Service
-                </Link>
-                <Link to="/privacy" className="text-white hover:text-gray-200 text-sm">
+                </ScrollToTopLink>
+                <ScrollToTopLink to="/privacy" className="text-white hover:text-gray-200 text-sm">
                   Privacy Policy
-                </Link>
+                </ScrollToTopLink>
 
                 {/* Social Media Icons */}
                 <a href="https://facebook.com/linkagevasolutions" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-200">

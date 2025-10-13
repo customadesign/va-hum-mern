@@ -1,12 +1,13 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
 import { useBranding } from '../contexts/BrandingContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useScrollToTop } from '../hooks/useScrollToTop';
 
 export default function About() {
   const { branding, loading: brandingLoading } = useBranding();
-  const { user } = useAuth();
+  
+  // Scroll to top when the page loads
+  useScrollToTop();
   
   // Show loading spinner while branding context is loading
   if (brandingLoading || !branding) {
@@ -17,9 +18,6 @@ export default function About() {
     );
   }
   
-  // Determine redirect destination based on authentication status
-  const getStartedDestination = user ? '/dashboard' : '/sign-up';
-  
   return (
     <>
       <Helmet>
@@ -27,119 +25,63 @@ export default function About() {
       </Helmet>
 
       <div className="bg-white">
-        <div className="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-base font-semibold text-gray-600 tracking-wide uppercase">About</h2>
-            <p className="mt-1 text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
-              {branding.name}
-            </p>
-            {!branding.isESystemsMode && (
-              <p className="max-w-xl mt-5 mx-auto text-xl text-gray-500">
-                Operated by Linkage Web Solutions
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="max-w-3xl mx-auto">
+            <h1 className="text-3xl font-bold text-gray-900 mb-8">About {branding.name}</h1>
+            
+            <div className="prose prose-gray max-w-none">
+              <p className="text-lg text-gray-600 mb-8">
+                {branding.isESystemsMode 
+                  ? 'E-Systems is a leading platform that connects businesses with skilled professionals from the Philippines. We provide comprehensive solutions for companies looking to build their remote teams with top talent.'
+                  : 'Linkage VA Hub is a premier platform that connects businesses with talented Filipino virtual assistants. We bridge the gap between companies seeking reliable remote support and skilled professionals looking for meaningful opportunities.'}
               </p>
-            )}
-          </div>
 
-          <div className="mt-12 prose prose-lg text-gray-500 mx-auto">
-            {branding.isESystemsMode ? (
-              <>
-                <p>
-                  E-Systems Management helps businesses build exceptional remote teams with pre-screened 
-                  professionals from the Philippines.
+              <section className="mb-8">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Our Mission</h2>
+                <p className="text-gray-600">
+                  {branding.isESystemsMode 
+                    ? 'To empower businesses by providing access to world-class talent from the Philippines while creating meaningful career opportunities for skilled professionals.'
+                    : 'To connect businesses with exceptional virtual assistants while providing Filipinos with dignified, well-paying remote work opportunities.'}
                 </p>
+              </section>
 
-                <h3>Our Mission</h3>
-                <p>
-                  We streamline the process of finding and hiring skilled professionals for your business. 
-                  Our platform connects you with talented individuals who are ready to become valuable 
-                  members of your team.
+              <section className="mb-8">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4">What We Do</h2>
+                <p className="text-gray-600 mb-4">
+                  {branding.isESystemsMode 
+                    ? 'We specialize in matching businesses with skilled professionals across various fields including IT, customer service, administrative support, and specialized technical roles.'
+                    : 'We specialize in connecting businesses with talented virtual assistants who can handle a wide range of tasks including administrative support, customer service, social media management, and more.'}
                 </p>
-
-                <h3>What We Offer Employers</h3>
-                <ul>
-                  <li>Pre-screened professionals ready to join your team</li>
-                  <li>Direct communication with candidates</li>
-                  <li>Detailed profiles showcasing skills and experience</li>
-                  <li>Efficient hiring process</li>
-                  <li>Cost-effective staffing solutions</li>
+                <ul className="list-disc pl-6 text-gray-600 space-y-2">
+                  <li>Thorough vetting of all {branding.isESystemsMode ? 'professionals' : 'virtual assistants'}</li>
+                  <li>Personalized matching based on business needs</li>
+                  <li>Ongoing support and training</li>
+                  <li>Quality assurance and performance monitoring</li>
                 </ul>
+              </section>
 
-                <h3>Why Hire Filipino Professionals?</h3>
-                <p>
-                  The Philippines offers a deep talent pool of skilled professionals who excel in:
+              <section className="mb-8">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Why Choose Us</h2>
+                <p className="text-gray-600 mb-4">
+                  {branding.isESystemsMode 
+                    ? 'We understand the unique needs of businesses and the strengths of Filipino professionals. Our platform ensures perfect matches that drive success.'
+                    : 'We understand the unique needs of businesses and the exceptional qualities of Filipino virtual assistants. Our platform ensures perfect matches that drive success for both parties.'}
                 </p>
-                <ul>
-                  <li>Excellent English communication</li>
-                  <li>Strong work ethic and reliability</li>
-                  <li>Cultural alignment with Western business practices</li>
-                  <li>Technical skills across various industries</li>
-                  <li>Flexibility and adaptability</li>
+                <ul className="list-disc pl-6 text-gray-600 space-y-2">
+                  <li>Access to pre-screened, {branding.isESystemsMode ? 'highly skilled' : 'talented'} professionals</li>
+                  <li>Competitive {branding.isESystemsMode ? 'rates' : 'pricing'} without compromising quality</li>
+                  <li>Dedicated support throughout the engagement</li>
+                  <li>Flexible engagement models to suit your needs</li>
                 </ul>
+              </section>
 
-                <h3>Build Your Team</h3>
-                <p>
-                  E-Systems Management makes it easy to find the right professionals for your business needs. 
-                  Start building your dream team today with our curated selection of skilled candidates.
+              <section className="mb-8">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Contact Us</h2>
+                <p className="text-gray-600">
+                  Ready to transform your business with {branding.isESystemsMode ? 'top-tier talent' : 'exceptional virtual assistants'}? 
+                  Get in touch with us today to learn more about how we can help you achieve your goals.
                 </p>
-              </>
-            ) : (
-              <>
-                <p>
-                  Linkage VA Hub is operated by Linkage Web Solutions, connecting talented Filipino virtual assistants 
-                  with permanent contract opportunities through our trusted network of employers.
-                </p>
-
-                <h3>Our Mission</h3>
-                <p>
-                  We believe in creating meaningful connections between skilled virtual assistants and businesses 
-                  that value their expertise. Our platform is designed to make the hiring process seamless, 
-                  transparent, and beneficial for both parties.
-                </p>
-
-                <h3>What We Offer</h3>
-                <ul>
-                  <li>Access to pre-screened, skilled Filipino virtual assistants</li>
-                  <li>Direct communication between VAs and businesses</li>
-                  <li>Transparent profiles showcasing skills and experience</li>
-                  <li>Secure messaging system</li>
-                  <li>Fair and competitive rates</li>
-                </ul>
-
-                <h3>Why Choose Filipino VAs?</h3>
-                <p>
-                  The Philippines has emerged as a global leader in virtual assistance, offering:
-                </p>
-                <ul>
-                  <li>Excellent English communication skills</li>
-                  <li>Strong work ethic and dedication</li>
-                  <li>Cultural compatibility with Western businesses</li>
-                  <li>Cost-effective solutions without compromising quality</li>
-                  <li>Diverse skill sets across various industries</li>
-                </ul>
-
-                <h3>Get Started</h3>
-                <p>
-                  Whether you're a business looking for talented virtual assistants or a VA seeking new opportunities, 
-                  Linkage VA Hub is here to help you succeed. Join our growing community today.
-                </p>
-              </>
-            )}
-
-            {/* Get Started Button */}
-            <div className="mt-12 text-center">
-              <Link
-                to={getStartedDestination}
-                className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-semibold rounded-lg text-white transform transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                style={{ backgroundColor: '#2273b8' }}
-              >
-                Get Started
-                <svg className="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </Link>
-              <p className="mt-4 text-sm text-gray-600">
-                Join hundreds of businesses and professionals already using our platform
-              </p>
+              </section>
             </div>
           </div>
         </div>

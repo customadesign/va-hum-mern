@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useBranding } from '../contexts/BrandingContext';
+import { useScrollToTop } from '../hooks/useScrollToTop';
 
 // Configuration constants
 const CONFIG = {
@@ -256,6 +257,10 @@ function VideoPlayer({ src, poster, fallbackPoster, onPlay, className = '' }) {
 export default function Community() {
   const { loading: brandingLoading } = useBranding();
   const { countdown, nextWebinarDate, timeLabel, mobileTimeShort } = useWebinarCountdown();
+  
+  // Scroll to top when the page loads
+  useScrollToTop();
+  
   const [showForm, setShowForm] = useState(true);
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', country: '', experience: '', messenger: '', consent: false
@@ -264,7 +269,7 @@ export default function Community() {
 
   // Rotating banner messages
   const bannerMessages = useRef([
-    "🚀 Fastest Path to Landing a $4–$5/Hour VA Job in the Philippines",
+    "🚀 Fastest Path to Landing a $4–$5/hour VA Job in the Philippines",
     "Join Hundreds of VAs Who've Already Joined and Unlocked Your Success Today!",
     "Linkage VA Hub: Your Go-To Source for Elite VA Training & Top-Dollar Gigs in the Philippines."
   ]).current;
@@ -842,888 +847,508 @@ export default function Community() {
           {/* Benefits & Training Details Section - Full Width */}
           <div className="space-y-6">
             {/* Main Benefits Cards - Expandable */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Priority Access Card */}
-              <div
-                className={`rounded-xl border transform transition-all cursor-pointer ${
-                  expandedBenefits.priority ? 'sm:col-span-3' : 'priority-glow'
+              <div 
+                className={`rounded-xl p-6 border-2 cursor-pointer transition-all duration-300 ${
+                  expandedBenefits.priority 
+                    ? 'border-blue-500 shadow-xl transform scale-105' 
+                    : 'border-gray-200 hover:border-gray-300'
                 }`}
-                style={{ backgroundColor: '#e4effe', borderColor: '#2173b8' }}
                 onClick={() => toggleBenefit('priority')}
               >
-                <div className="p-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 text-white rounded-full p-2" style={{ backgroundColor: '#2173b8' }}>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-bold text-gray-900 text-sm">Priority Access</h3>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold text-white animate-pulse" style={{ backgroundColor: '#4338ca' }}>
-                          ⭐ VIP
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-700 mt-1">First in line for Linkage's job opportunities</p>
-                      {expandedBenefits.priority && (
-                        <div className="mt-4 space-y-3 animate-fadeIn">
-                          <div className="rounded-lg p-3" style={{ backgroundColor: '#f8f9fa' }}>
-                            <h4 className="font-semibold text-sm mb-2" style={{ color: '#2173b8' }}>What Priority Access Means for You:</h4>
-                            <ul className="space-y-2 text-xs text-gray-700">
-                              <li className="flex items-start">
-                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2173b8" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                Your profile appears AHEAD of regular accounts when clients search for VAs
-                              </li>
-                              <li className="flex items-start">
-                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2173b8" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                First notification when new high-paying clients post jobs
-                              </li>
-                              <li className="flex items-start">
-                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2173b8" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                Exclusive access to premium client accounts paying $5+/hour
-                              </li>
-                              <li className="flex items-start">
-                                <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="#2173b8" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                Priority support from our team when you need help
-                              </li>
-                            </ul>
-                          </div>
-                          <p className="text-xs italic font-medium" style={{ color: '#2173b8' }}>
-                            "Our trained VAs get hired 3x faster than regular applicants!"
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">Priority Access</h3>
+                  <svg 
+                    className={`w-6 h-6 text-gray-500 transition-transform duration-200 ${
+                      expandedBenefits.priority ? 'transform rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </div>
+                
+                <div className="text-3xl mb-3">🎯</div>
+                <p className="text-gray-600 mb-3">
+                  Get priority access to exclusive VA jobs that aren't posted publicly
+                </p>
+                
+                {expandedBenefits.priority && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <ul className="space-y-2 text-sm text-gray-600">
+                      <li className="flex items-start">
+                        <span className="text-green-500 mr-2">✓</span>
+                        First notification of new positions
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Direct client connections
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Skip the application queue
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Exclusive high-paying opportunities
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
 
-              {/* $4+/Hour Card */}
-              <div
-                className={`rounded-xl border transform transition-all cursor-pointer ${
-                  expandedBenefits.earnings ? 'sm:col-span-3' : 'hover:scale-105'
+              {/* Earnings Potential Card */}
+              <div 
+                className={`rounded-xl p-6 border-2 cursor-pointer transition-all duration-300 ${
+                  expandedBenefits.earnings 
+                    ? 'border-blue-500 shadow-xl transform scale-105' 
+                    : 'border-gray-200 hover:border-gray-300'
                 }`}
-                style={{ backgroundColor: '#f3f4f6', borderColor: '#6b7280' }}
                 onClick={() => toggleBenefit('earnings')}
               >
-                <div className="p-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 text-white rounded-full p-2" style={{ backgroundColor: '#1f2937' }}>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-gray-900 text-sm">$4+/Hour</h3>
-                      <p className="text-xs text-gray-700 mt-1">Minimum rate with potential for higher pay</p>
-                      {expandedBenefits.earnings && (
-                        <div className="mt-4 space-y-3 animate-fadeIn">
-                          <div className="rounded-lg p-3" style={{ backgroundColor: '#f8f9fa' }}>
-                            <h4 className="font-semibold text-sm mb-2" style={{ color: '#1f2937' }}>Your Earning Potential:</h4>
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center text-xs">
-                                <span className="text-gray-600">1-3 Months Experience</span>
-                                <span className="font-bold" style={{ color: '#3b82f6' }}>$4-$5/hour</span>
-                              </div>
-                              <div className="flex justify-between items-center text-xs">
-                                <span className="text-gray-600">6 Months - 1 Year Experience</span>
-                                <span className="font-bold" style={{ color: '#3b82f6' }}>$6/hour</span>
-                              </div>
-                              <div className="flex justify-between items-center text-xs">
-                                <span className="text-gray-600">Over 1 Year Experience</span>
-                                <span className="font-bold" style={{ color: '#3b82f6' }}>$6-$7/hour</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="rounded-lg p-2" style={{ backgroundColor: '#e0e7ff' }}>
-                            <p className="text-xs" style={{ color: '#4338ca' }}>
-                              <strong>Monthly Income Example:</strong> At $4/hour × 40 hours/week =
-                              <span className="font-bold"> ₱35,000+ per month</span>
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">Earnings Growth</h3>
+                  <svg 
+                    className={`w-6 h-6 text-gray-500 transition-transform duration-200 ${
+                      expandedBenefits.earnings ? 'transform rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </div>
+                
+                <div className="text-3xl mb-3">💰</div>
+                <p className="text-gray-600 mb-3">
+                  Clear path to $6-8/hour within your first year with guaranteed raises
+                </p>
+                
+                {expandedBenefits.earnings && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <ul className="space-y-2 text-sm text-gray-600">
+                      <li className="flex items-start">
+                        <span className="text-green-500 mr-2">✓</span>
+                        6-month performance review
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Skill-based salary increases
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Bonus opportunities up to ₱25,000
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Transparent promotion criteria
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
 
-              {/* ₱999 Investment Card */}
-              <div
-                className={`rounded-xl border transform transition-all cursor-pointer ${
-                  expandedBenefits.investment ? 'sm:col-span-3' : 'hover:scale-105'
+              {/* Investment Return Card */}
+              <div 
+                className={`rounded-xl p-6 border-2 cursor-pointer transition-all duration-300 ${
+                  expandedBenefits.investment 
+                    ? 'border-blue-500 shadow-xl transform scale-105' 
+                    : 'border-gray-200 hover:border-gray-300'
                 }`}
-                style={{ backgroundColor: '#e4effe', borderColor: '#2173b8' }}
                 onClick={() => toggleBenefit('investment')}
               >
-                <div className="p-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 text-white rounded-full p-2" style={{ backgroundColor: '#2173b8' }}>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-gray-900 text-sm">₱999 Investment</h3>
-                      <p className="text-xs text-gray-700 mt-1">3-week professional training program</p>
-                      {expandedBenefits.investment && (
-                        <div className="mt-4 space-y-3 animate-fadeIn">
-                          <div className="rounded-lg p-3" style={{ backgroundColor: '#f8f9fa' }}>
-                            <h4 className="font-semibold text-sm mb-2" style={{ color: '#2173b8' }}>Your ₱999 Investment Includes:</h4>
-                            <ul className="space-y-2 text-xs text-gray-700">
-                              <li className="flex items-start">
-                                <span className="font-bold mr-2" style={{ color: '#2173b8' }}>✓</span>
-                                40 hours of live training (20 days × 2 hours)
-                              </li>
-                              <li className="flex items-start">
-                                <span className="font-bold mr-2" style={{ color: '#2173b8' }}>✓</span>
-                                Free GoHighLevel account (₱5,500/month value)
-                              </li>
-                              <li className="flex items-start">
-                                <span className="font-bold mr-2" style={{ color: '#2173b8' }}>✓</span>
-                                AI tools training for content creation
-                              </li>
-                              <li className="flex items-start">
-                                <span className="font-bold mr-2" style={{ color: '#2173b8' }}>✓</span>
-                                Lifetime access to our VA community
-                              </li>
-                              <li className="flex items-start">
-                                <span className="font-bold mr-2" style={{ color: '#2173b8' }}>✓</span>
-                                Job placement assistance after graduation
-                              </li>
-                            </ul>
-                          </div>
-                          <div className="rounded-lg p-2 text-center" style={{ backgroundColor: '#e4effe' }}>
-                            <p className="text-xs font-bold" style={{ color: '#2173b8' }}>
-                              ROI: Earn back your investment in just 6-8 hours of VA work!
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Interactive Earning Calculator & Bonus Benefits Section - ENHANCED */}
-            <div className="rounded-xl p-6 border-2" style={{
-              background: 'linear-gradient(135deg, #f3f4f6 0%, #e0e7ff 100%)',
-              borderColor: '#3b82f6'
-            }}>
-              {/* 100% Bonus & Raise Benefits Banner */}
-              <div className="mb-8 relative overflow-hidden rounded-2xl p-6 text-center" style={{
-                background: 'linear-gradient(135deg, #2173b8 0%, #4338ca 50%, #3b82f6 100%)',
-                boxShadow: '0 20px 40px rgba(38, 99, 235, 0.3)'
-              }}>
-                <div className="absolute inset-0 bg-white bg-opacity-10 backdrop-blur-sm"></div>
-                <div className="relative z-10">
-                  <div className="flex justify-center mb-4">
-                    <div className="animate-bounce">
-                      <span className="text-6xl">💰</span>
-                    </div>
-                  </div>
-                  <h2 className="text-2xl sm:text-4xl font-extrabold text-white mb-3 leading-tight">
-                    🚀 GAME CHANGER: You Keep 100% of Everything!
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                      <div className="text-3xl mb-2">🎁</div>
-                      <h3 className="font-bold text-white text-lg mb-1">100% of All Bonuses</h3>
-                      <p className="text-white text-sm opacity-90">Every bonus your client pays goes directly to YOU</p>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                      <div className="text-3xl mb-2">📈</div>
-                      <h3 className="font-bold text-white text-lg mb-1">100% of All Raises</h3>
-                      <p className="text-white text-sm opacity-90">When clients increase your rate, you keep every peso</p>
-                    </div>
-                  </div>
-                  <div className="inline-flex items-center bg-yellow-400 text-black px-4 py-2 rounded-full font-bold text-sm animate-pulse">
-                    ⚡ No agency fees • No commissions • All yours! ⚡
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-center mb-6">
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2">
-                  Interactive Earning Calculator
-                </h2>
-                <p className="text-sm text-gray-700">
-                  Move the slider to see your earning potential + bonuses in Philippine Pesos!
-                </p>
-              </div>
-
-              {/* Interactive Rate Calculator */}
-              <div className="bg-white rounded-2xl p-6 shadow-xl border-2 mb-6" style={{ borderColor: '#2173b8' }}>
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                    Your Hourly Rate Calculator
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Drag the slider to see your earning potential at different rates
-                  </p>
-                </div>
-
-                {/* Rate Slider */}
-                <div className="mb-8">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm font-medium text-gray-700">$4/hour</span>
-                    <div className="text-center">
-                      <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-1 transform transition-all duration-300 hover:scale-110" style={{
-                        backgroundColor: '#2173b8',
-                        boxShadow: `0 0 30px rgba(38, 99, 235, 0.3)`
-                      }}>
-                        <span className="text-2xl font-bold text-white">${selectedRate}</span>
-                      </div>
-                      <p className="text-xs text-gray-600">per hour</p>
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">$15/hour</span>
-                  </div>
-
-                  <div className="relative">
-                    <input
-                      type="range"
-                      min="4"
-                      max="15"
-                      step="0.5"
-                      value={selectedRate}
-                      onChange={(e) => setSelectedRate(parseFloat(e.target.value))}
-                      className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                      style={{
-                        background: `linear-gradient(to right, #2173b8 0%, #2173b8 ${((selectedRate - 4) / 11) * 100}%, #e5e7eb ${((selectedRate - 4) / 11) * 100}%, #e5e7eb 100%)`
-                      }}
-                    />
-                    <style jsx>{`
-                      .slider::-webkit-slider-thumb {
-                        appearance: none;
-                        height: 24px;
-                        width: 24px;
-                        border-radius: 50%;
-                        background: #2173b8;
-                        cursor: pointer;
-                        box-shadow: 0 4px 8px rgba(38, 99, 235, 0.3);
-                        transition: all 0.15s ease-in-out;
-                      }
-                      .slider::-webkit-slider-thumb:hover {
-                        transform: scale(1.2);
-                        box-shadow: 0 6px 12px rgba(38, 99, 235, 0.4);
-                      }
-                      .slider::-moz-range-thumb {
-                        height: 24px;
-                        width: 24px;
-                        border-radius: 50%;
-                        background: #2173b8;
-                        cursor: pointer;
-                        border: none;
-                        box-shadow: 0 4px 8px rgba(38, 99, 235, 0.3);
-                      }
-                    `}</style>
-                  </div>
-                </div>
-
-                {/* Dynamic Earnings Display */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 rounded-xl transition-all duration-300 hover:scale-105" style={{ backgroundColor: '#f8f9fa' }}>
-                    <div className="text-lg font-bold" style={{ color: '#2173b8' }}>₱{earnings.hourly.toLocaleString()}</div>
-                    <div className="text-xs text-gray-600">per hour</div>
-                  </div>
-                  <div className="text-center p-4 rounded-xl transition-all duration-300 hover:scale-105" style={{ backgroundColor: '#f8f9fa' }}>
-                    <div className="text-lg font-bold" style={{ color: '#2173b8' }}>₱{earnings.daily.toLocaleString()}</div>
-                    <div className="text-xs text-gray-600">per day</div>
-                  </div>
-                  <div className="text-center p-4 rounded-xl transition-all duration-300 hover:scale-105" style={{ backgroundColor: '#f8f9fa' }}>
-                    <div className="text-lg font-bold" style={{ color: '#2173b8' }}>₱{earnings.weekly.toLocaleString()}</div>
-                    <div className="text-xs text-gray-600">per week</div>
-                  </div>
-                  <div className="text-center p-4 rounded-xl transition-all duration-300 hover:scale-105 animate-pulse" style={{
-                    backgroundColor: '#e4effe',
-                    border: '2px solid #2173b8'
-                  }}>
-                    <div className="text-xl font-extrabold" style={{ color: '#2173b8' }}>₱{earnings.monthly.toLocaleString()}</div>
-                    <div className="text-xs font-semibold text-gray-900">per month</div>
-                  </div>
-                </div>
-
-                {/* 100% Bonus & Raise Highlight */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-r from-green-400 to-green-500 rounded-xl p-4 text-white text-center transform transition-all hover:scale-105">
-                    <div className="text-2xl mb-2">🎁</div>
-                    <h4 className="font-bold text-lg mb-1">+ 100% of Bonuses</h4>
-                    <p className="text-sm text-white opacity-90">Clients often give ₱2,000-₱10,000+ bonuses</p>
-                  </div>
-                  <div className="bg-gradient-to-r from-blue-400 to-blue-500 rounded-xl p-4 text-white text-center transform transition-all hover:scale-105">
-                    <div className="text-2xl mb-2">📈</div>
-                    <h4 className="font-bold text-lg mb-1">+ 100% of Raises</h4>
-                    <p className="text-sm text-white opacity-90">Rate increases to ${selectedRate + 2}-${selectedRate + 5}/hour common</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Salary Comparison Bar Chart */}
-              <div className="bg-white rounded-xl p-5 shadow-lg mb-6">
-                <h3 className="font-bold text-gray-900 mb-4 text-center text-xl">
-                  How Your VA Income Compares to Other Jobs In The Philippines
-                </h3>
-
-                <div className="space-y-4">
-                  {/* Minimum Wage */}
-                  <div className="relative">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-medium text-gray-700">Minimum Wage (NCR)</span>
-                      <span className="text-sm font-bold text-gray-900">₱610/day</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
-                      <div className="h-full rounded-full flex items-center justify-end pr-2"
-                           style={{
-                             width: '30%',
-                             backgroundColor: '#94a3b8'
-                           }}>
-                        <span className="text-xs text-white font-semibold">₱13,420/mo</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Call Center Agent */}
-                  <div className="relative">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-medium text-gray-700">Call Center Agent</span>
-                      <span className="text-sm font-bold text-gray-900">₱18,000-25,000/mo</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
-                      <div className="h-full rounded-full flex items-center justify-end pr-2"
-                           style={{
-                             width: '50%',
-                             backgroundColor: '#64748b'
-                           }}>
-                        <span className="text-xs text-white font-semibold">₱22,000 avg</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Office Admin */}
-                  <div className="relative">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-medium text-gray-700">Office Admin</span>
-                      <span className="text-sm font-bold text-gray-900">₱15,000-20,000/mo</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
-                      <div className="h-full rounded-full flex items-center justify-end pr-2"
-                           style={{
-                             width: '40%',
-                             backgroundColor: '#475569'
-                           }}>
-                        <span className="text-xs text-white font-semibold">₱17,500 avg</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* VA at Current Selected Rate */}
-                  <div className="relative">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-bold" style={{ color: '#2173b8' }}>VA at ${selectedRate}/hour (YOU!)</span>
-                      <span className="text-sm font-bold" style={{ color: '#2173b8' }}>₱{earnings.monthly.toLocaleString()}/mo</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
-                      <div className="h-full rounded-full flex items-center justify-end pr-2"
-                           style={{
-                             width: `${Math.min(100, (earnings.monthly / 44800) * 100)}%`,
-                             background: 'linear-gradient(90deg, #2173b8 0%, #3b82f6 100%)'
-                           }}>
-                        <span className="text-xs text-white font-extrabold">
-                          {((earnings.monthly - 13420) / 13420 * 100).toFixed(1)}% above minimum wage!
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 text-center p-6 rounded-lg" style={{ backgroundColor: '#e0e7ff' }}>
-                  <p className="text-lg font-bold" style={{ color: '#4338ca' }}>
-                    🎯 That's ₱{earnings.monthly.toLocaleString()} per month working from home!
-                  </p>
-                  <p className="text-sm text-gray-600 mt-2">
-                    No commute, no office politics, flexible schedule
-                  </p>
-                </div>
-              </div>
-
-              {/* Real Bonus & Raise Scenarios */}
-              <div className="bg-white rounded-xl p-6 shadow-lg mb-6 border-2" style={{ borderColor: '#10b981' }}>
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                    🎁 Real Bonus & Raise Examples from Our VAs
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    These are actual bonus and raise amounts our VAs have received - and you keep 100% of it!
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  {/* Bonus Examples */}
-                  <div className="space-y-4">
-                    <h4 className="font-bold text-lg text-center" style={{ color: '#10b981' }}>
-                      💰 Bonus Examples (100% Yours!)
-                    </h4>
-                    {[
-                      { occasion: "Holiday Bonus", amount: "₱5,600", description: "Christmas gift from grateful client" },
-                      { occasion: "Project Completion", amount: "₱8,400", description: "After successful campaign launch" },
-                      { occasion: "Birthday Bonus", amount: "₱2,800", description: "Personal touch from caring client" },
-                      { occasion: "Performance Bonus", amount: "₱11,200", description: "Exceeded monthly targets" },
-                      { occasion: "Anniversary Bonus", amount: "₱14,000", description: "One year of excellent service" }
-                    ].map((bonus, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 rounded-lg border transition-all hover:scale-105" style={{ backgroundColor: '#f0fdf4', borderColor: '#10b981' }}>
-                        <div>
-                          <p className="font-semibold text-sm text-gray-900">{bonus.occasion}</p>
-                          <p className="text-xs text-gray-600">{bonus.description}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-lg" style={{ color: '#10b981' }}>{bonus.amount}</p>
-                          <p className="text-sm text-gray-500">100% yours</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Raise Examples */}
-                  <div className="space-y-4">
-                    <h4 className="font-bold text-lg text-center" style={{ color: '#3b82f6' }}>
-                      📈 Raise Examples (100% Yours!)
-                    </h4>
-                    {[
-                      { timeline: "Month 6", from: "$5", to: "$6", reason: "Proved reliability" },
-                      { timeline: "Year 1", from: "$6", to: "$7", reason: "Learned new skills" },
-                      { timeline: "Year 2", from: "$7", to: "$8", reason: "Took on more tasks" },
-                      { timeline: "Year 3", from: "$8", to: "$10", reason: "Became indispensable" },
-                      { timeline: "Year 4+", from: "$10", to: "$12", reason: "Expert level achieved" }
-                    ].map((raise, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 rounded-lg border transition-all hover:scale-105" style={{ backgroundColor: '#eff6ff', borderColor: '#3b82f6' }}>
-                        <div>
-                          <p className="font-semibold text-sm text-gray-900">{raise.timeline}</p>
-                          <p className="text-xs text-gray-600">{raise.reason}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-sm" style={{ color: '#3b82f6' }}>
-                            {raise.from} → {raise.to}/hr
-                          </p>
-                          <p className="text-xs" style={{ color: '#10b981' }}>
-                            +₱{Math.round((parseFloat(raise.to.slice(1)) - parseFloat(raise.from.slice(1))) * 56 * 40 * 4.3).toLocaleString()}/mo
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Combined Impact Example */}
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-center">
-                  <h4 className="font-bold text-xl text-white mb-3">
-                    🚀 Real Example: Sara's First Year Journey
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-white">
-                    <div className="bg-white bg-opacity-20 rounded-lg p-3">
-                      <p className="font-semibold text-lg">Started at $5/hour</p>
-                      <p className="text-sm">₱{Math.round(5 * 56 * 40 * 4.3).toLocaleString()}/month</p>
-                    </div>
-                    <div className="bg-white bg-opacity-20 rounded-lg p-3">
-                      <p className="font-semibold text-lg">Got raises to $9/hour</p>
-                      <p className="text-sm">₱{Math.round(9 * 56 * 40 * 4.3).toLocaleString()}/month</p>
-                    </div>
-                    <div className="bg-white bg-opacity-20 rounded-lg p-3">
-                      <p className="font-semibold text-lg">Plus ₱25,000 in bonuses</p>
-                      <p className="text-sm">Throughout the year</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 bg-white bg-opacity-30 rounded-lg p-4">
-                    <p className="font-bold text-2xl text-white">
-                      Total First Year Earnings: ₱{Math.round(9 * 56 * 40 * 4.3 * 12 + 25000).toLocaleString()}
-                    </p>
-                    <p className="text-sm text-white opacity-90">
-                      That's ₱{Math.round((9 * 56 * 40 * 4.3 * 12 + 25000) / 12).toLocaleString()} per month average!
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 text-center p-4 rounded-lg" style={{ backgroundColor: '#ecfdf5', border: '2px solid #10b981' }}>
-                  <p className="text-lg font-bold text-gray-900 mb-2">
-                    💡 The Secret: Other agencies keep 20-50% of your bonuses and raises
-                  </p>
-                  <p className="text-sm text-gray-700 mb-2">
-                    With Linkage VA Hub, every peso of bonus and every rate increase goes directly to YOU
-                  </p>
-                  <div className="inline-flex items-center bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm">
-                    🎯 That's thousands more in your pocket every year!
-                  </div>
-                </div>
-              </div>
-
-              {/* What This Income Can Buy */}
-              <div className="bg-white rounded-xl p-5 shadow-lg">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 text-center">
-                  What ₱{earnings.monthly.toLocaleString()}/Month Can Do For You
-                </h3>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#e4effe' }}>
-                    <div className="text-2xl mb-1">🏠</div>
-                    <p className="text-sm font-semibold text-gray-900">Rent a Nice Condo</p>
-                    <p className="text-sm text-gray-600">₱15,000-20,000/mo</p>
-                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>✓ Covered!</p>
-                  </div>
-
-                  <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
-                    <div className="text-2xl mb-1">🛒</div>
-                    <p className="text-sm font-semibold text-gray-900">Groceries</p>
-                    <p className="text-sm text-gray-600">₱8,000-10,000/mo</p>
-                    <p className="text-sm font-bold" style={{ color: '#1f2937' }}>✓ Easy!</p>
-                  </div>
-
-                  <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#e4effe' }}>
-                    <div className="text-2xl mb-1">📱</div>
-                    <p className="text-sm font-semibold text-gray-900">Internet & Phone</p>
-                    <p className="text-sm text-gray-600">₱2,000-3,000/mo</p>
-                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>✓ No problem!</p>
-                  </div>
-
-                  <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
-                    <div className="text-2xl mb-1">💰</div>
-                    <p className="text-sm font-semibold text-gray-900">Savings</p>
-                    <p className="text-sm text-gray-600">₱5,000-10,000/mo</p>
-                    <p className="text-sm font-bold" style={{ color: '#1f2937' }}>✓ Build wealth!</p>
-                  </div>
-
-                  <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#e4effe' }}>
-                    <div className="text-2xl mb-1">👨‍👩‍👧‍👦</div>
-                    <p className="text-sm font-semibold text-gray-900">Family Support</p>
-                    <p className="text-sm text-gray-600">Help parents/siblings</p>
-                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>✓ Be the hero!</p>
-                  </div>
-
-                  <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
-                    <div className="text-2xl mb-1">🎯</div>
-                    <p className="text-sm font-semibold text-gray-900">Future Goals</p>
-                    <p className="text-sm text-gray-600">House, car, business</p>
-                    <p className="text-sm font-bold" style={{ color: '#1f2937' }}>✓ Achievable!</p>
-                  </div>
-                </div>
-
-                <div className="mt-4 border-2 rounded-lg p-4 text-center" style={{
-                  backgroundColor: '#e0e7ff',
-                  borderColor: '#3b82f6'
-                }}>
-                  <p className="text-lg font-extrabold text-gray-900 mb-2">
-                    Your ₱999 Investment Returns in Just {Math.ceil(999 / earnings.hourly)} Hours of Work!
-                  </p>
-                  <p className="text-sm text-gray-700 mb-3">
-                    After that, every peso you earn is pure profit
-                  </p>
-
-                  <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-2">
-                    <div className="text-center">
-                      <p className="text-2xl font-bold" style={{ color: '#4338ca' }}>₱999</p>
-                      <p className="text-xs text-gray-600">Your Investment</p>
-                    </div>
-                    <svg className="w-8 h-8" fill="#3b82f6" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                    <div className="text-center">
-                      <p className="text-2xl font-bold" style={{ color: '#2173b8' }}>₱{earnings.monthly.toLocaleString()}+</p>
-                      <p className="text-xs text-gray-600">Monthly Income</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 animate-bounce">
-                    <span className="inline-block px-4 py-2 rounded-full text-white font-bold text-sm" style={{ backgroundColor: '#3b82f6' }}>
-                      That's a {Math.round((earnings.monthly / 999) * 100).toLocaleString()}% Return Every Month!
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Motivational Message */}
-              <div className="mt-6 text-center">
-                <p className="text-sm text-gray-700 mb-2">
-                  While your friends spend ₱999 on a night out or new clothes...
-                </p>
-                <p className="text-lg font-bold text-gray-900">
-                  You're investing in a career that pays <span style={{ color: '#3b82f6' }}>₱{earnings.monthly.toLocaleString()}+ every month!</span>
-                </p>
-                <p className="text-sm text-gray-700 mt-2">
-                  This isn't just a webinar. It's your ticket to financial freedom.
-                </p>
-              </div>
-            </div>
-
-            {/* Global Reach Section */}
-            <div className="rounded-xl p-6 border-2" style={{
-              background: 'linear-gradient(135deg, #1a365d 0%, #2173b8 50%, #1a365d 100%)',
-              borderColor: '#2173b8'
-            }}>
-              <div className="text-center mb-6">
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">
-                  Your Profile Reaches a Global Audience
-                </h2>
-                <p className="text-lg text-blue-100 max-w-3xl mx-auto">
-                  We connect Filipino VAs with businesses across the United States and worldwide.
-                  Join our network of <span className="text-yellow-300 font-bold">10,000+ businesses</span> actively
-                  looking to hire talented VAs every single month.
-                </p>
-              </div>
-
-              {/* Lottie Animation Container */}
-              <div className="flex justify-center items-center my-8">
-                <div id="global-reach-animation" style={{ width: '100%', maxWidth: '500px', height: '400px' }}>
-                  {/* Lottie animation will be inserted here */}
-                </div>
-              </div>
-
-              {/* Statistics Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
-                  <div className="text-2xl sm:text-3xl font-bold text-yellow-300">10,000+</div>
-                  <div className="text-sm text-white/90">Active Businesses</div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
-                  <div className="text-2xl sm:text-3xl font-bold text-yellow-300">50+</div>
-                  <div className="text-sm text-white/90">Countries</div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
-                  <div className="text-2xl sm:text-3xl font-bold text-yellow-300">USA</div>
-                  <div className="text-sm text-white/90">Primary Market</div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
-                  <div className="text-2xl sm:text-3xl font-bold text-yellow-300">24/7</div>
-                  <div className="text-sm text-white/90">Global Hiring</div>
-                </div>
-              </div>
-
-              {/* Countries List */}
-              <div className="mt-6 text-center">
-                <p className="text-sm text-blue-100 mb-3">Businesses from these locations are actively hiring:</p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {['🇺🇸 USA', '🇨🇦 Canada', '🇬🇧 UK', '🇦🇺 Australia', '🇳🇿 New Zealand', '🇸🇬 Singapore', '🇩🇪 Germany', '🇫🇷 France', '🇳🇱 Netherlands', '🇦🇪 UAE'].map((country) => (
-                    <span key={country} className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs text-white border border-white/30">
-                      {country}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Call to Action */}
-              <div className="mt-8 text-center">
-                <p className="text-white/90 mb-4 text-lg">
-                  Join thousands of successful VAs connecting with international clients daily
-                </p>
-                <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-bold rounded-full shadow-lg">
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">Quick ROI</h3>
+                  <svg 
+                    className={`w-6 h-6 text-gray-500 transition-transform duration-200 ${
+                      expandedBenefits.investment ? 'transform rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                  Your Global Career Starts in 20 Days
                 </div>
+                
+                <div className="text-3xl mb-3">🚀</div>
+                <p className="text-gray-600 mb-3">
+                  Your ₱999 investment pays for itself in less than 20 hours of work
+                </p>
+                
+                {expandedBenefits.investment && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <ul className="space-y-2 text-sm text-gray-600">
+                      <li className="flex items-start">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Job-ready skills in 20 days
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Immediate earning potential
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Lifetime network access
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Ongoing support & updates
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Audio Testimonial Section */}
-            <div className="rounded-xl p-5 border" style={{ backgroundColor: '#e4effe', borderColor: '#2173b8' }}>
-              <div className="flex items-center mb-3">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="#2173b8" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                </svg>
-                <h3 className="font-bold text-gray-900">Hear From Our Founder</h3>
-                <span className="ml-auto text-white text-xs px-2 py-1 rounded-full font-semibold animate-pulse" style={{ backgroundColor: '#4338ca' }}>
-                  MUST LISTEN
-                </span>
-              </div>
-
-              <div className="rounded-lg p-4 shadow-inner" style={{ backgroundColor: '#f8f9fa' }}>
-                <audio
-                  id="founder-message"
-                  className="w-full"
-                  controls
-                  controlsList="nodownload"
-                  preload="metadata"
-                >
-                  <source
-                    src="https://storage.googleapis.com/msgsndr/QcArhd5EeedJmTdRxDXY/media/68cd3e99253906c81a140a98.mpeg"
-                    type="audio/mpeg"
+            {/* Interactive Rate Calculator */}
+            <div className="rounded-xl p-6 border" style={{ backgroundColor: '#f8f9fa', borderColor: '#2173b8' }}>
+              <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">
+                Calculate Your Earning Potential
+              </h3>
+              
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Your Hourly Rate (USD):
+                </label>
+                <div className="flex items-center space-x-4">
+                  <input
+                    type="range"
+                    min="4"
+                    max="10"
+                    step="0.5"
+                    value={selectedRate}
+                    onChange={(e) => setSelectedRate(parseFloat(e.target.value))}
+                    className="flex-1"
+                    style={{ accentColor: '#2173b8' }}
                   />
-                  Your browser does not support the audio element.
-                </audio>
-
-                <div className="mt-3 flex items-center justify-between text-xs text-gray-600">
-                  <div className="flex items-center space-x-4">
-                    <button
-                      onClick={() => {
-                        const audio = document.getElementById('founder-message');
-                        audio.playbackRate = 1.0;
-                      }}
-                      className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
-                    >
-                      1x
-                    </button>
-                    <button
-                      onClick={() => {
-                        const audio = document.getElementById('founder-message');
-                        audio.playbackRate = 1.5;
-                      }}
-                      className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
-                    >
-                      1.5x
-                    </button>
-                    <button
-                      onClick={() => {
-                        const audio = document.getElementById('founder-message');
-                        audio.playbackRate = 2.0;
-                      }}
-                      className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
-                    >
-                      2x
-                    </button>
-                  </div>
-                  <span className="text-gray-500">
-                    Pat Murphy's personal message about this opportunity
+                  <span className="text-xl font-bold text-gray-900 min-w-[60px]">
+                    ${selectedRate}/hr
                   </span>
                 </div>
               </div>
 
-              <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: '#e0e7ff' }}>
-                <p className="text-xs text-center font-medium" style={{ color: '#4338ca' }}>
-                  🎧 Listen to why this training can change your life as a VA in the Philippines
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#e4effe' }}>
+                  <p className="text-sm text-gray-600">Hourly</p>
+                  <p className="text-lg font-bold text-gray-900">₱{earnings.hourly.toLocaleString()}</p>
+                </div>
+                <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
+                  <p className="text-sm text-gray-600">Daily (8hrs)</p>
+                  <p className="text-lg font-bold text-gray-900">₱{earnings.daily.toLocaleString()}</p>
+                </div>
+                <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#e4effe' }}>
+                  <p className="text-sm text-gray-600">Weekly (40hrs)</p>
+                  <p className="text-lg font-bold text-gray-900">₱{earnings.weekly.toLocaleString()}</p>
+                </div>
+                <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
+                  <p className="text-sm text-gray-600">Monthly</p>
+                  <p className="text-lg font-bold text-gray-900">₱{earnings.monthly.toLocaleString()}</p>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <button
+                  onClick={() => setShowBonusExample(!showBonusExample)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white hover:opacity-90"
+                  style={{ backgroundColor: '#2173b8' }}
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Show Bonus Examples
+                </button>
+              </div>
+
+              {showBonusExample && (
+                <div className="mt-4 p-4 rounded-lg border-2" style={{ borderColor: '#3b82f6', backgroundColor: '#e0e7ff' }}>
+                  <h4 className="font-semibold text-gray-900 mb-3">Potential Bonus Earnings:</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Performance Bonus (Quarterly)</span>
+                      <span className="font-bold text-green-600">+₱5,000</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Client Satisfaction Bonus</span>
+                      <span className="font-bold text-green-600">+₱3,000</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Referral Bonus</span>
+                      <span className="font-bold text-green-600">+₱2,000</span>
+                    </div>
+                    <div className="pt-2 mt-2 border-t border-gray-300">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-semibold text-gray-900">Total Monthly Potential</span>
+                        <span className="text-xl font-bold text-green-600">
+                          ₱{(earnings.monthly + 10000).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Detailed Benefits Section */}
+            <div className="rounded-xl p-6 border" style={{ backgroundColor: '#f8f9fa', borderColor: '#2173b8' }}>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Your Complete Training Package</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column - Skills */}
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 001.745-.723 1 1 0 011.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                    </svg>
+                    In-Demand Skills You'll Master
+                  </h4>
+                  
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    <li className="flex items-start">
+                      <span className="text-blue-500 mr-2 mt-0.5">▸</span>
+                      <div>
+                        <strong>Calendar & Schedule Management:</strong> Handle complex scheduling for international clients
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-500 mr-2 mt-0.5">▸</span>
+                      <div>
+                        <strong>Travel Booking & Coordination:</strong> Master international travel arrangements
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-500 mr-2 mt-0.5">▸</span>
+                      <div>
+                        <strong>Client Journey Automation:</strong> Build automated workflows that save time
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-500 mr-2 mt-0.5">▸</span>
+                      <div>
+                        <strong>Brand Building & Marketing:</strong> Create professional content and manage social media
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-500 mr-2 mt-0.5">▸</span>
+                      <div>
+                        <strong>AI Tools Integration:</strong> Leverage ChatGPT, Claude, and other AI for productivity
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Right Column - Benefits */}
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Career Growth Benefits
+                  </h4>
+                  
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <div>
+                        <strong>Guaranteed Starting Rate:</strong> $4-5/hour minimum for all graduates
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <div>
+                        <strong>Performance Reviews:</strong> Guaranteed evaluation every 6 months
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <div>
+                        <strong>Skill Certification:</strong> Industry-recognized credentials
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <div>
+                        <strong>Alumni Network:</strong> Connect with successful VAs worldwide
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <div>
+                        <strong>Job Placement Support:</strong> Lifetime access to job opportunities
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Raise Timeline */}
+              <div className="mt-6 p-4 rounded-lg" style={{ backgroundColor: '#e4effe', borderColor: '#2173b8' }}>
+                <h4 className="font-semibold text-gray-900 mb-3">Typical Raise Timeline & Earnings</h4>
+                <div className="space-y-3">
+                  {[
+                    { timeline: '3 Months', reason: 'Probation completion', from: '$4', to: '$5' },
+                    { timeline: '6 Months', reason: 'Performance milestone', from: '$5', to: '$6' },
+                    { timeline: '12 Months', reason: 'Annual review + skills', from: '$6', to: '$8' },
+                    { timeline: '18 Months', reason: 'Senior VA status', from: '$8', to: '$10+' }
+                  ].map((raise, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                      <div>
+                        <p className="font-semibold text-sm text-gray-900">{raise.timeline}</p>
+                        <p className="text-xs text-gray-600">{raise.reason}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-sm" style={{ color: '#3b82f6' }}>
+                          {raise.from} → {raise.to}/hr
+                        </p>
+                        <p className="text-xs" style={{ color: '#10b981' }}>
+                          +₱{Math.round((parseFloat(raise.to.slice(1)) - parseFloat(raise.from.slice(1))) * 56 * 40 * 4.3).toLocaleString()}/mo
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Combined Impact Example */}
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-center">
+                <h4 className="font-bold text-xl text-white mb-3">
+                  🚀 Real Example: Sara's First Year Journey
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-white">
+                  <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                    <p className="font-semibold text-lg">Started at $5/hour</p>
+                    <p className="text-sm">₱{Math.round(5 * 56 * 40 * 4.3).toLocaleString()}/month</p>
+                  </div>
+                  <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                    <p className="font-semibold text-lg">Got raises to $9/hour</p>
+                    <p className="text-sm">₱{Math.round(9 * 56 * 40 * 4.3).toLocaleString()}/month</p>
+                  </div>
+                  <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                    <p className="font-semibold text-lg">Plus ₱25,000 in bonuses</p>
+                    <p className="text-sm">Throughout the year</p>
+                  </div>
+                </div>
+                <div className="mt-4 bg-white bg-opacity-30 rounded-lg p-4">
+                  <p className="font-bold text-2xl text-white">
+                    Total First Year Earnings: ₱{Math.round(9 * 56 * 40 * 4.3 * 12 + 25000).toLocaleString()}
+                  </p>
+                  <p className="text-sm text-white opacity-90">
+                    That's ₱{Math.round((9 * 56 * 40 * 4.3 * 12 + 25000) / 12).toLocaleString()} per month average!
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 text-center p-4 rounded-lg" style={{ backgroundColor: '#ecfdf5', border: '2px solid #10b981' }}>
+                <p className="text-lg font-bold text-gray-900 mb-2">
+                  💡 The Secret: Other agencies keep 20-50% of your bonuses and raises
                 </p>
+                <p className="text-sm text-gray-700 mb-2">
+                  With Linkage VA Hub, every peso of bonus and every rate increase goes directly to YOU
+                </p>
+                <div className="inline-flex items-center bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm">
+                  🎯 That's thousands more in your pocket every year!
+                </div>
               </div>
             </div>
 
-            {/* Training Schedule Timeline */}
-            <div className="rounded-xl p-5 border" style={{ backgroundColor: '#f8f9fa', borderColor: '#2173b8' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-gray-900 flex items-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="#2173b8" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  Live Training Schedule
-                </h3>
-                <span className="text-white text-xs px-3 py-1 rounded-full font-semibold" style={{ backgroundColor: '#2173b8' }}>20 DAYS</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2" style={{ borderColor: '#2173b8' }}>
-                      <svg className="w-5 h-5" fill="none" stroke="#2173b8" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">10 PM - 12 AM Daily</p>
-                    <p className="text-xs text-gray-600">Live Zoom sessions</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2" style={{ borderColor: '#2173b8' }}>
-                      <svg className="w-5 h-5" fill="none" stroke="#2173b8" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">Expert Training Team</p>
-                    <p className="text-xs text-gray-600">Led by Pat Murphy & Team</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-lg p-3 backdrop-blur-sm" style={{ backgroundColor: '#f8f9fa' }}>
-                <p className="text-center text-sm italic text-gray-800 font-medium">
-                  "Learn skills that will pay you more than you've ever dreamt of"
-                </p>
-              </div>
-
-              {/* Meet Your Training Team */}
-              <div className="mt-4 rounded-lg p-4 border" style={{ backgroundColor: '#e4effe', borderColor: '#2173b8' }}>
-                <h4 className="font-semibold text-gray-900 mb-3 text-center">Meet Your Training Team</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white rounded-lg p-2 text-center">
-                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>Pat Murphy</p>
-                    <p className="text-xs text-gray-600">Lead Trainer & Owner</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-2 text-center">
-                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>Kristina Mauri</p>
-                    <p className="text-xs text-gray-600">VA Trainer</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-2 text-center">
-                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>Shey Tiglao</p>
-                    <p className="text-xs text-gray-600">VA Onboarding</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-2 text-center">
-                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>Rhoda Guevarra</p>
-                    <p className="text-xs text-gray-600">Human Resources</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-2 text-center col-span-2">
-                    <p className="text-sm font-bold" style={{ color: '#2173b8' }}>Brian Murphy</p>
-                    <p className="text-xs text-gray-600">Chief of Operations</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* What's Included Feature List */}
-            <div className="rounded-xl p-5 border" style={{ backgroundColor: '#f8f9fa', borderColor: '#2173b8' }}>
-              <h3 className="font-bold text-gray-900 mb-4 flex items-center justify-between">
-                <span className="flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                  What's Included in Your Training
-                </span>
-                <span className="text-sm text-white px-2 py-1 rounded-full font-bold" style={{ backgroundColor: '#4338ca' }}>
-                  Total Value: ₱15,000+
-                </span>
+            {/* What This Income Can Buy */}
+            <div className="bg-white rounded-xl p-5 shadow-lg">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 text-center">
+                What ₱{earnings.monthly.toLocaleString()}/Month Can Do For You
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {[
-                  { icon: "🎯", title: "Free GoHighLevel Account", desc: "Primary training focus", value: "₱5,500/month value" },
-                  { icon: "🤖", title: "AI Tools Training", desc: "ChatGPT, Claude, & more", value: "₱3,000 value" },
-                  { icon: "🎬", title: "Video Creation Training", desc: "Professional video skills", value: "₱2,500 value" },
-                  { icon: "💼", title: "Lead Generation Mastery", desc: "Client acquisition techniques", value: "₱2,000 value" },
-                  { icon: "📊", title: "CRM Management Skills", desc: "Customer relationship tools", value: "₱1,500 value" },
-                  { icon: "📚", title: "LinkedIn Optimization", desc: "Profile & networking strategies", value: "₱1,000 value" }
-                ].map((item, index) => (
-                  <div key={index} className="flex items-start space-x-3 bg-white rounded-lg p-3 relative overflow-hidden">
-                    <span className="text-2xl flex-shrink-0">{item.icon}</span>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-gray-900">{item.title}</p>
-                      <p className="text-xs text-gray-600">{item.desc}</p>
-                      <p className="text-sm font-bold mt-1" style={{ color: '#2173b8' }}>{item.value}</p>
-                    </div>
-                    {index === 0 && (
-                      <div className="absolute top-0 right-0 text-white text-xs px-2 py-0.5 rounded-bl-lg font-bold" style={{ backgroundColor: '#4338ca' }}>
-                        HOT
-                      </div>
-                    )}
-                  </div>
-                ))}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#e4effe' }}>
+                  <div className="text-2xl mb-1">🏠</div>
+                  <p className="text-sm font-semibold text-gray-900">Rent a Nice Condo</p>
+                  <p className="text-sm text-gray-600">₱15,000-20,000/mo</p>
+                  <p className="text-sm font-bold" style={{ color: '#2173b8' }}>✓ Covered!</p>
+                </div>
+
+                <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
+                  <div className="text-2xl mb-1">🛒</div>
+                  <p className="text-sm font-semibold text-gray-900">Groceries</p>
+                  <p className="text-sm text-gray-600">₱8,000-10,000/mo</p>
+                  <p className="text-sm font-bold" style={{ color: '#1f2937' }}>✓ Easy!</p>
+                </div>
+
+                <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#e4effe' }}>
+                  <div className="text-2xl mb-1">📱</div>
+                  <p className="text-sm font-semibold text-gray-900">Internet & Phone</p>
+                  <p className="text-sm text-gray-600">₱2,000-3,000/mo</p>
+                  <p className="text-sm font-bold" style={{ color: '#2173b8' }}>✓ No problem!</p>
+                </div>
+
+                <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
+                  <div className="text-2xl mb-1">💰</div>
+                  <p className="text-sm font-semibold text-gray-900">Savings</p>
+                  <p className="text-sm text-gray-600">₱5,000-10,000/mo</p>
+                  <p className="text-sm font-bold" style={{ color: '#1f2937' }}>✓ Build wealth!</p>
+                </div>
+
+                <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#e4effe' }}>
+                  <div className="text-2xl mb-1">👨‍👩‍👧‍👦</div>
+                  <p className="text-sm font-semibold text-gray-900">Family Support</p>
+                  <p className="text-sm text-gray-600">Help parents/siblings</p>
+                  <p className="text-sm font-bold" style={{ color: '#2173b8' }}>✓ Be the hero!</p>
+                </div>
+
+                <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#f3f4f6' }}>
+                  <div className="text-2xl mb-1">🎯</div>
+                  <p className="text-sm font-semibold text-gray-900">Future Goals</p>
+                  <p className="text-sm text-gray-600">House, car, business</p>
+                  <p className="text-sm font-bold" style={{ color: '#1f2937' }}>✓ Achievable!</p>
+                </div>
               </div>
 
-              <div className="mt-4 border rounded-lg p-6" style={{ backgroundColor: '#e0e7ff', borderColor: '#3b82f6' }}>
-                <p className="text-2xl text-center font-bold" style={{ color: '#4338ca' }}>
-                  💰 All This for Only ₱999 - Save Over ₱14,000!
+              <div className="mt-4 border-2 rounded-lg p-4 text-center" style={{
+                backgroundColor: '#e0e7ff',
+                borderColor: '#3b82f6'
+              }}>
+                <p className="text-lg font-extrabold text-gray-900 mb-2">
+                  Your ₱999 Investment Returns in Just {Math.ceil(999 / earnings.hourly)} Hours of Work!
                 </p>
-                <p className="text-sm text-center text-gray-600 mt-2">
-                  Complete training package designed to make you job-ready in 3 weeks
+                <p className="text-sm text-gray-700 mb-3">
+                  After that, every peso you earn is pure profit
                 </p>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-2">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold" style={{ color: '#4338ca' }}>₱999</p>
+                    <p className="text-xs text-gray-600">Your Investment</p>
+                  </div>
+                  <svg className="w-8 h-8" fill="#3b82f6" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold" style={{ color: '#2173b8' }}>₱{earnings.monthly.toLocaleString()}+</p>
+                    <p className="text-xs text-gray-600">Monthly Income</p>
+                  </div>
+                </div>
+
+                <div className="mt-3 animate-bounce">
+                  <span className="inline-block px-4 py-2 rounded-full text-white font-bold text-sm" style={{ backgroundColor: '#3b82f6' }}>
+                    That's a {Math.round((earnings.monthly / 999) * 100).toLocaleString()}% Return Every Month!
+                  </span>
+                </div>
               </div>
+            </div>
+
+            {/* Motivational Message */}
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-700 mb-2">
+                While your friends spend ₱999 on a night out or new clothes...
+              </p>
+              <p className="text-lg font-bold text-gray-900">
+                You're investing in a career that pays <span style={{ color: '#3b82f6' }}>₱{earnings.monthly.toLocaleString()}+ every month!</span>
+              </p>
+              <p className="text-sm text-gray-700 mt-2">
+                This isn't just a webinar. It's your ticket to financial freedom.
+              </p>
             </div>
           </div>
         </section>
@@ -1810,15 +1435,6 @@ export default function Community() {
                   )}
                 </div>
               ))}
-            </div>
-
-            <div className="mt-8 border rounded-lg p-4 text-center" style={{ backgroundColor: '#e0e7ff', borderColor: '#3b82f6' }}>
-              <p className="text-sm font-semibold mb-2" style={{ color: '#2173b8' }}>
-                Still have questions?
-              </p>
-              <p className="text-sm text-gray-700">
-                Contact us at <a href="mailto:support@linkagevahub.com" className="hover:underline" style={{ color: '#2173b8' }}>support@linkagevahub.com</a> or join our community to connect with other VAs.
-              </p>
             </div>
           </div>
         </section>

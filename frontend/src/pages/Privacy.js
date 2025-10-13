@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useBranding } from '../contexts/BrandingContext';
+import { useScrollToTop } from '../hooks/useScrollToTop';
 
 export default function Privacy() {
   const { branding, loading: brandingLoading } = useBranding();
+  
+  // Scroll to top when the page loads
+  useScrollToTop();
   
   // Show loading spinner while branding context is loading
   if (brandingLoading || !branding) {
