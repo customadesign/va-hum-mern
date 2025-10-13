@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const userSchema = new mongoose.Schema({
   // Profile Information
@@ -478,12 +479,15 @@ userSchema.methods.getResetPasswordToken = function() {
 
 // Generate confirmation token
 userSchema.methods.getConfirmationToken = function() {
-  const confirmToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  
-  this.confirmationToken = bcrypt.hashSync(confirmToken, 10);
+  const confirmToken = crypto.randomBytes(32).toString('hex');
+  // Deterministic hash for lookup
+  this.confirmationToken = crypto.createHash('sha256').update(confirmToken).digest('hex');
   this.confirmationTokenExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
   
   return confirmToken;
 };
+
+// Index for faster lookups by confirmation token
+userSchema.index({ confirmationToken: 1 });
 
 module.exports = mongoose.model('User', userSchema);

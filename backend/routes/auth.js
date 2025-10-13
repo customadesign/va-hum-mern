@@ -544,39 +544,40 @@ router.post('/verify-email/:token', async (req, res) => {
   try {
     const { token } = req.params;
 
-    const user = await User.findOne({
-      confirmationToken: { $exists: true },
+    // Primary path: sha256 hashed token lookup
+    const hashed = require('crypto').createHash('sha256').update(token).digest('hex');
+    let user = await User.findOne({
+      confirmationToken: hashed,
       confirmationTokenExpire: { $gt: Date.now() }
     });
 
+    // Legacy fallback: iterate recent unverified users and bcrypt.compare
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid or expired token'
-      });
+      const bcrypt = require('bcryptjs');
+      const candidates = await User.find({
+        confirmationToken: { $exists: true },
+        confirmationTokenExpire: { $gt: Date.now() },
+        confirmedAt: { $exists: false }
+      }).limit(50);
+
+      for (const candidate of candidates) {
+        if (await bcrypt.compare(token, candidate.confirmationToken)) {
+          user = candidate;
+          break;
+        }
+      }
     }
 
-    // Verify token
-    const bcrypt = require('bcryptjs');
-    const isValid = await bcrypt.compare(token, user.confirmationToken);
-    
-    if (!isValid) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid token'
-      });
+    if (!user) {
+      return res.status(400).json({ success: false, error: 'Invalid or expired token' });
     }
 
-    // Confirm email
     user.confirmedAt = new Date();
     user.confirmationToken = undefined;
     user.confirmationTokenExpire = undefined;
     await user.save();
 
-    res.json({
-      success: true,
-      message: 'Email confirmed successfully'
-    });
+    res.json({ success: true, message: 'Email confirmed successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({
