@@ -15,6 +15,7 @@ export default function EmailVerification() {
   const [verifying, setVerifying] = useState(true);
   const [verified, setVerified] = useState(false);
   const [error, setError] = useState(null);
+  const verifyLogoUrl = 'https://storage.googleapis.com/msgsndr/H12yHzS5PDSz1dtmxbxH/media/67d446905106d57ab03054ed.png';
 
   useEffect(() => {
     verifyEmail();
@@ -61,8 +62,8 @@ export default function EmailVerification() {
           <div className="text-center">
             <img
               className="mx-auto h-24 w-auto object-contain"
-              src={branding.logoUrl || branding.logo}
-              alt={branding.name}
+              src={verifyLogoUrl}
+              alt="Linkage VA Hub"
             />
             
             {verifying && (
