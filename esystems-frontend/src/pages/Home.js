@@ -141,10 +141,10 @@ export default function Home() {
 
               <div className="mt-8 text-right">
                 <Link
-                  to="/vas"
+                  to="/pricing"
                   className="btn-primary inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md"
                 >
-                  Join Our Community
+                  View Pricing
                   <ArrowRightCircleIcon className="ml-3 -mr-1 h-5 w-5" aria-hidden="true" />
                 </Link>
               </div>

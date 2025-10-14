@@ -270,7 +270,7 @@ export default function Pricing() {
                   </h3>
                   <div className="text-center">
                     <div className="text-4xl font-extrabold mb-2" style={{ color: '#09006e' }}>
-                      $800
+                      $950
                     </div>
                     <div className="text-sm" style={{ color: '#374151' }}>per month</div>
                   </div>
@@ -396,7 +396,7 @@ export default function Pricing() {
                   What is the minimum commitment?
                 </h3>
                 <p style={{ color: '#374151' }}>
-                  We work on month-to-month agreements with no long-term lock-in. You can adjust hours or pause service with 30 days notice. Minimum recommended is 20 hours per week for consistency.
+                  We work on month-to-month agreements with no long-term lock-in. You can adjust hours with two weeks notice or hire additional VAs at any time. Our flexible model grows with your business needs.
                 </p>
               </div>
               <div>
