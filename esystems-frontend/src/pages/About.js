@@ -75,6 +75,17 @@ export default function About() {
                   E-Systems Management makes it easy to find the right professionals for your business needs. 
                   Start building your dream team today with our curated selection of skilled candidates.
                 </p>
+                
+                <div className="mt-8 text-center">
+                  <a
+                    href="https://esystems-management-hub.onrender.com/sign-up"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md md:py-4 md:text-lg md:px-10"
+                  >
+                    Register Your Business
+                  </a>
+                </div>
               </>
             ) : (
               <>
