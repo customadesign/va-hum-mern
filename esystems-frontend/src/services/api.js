@@ -8,7 +8,7 @@ function inferApiBase() {
 
       // 1) Explicit domain mappings take precedence over env to avoid misconfigured REACT_APP_API_URL
       if (hostname.includes('esystems-management-hub.onrender.com')) {
-        return 'https://esystems-management-hub-api.onrender.com/api';
+        return 'https://esystems-backend.onrender.com/api';
       }
       if (hostname.includes('linkage-va-hub.onrender.com')) {
         return 'https://linkage-va-hub-api.onrender.com/api';

@@ -55,7 +55,7 @@ const sendGridTemplates = {
         <p>Hi ${data.name || 'there'},</p>
         <p>Thank you for joining our comprehensive business solutions platform.</p>
         <p>Please confirm your email by clicking the link below:</p>
-        <a href="\${data.confirmUrl}" style="background-color: #1e40af; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">Confirm Email</a>
+        <a href="${data.confirmUrl}" style="background-color: #1e40af; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">Confirm Email</a>
         <p style="margin-top: 20px;">Once confirmed, you'll be able to:</p>
         <ul style="margin: 20px 0;">
           <li>Complete your company profile</li>
