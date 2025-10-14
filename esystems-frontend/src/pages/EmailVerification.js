@@ -11,7 +11,7 @@ export default function EmailVerification() {
   const { token } = useParams();
   const navigate = useNavigate();
   const { branding } = useBranding();
-  const { login } = useAuth();
+  const { checkAuth } = useAuth();
   const [verifying, setVerifying] = useState(true);
   const [verified, setVerified] = useState(false);
   const [error, setError] = useState(null);
@@ -30,22 +30,23 @@ export default function EmailVerification() {
         
         // Auto-login if tokens are provided
         if (response.data.token && response.data.user) {
-          // Store tokens directly for auto-login after email verification
+          // Store tokens for auto-login after email verification
           localStorage.setItem('token', response.data.token);
           if (response.data.refreshToken) {
             localStorage.setItem('refreshToken', response.data.refreshToken);
           }
           
-          // Redirect to profile setup or dashboard after a short delay
+          // Update auth context with fresh user data
+          await checkAuth();
+          
+          // Redirect to profile setup or dashboard after auth is refreshed
           setTimeout(() => {
             if (!response.data.user.va && !response.data.user.business) {
-              navigate('/profile-setup');
+              navigate('/profile-setup', { replace: true });
             } else {
-              navigate('/dashboard');
+              navigate('/dashboard', { replace: true });
             }
-            // Reload to trigger auth check
-            window.location.reload();
-          }, 2000);
+          }, 1500);
         }
       }
     } catch (error) {
