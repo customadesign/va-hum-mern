@@ -1,7 +1,36 @@
 import axios from 'axios';
 
-// Default to 5001 in E-Systems dev to match backend esystems:dev
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+// Robust API base URL inference for multi-deploy (Render) with safe fallbacks
+function inferApiBase() {
+  try {
+    // Prefer explicit env var when provided
+    if (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim()) {
+      return process.env.REACT_APP_API_URL.trim();
+    }
+    // Server-side (SSR/Node scripts)
+    if (typeof window === 'undefined') {
+      return process.env.SERVER_API_URL || 'http://localhost:5001/api';
+    }
+    const { hostname, protocol } = window.location;
+    // Render mapped domains
+    if (hostname.includes('linkage-va-hub.onrender.com')) {
+      return 'https://linkage-va-hub-api.onrender.com/api';
+    }
+    if (hostname.includes('esystems-management-hub.onrender.com')) {
+      return 'https://esystems-management-hub-api.onrender.com/api';
+    }
+    // Same-origin reverse proxy (e.g., Nginx -> /api)
+    if (protocol === 'https:' || protocol === 'http:') {
+      return '/api';
+    }
+    // Local fallback for esystems dev
+    return 'http://localhost:5001/api';
+  } catch {
+    return process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+  }
+}
+
+const API_URL = inferApiBase();
 
 // Create axios instance
 const api = axios.create({
@@ -9,6 +38,9 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Always send cookies with requests
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-CSRF-Token',
 });
 
 // Global token getter function (set by auth context)

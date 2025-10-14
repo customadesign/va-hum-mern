@@ -223,9 +223,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const resendVerificationEmail = async () => {
+  const resendVerificationEmail = async (email) => {
     try {
-      await authService.resendVerificationEmail();
+      await authService.resendVerificationEmail(email);
       toast.success('Verification email sent! Please check your inbox.');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to send verification email');
