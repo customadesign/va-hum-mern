@@ -20,16 +20,36 @@ function generateCsrfToken() {
 function detectPlatform(req) {
   const origin = req.headers.origin || req.headers.referer || '';
   const userAgent = req.headers['user-agent'] || '';
+  const xFrontendPlatform = req.headers['x-frontend-platform'] || '';
+  
+  console.log('🔍 Platform detection inputs:', {
+    origin,
+    referer: req.headers.referer,
+    userAgent,
+    xFrontendPlatform,
+    host: req.headers.host
+  });
   
   // Check if request is from esystems platform
-  if (origin.includes('esystems-management-hub.onrender.com') || 
-      origin.includes('esystemsmanagement.com') ||
-      req.headers['x-frontend-platform'] === 'esystems' ||
-      userAgent.includes('esystems')) {
+  const isEsystemsOrigin = origin.includes('esystems-management-hub.onrender.com');
+  const isEsystemsDomain = origin.includes('esystemsmanagement.com');
+  const isEsystemsHeader = xFrontendPlatform === 'esystems';
+  const isEsystemsUserAgent = userAgent.includes('esystems');
+  
+  console.log('🔍 Platform detection checks:', {
+    isEsystemsOrigin,
+    isEsystemsDomain,
+    isEsystemsHeader,
+    isEsystemsUserAgent
+  });
+  
+  if (isEsystemsOrigin || isEsystemsDomain || isEsystemsHeader || isEsystemsUserAgent) {
+    console.log('✅ Detected esystems platform');
     return 'esystems';
   }
   
   // Default to linkage platform
+  console.log('✅ Defaulting to linkage platform');
   return 'linkage';
 }
 
@@ -703,7 +723,17 @@ router.post('/resend-verification', protect, async (req, res) => {
 // @access  Public
 router.post('/resend-verification-public', async (req, res) => {
   try {
-    console.log('🔄 Public resend verification request received:', { body: req.body, ip: req.ip });
+    console.log('🔄 === RESEND VERIFICATION DEBUG START ===');
+    console.log('📧 Request received:', { 
+      body: req.body, 
+      ip: req.ip,
+      headers: {
+        origin: req.headers.origin,
+        referer: req.headers.referer,
+        'user-agent': req.headers['user-agent'],
+        'x-frontend-platform': req.headers['x-frontend-platform']
+      }
+    });
     
     const { email } = req.body || {};
     if (!email) {
@@ -719,7 +749,12 @@ router.post('/resend-verification-public', async (req, res) => {
       return res.json({ success: true, message: 'If an account exists, a verification email has been sent' });
     }
 
-    console.log('👤 User found:', { id: user._id, email: user.email, confirmedAt: user.confirmedAt });
+    console.log('👤 User found:', { 
+      id: user._id, 
+      email: user.email, 
+      confirmedAt: user.confirmedAt,
+      role: user.role 
+    });
     
     if (user.confirmedAt) {
       console.log('✅ User already verified');
@@ -728,7 +763,13 @@ router.post('/resend-verification-public', async (req, res) => {
 
     // Detect platform from request
     const platform = detectPlatform(req);
-    console.log(`🔄 Public resend verification request from platform: ${platform}`);
+    console.log(`🔄 Platform detection result: ${platform}`);
+    console.log('🔍 Platform detection details:', {
+      origin: req.headers.origin,
+      referer: req.headers.referer,
+      userAgent: req.headers['user-agent'],
+      xFrontendPlatform: req.headers['x-frontend-platform']
+    });
 
     console.log('🔑 Generating new confirmation token...');
     const confirmToken = user.getConfirmationToken();
@@ -738,27 +779,38 @@ router.post('/resend-verification-public', async (req, res) => {
     const confirmUrl = platform === 'esystems' 
       ? `${process.env.ESYSTEMS_FRONTEND_URL || 'https://esystems-management-hub.onrender.com'}/verify-email/${confirmToken}`
       : `${process.env.CLIENT_URL}/verify-email/${confirmToken}`;
-    console.log('📧 Sending verification email to:', user.email, 'with URL:', confirmUrl);
     
-    const emailTemplate = platform === 'esystems' ? 'esystems-welcome' : 'welcome';
-    const userData = platform === 'esystems' ? { role: 'business' } : { role: 'va' };
+    console.log('📧 Email configuration:', {
+      platform,
+      emailTemplate: platform === 'esystems' ? 'esystems-welcome' : 'welcome',
+      userData: platform === 'esystems' ? { role: 'business' } : { role: 'va' },
+      confirmUrl,
+      esystemsFrontendUrl: process.env.ESYSTEMS_FRONTEND_URL,
+      clientUrl: process.env.CLIENT_URL
+    });
     
+    console.log('📤 Attempting to send email...');
     await sendEmail({
       email: user.email,
       subject: platform === 'esystems' 
         ? 'Welcome to E-Systems Management - Please confirm your email'
         : 'Welcome to Linkage VA Hub - Please confirm your email',
-      template: emailTemplate,
+      template: platform === 'esystems' ? 'esystems-welcome' : 'welcome',
       data: { confirmUrl },
-      userData: userData,
+      userData: platform === 'esystems' ? { role: 'business' } : { role: 'va' },
       forceSendGrid: true
     });
 
     console.log(`✅ ${platform} verification email sent successfully to:`, user.email);
+    console.log('🔄 === RESEND VERIFICATION DEBUG END ===');
     return res.json({ success: true, message: 'Verification email resent' });
   } catch (err) {
-    console.error('❌ Public resend verification error:', err);
+    console.error('❌ === RESEND VERIFICATION ERROR ===');
+    console.error('Error details:', err);
     console.error('Error stack:', err.stack);
+    console.error('Request body:', req.body);
+    console.error('Request headers:', req.headers);
+    console.error('=== END ERROR DEBUG ===');
     return res.status(500).json({ success: false, error: 'Failed to resend verification email' });
   }
 });
