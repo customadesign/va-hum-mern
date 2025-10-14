@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
@@ -15,12 +15,17 @@ import {
   SparklesIcon,
   BanknotesIcon,
   HomeIcon,
-  ComputerDesktopIcon
+  ComputerDesktopIcon,
+  PlusIcon,
+  MinusIcon
 } from '@heroicons/react/24/outline';
 import { useBranding } from '../contexts/BrandingContext';
 
 export default function Pricing() {
   const { branding, loading: brandingLoading } = useBranding();
+  
+  // State for savings calculator
+  const [numberOfEmployees, setNumberOfEmployees] = useState(1);
 
   if (brandingLoading || !branding) {
     return (
@@ -29,6 +34,42 @@ export default function Pricing() {
       </div>
     );
   }
+
+  // Calculator functions
+  const handleEmployeeChange = (e) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value >= 1) {
+      setNumberOfEmployees(value);
+    }
+  };
+
+  const incrementEmployees = () => {
+    setNumberOfEmployees(prev => prev + 1);
+  };
+
+  const decrementEmployees = () => {
+    setNumberOfEmployees(prev => Math.max(1, prev - 1));
+  };
+
+  // Calculate savings based on number of employees
+  const usEmployeeMinCost = 55000;
+  const usEmployeeMaxCost = 70000;
+  const esystemsVACost = 19200;
+  
+  const totalUSMinCost = numberOfEmployees * usEmployeeMinCost;
+  const totalUSMaxCost = numberOfEmployees * usEmployeeMaxCost;
+  const totalEsystemsCost = numberOfEmployees * esystemsVACost;
+  const totalMinSavings = totalUSMinCost - totalEsystemsCost;
+  const totalMaxSavings = totalUSMaxCost - totalEsystemsCost;
+  
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
 
   const benefits = [
     {
@@ -358,102 +399,151 @@ export default function Pricing() {
                 </div>
               </div>
               
-              <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* US Employee Card */}
-                <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-gray-200 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                  <div className="absolute top-0 right-0 bg-red-500 text-white px-4 py-1 rounded-bl-lg text-sm font-bold">
-                    Higher Cost
+              {/* Interactive Savings Calculator */}
+              <div className="mt-8 bg-white rounded-2xl shadow-xl p-8 border-2" style={{ borderColor: '#09006e' }}>
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl font-bold mb-2" style={{ color: '#09006e' }}>
+                    Calculate Your Savings
+                  </h3>
+                  <p className="text-lg" style={{ color: '#374151' }}>
+                    See how much you can save with E-Systems Virtual Assistants
+                  </p>
+                </div>
+                
+                {/* Employee Input Section */}
+                <div className="flex flex-col items-center mb-8">
+                  <label htmlFor="employee-count" className="text-lg font-medium mb-4" style={{ color: '#374151' }}>
+                    Number of Employees You Need
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <button
+                      onClick={decrementEmployees}
+                      className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+                      aria-label="Decrease number of employees"
+                      style={{ color: '#09006e' }}
+                    >
+                      <MinusIcon className="h-6 w-6" />
+                    </button>
+                    <input
+                      id="employee-count"
+                      type="number"
+                      min="1"
+                      value={numberOfEmployees}
+                      onChange={handleEmployeeChange}
+                      className="w-24 text-center text-2xl font-bold border-2 rounded-lg p-2 focus:outline-none focus:ring-2"
+                      style={{ 
+                        borderColor: '#09006e', 
+                        color: '#09006e',
+                        focusRingColor: '#09006e50'
+                      }}
+                    />
+                    <button
+                      onClick={incrementEmployees}
+                      className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+                      aria-label="Increase number of employees"
+                      style={{ color: '#09006e' }}
+                    >
+                      <PlusIcon className="h-6 w-6" />
+                    </button>
                   </div>
-                  <div className="p-6 bg-gradient-to-br from-red-50 to-white">
+                </div>
+                
+                {/* Cost Comparison Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                  {/* US Employee Cost Card */}
+                  <div className="bg-red-50 rounded-xl p-6 border-2 border-red-200">
                     <div className="flex items-center mb-4">
-                      <div className="flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mr-3">
+                      <div className="flex items-center justify-center h-10 w-10 rounded-full bg-red-100 mr-3">
                         <BuildingOfficeIcon className="h-6 w-6 text-red-600" />
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900">US Employee</h3>
+                      <h4 className="text-lg font-bold text-red-800">US Employees</h4>
                     </div>
-                    
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
-                        <div className="flex items-center">
-                          <BanknotesIcon className="h-5 w-5 text-gray-600 mr-2" />
-                          <span className="text-sm font-medium text-gray-700">Base Salary</span>
-                        </div>
-                        <span className="text-lg font-bold text-gray-900">$40,000-$50,000</span>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-red-700">Cost per employee:</span>
+                        <span className="text-sm font-bold text-red-800">$55,000-$70,000</span>
                       </div>
-                      
-                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
-                        <div className="flex items-center">
-                          <UserGroupIcon className="h-5 w-5 text-gray-600 mr-2" />
-                          <span className="text-sm font-medium text-gray-700">Benefits & Taxes</span>
-                        </div>
-                        <span className="text-lg font-bold text-gray-900">+30-40%</span>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-red-700">Number of employees:</span>
+                        <span className="text-sm font-bold text-red-800">{numberOfEmployees}</span>
                       </div>
-                      
-                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
-                        <div className="flex items-center">
-                          <HomeIcon className="h-5 w-5 text-gray-600 mr-2" />
-                          <span className="text-sm font-medium text-gray-700">Office & Equipment</span>
+                      <div className="border-t border-red-200 pt-2 mt-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-base font-bold text-red-800">Total Cost:</span>
+                          <span className="text-lg font-bold text-red-600">
+                            {formatCurrency(totalUSMinCost)}-{formatCurrency(totalUSMaxCost)}
+                          </span>
                         </div>
-                        <span className="text-lg font-bold text-gray-900">$5,000-$10,000</span>
                       </div>
                     </div>
-                    
-                    <div className="mt-6 p-4 bg-red-50 rounded-lg border border-red-200">
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-bold text-red-800">Total Annual Cost:</span>
-                        <span className="text-2xl font-bold text-red-600">$55,000-$70,000+</span>
+                  </div>
+                  
+                  {/* E-Systems VA Cost Card */}
+                  <div className="bg-green-50 rounded-xl p-6 border-2 border-green-200">
+                    <div className="flex items-center mb-4">
+                      <div className="flex items-center justify-center h-10 w-10 rounded-full bg-green-100 mr-3">
+                        <UserIcon className="h-6 w-6 text-green-600" />
+                      </div>
+                      <h4 className="text-lg font-bold text-green-800">E-Systems VAs</h4>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-green-700">Cost per employee:</span>
+                        <span className="text-sm font-bold text-green-800">$19,200</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-green-700">Number of employees:</span>
+                        <span className="text-sm font-bold text-green-800">{numberOfEmployees}</span>
+                      </div>
+                      <div className="border-t border-green-200 pt-2 mt-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-base font-bold text-green-800">Total Cost:</span>
+                          <span className="text-lg font-bold text-green-600">
+                            {formatCurrency(totalEsystemsCost)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Total Savings Card */}
+                  <div className="bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl p-6 text-white">
+                    <div className="flex items-center mb-4">
+                      <div className="flex items-center justify-center h-10 w-10 rounded-full bg-white bg-opacity-20 mr-3">
+                        <CurrencyDollarIcon className="h-6 w-6 text-white" />
+                      </div>
+                      <h4 className="text-lg font-bold">Your Savings</h4>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-green-100">Savings per employee:</span>
+                        <span className="text-sm font-bold text-white">$35,800-$50,800</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-green-100">Number of employees:</span>
+                        <span className="text-sm font-bold text-white">{numberOfEmployees}</span>
+                      </div>
+                      <div className="border-t border-white border-opacity-30 pt-2 mt-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-base font-bold text-white">Total Savings:</span>
+                          <span className="text-lg font-bold text-yellow-300">
+                            {formatCurrency(totalMinSavings)}-{formatCurrency(totalMaxSavings)}
+                          </span>
+                        </div>
+                        <div className="mt-2 text-center">
+                          <span className="text-sm text-green-100">
+                            That's {Math.round((totalMinSavings / totalUSMinCost) * 100)}-{Math.round((totalMaxSavings / totalUSMaxCost) * 100)}% in annual savings!
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                {/* E-Systems VA Card */}
-                <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-green-200 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                  <div className="absolute top-0 right-0 bg-green-500 text-white px-4 py-1 rounded-bl-lg text-sm font-bold flex items-center">
-                    <SparklesIcon className="h-4 w-4 mr-1" />
-                    Best Value
-                  </div>
-                  <div className="p-6 bg-gradient-to-br from-green-50 to-white">
-                    <div className="flex items-center mb-4">
-                      <div className="flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mr-3">
-                        <UserIcon className="h-6 w-6 text-green-600" />
-                      </div>
-                      <h3 className="text-2xl font-bold text-gray-900">E-Systems VA</h3>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200">
-                        <div className="flex items-center">
-                          <BanknotesIcon className="h-5 w-5 text-green-600 mr-2" />
-                          <span className="text-sm font-medium text-gray-700">Annual Cost</span>
-                        </div>
-                        <span className="text-lg font-bold text-green-600">$19,200</span>
-                      </div>
-                      
-                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200">
-                        <div className="flex items-center">
-                          <CheckCircleIcon className="h-5 w-5 text-green-600 mr-2" />
-                          <span className="text-sm font-medium text-gray-700">Benefits & Taxes</span>
-                        </div>
-                        <span className="text-lg font-bold text-green-600">Included</span>
-                      </div>
-                      
-                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200">
-                        <div className="flex items-center">
-                          <ComputerDesktopIcon className="h-5 w-5 text-green-600 mr-2" />
-                          <span className="text-sm font-medium text-gray-700">Office & Equipment</span>
-                        </div>
-                        <span className="text-lg font-bold text-green-600">Not Required</span>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-bold text-green-800">Total Annual Cost:</span>
-                        <span className="text-2xl font-bold text-green-600">$19,200</span>
-                      </div>
-                    </div>
-                  </div>
+                <div className="text-center">
+                  <p className="text-sm" style={{ color: '#374151' }}>
+                    All calculations are based on annual costs per employee. Savings may vary based on specific roles and requirements.
+                  </p>
                 </div>
               </div>
               
