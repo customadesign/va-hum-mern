@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRightCircleIcon } from '@heroicons/react/24/outline';
 import { useQuery } from 'react-query';
 import { Helmet } from 'react-helmet-async';
@@ -9,6 +9,7 @@ import { useBranding } from '../contexts/BrandingContext';
 
 export default function Home() {
   const { branding, loading: brandingLoading } = useBranding();
+  const navigate = useNavigate();
   
   // ALL HOOKS MUST BE CALLED FIRST - Get featured VAs data
   const { data: featuredVAs, isLoading } = useQuery(
@@ -18,6 +19,14 @@ export default function Home() {
       return response.data.data;
     }
   );
+
+  const handleViewPricingClick = () => {
+    navigate('/pricing');
+    // Small timeout to ensure the page has started navigating before scrolling
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 100);
+  };
 
   // CONDITIONAL RETURNS AFTER ALL HOOKS - Show loading spinner while branding context is loading
   if (brandingLoading || !branding) {
@@ -140,13 +149,13 @@ export default function Home() {
               </div>
 
               <div className="mt-8 text-right">
-                <Link
-                  to="/pricing"
+                <button
+                  onClick={handleViewPricingClick}
                   className="btn-primary inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md"
                 >
                   View Pricing
                   <ArrowRightCircleIcon className="ml-3 -mr-1 h-5 w-5" aria-hidden="true" />
-                </Link>
+                </button>
               </div>
             </>
           ) : (

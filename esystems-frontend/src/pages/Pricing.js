@@ -8,7 +8,14 @@ import {
   ShieldCheckIcon,
   UserGroupIcon,
   StarIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  BuildingOfficeIcon,
+  UserIcon,
+  ChartBarIcon,
+  SparklesIcon,
+  BanknotesIcon,
+  HomeIcon,
+  ComputerDesktopIcon
 } from '@heroicons/react/24/outline';
 import { useBranding } from '../contexts/BrandingContext';
 
@@ -285,7 +292,7 @@ export default function Pricing() {
                     </div>
                     <div className="flex justify-between">
                       <span>Hourly rate:</span>
-                      <span className="font-medium">$10</span>
+                      <span className="font-medium">$11.88</span>
                     </div>
                   </div>
                 </div>
@@ -340,34 +347,138 @@ export default function Pricing() {
                   </div>
                 </div>
               </div>
-              <div className="mt-8 p-6 bg-white rounded-xl shadow-lg border-l-4" style={{ borderColor: '#10b981' }}>
-                <h4 className="font-bold text-lg mb-2" style={{ color: '#09006e' }}>
-                  Compare to Traditional Hiring:
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm" style={{ color: '#374151' }}>
-                  <div>
-                    <p className="font-medium mb-1">Full-time US employee:</p>
-                    <ul className="space-y-1 ml-4 list-disc">
-                      <li>Average salary: $40,000-$50,000/year</li>
-                      <li>Benefits & taxes: +30-40%</li>
-                      <li>Office space & equipment: $5,000-$10,000/year</li>
-                      <li><strong>Total: $55,000-$70,000+/year</strong></li>
-                    </ul>
+              <div className="mt-12 relative">
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="px-4 bg-gray-50 text-2xl font-bold" style={{ color: '#09006e' }}>
+                    Compare to Traditional Hiring
+                  </span>
+                </div>
+              </div>
+              
+              <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* US Employee Card */}
+                <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-gray-200 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                  <div className="absolute top-0 right-0 bg-red-500 text-white px-4 py-1 rounded-bl-lg text-sm font-bold">
+                    Higher Cost
                   </div>
-                  <div>
-                    <p className="font-medium mb-1">Full-time E Systems VA:</p>
-                    <ul className="space-y-1 ml-4 list-disc">
-                      <li>Cost: $19,200/year (40 hrs/week)</li>
-                      <li>No benefits or tax overhead</li>
-                      <li>No office space required</li>
-                      <li><strong>Total: $19,200/year</strong></li>
-                    </ul>
+                  <div className="p-6 bg-gradient-to-br from-red-50 to-white">
+                    <div className="flex items-center mb-4">
+                      <div className="flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mr-3">
+                        <BuildingOfficeIcon className="h-6 w-6 text-red-600" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900">US Employee</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                        <div className="flex items-center">
+                          <BanknotesIcon className="h-5 w-5 text-gray-600 mr-2" />
+                          <span className="text-sm font-medium text-gray-700">Base Salary</span>
+                        </div>
+                        <span className="text-lg font-bold text-gray-900">$40,000-$50,000</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                        <div className="flex items-center">
+                          <UserGroupIcon className="h-5 w-5 text-gray-600 mr-2" />
+                          <span className="text-sm font-medium text-gray-700">Benefits & Taxes</span>
+                        </div>
+                        <span className="text-lg font-bold text-gray-900">+30-40%</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                        <div className="flex items-center">
+                          <HomeIcon className="h-5 w-5 text-gray-600 mr-2" />
+                          <span className="text-sm font-medium text-gray-700">Office & Equipment</span>
+                        </div>
+                        <span className="text-lg font-bold text-gray-900">$5,000-$10,000</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 p-4 bg-red-50 rounded-lg border border-red-200">
+                      <div className="flex justify-between items-center">
+                        <span className="text-lg font-bold text-red-800">Total Annual Cost:</span>
+                        <span className="text-2xl font-bold text-red-600">$55,000-$70,000+</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="mt-4 p-4 rounded-lg text-center" style={{ backgroundColor: '#10b98120' }}>
-                  <p className="text-xl font-bold" style={{ color: '#10b981' }}>
-                    Save $35,000-$50,000+ per year per VA
-                  </p>
+                
+                {/* E-Systems VA Card */}
+                <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-green-200 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                  <div className="absolute top-0 right-0 bg-green-500 text-white px-4 py-1 rounded-bl-lg text-sm font-bold flex items-center">
+                    <SparklesIcon className="h-4 w-4 mr-1" />
+                    Best Value
+                  </div>
+                  <div className="p-6 bg-gradient-to-br from-green-50 to-white">
+                    <div className="flex items-center mb-4">
+                      <div className="flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mr-3">
+                        <UserIcon className="h-6 w-6 text-green-600" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900">E-Systems VA</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200">
+                        <div className="flex items-center">
+                          <BanknotesIcon className="h-5 w-5 text-green-600 mr-2" />
+                          <span className="text-sm font-medium text-gray-700">Annual Cost</span>
+                        </div>
+                        <span className="text-lg font-bold text-green-600">$19,200</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200">
+                        <div className="flex items-center">
+                          <CheckCircleIcon className="h-5 w-5 text-green-600 mr-2" />
+                          <span className="text-sm font-medium text-gray-700">Benefits & Taxes</span>
+                        </div>
+                        <span className="text-lg font-bold text-green-600">Included</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200">
+                        <div className="flex items-center">
+                          <ComputerDesktopIcon className="h-5 w-5 text-green-600 mr-2" />
+                          <span className="text-sm font-medium text-gray-700">Office & Equipment</span>
+                        </div>
+                        <span className="text-lg font-bold text-green-600">Not Required</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                      <div className="flex justify-between items-center">
+                        <span className="text-lg font-bold text-green-800">Total Annual Cost:</span>
+                        <span className="text-2xl font-bold text-green-600">$19,200</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Savings Highlight */}
+              <div className="mt-12 relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 p-8 shadow-2xl transform transition-all duration-500 hover:scale-[1.02]">
+                <div className="absolute top-0 right-0 -mt-4 -mr-4 h-16 w-16 rounded-full bg-white opacity-10"></div>
+                <div className="absolute bottom-0 left-0 -mb-4 -ml-4 h-24 w-24 rounded-full bg-white opacity-10"></div>
+                
+                <div className="relative text-center">
+                  <div className="flex justify-center mb-4">
+                    <div className="flex items-center justify-center h-16 w-16 rounded-full bg-white bg-opacity-20">
+                      <CurrencyDollarIcon className="h-10 w-10 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="text-3xl font-bold text-white mb-2">Massive Annual Savings</h3>
+                  <div className="flex justify-center items-center mb-4">
+                    <span className="text-5xl font-extrabold text-white">$35,000-$50,000+</span>
+                  </div>
+                  <p className="text-xl text-green-100">Save per year with each E-Systems Virtual Assistant</p>
+                  <div className="mt-6 flex justify-center">
+                    <div className="inline-flex items-center px-6 py-3 bg-white text-green-600 font-bold rounded-full shadow-lg">
+                      <ChartBarIcon className="h-5 w-5 mr-2" />
+                      That's 65-75% in annual savings!
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
