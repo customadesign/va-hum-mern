@@ -797,8 +797,7 @@ router.post('/resend-verification-public', async (req, res) => {
         : 'Welcome to Linkage VA Hub - Please confirm your email',
       template: platform === 'esystems' ? 'esystems-welcome' : 'welcome',
       data: { confirmUrl },
-      userData: platform === 'esystems' ? { role: 'business' } : { role: 'va' },
-      forceSendGrid: true
+      userData: platform === 'esystems' ? { role: 'business' } : { role: 'va' }
     });
 
     console.log(`✅ ${platform} verification email sent successfully to:`, user.email);

@@ -3,28 +3,28 @@ import axios from 'axios';
 // Robust API base URL inference for multi-deploy (Render) with safe fallbacks
 function inferApiBase() {
   try {
-    // Prefer explicit env var when provided
+    if (typeof window !== 'undefined') {
+      const { hostname, protocol } = window.location;
+
+      // 1) Explicit domain mappings take precedence over env to avoid misconfigured REACT_APP_API_URL
+      if (hostname.includes('esystems-management-hub.onrender.com')) {
+        return 'https://esystems-management-hub-api.onrender.com/api';
+      }
+      if (hostname.includes('linkage-va-hub.onrender.com')) {
+        return 'https://linkage-va-hub-api.onrender.com/api';
+      }
+
+      // 2) Same-origin reverse proxy (e.g., Nginx -> /api)
+      if (protocol === 'https:' || protocol === 'http:') {
+        return '/api';
+      }
+    }
+
+    // 3) Server-side or unknown host: use env var then local fallback
     if (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim()) {
       return process.env.REACT_APP_API_URL.trim();
     }
-    // Server-side (SSR/Node scripts)
-    if (typeof window === 'undefined') {
-      return process.env.SERVER_API_URL || 'http://localhost:5001/api';
-    }
-    const { hostname, protocol } = window.location;
-    // Render mapped domains
-    if (hostname.includes('linkage-va-hub.onrender.com')) {
-      return 'https://linkage-va-hub-api.onrender.com/api';
-    }
-    if (hostname.includes('esystems-management-hub.onrender.com')) {
-      return 'https://esystems-management-hub-api.onrender.com/api';
-    }
-    // Same-origin reverse proxy (e.g., Nginx -> /api)
-    if (protocol === 'https:' || protocol === 'http:') {
-      return '/api';
-    }
-    // Local fallback for esystems dev
-    return 'http://localhost:5001/api';
+    return process.env.SERVER_API_URL || 'http://localhost:5001/api';
   } catch {
     return process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
   }
@@ -37,6 +37,8 @@ const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
+    // Identify this FE to the backend for accurate platform detection
+    'x-frontend-platform': 'esystems'
   },
   withCredentials: true, // Always send cookies with requests
   xsrfCookieName: 'XSRF-TOKEN',

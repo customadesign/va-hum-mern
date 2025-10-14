@@ -143,7 +143,7 @@ const corsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-CSRF-Token'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-CSRF-Token', 'X-Frontend-Platform', 'x-frontend-platform'],
   exposedHeaders: ['Set-Cookie'],
   optionsSuccessStatus: 200,
   maxAge: 86400 // Cache preflight for 24 hours
@@ -217,6 +217,8 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" } // Allow cross-origin access to uploads
 }));
 app.use(cors(corsOptions));
+// Handle CORS preflight for all routes (fix 404 on OPTIONS preflight)
+app.options('*', cors(corsOptions));
 app.use(compression());
 
 // Trust proxy for rate limiting (required for X-Forwarded-For header handling)
