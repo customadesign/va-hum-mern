@@ -15,6 +15,24 @@ const crypto = require('crypto');
 function generateCsrfToken() {
   return crypto.randomBytes(32).toString('hex');
 }
+
+// Helper function to detect if request is from esystems platform
+function detectPlatform(req) {
+  const origin = req.headers.origin || req.headers.referer || '';
+  const userAgent = req.headers['user-agent'] || '';
+  
+  // Check if request is from esystems platform
+  if (origin.includes('esystems-management-hub.onrender.com') || 
+      origin.includes('esystemsmanagement.com') ||
+      req.headers['x-frontend-platform'] === 'esystems' ||
+      userAgent.includes('esystems')) {
+    return 'esystems';
+  }
+  
+  // Default to linkage platform
+  return 'linkage';
+}
+
 // Middleware to validate CSRF via double-submit cookie
 function requireCsrf(req, res, next) {
   const cookieToken = req.cookies && (req.cookies['XSRF-TOKEN'] || req.cookies['xsrf-token']);
@@ -70,6 +88,10 @@ router.post('/register', authLimiter, [
   try {
     const { email, password, referralCode } = req.body;
 
+    // Detect platform from request
+    const platform = detectPlatform(req);
+    console.log(`🔍 Registration request from platform: ${platform}`);
+
     // Check if user exists
     let user = await User.findOne({ email });
     if (user) {
@@ -79,12 +101,15 @@ router.post('/register', authLimiter, [
       });
     }
 
-    // Create user with 'va' role by default for Linkage VA Hub
-    // Business users should register through E-Systems Management Hub
+    // Create user with appropriate role based on platform
+    // E-Systems platform defaults to 'business' role
+    // Linkage VA Hub defaults to 'va' role
+    const defaultRole = platform === 'esystems' ? 'business' : 'va';
+    
     user = await User.create({
       email,
       password,
-      role: 'va' // Default to VA role for Linkage VA Hub registrations
+      role: defaultRole
     });
 
     // Handle referral
@@ -102,17 +127,27 @@ router.post('/register', authLimiter, [
     const confirmToken = user.getConfirmationToken();
     await user.save();
 
-    // Send confirmation email
+    // Send confirmation email with platform-specific template
     // TODO: Configure email settings in production
     try {
-      const confirmUrl = `${process.env.CLIENT_URL}/verify-email/${confirmToken}`;
+      const confirmUrl = platform === 'esystems' 
+        ? `${process.env.ESYSTEMS_FRONTEND_URL || 'https://esystems-management-hub.onrender.com'}/verify-email/${confirmToken}`
+        : `${process.env.CLIENT_URL}/verify-email/${confirmToken}`;
+      
+      const emailTemplate = platform === 'esystems' ? 'esystems-welcome' : 'welcome';
+      const userData = platform === 'esystems' ? { role: 'business' } : { role: 'va' };
+      
       await sendEmail({
         email: user.email,
-        subject: 'Welcome to Linkage VA Hub - Please confirm your email',
-        template: 'welcome',
+        subject: platform === 'esystems' 
+          ? 'Welcome to E-Systems Management - Please confirm your email'
+          : 'Welcome to Linkage VA Hub - Please confirm your email',
+        template: emailTemplate,
         data: { confirmUrl },
-        userData: { role: 'va' }
+        userData: userData
       });
+      
+      console.log(`✅ ${platform} verification email sent to: ${user.email}`);
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
       // Continue with registration even if email fails
@@ -631,17 +666,29 @@ router.post('/resend-verification', protect, async (req, res) => {
       return res.json({ success: true, message: 'Email already verified' });
     }
 
+    // Detect platform from request
+    const platform = detectPlatform(req);
+    console.log(`🔄 Resend verification request from platform: ${platform}`);
+
     // Generate a fresh confirmation token
     const confirmToken = user.getConfirmationToken();
     await user.save();
 
-    const confirmUrl = `${process.env.CLIENT_URL}/verify-email/${confirmToken}`;
+    const confirmUrl = platform === 'esystems' 
+      ? `${process.env.ESYSTEMS_FRONTEND_URL || 'https://esystems-management-hub.onrender.com'}/verify-email/${confirmToken}`
+      : `${process.env.CLIENT_URL}/verify-email/${confirmToken}`;
+    
+    const emailTemplate = platform === 'esystems' ? 'esystems-welcome' : 'welcome';
+    const userData = platform === 'esystems' ? { role: 'business' } : { role: 'va' };
+    
     await sendEmail({
       email: user.email,
-      subject: 'Welcome to Linkage VA Hub - Please confirm your email',
-      template: 'welcome',
+      subject: platform === 'esystems' 
+        ? 'Welcome to E-Systems Management - Please confirm your email'
+        : 'Welcome to Linkage VA Hub - Please confirm your email',
+      template: emailTemplate,
       data: { confirmUrl },
-      userData: { role: 'va' }
+      userData: userData
     });
 
     return res.json({ success: true, message: 'Verification email resent' });
@@ -679,24 +726,35 @@ router.post('/resend-verification-public', async (req, res) => {
       return res.json({ success: true, message: 'Email already verified' });
     }
 
+    // Detect platform from request
+    const platform = detectPlatform(req);
+    console.log(`🔄 Public resend verification request from platform: ${platform}`);
+
     console.log('🔑 Generating new confirmation token...');
     const confirmToken = user.getConfirmationToken();
     await user.save();
     console.log('💾 Token saved to user document');
 
-    const confirmUrl = `${process.env.CLIENT_URL}/verify-email/${confirmToken}`;
+    const confirmUrl = platform === 'esystems' 
+      ? `${process.env.ESYSTEMS_FRONTEND_URL || 'https://esystems-management-hub.onrender.com'}/verify-email/${confirmToken}`
+      : `${process.env.CLIENT_URL}/verify-email/${confirmToken}`;
     console.log('📧 Sending verification email to:', user.email, 'with URL:', confirmUrl);
+    
+    const emailTemplate = platform === 'esystems' ? 'esystems-welcome' : 'welcome';
+    const userData = platform === 'esystems' ? { role: 'business' } : { role: 'va' };
     
     await sendEmail({
       email: user.email,
-      subject: 'Welcome to Linkage VA Hub - Please confirm your email',
-      template: 'welcome',
+      subject: platform === 'esystems' 
+        ? 'Welcome to E-Systems Management - Please confirm your email'
+        : 'Welcome to Linkage VA Hub - Please confirm your email',
+      template: emailTemplate,
       data: { confirmUrl },
-      userData: { role: 'va' },
+      userData: userData,
       forceSendGrid: true
     });
 
-    console.log('✅ Verification email sent successfully to:', user.email);
+    console.log(`✅ ${platform} verification email sent successfully to:`, user.email);
     return res.json({ success: true, message: 'Verification email resent' });
   } catch (err) {
     console.error('❌ Public resend verification error:', err);

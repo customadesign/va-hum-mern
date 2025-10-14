@@ -101,6 +101,7 @@ const getSenderForTemplate = (template, recipientEmail, userData = null) => {
     case 'business-notification':
     case 'va-application':
     case 'new-message':
+    case 'esystems-welcome':
       recipientType = 'business';
       break;
     

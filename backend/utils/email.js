@@ -124,6 +124,27 @@ const getEmailTemplates = (senderConfig) => {
         </div>
       `
     }),
+    'esystems-welcome': (data) => ({
+      subject: `Welcome to E-Systems Management - Please confirm your email`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #1e40af;">Welcome to E-Systems Management!</h2>
+          <p>Hi ${data.name || 'there'},</p>
+          <p>Thank you for joining our comprehensive business solutions platform.</p>
+          <p>Please confirm your email by clicking the link below:</p>
+          <a href="${data.confirmUrl}" style="background-color: #1e40af; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">Confirm Email</a>
+          <p style="margin-top: 20px;">Once confirmed, you'll be able to:</p>
+          <ul style="margin: 20px 0;">
+            <li>Complete your company profile</li>
+            <li>Browse qualified virtual assistants</li>
+            <li>Post job requirements</li>
+            <li>Manage your team and projects</li>
+          </ul>
+          <p>If you have any questions, feel free to contact us.</p>
+          <p>Best regards,<br><strong>E-Systems Management Team</strong></p>
+        </div>
+      `
+    }),
     'admin-password-reset': (data) => ({
       subject: `Password Reset Initiated by Administrator - ${brandName}`,
       html: `
@@ -197,7 +218,11 @@ exports.sendEmail = async (options) => {
         });
       } catch (error) {
         console.error('SendGrid failed, falling back to SMTP:', error.message);
-        // Fall through to SMTP fallback
+        // If caller requests SendGrid only (for debugging/verification emails), surface the error
+        if (options.forceSendGrid) {
+          throw error;
+        }
+        // Otherwise, fall through to SMTP fallback
       }
     }
 
