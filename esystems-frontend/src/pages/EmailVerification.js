@@ -30,7 +30,11 @@ export default function EmailVerification() {
         
         // Auto-login if tokens are provided
         if (response.data.token && response.data.user) {
-          login(response.data.token, response.data.user, response.data.refreshToken);
+          // Store tokens directly for auto-login after email verification
+          localStorage.setItem('token', response.data.token);
+          if (response.data.refreshToken) {
+            localStorage.setItem('refreshToken', response.data.refreshToken);
+          }
           
           // Redirect to profile setup or dashboard after a short delay
           setTimeout(() => {
@@ -39,6 +43,8 @@ export default function EmailVerification() {
             } else {
               navigate('/dashboard');
             }
+            // Reload to trigger auth check
+            window.location.reload();
           }, 2000);
         }
       }
