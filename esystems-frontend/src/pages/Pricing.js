@@ -71,6 +71,26 @@ export default function Pricing() {
     }).format(amount);
   };
 
+  // New function to determine responsive font size based on number length
+  const getResponsiveFontSize = (amount) => {
+    const digits = Math.abs(amount).toString().length;
+    if (digits > 9) return 'text-base'; // Very large numbers
+    if (digits > 7) return 'text-lg';   // Large numbers
+    return 'text-xl';                   // Default size
+  };
+
+  // New function to format large numbers with abbreviations for very large values
+  const formatLargeCurrency = (amount) => {
+    const absAmount = Math.abs(amount);
+    if (absAmount >= 1000000) {
+      return `$${(absAmount / 1000000).toFixed(1)}M`;
+    }
+    if (absAmount >= 1000) {
+      return `$${(absAmount / 1000).toFixed(0)}K`;
+    }
+    return `$${absAmount}`;
+  };
+
   const benefits = [
     {
       title: 'English Proficient',
@@ -451,14 +471,14 @@ export default function Pricing() {
                 {/* Cost Comparison Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                   {/* US Employee Cost Card */}
-                  <div className="bg-red-50 rounded-xl p-6 border-2 border-red-200">
+                  <div className="bg-red-50 rounded-xl p-6 border-2 border-red-200 flex flex-col min-h-[280px]">
                     <div className="flex items-center mb-4">
                       <div className="flex items-center justify-center h-10 w-10 rounded-full bg-red-100 mr-3">
                         <BuildingOfficeIcon className="h-6 w-6 text-red-600" />
                       </div>
                       <h4 className="text-lg font-bold text-red-800">US Employees</h4>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2 flex-grow">
                       <div className="flex justify-between">
                         <span className="text-sm text-red-700">Cost per employee:</span>
                         <span className="text-sm font-bold text-red-800">$55,000-$70,000</span>
@@ -468,25 +488,28 @@ export default function Pricing() {
                         <span className="text-sm font-bold text-red-800">{numberOfEmployees}</span>
                       </div>
                       <div className="border-t border-red-200 pt-2 mt-2">
-                        <div className="flex justify-between items-center">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                           <span className="text-base font-bold text-red-800">Total Cost:</span>
-                          <span className="text-lg font-bold text-red-600">
-                            {formatCurrency(totalUSMinCost)}-{formatCurrency(totalUSMaxCost)}
-                          </span>
+                          <div className={`font-bold text-red-600 ${getResponsiveFontSize(totalUSMinCost)}`}
+                                style={{ wordBreak: 'break-word', maxWidth: '100%', textAlign: 'right' }}>
+                           <div>{formatCurrency(totalUSMinCost)}</div>
+                           <div className="text-red-500">to</div>
+                           <div>{formatCurrency(totalUSMaxCost)}</div>
+                         </div>
                         </div>
                       </div>
                     </div>
                   </div>
                   
                   {/* E-Systems VA Cost Card */}
-                  <div className="bg-green-50 rounded-xl p-6 border-2 border-green-200">
+                  <div className="bg-green-50 rounded-xl p-6 border-2 border-green-200 flex flex-col min-h-[280px]">
                     <div className="flex items-center mb-4">
                       <div className="flex items-center justify-center h-10 w-10 rounded-full bg-green-100 mr-3">
                         <UserIcon className="h-6 w-6 text-green-600" />
                       </div>
                       <h4 className="text-lg font-bold text-green-800">E-Systems VAs</h4>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2 flex-grow">
                       <div className="flex justify-between">
                         <span className="text-sm text-green-700">Cost per employee:</span>
                         <span className="text-sm font-bold text-green-800">$19,200</span>
@@ -498,23 +521,24 @@ export default function Pricing() {
                       <div className="border-t border-green-200 pt-2 mt-2">
                         <div className="flex justify-between items-center">
                           <span className="text-base font-bold text-green-800">Total Cost:</span>
-                          <span className="text-lg font-bold text-green-600">
-                            {formatCurrency(totalEsystemsCost)}
-                          </span>
+                          <span className={`font-bold text-green-600 ${getResponsiveFontSize(totalEsystemsCost)}`}
+                                style={{ wordBreak: 'break-word', maxWidth: '100%', textAlign: 'right' }}>
+                           {formatCurrency(totalEsystemsCost)}
+                         </span>
                         </div>
                       </div>
                     </div>
                   </div>
                   
                   {/* Total Savings Card */}
-                  <div className="bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl p-6 text-white">
+                  <div className="bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl p-6 text-white flex flex-col min-h-[280px]">
                     <div className="flex items-center mb-4">
                       <div className="flex items-center justify-center h-10 w-10 rounded-full bg-white bg-opacity-20 mr-3">
                         <CurrencyDollarIcon className="h-6 w-6 text-white" />
                       </div>
                       <h4 className="text-lg font-bold">Your Savings</h4>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2 flex-grow">
                       <div className="flex justify-between">
                         <span className="text-sm text-green-100">Savings per employee:</span>
                         <span className="text-sm font-bold text-white">$35,800-$50,800</span>
@@ -524,11 +548,14 @@ export default function Pricing() {
                         <span className="text-sm font-bold text-white">{numberOfEmployees}</span>
                       </div>
                       <div className="border-t border-white border-opacity-30 pt-2 mt-2">
-                        <div className="flex justify-between items-center">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                           <span className="text-base font-bold text-white">Total Savings:</span>
-                          <span className="text-lg font-bold text-yellow-300">
-                            {formatCurrency(totalMinSavings)}-{formatCurrency(totalMaxSavings)}
-                          </span>
+                          <div className={`font-bold text-yellow-300 ${getResponsiveFontSize(totalMinSavings)}`}
+                                style={{ wordBreak: 'break-word', maxWidth: '100%', textAlign: 'right' }}>
+                           <div>{formatCurrency(totalMinSavings)}</div>
+                           <div className="text-yellow-200">to</div>
+                           <div>{formatCurrency(totalMaxSavings)}</div>
+                         </div>
                         </div>
                         <div className="mt-2 text-center">
                           <span className="text-sm text-green-100">
