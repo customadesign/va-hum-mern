@@ -490,7 +490,7 @@ export default function BusinessProfile() {
 
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col space-y-6">
-          <div className="flex items-center justify-between mx-4 lg:mx-0 mt-8 lg:mt-16">
+          <div className="flex items-center justify-between mx-4 lg:mx-0 mt-4 lg:mt-8">
             <h1 className="text-3xl font-bold leading-tight text-gray-900">
               {branding.isESystemsMode ? 'Company Profile' : 'Business Profile'}
             </h1>
@@ -506,7 +506,7 @@ export default function BusinessProfile() {
           </div>
 
           {/* Profile Completion Progress */}
-          <div className="mx-4 lg:mx-0">
+          <div className="mx-4 lg:mx-0 -mt-2">
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-start">
                 <div className="flex-shrink-0">
