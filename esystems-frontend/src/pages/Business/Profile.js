@@ -294,6 +294,8 @@ export default function BusinessProfile() {
       // Auto-prepend https:// to website if it doesn't have a protocol
       const processedValues = {
         ...values,
+      // Ensure avatar is always included to prevent accidental clearing
+      avatar: values.avatar || profile?.avatar || '',
         website: values.website && !values.website.match(/^https?:\/\//) 
           ? `https://${values.website}` 
           : values.website
@@ -407,7 +409,9 @@ export default function BusinessProfile() {
       await api.put('/businesses/me', { avatar: response.data.url });
       // Also update formik state to preserve it
       formik.setFieldValue('avatar', response.data.url);
-      queryClient.invalidateQueries('businessProfile');
+      // Immediately refetch to avoid any stale cache and update UI
+      await queryClient.invalidateQueries('businessProfile');
+      await queryClient.refetchQueries('businessProfile');
       toast.success('Company logo updated successfully');
     } catch (error) {
       toast.error('Failed to upload company logo');
