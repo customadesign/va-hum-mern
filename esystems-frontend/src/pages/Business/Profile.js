@@ -2030,7 +2030,8 @@ export default function BusinessProfile() {
               <button
                 type="submit"
                 disabled={formik.isSubmitting || updateProfileMutation.isLoading}
-                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: '#ef8f00' }}
               >
                 {formik.isSubmitting || updateProfileMutation.isLoading ? 'Saving...' : 'Save Profile'}
               </button>
