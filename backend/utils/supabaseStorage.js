@@ -5,7 +5,8 @@ const supabase = require('../config/supabase');
 
 // Enhanced bucket configuration with specific media types
 const BUCKET_CONFIG = {
-  'profile-images': {
+  // Allow a custom primary bucket via env (e.g., linkage-va-hub)
+  [process.env.SUPABASE_BUCKET || 'profile-images']: {
     allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'],
     maxSize: 10 * 1024 * 1024, // 10MB
     folders: ['avatars', 'covers', 'admin-avatars', 'business-logos']

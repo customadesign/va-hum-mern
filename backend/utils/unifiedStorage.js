@@ -44,8 +44,9 @@ const uploadWithFallback = async (file, folder) => {
     try {
       // Map folder to appropriate bucket
       let bucket;
+      const customBucket = process.env.SUPABASE_BUCKET && process.env.SUPABASE_BUCKET.trim();
       if (['avatars', 'covers', 'admin-avatars', 'business-logos'].includes(folder)) {
-        bucket = 'profile-images';
+        bucket = customBucket || 'profile-images';
       } else if (['introductions', 'portfolio', 'demos', 'videos'].includes(folder)) {
         bucket = 'va-videos';
       } else if (['logos', 'marketing', 'documents', 'branding'].includes(folder)) {
