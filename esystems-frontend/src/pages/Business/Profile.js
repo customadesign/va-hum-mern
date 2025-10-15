@@ -260,6 +260,9 @@ export default function BusinessProfile() {
       instagram: profile?.instagram || '',
       youtube: profile?.youtube || '',
       
+      // Media
+      avatar: profile?.avatar || '',
+      
       // Settings
       vaNotifications: profile?.vaNotifications || 'no',
       
@@ -402,6 +405,8 @@ export default function BusinessProfile() {
       
       // Update the profile with new avatar URL
       await api.put('/businesses/me', { avatar: response.data.url });
+      // Also update formik state to preserve it
+      formik.setFieldValue('avatar', response.data.url);
       queryClient.invalidateQueries('businessProfile');
       toast.success('Company logo updated successfully');
     } catch (error) {
