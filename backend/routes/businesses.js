@@ -292,9 +292,9 @@ router.put('/me', protect, async (req, res) => {
 });
 
 // @route   POST /api/businesses/me/upload
-// @desc    Upload business avatar
+// @desc    Upload business avatar (updated to use unified storage)
 // @access  Private/Business
-router.post('/me/upload', protect, upload.single('image'), async (req, res) => {
+router.post('/me/upload', protect, handleUnifiedUpload('image', 'business-logos'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -303,15 +303,24 @@ router.post('/me/upload', protect, upload.single('image'), async (req, res) => {
       });
     }
 
-    const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
-    const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
-
+    // Return the uploaded file URL (compatible with frontend expectations)
     res.json({
       success: true,
-      url: imageUrl
+      url: req.file.path  // path is set by handleUnifiedUpload to the Supabase URL
     });
   } catch (err) {
-    console.error(err);
+    console.error('Business logo upload error:', err);
+    
+    // Clean up uploaded file if response fails
+    if (req.file && req.file.path) {
+      await deleteWithFallback({
+        provider: req.file.storageProvider,
+        url: req.file.path,
+        bucket: req.file.bucket,
+        key: req.file.s3Key
+      });
+    }
+    
     res.status(500).json({
       success: false,
       error: 'Server error'
