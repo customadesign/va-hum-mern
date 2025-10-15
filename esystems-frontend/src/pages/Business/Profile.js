@@ -262,8 +262,6 @@ export default function BusinessProfile() {
       
       // Settings
       vaNotifications: profile?.vaNotifications || 'no',
-      invisible: profile?.invisible || false,
-      surveyRequestNotifications: profile?.surveyRequestNotifications ?? true,
       
       // Email Notifications
       emailNotifications: {
@@ -279,10 +277,7 @@ export default function BusinessProfile() {
       communicationPreferences: {
         preferredContactMethod: profile?.communicationPreferences?.preferredContactMethod || 'email',
         responseTime: profile?.communicationPreferences?.responseTime || 'within-24h',
-        availableForInterviews: profile?.communicationPreferences?.availableForInterviews ?? true,
-        allowDirectMessages: profile?.communicationPreferences?.allowDirectMessages ?? true,
-        autoReplyEnabled: profile?.communicationPreferences?.autoReplyEnabled ?? false,
-        autoReplyMessage: profile?.communicationPreferences?.autoReplyMessage || ''
+        allowDirectMessages: profile?.communicationPreferences?.allowDirectMessages ?? true
       },
       
       // Privacy Settings
@@ -1774,25 +1769,6 @@ export default function BusinessProfile() {
                         <div className="flex items-start">
                           <div className="flex items-center h-5">
                             <input
-                              id="communicationPreferences.availableForInterviews"
-                              name="communicationPreferences.availableForInterviews"
-                              type="checkbox"
-                              checked={formik.values.communicationPreferences.availableForInterviews}
-                              onChange={formik.handleChange}
-                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                            />
-                          </div>
-                          <div className="ml-3 text-sm">
-                            <label htmlFor="communicationPreferences.availableForInterviews" className="font-medium text-gray-700">
-                              Available for Interviews
-                            </label>
-                            <p className="text-gray-700">VAs can request interviews with you</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start">
-                          <div className="flex items-center h-5">
-                            <input
                               id="communicationPreferences.allowDirectMessages"
                               name="communicationPreferences.allowDirectMessages"
                               type="checkbox"
@@ -1807,43 +1783,6 @@ export default function BusinessProfile() {
                             </label>
                             <p className="text-gray-700">VAs can send you direct messages through the platform</p>
                           </div>
-                        </div>
-                        
-                        <div>
-                          <div className="flex items-start">
-                            <div className="flex items-center h-5">
-                              <input
-                                id="communicationPreferences.autoReplyEnabled"
-                                name="communicationPreferences.autoReplyEnabled"
-                                type="checkbox"
-                                checked={formik.values.communicationPreferences.autoReplyEnabled}
-                                onChange={formik.handleChange}
-                                className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                              />
-                            </div>
-                            <div className="ml-3 text-sm flex-1">
-                              <label htmlFor="communicationPreferences.autoReplyEnabled" className="font-medium text-gray-700">
-                                Enable Auto-Reply
-                              </label>
-                              <p className="text-gray-700">Automatically reply to new messages when you're unavailable</p>
-                            </div>
-                          </div>
-                          {formik.values.communicationPreferences.autoReplyEnabled && (
-                            <div className="mt-3 ml-7">
-                              <label htmlFor="communicationPreferences.autoReplyMessage" className="block text-sm font-medium text-gray-700">
-                                Auto-Reply Message
-                              </label>
-                              <textarea
-                                id="communicationPreferences.autoReplyMessage"
-                                name="communicationPreferences.autoReplyMessage"
-                                rows={3}
-                                value={formik.values.communicationPreferences.autoReplyMessage}
-                                onChange={formik.handleChange}
-                                placeholder="Thank you for your message. I'll get back to you within 24 hours."
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                              />
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -1970,44 +1909,6 @@ export default function BusinessProfile() {
                               <option value="daily">Daily digest</option>
                               <option value="weekly">Weekly digest</option>
                             </select>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start">
-                          <div className="flex items-center h-5">
-                            <input
-                              id="invisible"
-                              name="invisible"
-                              type="checkbox"
-                              checked={formik.values.invisible}
-                              onChange={formik.handleChange}
-                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                            />
-                          </div>
-                          <div className="ml-3 text-sm">
-                            <label htmlFor="invisible" className="font-medium text-gray-700">
-                              Make my profile invisible
-                            </label>
-                            <p className="text-gray-700">Hide your profile from VAs</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start">
-                          <div className="flex items-center h-5">
-                            <input
-                              id="surveyRequestNotifications"
-                              name="surveyRequestNotifications"
-                              type="checkbox"
-                              checked={formik.values.surveyRequestNotifications}
-                              onChange={formik.handleChange}
-                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                            />
-                          </div>
-                          <div className="ml-3 text-sm">
-                            <label htmlFor="surveyRequestNotifications" className="font-medium text-gray-700">
-                              Survey notifications
-                            </label>
-                            <p className="text-gray-700">Receive occasional surveys to help improve the platform</p>
                           </div>
                         </div>
                       </div>
