@@ -40,8 +40,8 @@ export default function Layout() {
 
   const userNavigation = [
     { name: 'Dashboard', href: '/dashboard' },
-    // Use role-based routing for Profile link
-    { name: 'Profile', href: user?.role === 'va' ? '/va/profile' : '/business/profile' },
+    // Use role-based routing for Profile link, but always use business profile in E Systems mode
+    { name: 'Profile', href: branding.isESystemsMode ? '/business/profile' : (user?.role === 'va' ? '/va/profile' : '/business/profile') },
     { name: 'Conversations', href: '/conversations' },
     ...(user?.admin ? [{ name: 'Admin Panel', href: '/admin' }] : []),
   ];
