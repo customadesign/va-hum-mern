@@ -4,13 +4,17 @@ const path = require('path');
 const supabase = require('../config/supabase');
 
 // Enhanced bucket configuration with specific media types
+const PRIMARY_IMAGE_BUCKET = (process.env.SUPABASE_BUCKET && process.env.SUPABASE_BUCKET.trim()) || 'profile-images';
+
+const IMAGE_BUCKET_CONFIG = {
+  allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'],
+  maxSize: 10 * 1024 * 1024, // 10MB
+  folders: ['avatars', 'covers', 'admin-avatars', 'business-logos']
+};
+
+// Build BUCKET_CONFIG without computed properties to avoid timing issues
 const BUCKET_CONFIG = {
-  // Allow a custom primary bucket via env (e.g., linkage-va-hub)
-  [process.env.SUPABASE_BUCKET || 'profile-images']: {
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'],
-    maxSize: 10 * 1024 * 1024, // 10MB
-    folders: ['avatars', 'covers', 'admin-avatars', 'business-logos']
-  },
+  'profile-images': IMAGE_BUCKET_CONFIG,
   'va-videos': {
     allowedTypes: ['video/mp4', 'video/webm', 'video/mov', 'video/avi', 'video/quicktime'],
     maxSize: 1024 * 1024 * 1024, // 1GB
@@ -34,6 +38,13 @@ const BUCKET_CONFIG = {
     folders: ['system-assets', 'reports', 'backups', 'templates']
   }
 };
+
+// Add custom bucket name as alias if different from 'profile-images'
+if (PRIMARY_IMAGE_BUCKET !== 'profile-images') {
+  BUCKET_CONFIG[PRIMARY_IMAGE_BUCKET] = IMAGE_BUCKET_CONFIG;
+}
+
+console.log('[storage] PRIMARY_IMAGE_BUCKET =', PRIMARY_IMAGE_BUCKET, 'BUCKETS =', Object.keys(BUCKET_CONFIG));
 
 // Multer memory storage for Supabase
 const storage = multer.memoryStorage();
@@ -75,7 +86,7 @@ const createBucketUploader = (bucketName) => {
 };
 
 // Create multer instances for each bucket
-const uploadProfileImages = createBucketUploader('profile-images');
+const uploadProfileImages = createBucketUploader(PRIMARY_IMAGE_BUCKET);
 const uploadVAVideos = createBucketUploader('va-videos');
 const uploadBusinessAssets = createBucketUploader('business-assets');
 const uploadAdminFiles = createBucketUploader('admin-uploads');
