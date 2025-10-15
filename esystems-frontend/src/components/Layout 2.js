@@ -40,8 +40,8 @@ export default function Layout() {
 
   const userNavigation = [
     { name: 'Dashboard', href: '/dashboard' },
-    // Always route Profile to the VA profile page
-    { name: 'Profile', href: '/va/profile' },
+    // Use role-based routing for Profile link
+    { name: 'Profile', href: user?.role === 'va' ? '/va/profile' : '/business/profile' },
     { name: 'Conversations', href: '/conversations' },
     ...(user?.admin ? [{ name: 'Admin Panel', href: '/admin' }] : []),
   ];
