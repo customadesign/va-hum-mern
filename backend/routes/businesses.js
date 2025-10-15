@@ -101,6 +101,9 @@ router.get('/me', protect, async (req, res) => {
       missingFields
     };
 
+    // TEMP DEBUG: surface avatar value returned to clients
+    console.log('GET /api/businesses/me - avatar:', business.avatar);
+
     res.json({
       success: true,
       data: business,
