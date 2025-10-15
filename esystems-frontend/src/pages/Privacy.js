@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useBranding } from '../contexts/BrandingContext';
 
 export default function Privacy() {
   const { branding, loading: brandingLoading } = useBranding();
+  
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   // Show loading spinner while branding context is loading
   if (brandingLoading || !branding) {

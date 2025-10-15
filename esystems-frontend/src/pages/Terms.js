@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useBranding } from '../contexts/BrandingContext';
 
 export default function Terms() {
   const { branding, loading: brandingLoading } = useBranding();
+  
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   // Show loading spinner while branding context is loading
   if (brandingLoading || !branding) {
@@ -41,8 +46,8 @@ export default function Terms() {
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">2. Platform Description</h2>
                 <p className="text-gray-700">
-                  {branding.name} is a platform that {branding.isESystemsMode ? 'helps businesses find and hire skilled professionals from the Philippines' : 'connects businesses with Filipino virtual assistants'}.
-                  We facilitate connections but are not responsible for the specific agreements made between parties.
+                  {branding.name} is a platform that {branding.isESystemsMode ? 'helps businesses find and hire skilled professionals from Philippines' : 'connects businesses with Filipino virtual assistants'}.
+                  We facilitate connections but are not responsible for specific agreements made between parties.
                 </p>
               </section>
 
