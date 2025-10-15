@@ -266,11 +266,7 @@ export default function BusinessProfile() {
       // Email Notifications
       emailNotifications: {
         newMessages: profile?.emailNotifications?.newMessages ?? true,
-        vaApplications: profile?.emailNotifications?.vaApplications ?? true,
-        vaMatches: profile?.emailNotifications?.vaMatches ?? true,
-        platformUpdates: profile?.emailNotifications?.platformUpdates ?? false,
-        marketingEmails: profile?.emailNotifications?.marketingEmails ?? false,
-        weeklyDigest: profile?.emailNotifications?.weeklyDigest ?? true
+        vaMatches: profile?.emailNotifications?.vaMatches ?? true
       },
       
       // Communication Preferences
@@ -1628,25 +1624,6 @@ export default function BusinessProfile() {
                         <div className="flex items-start">
                           <div className="flex items-center h-5">
                             <input
-                              id="emailNotifications.vaApplications"
-                              name="emailNotifications.vaApplications"
-                              type="checkbox"
-                              checked={formik.values.emailNotifications.vaApplications}
-                              onChange={formik.handleChange}
-                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                            />
-                          </div>
-                          <div className="ml-3 text-sm">
-                            <label htmlFor="emailNotifications.vaApplications" className="font-medium text-gray-700">
-                              VA Applications
-                            </label>
-                            <p className="text-gray-700">Get notified when VAs apply to your job postings</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start">
-                          <div className="flex items-center h-5">
-                            <input
                               id="emailNotifications.vaMatches"
                               name="emailNotifications.vaMatches"
                               type="checkbox"
@@ -1660,63 +1637,6 @@ export default function BusinessProfile() {
                               VA Matches
                             </label>
                             <p className="text-gray-700">Get notified when we find VAs that match your requirements</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start">
-                          <div className="flex items-center h-5">
-                            <input
-                              id="emailNotifications.weeklyDigest"
-                              name="emailNotifications.weeklyDigest"
-                              type="checkbox"
-                              checked={formik.values.emailNotifications.weeklyDigest}
-                              onChange={formik.handleChange}
-                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                            />
-                          </div>
-                          <div className="ml-3 text-sm">
-                            <label htmlFor="emailNotifications.weeklyDigest" className="font-medium text-gray-700">
-                              Weekly Digest
-                            </label>
-                            <p className="text-gray-700">Receive a weekly summary of platform activity</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start">
-                          <div className="flex items-center h-5">
-                            <input
-                              id="emailNotifications.platformUpdates"
-                              name="emailNotifications.platformUpdates"
-                              type="checkbox"
-                              checked={formik.values.emailNotifications.platformUpdates}
-                              onChange={formik.handleChange}
-                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                            />
-                          </div>
-                          <div className="ml-3 text-sm">
-                            <label htmlFor="emailNotifications.platformUpdates" className="font-medium text-gray-700">
-                              Platform Updates
-                            </label>
-                            <p className="text-gray-700">Get notified about new features and platform updates</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start">
-                          <div className="flex items-center h-5">
-                            <input
-                              id="emailNotifications.marketingEmails"
-                              name="emailNotifications.marketingEmails"
-                              type="checkbox"
-                              checked={formik.values.emailNotifications.marketingEmails}
-                              onChange={formik.handleChange}
-                              className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                            />
-                          </div>
-                          <div className="ml-3 text-sm">
-                            <label htmlFor="emailNotifications.marketingEmails" className="font-medium text-gray-700">
-                              Marketing Emails
-                            </label>
-                            <p className="text-gray-700">Receive promotional offers and marketing communications</p>
                           </div>
                         </div>
                       </div>
