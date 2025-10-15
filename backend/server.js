@@ -446,26 +446,50 @@ const ensureAdminUser = require('./utils/ensureAdminUser');
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
+  let dbConnected = false;
+  
   try {
-    await connectDB();
+    const dbResult = await connectDB();
+    dbConnected = (dbResult !== false);
 
-    // Ensure admin user exists
-    await ensureAdminUser();
+    if (dbConnected) {
+      // Ensure admin user exists only if DB is connected
+      try {
+        await ensureAdminUser();
+      } catch (adminError) {
+        console.warn('⚠️  Could not ensure admin user:', adminError.message);
+      }
+    }
   } catch (error) {
-    console.error('Warning: Database connection failed:', error.message);
-    console.log('Server will start with limited functionality (webinar routes will work)');
+    console.error('⚠️  Startup warning: Database connection failed:', error.message);
+    console.log('ℹ️  Server will start with limited functionality');
   }
 
   server.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-    console.log('Webinar registration endpoint available at: POST /api/webinar/register');
+    console.log(`✅ Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    if (dbConnected) {
+      console.log('✅ Database connected - full functionality available');
+    } else {
+      console.log('⚠️  Database not connected - limited functionality');
+      console.log('ℹ️  Health check endpoint available at: GET /health');
+    }
+    console.log('ℹ️  Webinar registration endpoint available at: POST /api/webinar/register');
   });
 };
 
 startServer();
 
-// Handle unhandled promise rejections
+// Handle unhandled promise rejections - log but don't crash in production
 process.on('unhandledRejection', (err, promise) => {
-  console.error(`Error: ${err.message}`);
-  server.close(() => process.exit(1));
+  console.error(`❌ Unhandled Promise Rejection: ${err.message}`);
+  console.error('Stack:', err.stack);
+  
+  // In production/Render, log but keep running for debugging
+  if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
+    console.error('⚠️  Production mode - keeping server alive for debugging');
+    console.error('⚠️  Please check environment variables and database configuration!');
+  } else {
+    // In development, exit to force fixing the issue
+    server.close(() => process.exit(1));
+  }
 });

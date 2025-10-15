@@ -4,6 +4,11 @@ const connectDB = async () => {
   try {
     // Debug logging
     console.log('MongoDB URI exists:', !!process.env.MONGODB_URI);
+    
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI environment variable is not set');
+    }
+    
     if (process.env.MONGODB_URI) {
       console.log('MongoDB URI format check:', process.env.MONGODB_URI.startsWith('mongodb'));
       // Don't log the full URI as it contains credentials
@@ -13,15 +18,17 @@ const connectDB = async () => {
       }
     }
     
-    // MongoDB connection options for Atlas
+    // MongoDB connection options for Atlas with longer timeout for Render
     const options = {
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      serverSelectionTimeoutMS: 30000, // 30s timeout for Render cold starts
       socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+      family: 4, // Use IPv4, skip trying IPv6
     };
     
+    console.log('Attempting MongoDB connection...');
     // Try to connect to MongoDB
     const conn = await mongoose.connect(process.env.MONGODB_URI, options);
-    console.log(`MongoDB connected successfully to: ${conn.connection.host}`);
+    console.log(`✅ MongoDB connected successfully to: ${conn.connection.host}`);
     
     // Handle connection events
     mongoose.connection.on('error', (err) => {
@@ -33,7 +40,7 @@ const connectDB = async () => {
     });
     
   } catch (error) {
-    console.error('MongoDB connection error:', error.message);
+    console.error('❌ MongoDB connection error:', error.message);
     console.error('Full error:', error);
     
     // More specific error handling
@@ -48,14 +55,27 @@ const connectDB = async () => {
     } else if (error.message.includes('connect ETIMEDOUT')) {
       console.log('\n⚠️  MongoDB connection timed out!');
       console.log('Please check your network connection and MongoDB Atlas whitelist settings');
+    } else if (error.message.includes('MONGODB_URI environment variable')) {
+      console.log('\n⚠️  MONGODB_URI not configured!');
+      console.log('Please set MONGODB_URI in your environment variables');
     }
     
     console.log('\nFor MongoDB Atlas (cloud):');
-    console.log('  1. Ensure your IP is whitelisted in MongoDB Atlas');
+    console.log('  1. Ensure your IP is whitelisted in MongoDB Atlas (or use 0.0.0.0/0)');
     console.log('  2. Check your connection string format');
     console.log('  3. Verify database user credentials');
+    console.log('  4. For Render: Add Render IPs to MongoDB Atlas Network Access');
     
-    // For now, let's exit gracefully
+    // On production/Render, log the error but don't crash immediately
+    // This allows the health check endpoint to still respond
+    if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
+      console.error('⚠️  Running in production mode - server will start but database operations will fail');
+      console.error('⚠️  Please fix MongoDB configuration immediately!');
+      // Don't exit - let server start so we can see health check errors
+      return false;
+    }
+    
+    // In development, exit to force fixing the issue
     process.exit(1);
   }
 };
