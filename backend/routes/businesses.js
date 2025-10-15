@@ -124,6 +124,7 @@ router.put('/me', protect, async (req, res) => {
     console.log('Specialties received:', req.body.specialties);
     console.log('Benefits received:', req.body.benefits);
     console.log('Company Values received:', req.body.companyValues);
+    console.log('Avatar in request:', req.body.avatar);
     
     let business = await Business.findOne({ user: req.user._id });
 
@@ -163,6 +164,14 @@ router.put('/me', protect, async (req, res) => {
         // Handle nested objects for preferences
         if (['emailNotifications', 'communicationPreferences', 'privacySettings'].includes(field)) {
           if (typeof value === 'object' && value !== null) {
+            doc[field] = value;
+          }
+          return;
+        }
+        
+        // Special handling for avatar - only set if non-empty
+        if (field === 'avatar') {
+          if (value && value.trim() !== '') {
             doc[field] = value;
           }
           return;
@@ -236,6 +245,14 @@ router.put('/me', protect, async (req, res) => {
           return;
         }
         
+        // Special handling for avatar - never clear it unless explicitly set to empty
+        if (field === 'avatar') {
+          if (value && value.trim() !== '') {
+            business[field] = value;
+          }
+          return;
+        }
+        
         // Handle empty strings (but not arrays)
         if (typeof value === 'string' && value.trim() === '') return;
         
@@ -259,12 +276,14 @@ router.put('/me', protect, async (req, res) => {
 
         business[field] = value;
       });
+      console.log('Avatar before save:', business.avatar);
       await business.save();
     }
 
     console.log('Business after save - Specialties:', business.specialties);
     console.log('Business after save - Benefits:', business.benefits);
     console.log('Business after save - Company Values:', business.companyValues);
+    console.log('Business after save - Avatar:', business.avatar);
 
     // Calculate profile completion
     const percentage = calculateCompletionPercentage(business, 'business');
