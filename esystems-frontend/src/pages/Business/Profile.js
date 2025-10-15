@@ -1432,6 +1432,7 @@ export default function BusinessProfile() {
                         }}
                         defaultValue={formik.values.streetAddress}
                         placeholder="Start typing your office address..."
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                       />
                     </div>
 
