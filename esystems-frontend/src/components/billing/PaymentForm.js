@@ -207,7 +207,7 @@ const PaymentFormContent = ({ onSuccess, onCancel, submitButtonText = 'Save Paym
           />
         </div>
         
-        <div className="text-center">
+        <div className="text-center mt-6 pt-2">
           <button
             type="button"
             onClick={() => setShowCardBack(!showCardBack)}
