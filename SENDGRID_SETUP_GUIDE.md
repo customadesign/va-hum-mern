@@ -154,6 +154,70 @@ console.log('Email config test results:', results);
 
 ## 🔧 Troubleshooting
 
+### Verification Emails Not Arriving
+
+If verification emails worked previously but suddenly stopped:
+
+#### Step 1: Check SendGrid Suppression Lists
+
+**Problem**: Your email may be on SendGrid's suppression list, causing emails to be silently blocked.
+
+**Solution**:
+1. Go to https://app.sendgrid.com/suppressions
+2. Check these tabs for your email:
+   - **Bounces** - Hard bounces from invalid addresses
+   - **Blocks** - Blocked by recipient server  
+   - **Spam Reports** - Marked as spam
+   - **Invalid Emails** - Rejected addresses
+3. If found, click "Delete" to remove from suppression list
+4. Try resending the verification email
+
+**API Check** (Admin only):
+```bash
+GET /api/email-test/suppressions/inspect?email=your@email.com
+```
+
+**Remove from Suppression** (Admin only):
+```bash
+POST /api/email-test/suppressions/clear
+{ "email": "your@email.com" }
+```
+
+#### Step 2: Check SendGrid Activity Feed
+
+1. Go to https://app.sendgrid.com/email_activity
+2. Filter by your email address
+3. Look for recent delivery attempts
+4. Check status codes:
+   - `delivered` = Success
+   - `bounce` = Hard bounce (invalid email)
+   - `blocked` = Recipient server blocked
+   - `dropped` = SendGrid suppression list
+
+#### Step 3: Check Backend Logs
+
+1. Go to https://dashboard.render.com/web/srv-d25arrripnbc73dpeqs0/logs
+2. Click "Resend" button on the frontend
+3. Look for these messages:
+   ```
+   🔄 === RESEND VERIFICATION DEBUG START ===
+   📤 Attempting to send email...
+   ✅ verification email sent successfully
+   ```
+4. If errors appear, note the error code:
+   - `402` - SendGrid account issue
+   - `403` - Permission/authentication error
+   - `413` - Message too large
+   - `429` - Rate limit exceeded
+   - `451` - Suppressed address
+
+#### Step 4: Test with Different Email
+
+Try registering with a different email provider to isolate the issue:
+- If Gmail doesn't work, try Outlook/Yahoo
+- If Yahoo doesn't work, try Gmail/Outlook
+- Avoid temporary email services (they're often blocked)
+
 ### Common Issues:
 
 1. **"Authentication Failed"**
@@ -171,11 +235,37 @@ console.log('Email config test results:', results);
    - Improve email content and formatting
    - Monitor SendGrid reputation metrics
 
+4. **"Your email address may be blocked"**
+   - Email is on SendGrid suppression list
+   - Check suppressions using steps above
+   - Remove from list or use different email
+
+5. **"Too many requests"**
+   - SendGrid rate limiting active
+   - Wait 10-15 minutes before retry
+   - Consider upgrading SendGrid plan
+
+### Diagnostic Endpoints
+
+**Public Verification Status Check**:
+```bash
+POST /api/email-test/check-verification-status
+{ "email": "your@email.com" }
+```
+Returns whether email can receive verification emails.
+
+**Admin Suppression Inspect**:
+```bash
+GET /api/email-test/suppressions/inspect?email=your@email.com
+```
+Returns detailed suppression list information.
+
 ### Support Contacts:
 
 - **SendGrid Support**: https://support.sendgrid.com/
 - **DNS Issues**: Contact your domain registrar
 - **System Issues**: Check server logs and email test endpoints
+- **Suppression Issues**: Use admin endpoints to clear or contact support
 
 ## 📊 Monitoring & Analytics
 

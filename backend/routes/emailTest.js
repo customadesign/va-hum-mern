@@ -259,4 +259,84 @@ router.post('/suppressions/clear', protect, authorize('admin'), async (req, res)
   }
 });
 
+// @route   POST /api/email-test/check-verification-status
+// @desc    Check if an email can receive verification emails (public endpoint for troubleshooting)
+// @access  Public
+router.post('/check-verification-status', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Valid email address is required'
+      });
+    }
+
+    const results = {
+      email,
+      timestamp: new Date().toISOString(),
+      checks: {}
+    };
+
+    // Check SendGrid suppression lists
+    try {
+      const [bounces, blocks, spam, invalid] = await Promise.all([
+        sgRequest('GET', `/suppression/bounces?email=${encodeURIComponent(email)}`),
+        sgRequest('GET', `/suppression/blocks?email=${encodeURIComponent(email)}`),
+        sgRequest('GET', `/suppression/spam_reports?email=${encodeURIComponent(email)}`),
+        sgRequest('GET', `/suppression/invalid_emails?email=${encodeURIComponent(email)}`)
+      ]);
+
+      results.checks.suppression = {
+        bounces: bounces?.length > 0 ? 'SUPPRESSED' : 'clear',
+        blocks: blocks?.length > 0 ? 'BLOCKED' : 'clear',
+        spam: spam?.length > 0 ? 'SPAM_REPORTED' : 'clear',
+        invalid: invalid?.length > 0 ? 'INVALID' : 'clear'
+      };
+
+      results.canReceiveEmail = 
+        bounces?.length === 0 && 
+        blocks?.length === 0 && 
+        spam?.length === 0 && 
+        invalid?.length === 0;
+
+      if (!results.canReceiveEmail) {
+        results.message = 'Your email address is on SendGrid suppression list. This prevents delivery.';
+        results.recommendation = 'Please contact support to have your email address removed from the suppression list, or try a different email address.';
+        results.suppressionDetails = {
+          bounces: bounces || [],
+          blocks: blocks || [],
+          spam: spam || [],
+          invalid: invalid || []
+        };
+      } else {
+        results.message = 'Your email address is not suppressed and should receive emails normally.';
+        results.recommendation = 'Check your spam folder or try a different email provider.';
+      }
+
+    } catch (error) {
+      console.error('SendGrid suppression check error:', error);
+      results.checks.suppression = {
+        error: error.message,
+        note: 'Unable to check SendGrid suppression lists'
+      };
+      results.canReceiveEmail = 'unknown';
+      results.message = 'Could not verify email deliverability status';
+    }
+
+    res.json({
+      success: true,
+      data: results
+    });
+
+  } catch (error) {
+    console.error('Verification status check error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to check verification status'
+    });
+  }
+});
+
 module.exports = router;

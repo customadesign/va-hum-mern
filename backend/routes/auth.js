@@ -790,19 +790,41 @@ router.post('/resend-verification-public', async (req, res) => {
     });
     
     console.log('📤 Attempting to send email...');
-    await sendEmail({
-      email: user.email,
-      subject: platform === 'esystems' 
-        ? 'Welcome to E-Systems Management - Please confirm your email'
-        : 'Welcome to Linkage VA Hub - Please confirm your email',
-      template: platform === 'esystems' ? 'esystems-welcome' : 'welcome',
-      data: { confirmUrl },
-      userData: platform === 'esystems' ? { role: 'business' } : { role: 'va' }
-    });
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: platform === 'esystems' 
+          ? 'Welcome to E-Systems Management - Please confirm your email'
+          : 'Welcome to Linkage VA Hub - Please confirm your email',
+        template: platform === 'esystems' ? 'esystems-welcome' : 'welcome',
+        data: { confirmUrl },
+        userData: platform === 'esystems' ? { role: 'business' } : { role: 'va' },
+        forceSendGrid: true  // Prevent silent fallback to SMTP
+      });
 
-    console.log(`✅ ${platform} verification email sent successfully to:`, user.email);
-    console.log('🔄 === RESEND VERIFICATION DEBUG END ===');
-    return res.json({ success: true, message: 'Verification email resent' });
+      console.log(`✅ ${platform} verification email sent successfully to:`, user.email);
+      console.log('🔄 === RESEND VERIFICATION DEBUG END ===');
+      return res.json({ success: true, message: 'Verification email resent' });
+    } catch (emailError) {
+      console.error('❌ Email sending failed:', emailError);
+      console.log('🔄 === RESEND VERIFICATION DEBUG END (WITH ERROR) ===');
+      
+      // Parse SendGrid error for user-friendly message
+      let userMessage = 'Failed to send verification email';
+      if (emailError.message?.includes('suppression') || emailError.message?.includes('blocked')) {
+        userMessage = 'Your email address may be blocked. Please contact support or try a different email.';
+      } else if (emailError.message?.includes('rate limit')) {
+        userMessage = 'Too many requests. Please wait a few minutes before trying again.';
+      } else if (emailError.message?.includes('authentication') || emailError.message?.includes('403')) {
+        userMessage = 'Email service configuration error. Please contact support.';
+      }
+      
+      return res.status(500).json({ 
+        success: false, 
+        error: userMessage,
+        details: process.env.NODE_ENV === 'development' ? emailError.message : undefined
+      });
+    }
   } catch (err) {
     console.error('❌ === RESEND VERIFICATION ERROR ===');
     console.error('Error details:', err);
