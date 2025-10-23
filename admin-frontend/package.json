@@ -45,8 +45,9 @@
   },
   "scripts": {
     "start": "PORT=4000 react-scripts start",
-    "build": "react-scripts build",
-    "serve": "serve -s build -p 10000",
+    "build": "react-scripts build && npm run postbuild",
+    "postbuild": "cp public/_redirects build/_redirects || true",
+    "serve": "serve -s build -p 10000 -n",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

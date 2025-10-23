@@ -5,7 +5,7 @@ services:
     plan: starter
     rootDir: admin-frontend
     buildCommand: npm install --include=dev && npm run build
-    startCommand: npx serve -s build -p $PORT --config serve.json --no-clipboard
+    startCommand: npx serve -s build -p $PORT -n --no-clipboard
     envVars:
       - key: NODE_ENV
         value: production
