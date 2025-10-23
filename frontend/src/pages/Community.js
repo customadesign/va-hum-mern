@@ -639,7 +639,7 @@ export default function Community() {
                 <a
                   href="#register"
                   className="inline-flex justify-center items-center rounded-md text-white px-6 py-3 text-base font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 relative hover:opacity-90"
-                  style={{ backgroundColor: '#2173b8', '--tw-ring-color': '#2173b8' }}
+                  style={{ backgroundColor: '#2273b8', '--tw-ring-color': '#2273b8' }}
                   aria-label="Register for the ₱999 webinar"
                   onClick={() => track('webinar_register_cta_click', { source: 'community_page_hero' })}
                 >
@@ -792,7 +792,7 @@ export default function Community() {
                       type="submit"
                       disabled={isSubmitting}
                       className={`inline-flex justify-center items-center rounded-md text-white px-6 py-3 text-base font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-90 ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
-                      style={{ backgroundColor: '#2173b8' }}
+                      style={{ backgroundColor: '#2273b8' }}
                     >
                       {isSubmitting ? 'Registering...' : 'Proceed to Payment (₱999)'}
                     </button>
@@ -1444,7 +1444,8 @@ export default function Community() {
           <div className="text-center">
             <a
               href="#register"
-              className="inline-flex justify-center items-center rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-12 py-4 text-lg font-bold shadow-lg transform transition hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-indigo-500"
+              className="inline-flex justify-center items-center rounded-full text-white px-12 py-4 text-lg font-bold shadow-lg transform transition hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2"
+              style={{ backgroundColor: '#2273b8', '--tw-ring-color': '#2273b8' }}
               aria-label="Register for the webinar"
               onClick={() => track('webinar_register_cta_click', { source: 'community_page_final_cta' })}
             >
