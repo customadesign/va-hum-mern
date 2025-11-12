@@ -1,0 +1,294 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900 dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-950 dark:text-gray-100 transition-all duration-300;
+  }
+}
+
+@layer components {
+  .admin-card {
+    @apply bg-white dark:bg-[#1f2937] rounded-lg shadow-md dark:shadow-xl border border-gray-200 dark:border-[#374151] transition-all duration-200 dark:backdrop-blur-sm;
+  }
+  
+  .admin-button {
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .admin-button-primary {
+    background-color: #1e3a8a !important;
+    color: #ffffff !important;
+    @apply admin-button hover:bg-opacity-90 focus:ring-blue-500 dark:focus:ring-blue-400 justify-center text-center shadow-sm hover:shadow-md transition-all duration-200;
+  }
+  
+  .admin-button-primary:hover {
+    background-color: #164070 !important;
+  }
+  
+  .admin-button-secondary {
+    @apply admin-button text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800/90 border-gray-300 dark:border-gray-600/50 hover:bg-gray-50 dark:hover:bg-gray-700/90 focus:ring-primary-500 dark:focus:ring-primary-400 transition-all duration-200 hover:shadow-sm dark:hover:shadow-lg;
+  }
+  
+  .admin-button-danger {
+    @apply admin-button text-white bg-danger-600 hover:bg-danger-700 dark:bg-danger-500 dark:hover:bg-danger-600 focus:ring-danger-500 dark:focus:ring-danger-400 shadow-sm hover:shadow-md transition-all duration-200;
+  }
+  
+  .admin-button-success {
+    @apply admin-button text-white bg-success-600 hover:bg-success-700 dark:bg-success-500 dark:hover:bg-success-600 focus:ring-success-500 dark:focus:ring-success-400 shadow-sm hover:shadow-md transition-all duration-200;
+  }
+  
+  .admin-button-warning {
+    @apply admin-button text-white bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-500 dark:hover:bg-yellow-600 focus:ring-yellow-500 dark:focus:ring-yellow-400 shadow-sm hover:shadow-md transition-all duration-200;
+  }
+  
+  .admin-input {
+    @apply block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white text-gray-900 shadow-sm focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 sm:text-sm transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500;
+    padding: 0.5rem 0.75rem;
+    line-height: 1.5;
+  }
+  
+  .dark .admin-input {
+    background-color: #1f2937 !important;
+    border-color: #4b5563 !important;
+    color: #f9fafb !important;
+  }
+  
+  .dark .admin-input::placeholder {
+    color: #9ca3af !important;
+  }
+  
+  .dark .admin-input:focus {
+    background-color: #1f2937 !important;
+    border-color: #3b82f6 !important;
+    ring-color: #3b82f6 !important;
+  }
+  
+  /* Specific styling for search inputs with icons */
+  .admin-input.pl-12 {
+    padding-left: 3.5rem !important; /* 56px - adds the extra 8px you requested */
+  }
+  
+  /* Pleasant link colors for light and dark themes */
+  .admin-link {
+    @apply text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200;
+  }
+  
+  .admin-link-website {
+    @apply text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors duration-200;
+  }
+  
+  .admin-select {
+    @apply block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800/90 text-gray-900 dark:text-gray-100 shadow-sm focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 sm:text-sm transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    background-position: right 0.75rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1.25em 1.25em !important;
+    padding: 0.5rem 2.5rem 0.5rem 0.75rem !important;
+    line-height: 1.5 !important;
+  }
+  
+  .dark .admin-select {
+    @apply bg-gray-800/90 border-gray-600 text-gray-100;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%9ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-position: right 0.75rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1.25em 1.25em !important;
+    padding: 0.5rem 2.5rem 0.5rem 0.75rem !important;
+  }
+  
+  /* Remove any default select styling that might interfere */
+  .admin-select::-ms-expand {
+    display: none !important;
+  }
+  
+  /* Ensure no other select styling interferes */
+  select.admin-select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+  }
+  
+  .admin-textarea {
+    @apply block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800/90 text-gray-900 dark:text-gray-100 shadow-sm focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 sm:text-sm transition-all duration-200 dark:placeholder-gray-500 hover:border-gray-400 dark:hover:border-gray-500 resize-vertical;
+    padding: 0.5rem 0.75rem;
+    line-height: 1.5;
+  }
+  
+  .admin-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .admin-badge-success {
+    @apply admin-badge bg-success-100 dark:bg-success-900/30 text-success-800 dark:text-success-300 border border-transparent dark:border-success-500/30;
+  }
+  
+  .admin-badge-warning {
+    @apply admin-badge bg-warning-100 dark:bg-warning-900/30 text-warning-800 dark:text-warning-300 border border-transparent dark:border-warning-500/30;
+  }
+  
+  .admin-badge-danger {
+    @apply admin-badge bg-danger-100 dark:bg-danger-900/30 text-danger-800 dark:text-danger-300 border border-transparent dark:border-danger-500/30;
+  }
+  
+  .admin-badge-info {
+    @apply admin-badge bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 border border-transparent dark:border-primary-500/30;
+  }
+  
+  .admin-badge-gray {
+    @apply admin-badge bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-300 border border-transparent dark:border-gray-600/30;
+  }
+  
+  .admin-table {
+    @apply min-w-full divide-y divide-gray-200 dark:divide-gray-700/50 overflow-hidden rounded-lg;
+  }
+  
+  .admin-table-header {
+    @apply bg-[#1e3a8a] dark:bg-gray-800/80;
+  }
+  
+  .admin-table-header-cell {
+    @apply px-6 py-3 text-left text-xs font-semibold text-white dark:text-gray-400 uppercase tracking-wider border-b dark:border-gray-700/50;
+  }
+  
+  .admin-table-body {
+    @apply bg-white dark:bg-gray-900/50 divide-y divide-gray-200 dark:divide-gray-700/30;
+  }
+  
+  .admin-table-cell {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 transition-colors duration-150;
+  }
+  
+  .dark .admin-table-header {
+    background-color: #1f2937 !important;
+  }
+  
+  .dark .admin-table-header-cell {
+    color: #9ca3af !important;
+    border-color: #374151 !important;
+  }
+  
+  .dark .admin-table-body {
+    background-color: #1f2937 !important;
+  }
+  
+  .dark .admin-table-cell {
+    color: #f9fafb !important;
+    border-color: #374151 !important;
+  }
+  
+  .admin-sidebar-link {
+    @apply flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150;
+  }
+  
+  .admin-sidebar-link-active {
+    @apply admin-sidebar-link bg-primary-100 dark:bg-gradient-to-r dark:from-primary-500/20 dark:to-primary-600/20 text-primary-900 dark:text-primary-200 font-medium border-l-4 border-primary-500 dark:border-primary-400;
+  }
+  
+  .admin-sidebar-link-inactive {
+    @apply admin-sidebar-link text-admin-600 hover:bg-admin-50 hover:text-admin-900 dark:text-gray-400 dark:hover:bg-gray-700/50 dark:hover:text-gray-200 hover:translate-x-1 transition-all duration-200;
+  }
+  
+  .admin-stat-card {
+    @apply admin-card p-6 hover:shadow-lg dark:hover:shadow-2xl transition-all duration-200 hover:-translate-y-1;
+  }
+  
+  .dark .admin-stat-card {
+    background-color: #1f2937 !important;
+  }
+  
+  .admin-stat-number {
+    @apply text-2xl font-bold text-admin-900 dark:text-gray-100;
+  }
+  
+  .admin-stat-label {
+    @apply text-sm font-medium text-admin-500 dark:text-gray-400;
+  }
+  
+  .dark .admin-stat-number {
+    color: #f9fafb !important;
+  }
+  
+  .dark .admin-stat-label {
+    color: #d1d5db !important;
+  }
+  
+  .admin-loading {
+    @apply animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 dark:border-primary-400;
+  }
+  
+  .admin-modal-overlay {
+    @apply fixed inset-0 bg-gray-900 bg-opacity-50 dark:bg-opacity-80 overflow-y-auto h-full w-full z-50 backdrop-blur-sm;
+  }
+  
+  .admin-modal-content {
+    @apply relative top-20 mx-auto p-5 border border-gray-200 dark:border-gray-700 w-96 shadow-2xl rounded-lg bg-white dark:bg-gray-800 transition-all duration-200;
+  }
+  
+  .dark .admin-modal-content {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+    color: #f9fafb !important;
+  }
+  
+  /* Fix for form labels in dark theme modals */
+  .dark .admin-modal-content label {
+    color: #f9fafb !important;
+  }
+  
+  /* Specific targeting for admin-700 text color in dark theme */
+  .dark .text-admin-700 {
+    color: #f9fafb !important;
+  }
+  
+  /* Help text styling for dark theme */
+  .dark .admin-modal-content p.text-sm {
+    color: #d1d5db !important;
+  }
+}
+
+/* Enhanced scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-900 rounded;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 dark:bg-gray-600 rounded-full transition-colors duration-200;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500 dark:bg-gray-500;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: theme('colors.gray.400') theme('colors.gray.100');
+}
+
+.dark * {
+  scrollbar-color: theme('colors.gray.600') theme('colors.gray.900');
+}
+
+/* React Query Devtools positioning */
+.react-query-devtools-panel {
+  z-index: 9999 !important;
+}

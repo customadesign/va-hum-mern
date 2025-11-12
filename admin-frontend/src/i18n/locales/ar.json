@@ -1,0 +1,16 @@
+{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "settings": "الإعدادات",
+    "language": "اللغة"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "display": {
+      "title": "إعدادات العرض",
+      "language": "اللغة"
+    }
+  }
+}

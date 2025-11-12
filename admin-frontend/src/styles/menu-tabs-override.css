@@ -1,0 +1,178 @@
+/* CRITICAL MENU TAB COLOR OVERRIDES - MUST LOAD LAST */
+/* Force menu tabs to use #1e3a8a background and #5da0f5 font color */
+
+/* ===== DARK THEME MENU TAB STYLES ===== */
+
+/* Active menu tab - #1e3a8a background with #5da0f5 text */
+.dark .admin-sidebar-link-active {
+  background-color: #1e3a8a !important;
+  background: #1e3a8a !important;
+  color: #5da0f5 !important;
+  border-left: 3px solid #5da0f5 !important;
+  font-weight: 600 !important;
+}
+
+/* Active menu tab text and icons */
+.dark .admin-sidebar-link-active span,
+.dark .admin-sidebar-link-active svg,
+.dark .admin-sidebar-link-active * {
+  color: #5da0f5 !important;
+}
+
+/* Inactive menu tabs - transparent with lighter text */
+.dark .admin-sidebar-link-inactive {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: #94a3b8 !important;
+  border-left: 3px solid transparent !important;
+}
+
+/* Inactive menu tab text and icons */
+.dark .admin-sidebar-link-inactive span,
+.dark .admin-sidebar-link-inactive svg,
+.dark .admin-sidebar-link-inactive * {
+  color: #94a3b8 !important;
+}
+
+/* Hover state for inactive tabs */
+.dark .admin-sidebar-link-inactive:hover {
+  background-color: rgba(30, 58, 138, 0.3) !important;
+  background: rgba(30, 58, 138, 0.3) !important;
+  color: #5da0f5 !important;
+  border-left: 3px solid rgba(93, 160, 245, 0.5) !important;
+}
+
+.dark .admin-sidebar-link-inactive:hover span,
+.dark .admin-sidebar-link-inactive:hover svg,
+.dark .admin-sidebar-link-inactive:hover * {
+  color: #5da0f5 !important;
+}
+
+/* Remove any conflicting gradients or overlays */
+.dark .admin-sidebar-link-active::before,
+.dark .admin-sidebar-link-active::after {
+  display: none !important;
+}
+
+/* Force override any Ant Design or other styles */
+.dark a.admin-sidebar-link-active,
+.dark .admin-sidebar a.admin-sidebar-link-active,
+.dark nav a.admin-sidebar-link-active,
+.dark [class*="sidebar"] a.admin-sidebar-link-active {
+  background-color: #1e3a8a !important;
+  background: #1e3a8a !important;
+  color: #5da0f5 !important;
+}
+
+.dark a.admin-sidebar-link-inactive,
+.dark .admin-sidebar a.admin-sidebar-link-inactive,
+.dark nav a.admin-sidebar-link-inactive,
+.dark [class*="sidebar"] a.admin-sidebar-link-inactive {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: #94a3b8 !important;
+}
+
+/* Mobile sidebar menu tabs */
+.dark .md\:hidden .admin-sidebar-link-active,
+.dark .fixed .admin-sidebar-link-active {
+  background-color: #1e3a8a !important;
+  background: #1e3a8a !important;
+  color: #5da0f5 !important;
+}
+
+.dark .md\:hidden .admin-sidebar-link-inactive,
+.dark .fixed .admin-sidebar-link-inactive {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: #94a3b8 !important;
+}
+
+/* Desktop sidebar menu tabs */
+.dark .md\:flex .admin-sidebar-link-active,
+.dark .hidden.md\:flex .admin-sidebar-link-active {
+  background-color: #1e3a8a !important;
+  background: #1e3a8a !important;
+  color: #5da0f5 !important;
+}
+
+.dark .md\:flex .admin-sidebar-link-inactive,
+.dark .hidden.md\:flex .admin-sidebar-link-inactive {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: #94a3b8 !important;
+}
+
+/* Target by React Router Link component */
+.dark a[class*="admin-sidebar-link-active"] {
+  background-color: #1e3a8a !important;
+  background: #1e3a8a !important;
+  color: #5da0f5 !important;
+}
+
+.dark a[class*="admin-sidebar-link-inactive"] {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: #94a3b8 !important;
+}
+
+/* Highest specificity overrides */
+html.dark body .admin-sidebar-link-active {
+  background-color: #1e3a8a !important;
+  background: #1e3a8a !important;
+  color: #5da0f5 !important;
+}
+
+html.dark body .admin-sidebar-link-inactive {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: #94a3b8 !important;
+}
+
+/* Remove any linear gradients that might be applied */
+.dark .admin-sidebar-link-active {
+  background-image: none !important;
+}
+
+/* Badge styling for menu items */
+.dark .admin-sidebar-link-active .absolute.right-2 {
+  background-color: #5da0f5 !important;
+  color: #1e3a8a !important;
+}
+
+.dark .admin-sidebar-link-inactive .absolute.right-2 {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+/* Focus states */
+.dark .admin-sidebar-link-active:focus,
+.dark .admin-sidebar-link-active:focus-visible {
+  outline: 2px solid #5da0f5 !important;
+  outline-offset: 2px !important;
+}
+
+.dark .admin-sidebar-link-inactive:focus,
+.dark .admin-sidebar-link-inactive:focus-visible {
+  outline: 2px solid #5da0f5 !important;
+  outline-offset: 2px !important;
+}
+
+/* ===== LIGHT THEME MENU TAB STYLES (keeping existing) ===== */
+
+/* Active menu tab - Light theme */
+.admin-sidebar-link-active {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+/* Inactive menu tab - Light theme */
+.admin-sidebar-link-inactive {
+  background-color: transparent !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.admin-sidebar-link-inactive:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}

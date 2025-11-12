@@ -1,0 +1,16 @@
+{
+  "common": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "settings": "Настройки",
+    "language": "Язык"
+  },
+  "settings": {
+    "title": "Настройки",
+    "display": {
+      "title": "Настройки отображения",
+      "language": "Язык"
+    }
+  }
+}

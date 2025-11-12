@@ -1,0 +1,67 @@
+services:
+  # Backend API Service
+  - type: web
+    name: linkage-va-hub-api
+    plan: starter
+    runtime: node
+    repo: https://github.com/customadesign/va-hum-mern
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # Set in Render dashboard
+      - key: JWT_SECRET
+        generateValue: true # Render will generate a secure random value
+      - key: JWT_EXPIRE
+        value: 30d
+      - key: CLIENT_URL
+        value: https://linkage-va-hub.onrender.com # Update after frontend deploys
+      - key: SERVER_URL
+        value: https://linkage-va-hub-api.onrender.com
+      - key: PORT
+        value: 8000
+      - key: RATE_LIMIT_WINDOW
+        value: 15
+      - key: RATE_LIMIT_MAX
+        value: 100
+      - key: SUPABASE_URL
+        sync: false # Set in Render dashboard
+      - key: SUPABASE_ANON_KEY
+        sync: false # Set in Render dashboard
+      - key: SUPABASE_BUCKET
+        value: linkage-va-hub # Or your bucket name
+
+  # Frontend Web Service (serving static build)
+  - type: web
+    name: linkage-va-hub
+    runtime: node
+    repo: https://github.com/customadesign/va-hum-mern
+    buildCommand: cd frontend && rm -rf node_modules package-lock.json && npm install --legacy-peer-deps && npm run build
+    startCommand: cd frontend && npm run serve
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://linkage-va-hub-api.onrender.com/api # Update after backend deploys
+      - key: REACT_APP_LINKEDIN_CLIENT_ID
+        value: 862opndk5vhk47 # LinkedIn OAuth Client ID
+
+  # Admin Frontend Service
+  - type: web
+    name: admin
+    runtime: node
+    repo: https://github.com/customadesign/va-hum-mern
+    buildCommand: cd admin-frontend && rm -rf node_modules package-lock.json && npm install --legacy-peer-deps && npm run build
+    startCommand: cd admin-frontend && npx serve -s build -p $PORT --no-clipboard
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REACT_APP_API_URL
+        value: https://linkage-va-hub-api.onrender.com/api
+      - key: REACT_APP_SOCKET_URL
+        value: https://linkage-va-hub-api.onrender.com
+      - key: REACT_APP_BRAND
+        value: admin
+      - key: REACT_APP_NAME
+        value: Linkage VA Hub Admin
+      # Clerk removed: no publishable key needed

@@ -1,0 +1,367 @@
+/* Dark Theme Overrides - Force dark theme styles */
+
+/* Ensure dark theme is applied to all layout elements */
+.dark {
+  background-color: #0f0f0f !important;
+  color: #f3f4f6 !important;
+}
+
+/* Layout Header - Force dark background */
+.dark .ant-layout-header,
+.dark [class*="MobileResponsiveLayout"] .ant-layout-header,
+.dark [class*="layout-header"],
+html.dark .ant-layout-header {
+  background-color: #1a1a1a !important;
+  border-bottom: 1px solid #333333 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Removed sidebar override to allow custom admin-sidebar gradient */
+
+/* Main Content Area */
+.dark .ant-layout-content,
+.dark [class*="MobileResponsiveLayout"] .ant-layout-content,
+html.dark .ant-layout-content {
+  background-color: #0f0f0f !important;
+  color: #f3f4f6 !important;
+}
+
+/* Cards and Widgets - Force dark theme */
+.dark .ant-card,
+.dark [class*="card"],
+.dark [class*="Card"],
+html.dark .ant-card {
+  background-color: #1a1a1a !important;
+  border: 1px solid #333333 !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .ant-card-head,
+.dark .ant-card-header,
+html.dark .ant-card-head {
+  background-color: #1f1f1f !important;
+  border-bottom: 1px solid #333333 !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .ant-card-body,
+html.dark .ant-card-body {
+  background-color: #1a1a1a !important;
+  color: #f3f4f6 !important;
+}
+
+/* Statistics Cards - Force dark theme */
+.dark .ant-statistic,
+.dark [class*="statistic"],
+html.dark .ant-statistic {
+  color: #f3f4f6 !important;
+}
+
+.dark .ant-statistic-title,
+html.dark .ant-statistic-title {
+  color: #d1d5db !important;
+}
+
+.dark .ant-statistic-content,
+.dark .ant-statistic-content-value,
+.dark .ant-statistic-content-value-int,
+.dark .ant-statistic-content-value-decimal,
+html.dark .ant-statistic-content {
+  color: #f3f4f6 !important;
+}
+
+/* Tables - Force dark theme */
+.dark .ant-table,
+.dark .ant-table-container,
+html.dark .ant-table {
+  background-color: #1a1a1a !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .ant-table-thead > tr > th,
+html.dark .ant-table-thead > tr > th {
+  background-color: #1f1f1f !important;
+  border-bottom: 1px solid #333333 !important;
+  color: #d1d5db !important;
+}
+
+.dark .ant-table-tbody > tr > td,
+html.dark .ant-table-tbody > tr > td {
+  background-color: #1a1a1a !important;
+  border-bottom: 1px solid #333333 !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .ant-table-tbody > tr:hover > td,
+html.dark .ant-table-tbody > tr:hover > td {
+  background-color: #2d2d2d !important;
+}
+
+/* Typography - Force dark theme text colors */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
+.dark .ant-typography h1,
+.dark .ant-typography h2, 
+.dark .ant-typography h3,
+.dark .ant-typography h4,
+.dark .ant-typography h5,
+.dark .ant-typography h6,
+.dark .ant-typography-title,
+html.dark .ant-typography {
+  color: #f3f4f6 !important;
+}
+
+.dark .ant-typography,
+.dark .ant-typography-text,
+html.dark .ant-typography {
+  color: #f3f4f6 !important;
+}
+
+.dark .ant-typography-secondary,
+html.dark .ant-typography-secondary {
+  color: #d1d5db !important;
+}
+
+/* Buttons - Force dark theme */
+.dark .ant-btn:not(.ant-btn-primary):not(.ant-btn-danger),
+html.dark .ant-btn:not(.ant-btn-primary):not(.ant-btn-danger) {
+  background-color: #1f1f1f !important;
+  border-color: #333333 !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .ant-btn:not(.ant-btn-primary):not(.ant-btn-danger):hover,
+html.dark .ant-btn:not(.ant-btn-primary):not(.ant-btn-danger):hover {
+  background-color: #2d2d2d !important;
+  border-color: #404040 !important;
+  color: #ffffff !important;
+}
+
+.dark .ant-btn-text,
+html.dark .ant-btn-text {
+  background-color: transparent !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .ant-btn-text:hover,
+html.dark .ant-btn-text:hover {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+/* Input and Form Controls */
+.dark .ant-input,
+.dark .ant-input-group-addon,
+html.dark .ant-input {
+  background-color: #1f1f1f !important;
+  border-color: #333333 !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .ant-input::placeholder,
+html.dark .ant-input::placeholder {
+  color: #9ca3af !important;
+}
+
+.dark .ant-select-selector,
+html.dark .ant-select-selector {
+  background-color: #1f1f1f !important;
+  border-color: #333333 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Modals */
+.dark .ant-modal-content,
+.dark .ant-modal-header,
+.dark .ant-modal-body,
+.dark .ant-modal-footer,
+html.dark .ant-modal-content {
+  background-color: #1a1a1a !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .ant-modal-header,
+html.dark .ant-modal-header {
+  border-bottom: 1px solid #333333 !important;
+}
+
+.dark .ant-modal-footer,
+html.dark .ant-modal-footer {
+  border-top: 1px solid #333333 !important;
+}
+
+/* Tabs */
+.dark .ant-tabs-nav,
+html.dark .ant-tabs-nav {
+  background-color: transparent !important;
+}
+
+.dark .ant-tabs-tab,
+html.dark .ant-tabs-tab {
+  color: #d1d5db !important;
+}
+
+.dark .ant-tabs-tab:hover,
+html.dark .ant-tabs-tab:hover {
+  color: #f3f4f6 !important;
+}
+
+.dark .ant-tabs-tab-active .ant-tabs-tab-btn,
+html.dark .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #60a5fa !important;
+}
+
+.dark .ant-tabs-ink-bar,
+html.dark .ant-tabs-ink-bar {
+  background-color: #60a5fa !important;
+}
+
+/* Dropdown and Menu */
+.dark .ant-dropdown,
+.dark .ant-dropdown-menu,
+html.dark .ant-dropdown {
+  background-color: #1a1a1a !important;
+  border: 1px solid #333333 !important;
+}
+
+.dark .ant-dropdown-menu-item,
+html.dark .ant-dropdown-menu-item {
+  color: #f3f4f6 !important;
+}
+
+.dark .ant-dropdown-menu-item:hover,
+html.dark .ant-dropdown-menu-item:hover {
+  background-color: #2d2d2d !important;
+}
+
+/* Notification specific styles */
+.dark .unread-row,
+html.dark .unread-row {
+  background-color: rgba(96, 165, 250, 0.1) !important;
+}
+
+.dark .unread-row:hover td,
+html.dark .unread-row:hover td {
+  background-color: rgba(96, 165, 250, 0.15) !important;
+}
+
+.dark .archived-row,
+html.dark .archived-row {
+  background-color: #1f1f1f !important;
+  opacity: 0.9;
+}
+
+.dark .archived-row:hover td,
+html.dark .archived-row:hover td {
+  background-color: #2d2d2d !important;
+}
+
+/* Icons */
+.dark .anticon,
+.dark [class*="icon"],
+html.dark .anticon {
+  color: #d1d5db !important;
+}
+
+.dark .anticon:hover,
+html.dark .anticon:hover {
+  color: #f3f4f6 !important;
+}
+
+/* Badges and Tags */
+.dark .ant-tag,
+html.dark .ant-tag {
+  background-color: #1f1f1f !important;
+  border-color: #333333 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Tooltips */
+.dark .ant-tooltip-inner,
+html.dark .ant-tooltip-inner {
+  background-color: #2d2d2d !important;
+  color: #f3f4f6 !important;
+}
+
+/* Empty states */
+.dark .ant-empty,
+.dark .ant-empty-description,
+html.dark .ant-empty {
+  color: #9ca3af !important;
+}
+
+/* Dividers */
+.dark .ant-divider,
+html.dark .ant-divider {
+  border-color: #333333 !important;
+}
+
+.dark .ant-divider-inner-text,
+html.dark .ant-divider-inner-text {
+  color: #d1d5db !important;
+}
+
+/* Spin/Loading */
+.dark .ant-spin-dot-item,
+html.dark .ant-spin-dot-item {
+  background-color: #60a5fa !important;
+}
+
+/* Row and Column */
+.dark .ant-row,
+.dark .ant-col,
+html.dark .ant-row,
+html.dark .ant-col {
+  color: #f3f4f6 !important;
+}
+
+/* Popconfirm */
+.dark .ant-popover-inner,
+html.dark .ant-popover-inner {
+  background-color: #1a1a1a !important;
+  border: 1px solid #333333 !important;
+}
+
+.dark .ant-popover-title,
+html.dark .ant-popover-title {
+  color: #f3f4f6 !important;
+  border-bottom: 1px solid #333333 !important;
+}
+
+.dark .ant-popover-inner-content,
+html.dark .ant-popover-inner-content {
+  color: #f3f4f6 !important;
+}
+
+/* Ensure theme persistence by adding important to all styles */
+.dark *,
+html.dark * {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease !important;
+}
+
+/* Force dark theme on body and html */
+html.dark,
+html.dark body {
+  background-color: #0f0f0f !important;
+  color: #f3f4f6 !important;
+}
+
+/* Override any inline styles that might interfere */
+.dark [style*="background"],
+.dark [style*="color"] {
+  background-color: #1a1a1a !important;
+  color: #f3f4f6 !important;
+}
+
+/* Special override for header elements that use inline styles */
+.dark .ant-layout-header[style],
+html.dark .ant-layout-header[style] {
+  background-color: #1a1a1a !important;
+  background: #1a1a1a !important;
+}
+
+/* Special override for card elements that use inline styles */
+.dark .ant-card[style],
+html.dark .ant-card[style] {
+  background-color: #1a1a1a !important;
+  background: #1a1a1a !important;
+}

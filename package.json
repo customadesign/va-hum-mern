@@ -1,0 +1,37 @@
+{
+  "name": "linkage-va-hub-mern",
+  "version": "1.0.0",
+  "description": "Linkage VA Hub - MERN Stack Implementation",
+  "main": "index.js",
+  "scripts": {
+    "preinstall": "npm config set legacy-peer-deps true",
+    "postinstall": "echo 'Skipping postinstall - dependencies are in subdirectories'",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm start",
+    "build": "cd frontend && npm install --legacy-peer-deps && npm run build",
+    "build-admin": "cd admin-frontend && npm install --legacy-peer-deps && npm run build",
+    "install-all": "./fix-dependencies.sh",
+    "clean": "rm -rf node_modules package-lock.json && cd backend && rm -rf node_modules package-lock.json && cd ../frontend && rm -rf node_modules package-lock.json && cd ../admin-frontend && rm -rf node_modules package-lock.json && cd ../esystems-frontend && rm -rf node_modules package-lock.json && cd ../esystems-backend && rm -rf node_modules package-lock.json && cd ..",
+    "setup-mongodb": "node setup-mongodb.js",
+    "test-mongodb": "node test-mongodb-connection.js",
+    "get-mongodb-uri": "node get-mongodb-uri.js"
+  },
+  "keywords": [
+    "virtual-assistant",
+    "marketplace",
+    "mern"
+  ],
+  "author": "Linkage Web Solutions",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.55.0",
+    "axios": "^1.11.0",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.2",
+    "mongoose": "^8.18.1"
+  }
+}

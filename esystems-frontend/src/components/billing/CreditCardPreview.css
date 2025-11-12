@@ -1,0 +1,80 @@
+/* 3D Card Flip Styles */
+.transform-style-preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Card hover effects */
+.credit-card-preview {
+  perspective: 1000px;
+}
+
+.credit-card-preview .card-container {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.credit-card-preview .card-container:hover {
+  transform: rotateY(5deg) rotateX(5deg);
+}
+
+/* Shimmer effect for loading states */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background-size: 200px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Typing animation for placeholder text */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+.typing-animation {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 2s steps(40, end);
+}
+
+/* Glow effect for focused elements */
+.card-glow {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+}
+
+/* Card brand specific gradients */
+.visa-gradient {
+  background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+}
+
+.mastercard-gradient {
+  background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%);
+}
+
+.amex-gradient {
+  background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+}
+
+.discover-gradient {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+}
+
+.generic-gradient {
+  background: linear-gradient(135deg, #374151 0%, #111827 100%);
+}

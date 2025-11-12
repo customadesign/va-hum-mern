@@ -1,0 +1,16 @@
+{
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "settings": "Einstellungen",
+    "language": "Sprache"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "display": {
+      "title": "Anzeigeeinstellungen",
+      "language": "Sprache"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "common": {
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "delete": "हटाएं",
+    "settings": "सेटिंग्स",
+    "language": "भाषा"
+  },
+  "settings": {
+    "title": "सेटिंग्स",
+    "display": {
+      "title": "प्रदर्शन सेटिंग्स",
+      "language": "भाषा"
+    }
+  }
+}

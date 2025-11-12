@@ -1,0 +1,14 @@
+# Simple Test PRD
+
+## Overview
+Test PRD for TaskMaster functionality.
+
+## Features
+- Authentication system
+- File storage
+- User profiles
+
+## Implementation
+- Set up authentication
+- Implement file uploads
+- Create user management

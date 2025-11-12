@@ -1,0 +1,156 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Create SignPreview Component Structure",
+        "description": "Develop the core SignPreview component that accepts width, height, and unit as props and renders an SVG-based preview.",
+        "details": "Create a new React component with TypeScript:\n\n```typescript\ninterface SignPreviewProps {\n  width: number;\n  height: number;\n  unit: string;\n}\n\nconst SignPreview: React.FC<SignPreviewProps> = ({ width, height, unit }) => {\n  // Validate dimensions\n  if (width <= 0 || height <= 0) {\n    return <div className=\"sign-preview-error\">Invalid dimensions</div>;\n  }\n\n  // Basic SVG structure with 220x220 viewBox\n  return (\n    <div className=\"sign-preview-container\">\n      <svg \n        viewBox=\"0 0 220 220\" \n        xmlns=\"http://www.w3.org/2000/svg\"\n        className=\"sign-preview\"\n      >\n        {/* Sign rectangle will be added in Task 2 */}\n        {/* Labels and guides will be added in Task 3 */}\n      </svg>\n    </div>\n  );\n};\n\nexport default SignPreview;\n```\n\nAdd basic styling with styled-components:\n\n```typescript\nconst PreviewContainer = styled.div`\n  width: 100%;\n  max-width: 300px;\n  margin: 0 auto;\n  transition: all 200ms ease-out;\n`;\n\nconst StyledSVG = styled.svg`\n  width: 100%;\n  height: auto;\n  border: 1px solid #e5e7eb;\n  border-radius: 8px;\n  background-color: #f9fafb;\n`;\n```\n\nIntegrate the component into the existing QuoteWizard Step 1, replacing the static preview placeholder:\n\n```typescript\n// In QuoteWizard Step 1\nimport SignPreview from './SignPreview';\n\n// Within the render method\n<SignPreview \n  width={formState.width} \n  height={formState.height} \n  unit={formState.unit} \n/>\n```",
+        "testStrategy": "1. Unit test the component with various valid and invalid props combinations\n2. Verify component renders without errors\n3. Check that error state is displayed when invalid dimensions are provided\n4. Confirm SVG viewBox is correctly set to 220x220\n5. Verify component integration in QuoteWizard Step 1\n6. Test that component receives updates from form state",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement Scaling Algorithm",
+        "description": "Develop the proportional scaling algorithm that maintains aspect ratio and properly sizes the sign within the viewBox constraints.",
+        "details": "Enhance the SignPreview component with scaling logic:\n\n```typescript\nconst SignPreview: React.FC<SignPreviewProps> = ({ width, height, unit }) => {\n  // Validation code from Task 1\n  \n  // Calculate aspect ratio and dimensions\n  const aspectRatio = width / height;\n  \n  // Determine optimal scaling (max size 160 units, min 28 units)\n  let scaledWidth, scaledHeight;\n  \n  if (aspectRatio >= 1) { // Landscape or square\n    scaledWidth = Math.min(160, Math.max(28, 160));\n    scaledHeight = scaledWidth / aspectRatio;\n    \n    // Ensure minimum height\n    if (scaledHeight < 28) {\n      scaledHeight = 28;\n      scaledWidth = scaledHeight * aspectRatio;\n    }\n  } else { // Portrait\n    scaledHeight = Math.min(160, Math.max(28, 160));\n    scaledWidth = scaledHeight * aspectRatio;\n    \n    // Ensure minimum width\n    if (scaledWidth < 28) {\n      scaledWidth = 28;\n      scaledHeight = scaledWidth / aspectRatio;\n    }\n  }\n  \n  // Calculate position to center in viewBox\n  const xPosition = (220 - scaledWidth) / 2;\n  const yPosition = (220 - scaledHeight) / 2;\n  \n  return (\n    <div className=\"sign-preview-container\">\n      <svg \n        viewBox=\"0 0 220 220\" \n        xmlns=\"http://www.w3.org/2000/svg\"\n        className=\"sign-preview\"\n      >\n        {/* Sign rectangle with rounded corners */}\n        <rect\n          x={xPosition}\n          y={yPosition}\n          width={scaledWidth}\n          height={scaledHeight}\n          rx=\"8\"\n          fill=\"white\"\n          stroke=\"#1E3A8A\"\n          strokeWidth=\"2\"\n          className=\"sign-shape\"\n        />\n        {/* Labels and guides will be added in Task 3 */}\n      </svg>\n    </div>\n  );\n};\n```\n\nAdd transition styling for smooth dimension changes:\n\n```typescript\nconst StyledRect = styled.rect`\n  transition: all 200ms ease-out;\n`;\n```\n\nImplement a custom hook for memoizing calculations to optimize performance:\n\n```typescript\nfunction useSignDimensions(width: number, height: number) {\n  return useMemo(() => {\n    // Move calculation logic here\n    // Return calculated dimensions and positions\n    return { scaledWidth, scaledHeight, xPosition, yPosition };\n  }, [width, height]);\n}\n```",
+        "testStrategy": "1. Unit test the scaling algorithm with various dimension combinations\n2. Test landscape, portrait, and square sign dimensions\n3. Verify minimum dimensions (28 units) are respected\n4. Confirm maximum dimensions (160 units) are not exceeded\n5. Test that the sign is properly centered in the viewBox\n6. Verify aspect ratio is maintained during scaling\n7. Test edge cases (very small or large dimensions, extreme aspect ratios)",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Add Visual Elements and Labels",
+        "description": "Implement the dimension guides, labels, and formatting to provide clear visual feedback on sign dimensions.",
+        "details": "Enhance the SignPreview component with visual elements:\n\n```typescript\nimport { useMemo } from 'react';\n\n// Number formatting utility\nconst formatNumber = (value: number): string => {\n  const formatter = new Intl.NumberFormat('en-US', {\n    minimumFractionDigits: 0,\n    maximumFractionDigits: 2\n  });\n  \n  return formatter.format(value);\n};\n\nconst SignPreview: React.FC<SignPreviewProps> = ({ width, height, unit }) => {\n  // Previous code from Tasks 1-2\n  \n  // Format dimension labels\n  const formattedWidth = formatNumber(width);\n  const formattedHeight = formatNumber(height);\n  const centralLabel = `${formattedWidth} × ${formattedHeight} ${unit}`;\n  \n  return (\n    <div className=\"sign-preview-container\">\n      <svg viewBox=\"0 0 220 220\" xmlns=\"http://www.w3.org/2000/svg\">\n        {/* Sign rectangle from Task 2 */}\n        \n        {/* Central dimension label */}\n        <text\n          x=\"110\"\n          y=\"110\"\n          textAnchor=\"middle\"\n          dominantBaseline=\"middle\"\n          fill=\"#1E3A8A\"\n          fontSize=\"14\"\n          fontWeight=\"500\"\n          className=\"central-label\"\n        >\n          {centralLabel}\n        </text>\n        \n        {/* Width guide (bottom) */}\n        <line\n          x1={xPosition}\n          y1={yPosition + scaledHeight + 10}\n          x2={xPosition + scaledWidth}\n          y2={yPosition + scaledHeight + 10}\n          stroke=\"#1E3A8A\"\n          strokeWidth=\"1\"\n          strokeDasharray=\"4 2\"\n          className=\"guide-line\"\n        />\n        \n        {/* Width label */}\n        <text\n          x={xPosition + scaledWidth / 2}\n          y={yPosition + scaledHeight + 25}\n          textAnchor=\"middle\"\n          fill=\"#1E3A8A\"\n          fontSize=\"12\"\n          className=\"dimension-label\"\n        >\n          {`${formattedWidth} ${unit}`}\n        </text>\n        \n        {/* Height guide (right) */}\n        <line\n          x1={xPosition + scaledWidth + 10}\n          y1={yPosition}\n          x2={xPosition + scaledWidth + 10}\n          y2={yPosition + scaledHeight}\n          stroke=\"#1E3A8A\"\n          strokeWidth=\"1\"\n          strokeDasharray=\"4 2\"\n          className=\"guide-line\"\n        />\n        \n        {/* Height label */}\n        <text\n          x={xPosition + scaledWidth + 25}\n          y={yPosition + scaledHeight / 2}\n          textAnchor=\"middle\"\n          dominantBaseline=\"middle\"\n          fill=\"#1E3A8A\"\n          fontSize=\"12\"\n          transform={`rotate(90, ${xPosition + scaledWidth + 25}, ${yPosition + scaledHeight / 2})`}\n          className=\"dimension-label\"\n        >\n          {`${formattedHeight} ${unit}`}\n        </text>\n      </svg>\n    </div>\n  );\n};\n```\n\nAdd additional styling for the visual elements:\n\n```typescript\nconst StyledText = styled.text`\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n  transition: all 200ms ease-out;\n`;\n\nconst GuideLine = styled.line`\n  transition: all 200ms ease-out;\n`;\n```",
+        "testStrategy": "1. Test number formatting with various inputs (integers, decimals, large numbers)\n2. Verify central label displays correctly with proper formatting\n3. Test guide lines positioning for different sign dimensions\n4. Confirm external dimension labels are correctly positioned and formatted\n5. Verify text readability at various sign sizes\n6. Test that all elements transition smoothly during dimension changes\n7. Verify correct use of brand colors (#1E3A8A)\n8. Test with different unit types (inches, feet, cm, etc.)",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Performance Optimization and Browser Testing",
+        "description": "Optimize the component for real-time updates, implement smooth transitions, and ensure cross-browser compatibility.",
+        "details": "Optimize the SignPreview component for performance:\n\n```typescript\nimport React, { useMemo, useCallback } from 'react';\nimport styled from 'styled-components';\n\nconst SignPreview: React.FC<SignPreviewProps> = React.memo(({ width, height, unit }) => {\n  // Memoize calculations to prevent unnecessary re-renders\n  const { \n    scaledWidth, \n    scaledHeight, \n    xPosition, \n    yPosition,\n    formattedWidth,\n    formattedHeight,\n    centralLabel\n  } = useMemo(() => {\n    // Move all calculations here from previous tasks\n    // Return all computed values\n    return { \n      scaledWidth, \n      scaledHeight, \n      xPosition, \n      yPosition,\n      formattedWidth: formatNumber(width),\n      formattedHeight: formatNumber(height),\n      centralLabel: `${formatNumber(width)} × ${formatNumber(height)} ${unit}`\n    };\n  }, [width, height, unit]);\n  \n  // Memoize the SVG elements to prevent unnecessary re-renders\n  const signRectangle = useMemo(() => (\n    <StyledRect\n      x={xPosition}\n      y={yPosition}\n      width={scaledWidth}\n      height={scaledHeight}\n      rx=\"8\"\n      fill=\"white\"\n      stroke=\"#1E3A8A\"\n      strokeWidth=\"2\"\n      className=\"sign-shape\"\n    />\n  ), [xPosition, yPosition, scaledWidth, scaledHeight]);\n  \n  // Similarly memoize other SVG elements\n  \n  return (\n    <PreviewContainer>\n      <StyledSVG viewBox=\"0 0 220 220\" xmlns=\"http://www.w3.org/2000/svg\">\n        {signRectangle}\n        {/* Other memoized elements */}\n      </StyledSVG>\n    </PreviewContainer>\n  );\n});\n\n// Add browser compatibility CSS\nconst PreviewContainer = styled.div`\n  width: 100%;\n  max-width: 300px;\n  margin: 0 auto;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n`;\n\nconst StyledSVG = styled.svg`\n  width: 100%;\n  height: auto;\n  border: 1px solid #e5e7eb;\n  border-radius: 8px;\n  background-color: #f9fafb;\n  \n  @media (prefers-reduced-motion: reduce) {\n    * {\n      transition: none !important;\n    }\n  }\n`;\n```\n\nImplement debouncing for dimension input changes to prevent excessive re-renders:\n\n```typescript\n// In the parent component that manages form state\nimport { useDebounce } from 'use-debounce';\n\nfunction QuoteWizardStep1() {\n  const [dimensions, setDimensions] = useState({ width: 48, height: 24, unit: 'in' });\n  \n  // Debounce dimension changes for smoother updates\n  const [debouncedDimensions] = useDebounce(dimensions, 100);\n  \n  return (\n    <div>\n      {/* Form inputs */}\n      <SignPreview \n        width={debouncedDimensions.width} \n        height={debouncedDimensions.height} \n        unit={debouncedDimensions.unit} \n      />\n    </div>\n  );\n}\n```\n\nAdd browser compatibility testing setup:\n\n```javascript\n// browser-compatibility.test.js\nimport { render } from '@testing-library/react';\nimport SignPreview from './SignPreview';\n\ndescribe('SignPreview Browser Compatibility', () => {\n  test('renders correctly with vendor prefixes', () => {\n    const { container } = render(\n      <SignPreview width={48} height={24} unit=\"in\" />\n    );\n    \n    // Check for critical rendering elements\n    expect(container.querySelector('svg')).toBeInTheDocument();\n    expect(container.querySelector('.sign-shape')).toBeInTheDocument();\n    expect(container.querySelector('.central-label')).toBeInTheDocument();\n  });\n});\n```",
+        "testStrategy": "1. Measure render performance using React DevTools Profiler\n2. Test real-time updates with rapid dimension changes\n3. Verify smooth transitions with 200ms ease-out animations\n4. Test cross-browser compatibility on Chrome 90+, Firefox 88+, Safari 14+, and Edge 90+\n5. Verify accessibility features (SVG aria attributes, color contrast)\n6. Test with reduced motion preferences\n7. Verify performance on lower-end devices\n8. Conduct end-to-end testing in the QuoteWizard flow\n9. Verify no regression in existing functionality\n10. Test with various screen sizes and resolutions",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Set up project structure for Contacts and Companies modules",
+        "description": "Create the foundational directory structure for the Contacts and Companies modules, establish TypeScript interfaces, and install required dependencies for form handling, validation, notifications, and file uploads.",
+        "details": "",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Update BaseLayout navigation for Contacts and Companies",
+        "description": "Modify the BaseLayout component to add navigation items for Contacts and Companies, ensuring they link to the correct routes and maintain consistent styling in both desktop and mobile views.",
+        "details": "",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [
+          5
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Create shared UI components",
+        "description": "Build a set of reusable UI components in the components/shared/ directory including SearchBar, StatusBadge, TagPills, Pagination, EmptyState, LoadingSpinner, and ConfirmDialog components with TypeScript interfaces and Tailwind CSS styling.",
+        "details": "",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [
+          5
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Build Contacts List View Component",
+        "description": "Create a ContactsList.tsx component that displays contact data in a table format with pagination, search, filtering, and sorting capabilities, using localStorage for mock data storage.",
+        "details": "",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [
+          5,
+          7
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Contacts List View Page",
+        "description": "Create a page component that integrates the ContactsList component with the BaseLayout, implements routing, and handles data fetching from localStorage to display contacts in a table layout with pagination, search, and filtering.",
+        "details": "",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [
+          6,
+          7,
+          8
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Implement Contact Detail Page",
+        "description": "Create a page component that displays detailed information for a single contact, including full profile information, company link, activity history, notes section, and action buttons for editing and deleting the contact.",
+        "details": "",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [
+          6,
+          7,
+          9
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Build ContactForm with React Hook Form and Zod",
+        "description": "Create a reusable ContactForm component that handles both create and edit flows, implementing React Hook Form with Zod validation, including a tags multi-select and company autocomplete field.",
+        "details": "",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [
+          5,
+          7
+        ],
+        "priority": "high",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-10-01T01:10:50.849Z",
+      "updated": "2025-10-01T01:44:25.826Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

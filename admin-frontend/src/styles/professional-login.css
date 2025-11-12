@@ -1,0 +1,678 @@
+/* Force all login-page icons to white */
+.professional-login-wrapper .ant-input-affix-wrapper .ant-input-prefix .anticon,
+.professional-login-wrapper .ant-input-affix-wrapper .ant-input-suffix .anticon,
+.professional-login-wrapper .input-icon,
+.professional-login-wrapper .login-input .ant-input-password-icon,
+.professional-login-wrapper .anticon {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+/* Professional Login Page Styles */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Main Wrapper */
+.professional-login-wrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Animated Background */
+.animated-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.gradient-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #5b3d8a 0%, #3d2659 50%, #2a1a3f 100%);
+  transition: all 0.5s ease;
+}
+
+.dark .gradient-bg {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+
+/* Animated Shapes */
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.1;
+  animation: float 20s infinite ease-in-out;
+}
+
+.shape-1 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  top: -200px;
+  right: -200px;
+  animation-duration: 25s;
+}
+
+.shape-2 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  bottom: -150px;
+  left: -150px;
+  animation-duration: 20s;
+  animation-delay: -5s;
+}
+
+.shape-3 {
+  width: 250px;
+  height: 250px;
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-duration: 30s;
+  animation-delay: -10s;
+}
+
+.dark .shape {
+  opacity: 0.05;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-30px) rotate(120deg);
+  }
+  66% {
+    transform: translateY(30px) rotate(240deg);
+  }
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
+}
+
+.dark .theme-toggle-btn {
+  background: rgba(45, 45, 60, 0.95);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Login Content */
+.login-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 450px;
+  padding: 20px;
+}
+
+/* Login Box */
+.login-box {
+  background: rgba(76, 50, 110, 0.92);
+  border-radius: 24px;
+  padding: 48px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  transition: all 0.3s ease;
+}
+
+.dark .login-box {
+  background: #0d0d1a !important; /* pure solid dark, no gray tint */
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85) !important;
+  backdrop-filter: none !important;
+  color: #ffffff !important;
+}
+
+/* Force Ant Design and custom inputs to dark theme */
+.dark .login-input,
+.dark .ant-input,
+.dark .ant-input-affix-wrapper,
+.dark .ant-input-password {
+  background: #1a1a2f !important;
+/* Login Page Icon Overrides - force white for login page */
+.login-force-light-theme .input-icon,
+.login-force-light-theme .ant-input-password-icon,
+.login-force-light-theme .anticon {
+  color: #ffffff !important;
+}
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+
+.dark .ant-input::placeholder,
+.dark .login-input::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.dark .anticon,
+.dark .input-icon {
+  color: rgba(255,255,255,0.9) !important;
+}
+
+/* Ensure all Ant Design icons are visible in both themes */
+.anticon,
+.input-icon {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Full override for Ant Design input wrappers in dark mode */
+.dark .ant-input-affix-wrapper,
+.dark .ant-input-affix-wrapper:hover,
+.dark .ant-input-affix-wrapper:focus,
+.dark .ant-input-affix-wrapper-focused,
+.dark .ant-input-affix-wrapper > input.ant-input,
+.dark input.ant-input {
+  background-color: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  padding: 12px 0 !important;
+  border-radius: 0 !important;
+}
+
+.dark .ant-input-affix-wrapper > input.ant-input::placeholder,
+.dark input.ant-input::placeholder {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+/* Brand Section */
+.login-brand {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.brand-logo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.dark .brand-logo {
+  background: #0d0d1a; /* match container background for seamless dark theme */
+  box-shadow: none; /* remove shadow to blend better */
+}
+
+.brand-logo::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.logo-text {
+    font-size: 36px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.dark .logo-text {
+    color: #ffffff !important;
+}
+
+.brand-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.dark .brand-title {
+    color: #f7fafc !important;
+}
+
+.brand-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-weight: 400;
+}
+
+.dark .brand-subtitle {
+    color: #f7fafc !important;
+}
+
+/* Login Form */
+.login-form {
+  margin-bottom: 24px;
+}
+
+.login-form .ant-form-item {
+  margin-bottom: 20px;
+}
+
+/* Input Styles */
+.login-input,
+.login-input.ant-input-affix-wrapper,
+.ant-input-password.login-input {
+  height: 48px !important;
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  border: 2px solid rgba(139, 92, 246, 0.3) !important;
+  background: rgba(139, 92, 246, 0.08) !important;
+  color: #ffffff !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Target the actual input element inside Ant Design wrappers */
+.login-input input.ant-input,
+.login-input.ant-input-affix-wrapper input.ant-input,
+.ant-input-password.login-input input.ant-input {
+  background: rgba(139, 92, 246, 0.08) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Override the problematic .login-force-light-theme class */
+.login-force-light-theme .login-input,
+.login-force-light-theme .login-input.ant-input-affix-wrapper,
+.login-force-light-theme .ant-input-password.login-input {
+  background: rgba(139, 92, 246, 0.08) !important;
+  border: 2px solid rgba(139, 92, 246, 0.3) !important;
+}
+
+.login-force-light-theme .login-input input.ant-input,
+.login-force-light-theme .login-input.ant-input-affix-wrapper input.ant-input,
+.login-force-light-theme .ant-input-password.login-input input.ant-input {
+  background: rgba(139, 92, 246, 0.08) !important;
+  color: #ffffff !important;
+}
+
+.dark .login-input,
+.dark .login-input.ant-input-affix-wrapper,
+.dark .ant-input-password.login-input {
+  background: transparent; /* fully seamless */
+  border: none;
+  color: #f7fafc;
+  padding: 12px 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.login-input:hover,
+.login-input.ant-input-affix-wrapper:hover,
+.ant-input-password.login-input:hover {
+  border-color: #667eea;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.dark .login-input:hover,
+.dark .login-input.ant-input-affix-wrapper:hover,
+.dark .ant-input-password.login-input:hover {
+  background: rgba(255,255,255,0.05); /* subtle highlight on hover for visibility */
+}
+
+.login-input:focus,
+.login-input.ant-input-affix-wrapper-focused,
+.ant-input-password.login-input.ant-input-affix-wrapper-focused,
+.login-input.ant-input-affix-wrapper:focus,
+.ant-input-password.login-input:focus {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  outline: none;
+}
+
+.dark .login-input:focus,
+.dark .login-input.ant-input-affix-wrapper-focused,
+.dark .ant-input-password.login-input.ant-input-affix-wrapper-focused,
+.dark .login-input.ant-input-affix-wrapper:focus,
+.dark .ant-input-password.login-input:focus {
+  background: rgba(255,255,255,0.05) !important;
+  box-shadow: 0 0 0 2px rgba(79,172,254,0.2) !important;
+}
+
+/* Input Icons */
+.input-icon {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 18px;
+  margin-right: 8px;
+}
+
+.dark .input-icon {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Input placeholders */
+.login-input input::placeholder,
+.ant-input-password.login-input input::placeholder,
+.login-input input.ant-input::placeholder,
+.login-input.ant-input-affix-wrapper input.ant-input::placeholder,
+.ant-input-password.login-input input.ant-input::placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.dark .login-input input::placeholder,
+.dark .ant-input-password.login-input input::placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Override Ant Design input backgrounds in dark mode */
+.dark .ant-input,
+.dark .ant-input-affix-wrapper input,
+.dark .ant-input-password input {
+  background: rgba(30, 30, 45, 1) !important;
+  color: #f7fafc !important;
+}
+
+.dark .ant-input::placeholder,
+.dark .ant-input-affix-wrapper input::placeholder,
+.dark .ant-input-password input::placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Password visibility icon */
+.ant-input-password-icon {
+  color: rgba(255, 255, 255, 0.9) !important;
+  transition: color 0.3s ease;
+}
+
+.ant-input-password-icon:hover {
+  color: rgba(255, 255, 255, 1) !important;
+}
+
+.dark .ant-input-password-icon {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.dark .ant-input-password-icon:hover {
+  color: rgba(255, 255, 255, 1) !important;
+}
+
+/* Login Button */
+.login-button {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  color: #000;
+}
+
+.login-button:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+
+.dark .login-button {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+  color: #000;
+}
+
+.dark .login-button:hover {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  box-shadow: 0 15px 40px rgba(79, 172, 254, 0.4);
+}
+
+/* Demo Credentials */
+.demo-credentials {
+  background: rgba(139, 92, 246, 0.15);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.dark .demo-credentials {
+  background: #0d0d1a; /* solid to remove gray transparency */
+  border: none;
+}
+
+.demo-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff !important; /* Force white text with !important to override Ant Design */
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dark .demo-title {
+  color: #f7fafc !important;
+}
+
+.demo-info code {
+  display: block;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 13px;
+  color: #ffffff !important; /* Force white text with !important to override Ant Design */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .demo-info code {
+  background: rgba(30, 30, 45, 0.5);
+  color: #f7fafc !important;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Login Footer */
+.login-footer {
+  text-align: center;
+}
+
+.login-footer p {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.95) !important; /* Increase opacity and force with !important to override Ant Design */
+  margin: 0;
+}
+
+.dark .login-footer p {
+  color: #f7fafc !important;
+}
+
+/* Loading State */
+.login-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Error Messages */
+.ant-form-item-explain-error {
+    font-size: 13px;
+    margin-top: 4px;
+    color: #ffffff !important;
+}
+
+/* Success/Error Messages */
+.ant-message {
+  top: 24px;
+}
+
+.ant-message-notice-content {
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .login-content {
+    padding: 16px;
+  }
+
+  .login-box {
+    padding: 32px 24px;
+  }
+
+  .brand-title {
+    font-size: 24px;
+  }
+
+  .brand-subtitle {
+    font-size: 14px;
+  }
+
+  .theme-toggle-btn {
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .shape-1 {
+    width: 300px;
+    height: 300px;
+  }
+
+  .shape-2 {
+    width: 200px;
+    height: 200px;
+  }
+
+  .shape-3 {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-box {
+    padding: 28px 20px;
+    border-radius: 20px;
+  }
+
+  .brand-logo {
+    width: 70px;
+    height: 70px;
+  }
+
+  .logo-text {
+    font-size: 30px;
+  }
+
+  .brand-title {
+    font-size: 22px;
+  }
+
+  .login-input,
+  .login-input.ant-input-affix-wrapper,
+  .ant-input-password.login-input,
+  .login-button {
+    height: 44px;
+    font-size: 15px;
+  }
+}
+
+/* Remove Ant Design input suffix background */
+.ant-input-affix-wrapper .ant-input-suffix {
+  background: transparent !important;
+}
+
+/* Fix for autofill background */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #2d3748;
+  -webkit-box-shadow: 0 0 0 1000px #f7fafc inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #f7fafc;
+  -webkit-box-shadow: 0 0 0 1000px rgba(45, 45, 60, 0.5) inset;
+}
+
+/* Remove unnecessary Ant Design error styling */
+.ant-form-item-has-error .login-input,
+.ant-form-item-has-error .login-input.ant-input-affix-wrapper,
+.ant-form-item-has-error .ant-input-password.login-input {
+  border-color: #fc8181 !important;
+}
+
+.ant-form-item-has-error .login-input:focus,
+.ant-form-item-has-error .login-input.ant-input-affix-wrapper-focused,
+.ant-form-item-has-error .ant-input-password.login-input.ant-input-affix-wrapper-focused {
+  box-shadow: 0 0 0 3px rgba(252, 129, 129, 0.2) !important;
+}
+/* Login Page Icon Overrides for both themes */
+.login-force-light-theme .anticon,
+.login-force-light-theme svg,
+.professional-login-wrapper .anticon,
+.professional-login-wrapper svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}

@@ -1,0 +1,91 @@
+services:
+  # E-Systems Backend Service - Fixed Configuration
+  - type: web
+    name: esystems-backend
+    plan: starter
+    runtime: node
+    region: oregon
+    repo: https://github.com/customadesign/va-hum-mern
+    branch: main
+    rootDir: esystems-backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ESYSTEMS_MODE
+        value: "true"
+      - key: MONGODB_URI
+        sync: false # Set in Render dashboard
+      - key: JWT_SECRET
+        sync: false # Set in Render dashboard
+      - key: JWT_EXPIRE
+        value: 30d
+      - key: CLIENT_URL
+        value: https://esystems-management-hub.onrender.com
+      - key: ADMIN_CLIENT_URL
+        value: https://admin-frontend-zbi8.onrender.com
+      - key: SERVER_URL
+        value: https://esystems-backend.onrender.com
+      - key: PORT
+        value: 8000
+      - key: RATE_LIMIT_WINDOW
+        value: 15
+      - key: RATE_LIMIT_MAX
+        value: 100
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: SUPABASE_BUCKET
+        value: linkage-va-hub
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: SENDGRID_FROM_EMAIL
+        sync: false
+      - key: SENDGRID_FROM_NAME
+        value: E-Systems Management Hub
+    healthCheckPath: /health
+
+  # E-Systems Frontend - Static Site
+  - type: static
+    name: esystems-management-hub
+    runtime: static
+    repo: https://github.com/customadesign/va-hum-mern
+    branch: main
+    buildCommand: cd esystems-frontend && npm install --legacy-peer-deps && npm run build
+    publishPath: esystems-frontend/build
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REACT_APP_API_URL
+        value: https://esystems-backend.onrender.com/api
+      - key: REACT_APP_SOCKET_URL
+        value: https://esystems-backend.onrender.com
+      - key: REACT_APP_BRAND
+        value: esystems
+      - key: REACT_APP_NAME
+        value: E-Systems Management Hub
+
+  # Admin Frontend - Static Site  
+  - type: static
+    name: admin-frontend
+    runtime: static
+    repo: https://github.com/customadesign/va-hum-mern
+    branch: main
+    buildCommand: cd admin-frontend && npm install && npm run build
+    publishPath: admin-frontend/build
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REACT_APP_API_URL
+        value: https://linkage-va-hub-api.onrender.com/api
+      - key: REACT_APP_SOCKET_URL
+        value: https://linkage-va-hub-api.onrender.com
+      - key: REACT_APP_BRAND
+        value: admin
+      - key: REACT_APP_NAME
+        value: Linkage VA Hub Admin
+
