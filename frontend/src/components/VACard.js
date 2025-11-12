@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPinIcon, BriefcaseIcon, XMarkIcon, PlayIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { useBranding } from '../contexts/BrandingContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 
 export default function VACard({ va }) {
   const { branding } = useBranding();
-  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
+  const { addToFavorites, isFavorite } = useFavorites();
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -15,24 +15,6 @@ export default function VACard({ va }) {
     message: ''
   });
 
-  const getStatusBadge = () => {
-    switch (va.searchStatus) {
-      case 'actively_looking':
-        return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-            {branding.isESystemsMode ? 'Available now' : 'Actively looking'}
-          </span>
-        );
-      case 'open':
-        return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-            {branding.isESystemsMode ? 'Open to offers' : 'Open to opportunities'}
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
 
   const handleImageClick = (e) => {
     console.log('Video clicked:', va.videoIntroduction);
