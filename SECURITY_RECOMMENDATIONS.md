@@ -45,10 +45,7 @@ MONGODB_URI=mongodb+srv://user:password@cluster/db?ssl=true&authSource=admin
 ```javascript
 // Enhanced connection with security options
 const mongooseOptions = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
   maxPoolSize: 10,
-  bufferMaxEntries: 0,
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
   ssl: true,
