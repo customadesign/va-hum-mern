@@ -245,6 +245,9 @@ export default function Layout() {
                   </Disclosure.Button>
                 ))}
               </div>
+              <div className=" px-4">
+                  <Link to="/vas" className='bg-accent-700 hover:bg-accent-600 text-white px-3 py-2 rounded-md  w-100 block px-4 py-2 text-base font-medium '>Our Talents</Link>
+              </div> 
               {user ? (
                 <div className={classNames(
                   "pt-4 pb-3 border-t",

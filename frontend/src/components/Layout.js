@@ -277,7 +277,7 @@ export default function Layout() {
               </div>
             </div>
 
-            <Disclosure.Panel className="sm:hidden border-b border-gray-200" style={{backgroundColor: '#2173b8'}}>
+            <Disclosure.Panel className="sm:hidden" style={{backgroundColor: '#2173b8'}}>
               <div className="pt-2 pb-3 space-y-1">
                 {navigation.map((item) => (
                   <Disclosure.Button
@@ -295,10 +295,13 @@ export default function Layout() {
                   </Disclosure.Button>
                 ))}
               </div>
+              <div className=" px-4">
+                  <Link to="/vas" className='bg-accent-700 hover:bg-accent-600 text-white px-3 py-2 rounded-md  w-100 block px-4 py-2 text-base font-medium '>Our Talents</Link>
+              </div> 
               {user ? (
                 <div className={classNames(
-                  "pt-4 pb-3 border-t",
-                  branding.isESystemsMode ? "border-gray-600" : "border-gray-200"
+                  "pt-4 pb-3",
+                  branding.isESystemsMode ? "" : ""
                 )}>
                   <div className="flex items-center px-4">
                     <div className="flex-shrink-0">
@@ -373,7 +376,7 @@ export default function Layout() {
                 </div>
               ) : (
                 <div className={classNames(
-                  "pt-4 pb-3 border-t",
+                  "pt-4 pb-3 ",
                   branding.isESystemsMode ? "border-gray-600" : "border-gray-200"
                 )}>
                   <div className="space-y-1">

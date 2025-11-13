@@ -48,3 +48,22 @@ body {
         }
     }
 }
+
+@media (max-width: 767px) {
+    .va-card > .flex {
+        flex-direction: column;
+    }
+    .va-cards .list-item-va-card .va-card > .flex > .flex {
+        width: 100% !important;
+        max-width: unset !important;
+    }
+    .va-cards .list-item-va-card .va-card > .flex > .flex:first-child {
+        flex-direction: column;
+    }
+    .va-cards .list-item-va-card .va-card > .flex > .flex:first-child .ml-6 {
+        margin: 20px 0;
+    }
+    .va-cards .list-item-va-card .va-card > .flex > .va-video-wrapper {
+        margin: 20px 0;
+    }
+}

@@ -5,6 +5,7 @@ body {
 
 :root {
   --primary-color: #09006E;
+  --secondary-color: #EF8F00;
   --grey-color: #ebebeb;
   --primary-light-color: #4332ff;
   --font-color: #000000;
@@ -32,7 +33,26 @@ body {
 }
 .va-cards .list-item-va-card .va-card .va-capabilities li {
   list-style: disc;
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1.4;
   color: var(--font-color);
+}
+
+@media (max-width: 767px) {
+  .va-card > .flex {
+    flex-direction: column;
+  }
+  .va-cards .list-item-va-card .va-card > .flex > .flex {
+    width: 100% !important;
+    max-width: unset !important;
+  }
+  .va-cards .list-item-va-card .va-card > .flex > .flex:first-child {
+    flex-direction: column;
+  }
+  .va-cards .list-item-va-card .va-card > .flex > .flex:first-child .ml-6 {
+    margin: 20px 0;
+  }
+  .va-cards .list-item-va-card .va-card > .flex > .va-video-wrapper {
+    margin: 20px 0;
+  }
 }/*# sourceMappingURL=custom.css.map */
