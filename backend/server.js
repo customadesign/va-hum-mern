@@ -459,7 +459,9 @@ io.on('connection', (socket) => {
 app.set('io', io);
 
 // Import database connection
-const connectDB = require('./config/database');
+const connectDB = process.env.NODE_ENV === 'production' || process.env.RENDER
+  ? require('./config/database-render')
+  : require('./config/database');
 const ensureAdminUser = require('./utils/ensureAdminUser');
 
 // Start server
