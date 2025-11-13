@@ -276,19 +276,6 @@ router.get('/industries', async (req, res) => {
 // @access  Public
 router.get('/featured', async (req, res) => {
   try {
-    // Check database connection first
-    const mongoose = require('mongoose');
-    if (mongoose.connection.readyState !== 1) {
-      console.log('Database not connected, attempting to reconnect...');
-      return res.status(503).json({
-        success: false,
-        error: 'Database temporarily unavailable',
-        retryAfter: 5
-      });
-    }
-
-    console.log('Fetching featured VAs...');
-    
     const vas = await VA.find({
       featuredAt: { $ne: null },
       searchStatus: { $in: ['actively_looking', 'open'] }
@@ -296,39 +283,17 @@ router.get('/featured', async (req, res) => {
       .populate('location')
       .populate('specialties')
       .sort('-featuredAt')
-      .limit(6)
-      .lean(); // Use lean for better performance
-
-    console.log(`Found ${vas.length} featured VAs`);
+      .limit(6);
 
     res.json({
       success: true,
-      data: vas,
-      count: vas.length
+      data: vas
     });
   } catch (err) {
-    console.error('Error in /api/vas/featured:', {
-      message: err.message,
-      stack: err.stack,
-      dbState: mongoose.connection.readyState
-    });
-    
-    // Send more specific error information
-    let errorMessage = 'Server error';
-    let statusCode = 500;
-    
-    if (err.name === 'MongoNetworkError' || err.name === 'MongoTimeoutError') {
-      errorMessage = 'Database connection error';
-      statusCode = 503;
-    } else if (err.name === 'ValidationError') {
-      errorMessage = 'Data validation error';
-      statusCode = 400;
-    }
-    
-    res.status(statusCode).json({
+    console.error(err);
+    res.status(500).json({
       success: false,
-      error: errorMessage,
-      timestamp: new Date().toISOString()
+      error: 'Server error'
     });
   }
 });
