@@ -150,7 +150,7 @@ export default function VACard({ va }) {
                   e.stopPropagation();
                   setShowRequestModal(true);
                 }}
-                className="transition-all duration-300 mb-2 bg-accent-500 hover:bg-accent-300 text-white w-full px-3 py-3 rounded-md text-lg font-medium"
+                className="transition-all duration-300 mb-2 bg-accent-700 hover:bg-accent-600 text-white w-full px-3 py-3 rounded-md text-lg font-medium"
               >
                     Request details / Interview
               </button>
