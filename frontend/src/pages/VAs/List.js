@@ -307,7 +307,7 @@ export default function VAList() {
             </div>
           ) : (
             <> 
-              <div className="shadow overflow-hidden sm:rounded-md">
+              <div className="overflow-hidden sm:rounded-md">
                                 <div className="va-cards divide-y divide-gray-200">
                   {data?.data?.map((va) => (
                     <div className='border-0 list-item-va-card my-2 border-none' key={va._id}>

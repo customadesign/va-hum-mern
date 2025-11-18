@@ -72,8 +72,8 @@ export default function VACard({ va }) {
                     alt={va.name}
                   />
                 ) : (
-                  <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
-                    <span className="text-lg font-medium text-gray-700">
+                  <div className="h-[150px] max-w-[150px] w-48 rounded-full bg-gray-300 flex items-center justify-center">
+                    <span className="text-xl font-medium text-gray-700">
                       {va.name?.[0]?.toUpperCase() || (branding.isESystemsMode ? 'P' : 'V')}
                     </span>
                   </div>

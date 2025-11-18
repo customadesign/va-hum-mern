@@ -85,7 +85,7 @@ export default function Layout() {
                   </div>
                 </div>
                 <div className="hidden ml-auto sm:ml-6 sm:flex sm:items-center">
-                    <Link to="/vas" className='bg-accent-500 hover:bg-accent-600 text-white px-3 py-2 rounded-md text-sm font-medium'>Our Talents</Link>
+                    <Link to="/vas" className='bg-white hover:bg-white-600 text-black px-3 py-2 rounded-full text-sm font-medium'>Our Talent</Link>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:items-center">
                   {user ? (
@@ -223,7 +223,6 @@ export default function Layout() {
                 </div>
               </div>
             </div>
-
             <Disclosure.Panel className={classNames(
               "sm:hidden",
               branding.isESystemsMode ? "bg-primary-700" : "bg-white border-b border-gray-200"
@@ -246,7 +245,7 @@ export default function Layout() {
                 ))}
               </div>
               <div className=" px-4">
-                  <Link to="/vas" className='bg-accent-700 hover:bg-accent-600 text-white px-3 py-2 rounded-md  w-100 block px-4 py-2 text-base font-medium '>Our Talents</Link>
+                  <Link to="/vas" className='bg-white hover:bg-white-600 text-black px-3 py-2 rounded-md  w-100 block px-4 py-2 text-base font-medium '>Our Talent</Link>
               </div> 
               {user ? (
                 <div className={classNames(
