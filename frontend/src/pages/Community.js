@@ -752,7 +752,7 @@ export default function Community() {
 
                   <div className="flex flex-col gap-1">
                     <label htmlFor="messenger" className="text-sm font-medium">Philippine phone number</label>
-                    <div className="flex">
+                    <div className="flex min-w-0">
                       <span className="inline-flex items-center px-3 rounded-l border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
                         +63
                       </span>
@@ -767,7 +767,7 @@ export default function Community() {
                           setFormData({...formData, messenger: value});
                         }}
                         placeholder="9XX XXX XXXX"
-                        className="flex-1 rounded-r border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="min-w-0 flex-1 rounded-r border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                   </div>
