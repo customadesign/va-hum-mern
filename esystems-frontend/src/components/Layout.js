@@ -33,6 +33,8 @@ export default function Layout() {
     { name: 'Home', href: '/', current: false },
     { name: 'How It Works', href: '/how-it-works', current: false },
     { name: 'Pricing', href: '/pricing', current: false },
+    { name: 'Virtual Assistants', href: '/vas', current: false },
+    { name: 'Resources', href: '/resources', current: false },
     ...(!branding.isESystemsMode ? [{ name: 'Community', href: '/community', current: false }] : []),
     { name: 'About', href: '/about', current: false },
   ];
@@ -358,6 +360,12 @@ export default function Layout() {
                 </Link>
                 <Link to="/privacy" className="text-gray-700 hover:text-gray-700 text-sm">
                   Privacy Policy
+                </Link>
+                <Link to="/payments" className="text-gray-700 hover:text-gray-700 text-sm">
+                  Payments
+                </Link>
+                <Link to="/resources" className="text-gray-700 hover:text-gray-700 text-sm">
+                  Resources
                 </Link>
                 <a href="#" className="text-gray-700 hover:text-gray-700">
                   <span className="sr-only">Twitter</span>
