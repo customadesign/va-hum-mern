@@ -80,12 +80,12 @@ export default function VACard({ va }) {
   return (
     <>
       <Link to={`/vas/${va._id}`} className="va-card  rounded-lg">
-          <div className="flex items-center rounde-xl bg-stone-100 px-6 p-10 justify-between">
-            <div className="flex items-center max-w-[40%] w-[40%] pr-[30px]">
+          <div className="flex flex-col gap-6 rounde-xl bg-stone-100 p-4 sm:p-6 lg:flex-row lg:items-center lg:justify-between lg:p-10">
+            <div className="flex w-full min-w-0 items-center pr-0 lg:max-w-[40%] lg:w-[40%] lg:pr-[30px]">
               <div className="flex-shrink-0">
                 {va.avatar ? (
                   <img
-                    className="va-profile-pic rounded-full h-[150px] max-w-[150px] w-48"
+                    className="va-profile-pic h-20 w-20 flex-shrink-0 rounded-full object-cover sm:h-[150px] sm:max-w-[150px] sm:w-48"
                     src={va.avatar}
                     alt={va.name}
                   />
@@ -97,25 +97,25 @@ export default function VACard({ va }) {
                   </div>
                 )}
               </div>
-              <div className="ml-6">
+              <div className="ml-4 min-w-0 flex-1 sm:ml-6">
                 <div className="text-sm font-medium text-gray-900">
-                  <h2 className='va-card-title-va-name'>
+                  <h2 className='va-card-title-va-name break-words'>
                     {va.name?.split(' ')[0]}
                   </h2>
                   {va.yearsOfExperience && (
-                    <span className="ml-2 text-xs text-gray-700">
+                    <span className="ml-2 whitespace-nowrap text-xs text-gray-700">
                       • {va.yearsOfExperience} years exp
                     </span>
                   )}
                 </div>
-                <div className="text-sm text-gray-700 va-role">{va.hero}</div>
+                <div className="text-sm text-gray-700 va-role break-words">{va.hero}</div>
               </div>
             </div>
               
-            <div className="flex va-categories-wrapper pl-[20px] align-center max-w-[20%] w-[20%] items-center">
-                <div className="flex column items-center text-sm text-gray-700">
+            <div className="flex va-categories-wrapper w-full min-w-0 items-center pl-0 lg:max-w-[20%] lg:w-[20%] lg:pl-[20px]">
+                <div className="flex column min-w-0 items-start text-sm text-gray-700 lg:items-center">
                   {va.specialties?.length > 0 && (
-                    <ul className="va-capabilities flex flex-col">
+                    <ul className="va-capabilities flex min-w-0 flex-col break-words">
                       {va.specialties.slice(0, 2).map(s => (
                         <li key={s.name}>{s.name}</li>
                       ))}
@@ -127,7 +127,7 @@ export default function VACard({ va }) {
                 </div>
             </div>
 
-            <div className="flex va-video-wrapper items-center align-center justify-center max-w-[20%] w-[20%]">
+            <div className="flex va-video-wrapper w-full items-center justify-start lg:max-w-[20%] lg:w-[20%] lg:justify-center">
                 <div className="text-sm text-gray-700">
                   {va.videoIntroduction ? (
                     <div
@@ -135,7 +135,7 @@ export default function VACard({ va }) {
                       onClick={handleImageClick}
                     >
                       <img
-                        className="w-42 h-[140px] object-cover rounded-lg"
+                        className="h-32 w-full max-w-[180px] object-cover rounded-lg lg:h-[140px]"
                         src={'https://blocks.astratic.com/img/general-video.png'}
                         alt={`${va.name} video thumbnail`}
                       />
@@ -153,7 +153,7 @@ export default function VACard({ va }) {
                 </div>
             </div>
 
-            <div className="flex flex-col items-end space-y-2 max-w-[20%] w-[20%]">
+            <div className="flex w-full flex-col items-stretch gap-2 lg:max-w-[20%] lg:w-[20%] lg:items-end">
 
               {/* {getStatusBadge()}
               {va.industry && va.industry.toLowerCase() !== 'other' && (
@@ -353,4 +353,4 @@ export default function VACard({ va }) {
       )}
     </>
   );
-} 
+}
