@@ -62,7 +62,7 @@ function BusinessProfileWithTabsContent() {
 
             {/* Tab Navigation */}
             <div className="border-b border-gray-200">
-              <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+              <nav className="-mb-px flex gap-8 overflow-x-auto" aria-label="Tabs">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   return (
@@ -70,7 +70,7 @@ function BusinessProfileWithTabsContent() {
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
                       className={`
-                        group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm
+                        group inline-flex flex-shrink-0 items-center py-4 px-1 border-b-2 font-medium text-sm
                         ${activeTab === tab.id
                           ? 'border-blue-500 text-blue-600'
                           : 'border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 cursor-pointer'

@@ -179,7 +179,7 @@ function VADetailContent() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="md:flex md:items-end md:justify-between">
               <div className="flex-1 min-w-0">
-                <div className="flex items-end">
+                <div className="flex min-w-0 items-end">
                   {va.avatar ? (
                     <img
                       className="h-24 w-24 sm:h-32 sm:w-32 rounded-full border-4 border-white shadow-lg"
@@ -196,21 +196,21 @@ function VADetailContent() {
                       </span>
                     </div>
                   )}
-                  <div className="ml-4 pb-4">
+                  <div className="ml-4 min-w-0 pb-4">
                     <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-sm">
-                      <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+                      <h1 className="break-words text-2xl font-bold text-gray-900 sm:text-3xl">
                         {va.name}
                       </h1>
-                      <p className="text-sm text-gray-700">{va.hero}</p>
+                      <p className="break-words text-sm text-gray-700">{va.hero}</p>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="mt-4 flex md:mt-0 md:ml-4 pb-4 space-x-3">
+              <div className="mt-4 flex flex-col gap-3 pb-4 sm:flex-row sm:flex-wrap md:mt-0 md:ml-4 md:justify-end">
                 <button
                   onClick={handleCreateShareUrl}
                   disabled={isCreatingShare}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
+                  className="inline-flex w-full items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 sm:w-auto"
                 >
                   <ShareIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
                   {isCreatingShare ? 'Creating...' : 'Share Profile'}
@@ -223,7 +223,7 @@ function VADetailContent() {
                     {messaging.actionButton.type === 'message' ? (
                       <button
                         onClick={handleStartConversation}
-                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                        className="inline-flex w-full items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:w-auto"
                       >
                         <EnvelopeIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
                         {messaging.actionButton.text || (branding.isESystemsMode ? 'Contact Professional' : 'Start Conversation')}
@@ -231,7 +231,7 @@ function VADetailContent() {
                     ) : messaging.actionButton.type === 'register' ? (
                       <a
                         href={messaging.actionButton.url}
-                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        className="inline-flex w-full items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto"
                       >
                         <ChatBubbleLeftIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
                         {messaging.actionButton.text}
@@ -239,7 +239,7 @@ function VADetailContent() {
                     ) : messaging.actionButton.type === 'complete_profile' ? (
                       <a
                         href={messaging.actionButton.url}
-                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                        className="inline-flex w-full items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:w-auto"
                       >
                         <ChatBubbleLeftIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
                         {messaging.actionButton.text}
@@ -251,7 +251,7 @@ function VADetailContent() {
                 {!messaging?.actionButton && isBusiness && (
                   <button
                     onClick={handleStartConversation}
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                    className="inline-flex w-full items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:w-auto"
                   >
                     <EnvelopeIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
                     {branding.isESystemsMode ? 'Contact Professional' : 'Start Conversation'}
@@ -614,8 +614,8 @@ function VADetailContent() {
 
       {/* Share Modal */}
       {showShareModal && shareUrl && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-6 border w-full max-w-md shadow-lg rounded-lg bg-white">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+          <div className="relative top-8 mx-auto w-full max-w-md rounded-lg border bg-white p-4 shadow-lg sm:top-20 sm:p-6">
             <div className="text-center">
               <div className="flex items-center justify-center w-12 h-12 mx-auto bg-blue-100 rounded-full mb-4">
                 <ShareIcon className="h-6 w-6 text-blue-600" />
@@ -623,7 +623,7 @@ function VADetailContent() {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Share this profile with your network</h3>
               
               {/* Social Media Sharing Buttons */}
-              <div className="flex justify-center space-x-3 mb-6">
+              <div className="mb-6 flex flex-wrap justify-center gap-3">
                 {/* Facebook */}
                 <button
                   onClick={() => {
@@ -708,12 +708,12 @@ function VADetailContent() {
 
               {/* URL Display */}
               <div className="mb-4">
-                <div className="flex items-center border border-gray-300 rounded-md p-3 bg-gray-50">
+                <div className="flex min-w-0 items-center border border-gray-300 rounded-md p-3 bg-gray-50">
                   <input
                     type="text"
                     value={shareUrl}
                     readOnly
-                    className="flex-1 bg-transparent text-sm text-gray-700 focus:outline-none"
+                    className="min-w-0 flex-1 bg-transparent text-sm text-gray-700 focus:outline-none"
                   />
                 </div>
               </div>
@@ -732,8 +732,8 @@ function VADetailContent() {
 
       {/* Chat Modal */}
       {showChatModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+          <div className="relative top-8 mx-auto w-full max-w-lg rounded-md border bg-white p-4 shadow-lg sm:top-20 sm:p-5">
             <div className="mt-3">
               <div className="flex items-center justify-center w-12 h-12 mx-auto bg-blue-100 rounded-full">
                 <ChatBubbleLeftIcon className="h-6 w-6 text-blue-600" />
@@ -754,7 +754,7 @@ function VADetailContent() {
                     onChange={(e) => setChatMessage(e.target.value)}
                   />
                 </div>
-                <div className="mt-6 flex justify-center space-x-3">
+                <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
                   <button
                     onClick={() => {
                       setShowChatModal(false);

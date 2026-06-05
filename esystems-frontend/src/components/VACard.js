@@ -28,8 +28,8 @@ export default function VACard({ va }) {
   return (
     <Link to={`/vas/${va._id}`} className="block hover:bg-gray-50">
       <div className="px-4 py-4 sm:px-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-start sm:items-center">
             <div className="flex-shrink-0">
               {va.avatar ? (
                 <img
@@ -45,38 +45,42 @@ export default function VACard({ va }) {
                 </div>
               )}
             </div>
-            <div className="ml-4">
-              <div className="text-sm font-medium text-gray-900">
+            <div className="ml-4 min-w-0 flex-1">
+              <div className="text-sm font-medium text-gray-900 break-words">
                 {va.name}
                 {va.yearsOfExperience && (
-                  <span className="ml-2 text-xs text-gray-700">
+                  <span className="ml-2 whitespace-nowrap text-xs text-gray-700">
                     • {va.yearsOfExperience} years exp
                   </span>
                 )}
               </div>
-              <div className="text-sm text-gray-700">{va.hero}</div>
-              <div className="mt-2 flex items-center text-sm text-gray-700">
+              <div className="text-sm text-gray-700 break-words">{va.hero}</div>
+              <div className="mt-2 flex flex-col gap-1 text-sm text-gray-700 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6">
                 {va.location && (
-                  <div className="flex items-center">
+                  <div className="flex min-w-0 items-center">
                     <MapPinIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-700" />
                     {/* Smart location display: prioritize proper city names */}
-                    {va.location.city?.toLowerCase().includes('barangay') 
-                      ? `Angeles City, ${va.location.countryCode || 'PH'}`
-                      : `${va.location.city}, ${va.location.countryCode || 'PH'}`
-                    }
+                    <span className="min-w-0 break-words">
+                      {va.location.city?.toLowerCase().includes('barangay') 
+                        ? `Angeles City, ${va.location.countryCode || 'PH'}`
+                        : `${va.location.city}, ${va.location.countryCode || 'PH'}`
+                      }
+                    </span>
                   </div>
                 )}
                 {va.specialties?.length > 0 && (
-                  <div className="ml-6 flex items-center">
+                  <div className="flex min-w-0 items-center">
                     <BriefcaseIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-700" />
-                    {va.specialties.slice(0, 2).map(s => s.name).join(', ')}
-                    {va.specialties.length > 2 && ` +${va.specialties.length - 2}`}
+                    <span className="min-w-0 break-words">
+                      {va.specialties.slice(0, 2).map(s => s.name).join(', ')}
+                      {va.specialties.length > 2 && ` +${va.specialties.length - 2}`}
+                    </span>
                   </div>
                 )}
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-end space-y-2">
+          <div className="flex flex-wrap items-start gap-2 sm:flex-col sm:items-end">
             {getStatusBadge()}
             {va.industry && va.industry.toLowerCase() !== 'other' && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">

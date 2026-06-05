@@ -183,10 +183,10 @@ export default function NotificationControl() {
 
       {/* Tabs */}
       <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex gap-8 overflow-x-auto">
           <button
             onClick={() => setActiveTab('send')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`flex-shrink-0 py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'send'
                 ? 'border-indigo-500 text-indigo-600'
                 : 'border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300'
@@ -196,7 +196,7 @@ export default function NotificationControl() {
           </button>
           <button
             onClick={() => setActiveTab('templates')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`flex-shrink-0 py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'templates'
                 ? 'border-indigo-500 text-indigo-600'
                 : 'border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300'
@@ -206,7 +206,7 @@ export default function NotificationControl() {
           </button>
           <button
             onClick={() => setActiveTab('history')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`flex-shrink-0 py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'history'
                 ? 'border-indigo-500 text-indigo-600'
                 : 'border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300'

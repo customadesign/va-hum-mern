@@ -68,7 +68,7 @@ export default function Layout() {
                       />
                     </Link>
                   </div>
-                  <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                  <div className="hidden lg:ml-6 lg:flex lg:space-x-8">
                     {navigation.map((item) => (
                       <Link
                         key={item.name}
@@ -85,7 +85,7 @@ export default function Layout() {
                     ))}
                   </div>
                 </div>
-                <div className="hidden sm:ml-6 sm:flex sm:items-center">
+                <div className="hidden lg:ml-6 lg:flex lg:items-center">
                   {user ? (
                     <>
                       <button
@@ -204,7 +204,7 @@ export default function Layout() {
                     </div>
                   )}
                 </div>
-                <div className="-mr-2 flex items-center sm:hidden">
+                <div className="-mr-2 flex items-center lg:hidden">
                   <Disclosure.Button className={classNames(
                     branding.isESystemsMode 
                       ? "bg-primary-800 text-primary-400 hover:text-white hover:bg-primary-600 focus:ring-offset-primary-700 focus:ring-white"
@@ -223,7 +223,7 @@ export default function Layout() {
             </div>
 
             <Disclosure.Panel className={classNames(
-              "sm:hidden",
+              "lg:hidden",
               branding.isESystemsMode ? "bg-primary-700" : "bg-white border-b border-gray-200"
             )}>
               <div className="pt-2 pb-3 space-y-1">
@@ -262,10 +262,10 @@ export default function Layout() {
                         </span>
                       </div>
                     </div>
-                    <div className="ml-3 flex-1">
+                    <div className="ml-3 flex-1 min-w-0">
                       <div className={classNames(
                         branding.isESystemsMode ? "text-white" : "text-gray-900",
-                        "text-base font-medium"
+                        "truncate text-base font-medium"
                       )}>{user.email}</div>
                     </div>
                     <button
@@ -348,7 +348,7 @@ export default function Layout() {
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex justify-center md:order-2">
-              <div className="flex space-x-6">
+              <div className="flex flex-wrap justify-center gap-x-6 gap-y-3">
                 <Link to="/terms" className="text-gray-700 hover:text-gray-700 text-sm">
                   Terms of Service
                 </Link>
