@@ -115,7 +115,7 @@ export default function Resources() {
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Where to Buy Stablecoins</h2>
               <p className="text-gray-700 mb-4">
                 Stablecoins are digital dollars intended to track the US Dollar. {branding.name} uses
-                stablecoins such as <strong>USDC</strong>, <strong>USDT</strong>, and <strong>USD1</strong>
+                stablecoins such as <strong>USDC</strong>, <strong>USDT</strong>, and <strong>USD1</strong>{' '}
                 for escrow payment workflows because they can support faster cross-border settlement
                 and reduce foreign-exchange friction compared with traditional remittance rails.
               </p>
