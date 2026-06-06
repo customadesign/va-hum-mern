@@ -3,6 +3,59 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { useBranding } from '../contexts/BrandingContext';
 
+const usStablecoinResources = [
+  {
+    name: 'Coinbase',
+    href: 'https://www.coinbase.com/how-to-buy/usdc',
+    detail: 'USDC with USD funding options; review fees and limits in the trade preview before purchase.',
+  },
+  {
+    name: 'Kraken',
+    href: 'https://support.kraken.com/articles/stablecoins-supported-on-kraken',
+    detail: 'Publishes supported stablecoins and networks for USDC, USDT, and other digital dollars.',
+  },
+  {
+    name: 'Crypto.com US',
+    href: 'https://crypto.com/us/crypto/buy',
+    detail: 'US app option for buying USDC and other supported assets with USD funding methods.',
+  },
+  {
+    name: 'Gemini',
+    href: 'https://support.gemini.com/hc/en-us/articles/115005868106-What-cryptos-are-supported-on-the-Gemini-Exchange',
+    detail: 'Lists current stablecoin availability, including location-specific restrictions.',
+  },
+];
+
+const phStablecoinResources = [
+  {
+    name: 'Coins.ph',
+    href: 'https://support.coins.ph/hc/en-us/articles/900006877303-What-cryptocurrencies-are-available-on-Coins-ph',
+    detail: 'Philippines wallet and exchange with USDC and USDT support plus local PHP funding paths.',
+  },
+  {
+    name: 'PDAX',
+    href: 'https://support.pdax.ph/support/solutions/articles/1060000097297-what-cryptocurrencies-are-listed-on-pdax-',
+    detail: 'Local exchange option with USDC and USDT listed among supported assets.',
+  },
+  {
+    name: 'GCrypto via GCash',
+    href: 'https://help.gcash.com/hc/en-us/articles/9781218166041-What-coins-can-I-trade-in-GCrypto',
+    detail: 'GCash in-app crypto route with USDC and USDT listed on supported networks.',
+  },
+  {
+    name: 'Maya Crypto',
+    href: 'https://www.maya.ph/crypto',
+    detail: 'Maya in-app crypto route; verify the current stablecoin list and availability before use.',
+  },
+];
+
+const stablecoinChecks = [
+  'Confirm the ticker before buying: USDC, USDT, or USD1.',
+  'Confirm the transfer network before sending. Wrong-network transfers may be unrecoverable.',
+  'Send a small test transfer before moving a large balance.',
+  'Keep receipts, transaction hashes, and platform confirmations.',
+];
+
 export default function Resources() {
   const { branding, loading: brandingLoading } = useBranding();
 
@@ -87,99 +140,56 @@ export default function Resources() {
             <section className="mb-10">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Where to Buy Stablecoins</h2>
               <p className="text-gray-700 mb-4">
-                Stablecoins are digital dollars pegged 1:1 to the US Dollar. {branding.name} uses stablecoins (USDC, USDT, and USD1) for escrow payments because they offer instant payout, zero FX spread, and lower fees than wire transfers or PayPal. Stablecoins are <strong>not</strong> cryptocurrency speculation — they are dollar-pegged digital cash designed for payments.
+                Stablecoins are digital dollars intended to track the US Dollar. {branding.name} uses stablecoins (USDC, USDT, and USD1) for escrow payments because they can support faster cross-border settlement and reduce foreign-exchange friction compared with traditional remittance rails. Stablecoins are <strong>not</strong> cryptocurrency speculation — they are dollar-pegged digital cash designed for payments.
               </p>
               <p className="text-gray-700 mb-6">
                 {branding.name} supports <strong>USDC</strong>, <strong>USD1</strong>, and <strong>USDT</strong> (ERC-20 and TRC-20 networks). For the full escrow payment explanation, see our{' '}
                 <Link to="/payments" className="text-blue-600 hover:text-blue-800 underline">Payments page</Link>.
               </p>
 
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Before you transfer</h3>
+                <ul className="space-y-2">
+                  {stablecoinChecks.map((check) => (
+                    <li key={check} className="flex items-start">
+                      <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
+                      <span className="text-gray-700">{check}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">For U.S. Employers</h3>
                 <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
-                    <div>
-                      <a href="https://www.coinbase.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 font-medium underline">Coinbase</a>
-                      <span className="text-gray-500 ml-2">— Buy USDC 1:1 with USD, no fees on USDC purchases</span>
-                    </div>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
-                    <div>
-                      <a href="https://www.kraken.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 font-medium underline">Kraken</a>
-                      <span className="text-gray-500 ml-2">— Buy USDC, USDT with bank transfer</span>
-                    </div>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
-                    <div>
-                      <a href="https://www.binance.us" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 font-medium underline">Binance.US</a>
-                      <span className="text-gray-500 ml-2">— USDC, USDT, USD1</span>
-                    </div>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
-                    <div>
-                      <a href="https://crypto.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 font-medium underline">Crypto.com</a>
-                      <span className="text-gray-500 ml-2">— USDC, USDT with card or bank</span>
-                    </div>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
-                    <div>
-                      <a href="https://www.gemini.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 font-medium underline">Gemini</a>
-                      <span className="text-gray-500 ml-2">— Regulated US exchange, USDC</span>
-                    </div>
-                  </li>
+                  {usStablecoinResources.map((resource) => (
+                    <li key={resource.name} className="flex items-start">
+                      <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
+                      <div>
+                        <a href={resource.href} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 font-medium underline">
+                          {resource.name}
+                        </a>
+                        <span className="text-gray-500 ml-2">— {resource.detail}</span>
+                      </div>
+                    </li>
+                  ))}
                 </ul>
               </div>
 
               <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">For Filipino VAs</h3>
                 <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
-                    <div>
-                      <a href="https://coins.ph" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 font-medium underline">Coins.ph</a>
-                      <span className="text-gray-500 ml-2">— Buy/sell USDC, USDT with PHP; cash-in via GCash, Maya, bank transfer</span>
-                    </div>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
-                    <div>
-                      <a href="https://pdax.ph" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 font-medium underline">PDAX</a>
-                      <span className="text-gray-500 ml-2">— BSP-regulated exchange; USDC, USDT with PHP</span>
-                    </div>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
-                    <div>
-                      <a href="https://www.maya.ph" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 font-medium underline">Maya Crypto</a>
-                      <span className="text-gray-500 ml-2">— Built into Maya app; buy crypto with PHP balance</span>
-                    </div>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
-                    <div>
-                      <a href="https://www.binance.com/en/p2p" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 font-medium underline">Binance P2P</a>
-                      <span className="text-gray-500 ml-2">— Peer-to-peer USDT trading in PHP</span>
-                    </div>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
-                    <div>
-                      <a href="https://www.bybit.com/en/p2p-trade/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 font-medium underline">Bybit P2P</a>
-                      <span className="text-gray-500 ml-2">— Peer-to-peer USDT with GCash, Maya, bank</span>
-                    </div>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
-                    <div>
-                      <a href="https://www.gcash.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 font-medium underline">GCrypto (via GCash)</a>
-                      <span className="text-gray-500 ml-2">— Buy crypto directly in GCash app</span>
-                    </div>
-                  </li>
+                  {phStablecoinResources.map((resource) => (
+                    <li key={resource.name} className="flex items-start">
+                      <span className="text-blue-500 mr-2 mt-1">&#9679;</span>
+                      <div>
+                        <a href={resource.href} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 font-medium underline">
+                          {resource.name}
+                        </a>
+                        <span className="text-gray-500 ml-2">— {resource.detail}</span>
+                      </div>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </section>
