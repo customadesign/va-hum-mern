@@ -47,6 +47,7 @@ import NotFound from './pages/NotFound';
 import Notifications from './pages/Notifications';
 import Analytics from './pages/Analytics';
 import ScrollExpansionDemo from './pages/ScrollExpansionDemo';
+import Resources from './pages/Resources';
 
 // Admin Pages
 import AdminDashboard from './pages/Admin/Dashboard';
@@ -119,6 +120,7 @@ function App() {
                         <Route path="vas" element={<VAList />} />
                         <Route path="terms" element={<Terms />} />
                         <Route path="privacy" element={<Privacy />} />
+                        <Route path="resources" element={<Resources />} />
                         <Route path="scroll-demo" element={<ScrollExpansionDemo />} />
                         
                         {/* Profile Redirect Route */}

@@ -89,6 +89,7 @@ export default function Layout() {
     { name: 'Home', href: '/', current: false },
     // { name: 'Virtual Assistants', href: '/vas', current: false },
     ...(!branding.isESystemsMode ? [{ name: 'Community', href: '/community', current: false }] : []),
+    { name: 'Resources', href: '/resources', current: false },
     { name: 'About', href: '/about', current: false },
   ];
 
@@ -417,6 +418,9 @@ export default function Layout() {
                 </ScrollToTopLink>
                 <ScrollToTopLink to="/privacy" className="text-white hover:text-gray-200 text-sm">
                   Privacy Policy
+                </ScrollToTopLink>
+                <ScrollToTopLink to="/resources" className="text-white hover:text-gray-200 text-sm">
+                  Resources
                 </ScrollToTopLink>
 
                 {/* Social Media Icons */}
