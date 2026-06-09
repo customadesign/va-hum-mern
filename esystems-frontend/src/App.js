@@ -49,8 +49,6 @@ import NotFound from './pages/NotFound';
 import Notifications from './pages/Notifications';
 import Analytics from './pages/Analytics';
 import Pricing from './pages/Pricing';
-import Resources from './pages/Resources';
-import Payments from './pages/Payments';
 
 // Admin Pages
 import AdminDashboard from './pages/Admin/Dashboard';
@@ -122,8 +120,6 @@ function App() {
                         {/* Public Pages */}
                         <Route path="vas" element={<VAList />} />
                         <Route path="pricing" element={<Pricing />} />
-                        <Route path="resources" element={<Resources />} />
-                        <Route path="payments" element={<Payments />} />
                         <Route path="terms" element={<Terms />} />
                         <Route path="privacy" element={<Privacy />} />
                         
